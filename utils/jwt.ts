@@ -11,13 +11,15 @@ export function decodeBase64Url(input: string): Uint8Array {
 
   // Base64URL文字のパターンチェック
   if (!/^[A-Za-z0-9_-]*$/.test(input)) {
-    throw new Error('Base64URL形式が正しくありません。使用できる文字は A-Z, a-z, 0-9, -, _ のみです。')
+    throw new Error(
+      'Base64URL形式が正しくありません。使用できる文字は A-Z, a-z, 0-9, -, _ のみです。'
+    )
   }
 
   try {
     // Base64URL → Base64 変換
     let base64 = input.replace(/-/g, '+').replace(/_/g, '/')
-    
+
     // パディング調整
     while (base64.length % 4) {
       base64 += '='
@@ -26,11 +28,11 @@ export function decodeBase64Url(input: string): Uint8Array {
     // Base64デコード
     const binaryString = atob(base64)
     const bytes = new Uint8Array(binaryString.length)
-    
+
     for (let i = 0; i < binaryString.length; i++) {
       bytes[i] = binaryString.charCodeAt(i)
     }
-    
+
     return bytes
   } catch (error) {
     throw new Error('Base64URLのデコードに失敗しました。形式が正しくない可能性があります。')
@@ -50,7 +52,9 @@ export function parseJwt(token: string): { header: unknown; payload: unknown } {
 
   const parts = token.split('.')
   if (parts.length !== 3) {
-    throw new Error('JWTの形式が正しくありません。header.payload.signature の形式である必要があります。')
+    throw new Error(
+      'JWTの形式が正しくありません。header.payload.signature の形式である必要があります。'
+    )
   }
 
   const [headerPart, payloadPart] = parts

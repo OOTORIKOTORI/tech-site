@@ -26,20 +26,21 @@ describe('JWT Utils', () => {
       // 実際に有効なJWTトークン（テスト用のダミー）
       // header: {"alg":"HS256","typ":"JWT"}
       // payload: {"sub":"1234567890","name":"John Doe","iat":1516239022}
-      const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'
-      
+      const token =
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'
+
       const result = parseJwt(token)
-      
+
       expect(result).toHaveProperty('header')
       expect(result).toHaveProperty('payload')
       expect(result.header).toEqual({
         alg: 'HS256',
-        typ: 'JWT'
+        typ: 'JWT',
       })
       expect(result.payload).toEqual({
         sub: '1234567890',
         name: 'John Doe',
-        iat: 1516239022
+        iat: 1516239022,
       })
     })
 
@@ -49,7 +50,9 @@ describe('JWT Utils', () => {
     })
 
     it('Base64URLが不正な場合エラーを投げる', () => {
-      expect(() => parseJwt('invalid@.invalid@.signature')).toThrow('Base64URL形式が正しくありません')
+      expect(() => parseJwt('invalid@.invalid@.signature')).toThrow(
+        'Base64URL形式が正しくありません'
+      )
     })
 
     it('JSONが不正な場合エラーを投げる', () => {
@@ -61,7 +64,8 @@ describe('JWT Utils', () => {
 
   describe('isProbablyJwt', () => {
     it('有効なJWT形式を正しく判定する', () => {
-      const validJwt = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'
+      const validJwt =
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'
       expect(isProbablyJwt(validJwt)).toBe(true)
     })
 
