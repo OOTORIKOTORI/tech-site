@@ -1,1 +1,1 @@
-﻿export default defineContentConfig({})
+export default defineContentConfig({})
