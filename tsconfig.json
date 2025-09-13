@@ -10,7 +10,8 @@
     "strictBindCallApply": true,
     "strictPropertyInitialization": true,
     "noImplicitOverride": true,
-    "exactOptionalPropertyTypes": true
+    "exactOptionalPropertyTypes": true,
+    "types": ["vitest/globals"]
   },
   "files": [],
   "references": [
