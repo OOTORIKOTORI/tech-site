@@ -161,22 +161,39 @@ function insertSample(): void {
 }
 
 async function copyToClipboard(text: string): Promise<void> {
+  // 早期 return: 空文字をコピーしない
+  if (!text) {
+    showNotificationMessage('コピーする内容がありません')
+    return
+  }
+
   try {
-    await navigator.clipboard.writeText(text)
-    showNotificationMessage('コピーしました')
-  } catch (error) {
-    // Fallback for older browsers
-    const textArea = document.createElement('textarea')
-    textArea.value = text
-    document.body.appendChild(textArea)
-    textArea.select()
-    try {
-      document.execCommand('copy')
+    if (navigator?.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text)
       showNotificationMessage('コピーしました')
-    } catch (err) {
-      showNotificationMessage('コピーに失敗しました')
+      return
     }
-    document.body.removeChild(textArea)
+    throw new Error('Clipboard API が利用できません')
+  } catch (primaryErr) {
+    // Fallback for古いブラウザ
+    try {
+      const textArea = document.createElement('textarea')
+      textArea.value = text
+      textArea.style.position = 'fixed'
+      textArea.style.top = '-1000px'
+      document.body.appendChild(textArea)
+      textArea.focus()
+      textArea.select()
+      const succeeded = document.execCommand('copy')
+      document.body.removeChild(textArea)
+      if (succeeded) {
+        showNotificationMessage('コピーしました')
+      } else {
+        showNotificationMessage('コピーに失敗しました（手動で選択してください）')
+      }
+    } catch (fallbackErr) {
+      showNotificationMessage('コピーに失敗しました（手動で選択してください）')
+    }
   }
 }
 

@@ -10,7 +10,7 @@ export function decodeBase64Url(input: string): Uint8Array {
   }
 
   // Base64URL文字のパターンチェック
-  if (!/^[A-Za-z0-9_-]*$/.test(input)) {
+  if (!/^[A-Za-z0-9\-_]+$/.test(input)) {
     throw new Error(
       'Base64URL形式が正しくありません。使用できる文字は A-Z, a-z, 0-9, -, _ のみです。'
     )
@@ -104,5 +104,5 @@ export function isProbablyJwt(token: string): boolean {
   }
 
   // 各部分がBase64URL文字のみで構成されているかチェック
-  return parts.every(part => /^[A-Za-z0-9_-]*$/.test(part))
+  return parts.every(part => /^[A-Za-z0-9\-_]+$/.test(part))
 }

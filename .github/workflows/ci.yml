@@ -44,6 +44,12 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Approve native builds (non-interactive)
+        run: pnpm approve-builds <<< "y" || true
+
+      - name: Rebuild better-sqlite3 (ensure native module)
+        run: pnpm rebuild better-sqlite3 || true
+
       - name: Run linter
         run: pnpm run lint
 
