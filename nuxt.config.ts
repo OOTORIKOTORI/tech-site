@@ -1,12 +1,16 @@
 ﻿import { defineNuxtConfig } from 'nuxt/config'
 
 export default defineNuxtConfig({
+  modules: ['@nuxt/content', '@nuxtjs/tailwindcss'],
+  css: ['@@/assets/css/tailwind.css'],
+  pages: true,
+
+  tailwindcss: {
+    cssPath: '@@/assets/css/tailwind.css',
+  },
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
   typescript: { strict: true },
-
-  modules: ['@nuxt/content', '@nuxtjs/tailwindcss'],
-  css: ['~/assets/css/tailwind.css'],
 
   //  ここでpostcssを設定（postcss.config.jsは不要）
   postcss: {
