@@ -185,6 +185,74 @@
 				"--",
 				"--run"
 			]
+		},
+		{
+			"label": "Typecheck",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"typecheck"
+			]
+		},
+		{
+			"label": "Run Vitest Once",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"test",
+				"--",
+				"--run"
+			]
+		},
+		{
+			"label": "Run Vitest Once",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"test",
+				"--",
+				"--run"
+			]
+		},
+		{
+			"label": "Run Vitest Once",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"test",
+				"--",
+				"--run"
+			]
+		},
+		{
+			"label": "Run Vitest Once",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"test",
+				"--",
+				"--run"
+			]
+		},
+		{
+			"label": "Run Vitest Once",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"test",
+				"--",
+				"--run"
+			]
+		},
+		{
+			"label": "Run Vitest Once",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"test",
+				"--",
+				"--run"
+			]
 		}
 	]
 }

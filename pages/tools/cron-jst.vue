@@ -11,7 +11,7 @@
       <textarea id="cron" v-model="input" rows="2" class="w-full border rounded p-2 font-mono text-base"
         :aria-invalid="!!error" aria-describedby="cron-help" spellcheck="false" autocomplete="off"></textarea>
       <div id="cron-help" class="text-xs text-gray-500">
-        例: <code>*/5 9-18 * * 1-5</code>（平日9-18時に5分毎）
+        例: <code>*/5 9-18 * * 1-5</code>（平日9-18時に5分毎） / 曜日は 0-6（0=Sun）。7 は非対応。
       </div>
 
       <div class="flex flex-wrap items-center gap-3">

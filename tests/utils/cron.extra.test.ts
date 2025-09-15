@@ -23,4 +23,24 @@ describe('cron utils (extra checks)', () => {
     expect(iso[0]).toBe('2025-09-14T14:00:00.000Z') // 23:00 JST
     expect(iso[1]).toBe('2025-09-14T14:30:00.000Z') // 23:30 JST
   })
+
+  it('range step endpoint includes boundaries (*/5 minutes)', () => {
+    const spec = parseCron('*/5 9-18 * * 1-5')
+    expect(spec.minute.values).toEqual([0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55])
+  })
+
+  it('invalid step throws (*/0)', () => {
+    expect(() => parseCron('*/0 * * * *')).toThrow()
+  })
+
+  it('nonexistent DOM is skipped (Feb 31 -> Mar 31) with month wildcard', () => {
+    const spec = parseCron('0 0 31 * *')
+    const base = new Date('2025-02-01T00:00:00.000Z')
+    const run = nextRuns(spec, base, 'UTC', 1)[0]
+    expect(run!.toISOString()).toBe('2025-03-31T00:00:00.000Z')
+  })
+
+  it('dow out of range (7) is error', () => {
+    expect(() => parseCron('* * * * 7')).toThrow()
+  })
 })

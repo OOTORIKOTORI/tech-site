@@ -1,7 +1,22 @@
 // utils/cron.ts
 
+/**
+ * Cron 単一フィールドの内部表現
+ * - values: 許容される数値リスト（昇順・重複なし）
+ * - star: ワイルドカード（`*`）指定か
+ */
 export type CronField = { values: number[]; star: boolean }
 
+/**
+ * Cron 全体の内部表現（minute/hour/dom/month/dow）
+ *
+ * メモ:
+ * - DOW は 0-6（0=Sun）。7 は非対応（エラー想定）。
+ * - DOM×DOW は OR（どちらか一致で通過）。
+ * - 名前トークン（JAN..DEC, SUN..SAT）は大小文字を無視。
+ * - ステップ指定（例: asterisk/5, a-b/2）に対応。0 以下のステップは不正。
+ * - 基準の秒・ミリ秒があるときは“次の分”に切り上げ。ちょうど分なら包括開始。
+ */
 export type CronSpec = {
   minute: CronField
   hour: CronField
@@ -16,8 +31,11 @@ function expandField(src: string, min: number, max: number): number[] {
   for (const partRaw of parts) {
     const [rawRange0, rawStep0] = partRaw.split('/')
     const rawRange = (rawRange0 ?? '*').trim()
-    const stepNum = Number(rawStep0)
-    const step = rawStep0 && Number.isFinite(stepNum) && stepNum > 0 ? Math.floor(stepNum) : 1
+    const stepNum = rawStep0 === undefined ? 1 : Number(rawStep0)
+    if (!Number.isFinite(stepNum) || stepNum <= 0) {
+      throw new Error('Step must be a positive integer')
+    }
+    const step = Math.floor(stepNum)
     const range = rawRange === '*' ? `${min}-${max}` : rawRange
     const [startStr, endStr] = range.includes('-') ? range.split('-') : [range, range]
     let start = Number(startStr)
@@ -35,11 +53,16 @@ function makeField(src: string, min: number, max: number): CronField {
 }
 
 function makeDowField(src: string): CronField {
-  const vals = expandField(src, 0, 7).map(v => (v === 7 ? 0 : v))
+  const s = src.trim()
+  if (s === '*') {
+    return { values: [0, 1, 2, 3, 4, 5, 6], star: true }
+  }
+  const vals = expandField(src, 0, 7)
+  if (vals.some(v => v === 7)) throw new Error('DOW supports 0-6 (0=Sun). 7 is not supported.')
   const uniq = Array.from(new Set(vals))
     .filter(v => v >= 0 && v <= 6)
     .sort((a, b) => a - b)
-  return { values: uniq, star: src.trim() === '*' }
+  return { values: uniq, star: false }
 }
 
 const MON_NAME: Record<string, number> = {
@@ -90,6 +113,20 @@ function mapNamedTokens(src: string, dict: Record<string, number>): string {
     .join(',')
 }
 
+/**
+ * Cron 式を解析して `CronSpec` に変換します。
+ *
+ * 仕様要点:
+ * - フィールドは `minute hour dom month dow` の 5 つ。
+ * - DOW: 0-6（0=Sun）。7 は非対応（エラー想定）。
+ * - DOM×DOW は OR。
+ * - 名前トークン（JAN..DEC, SUN..SAT）は大小文字を無視。
+ * - ステップ指定（例: asterisk/5, a-b/5）で 0 以下や NaN は不正。
+ *
+ * 例:
+ * - asterisk/5 9-18 * * 1-5
+ * - 0 0 1 JAN *
+ */
 export function parseCron(expr: string): CronSpec {
   const fields = expr.trim().split(/\s+/)
   if (fields.length !== 5) throw new Error('Cron expression must have exactly 5 fields')
@@ -218,7 +255,8 @@ export function nextRuns(
     let ok = domDowOk(p)
     if (!ok) {
       cur = setInTZ(cur, tz, { hour: hourFirst, minute: minFirst })
-      const maxSteps = spec.dom.star && !spec.dow.star ? 7 : 31
+      const maxSteps =
+        spec.dow.star && !spec.dom.star ? 62 : spec.dom.star && !spec.dow.star ? 7 : 31
       let steps = 0
       while (!ok && steps < maxSteps && dayGuard < guardLimit) {
         const pp = partsInTZ(cur, tz)

@@ -51,15 +51,13 @@ describe('cron utils', () => {
     expect(runs[0]).toBe('2025-09-15T00:05:00.000Z') // 9:05 JST (*/5)
   })
 
-  // 3) DOW: 0/7 日曜等価
-  it('treats 0 and 7 as Sunday (DOW)', () => {
+  // 3) DOW: 7 は非対応（0=Sun のみ）
+  it('treats 0 as Sunday and 7 throws (DOW)', () => {
     const s0 = parseCron('0 0 * * 0')
-    const s7 = parseCron('0 0 * * 7')
-    const base = new Date('2025-09-15T00:00:00Z') // 月曜 UTC
+    const base = new Date('2025-09-15T00:00:00Z')
     const r0 = nextRuns(s0, base, 'UTC', 1)[0]!
-    const r7 = nextRuns(s7, base, 'UTC', 1)[0]!
     expect(r0.getDay()).toBe(0)
-    expect(r7.getDay()).toBe(0)
+    expect(() => parseCron('0 0 * * 7')).toThrow()
   })
 
   // 4) 不可能スペックは空配列（または上限内で空）
@@ -71,14 +69,13 @@ describe('cron utils', () => {
     expect(runs.length).toBe(0)
   })
 
-  it('treats DOW 0 and 7 equivalently with comma list', () => {
-    const spec = parseCron('* * * * 0,7')
+  it('accepts comma list for DOW with 0 and names (no 7)', () => {
+    const spec = parseCron('* * * * 0,MON')
     const base = new Date('2025-09-14T14:59:00.000Z') // JST 23:59 (Sun)
     const runs = nextRuns(spec, base, 'Asia/Tokyo', 3)
-    const iso = runs.map(d => d.toISOString())
-    expect(iso[0]).toBe('2025-09-14T14:59:00.000Z') // Sun 23:59 JST
-    expect(iso[1]).toBe('2025-09-20T15:00:00.000Z') // Next Sun 00:00 JST
-    expect(iso[2]).toBe('2025-09-20T15:01:00.000Z') // Next Sun 00:01 JST
+    expect(runs[0]!.getDay()).toBe(0)
+    expect(runs[1]!.getDay()).toBe(1)
+    expect(runs[2]!.getDay()).toBe(1)
   })
 
   it('accepts name ranges and is case-insensitive (JAN-MAR/2, MON-FRI)', () => {
