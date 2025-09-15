@@ -1,252 +1,177 @@
-// utils/cron.ts - strict, no deps, JST-aware matching
+// utils/cron.ts
+// Cron 5フィールド（分 時 日 月 曜日）をパース & 次回時刻を算出
+// 仕様: 数値, 範囲 a-b, ステップ */s および a-b/s, カンマ区切り, '*' サポート
+// DOW: 0=日(7も日として扱う) 1=月 ... 6=土
 
-const FIELD_RANGES = [
-  [0, 59], // 分
-  [0, 23], // 時
-  [1, 31], // 日(DoM)
-  [1, 12], // 月
-  [0, 6], // 曜日(0=日)
-] as const
-
-const CRON_DEBUG = typeof process !== 'undefined' && (process as any).env?.CRON_DEBUG
-
-type CronSpec = {
-  minute: number[]
-  hour: number[]
-  dom: number[]
-  month: number[]
-  dow: number[]
-  domStar: boolean
-  dowStar: boolean
+export type CronSpec = {
+  mins: number[]
+  hours: number[]
+  dom: number[]       // 1..31
+  months: number[]    // 1..12
+  dow: number[]       // 0..6 (0 or 7 は 0 に正規化)
 }
 
-type ParsedField = { values: number[]; isStar: boolean }
-
-// これを追加（または既存の位置に）
-type FieldIndex = 0 | 1 | 2 | 3 | 4
-
-function fullRange(idx: number): number[] {
-  const [min, max] = FIELD_RANGES[idx]
-  const arr: number[] = []
-  for (let v = min; v <= max; v++) arr.push(v)
-  return arr
+/** 重複排除して昇順に整列 */
+function uniqSorted(nums: number[]) {
+  return Array.from(new Set(nums)).sort((a, b) => a - b)
 }
 
-function parseField(part: string, idx: FieldIndex) {
-  const [MIN, MAX] = FIELD_RANGES[idx] // ← undefined にならない
-  const values = new Set<number>()
+function clamp(n: number, lo: number, hi: number) {
+  return Math.max(lo, Math.min(hi, n))
+}
 
-  if (expr === '*') {
-    return { values: fullRange(idx), isStar: true }
+/** 1..N の配列 */
+function range(lo: number, hi: number, step = 1) {
+  const out: number[] = []
+  for (let v = lo; v <= hi; v += step) out.push(v)
+  return out
+}
+
+/** 1トークンを展開（例: "*", "*/5", "10", "10-20", "10-20/2"） */
+function expandToken(
+  tok: string,
+  lo: number,
+  hi: number
+): number[] {
+  if (tok === '*') return range(lo, hi)
+
+  // */s
+  const stepOnly = tok.match(/^\*\/(\d+)$/)
+  if (stepOnly) {
+    const s = Math.max(1, Number(stepOnly[1]))
+    return range(lo, hi, s)
   }
 
-  for (const part of expr.split(',')) {
-    // */n
-    const starStep = part.match(/^\*\/(\d+)$/)
-    if (starStep) {
-      const step = Number(starStep[1])
-      if (!Number.isInteger(step) || step <= 0) {
-        throw new Error(`フィールド${idx + 1}のステップ「${part}」が不正です`)
-      }
-      for (let v = min; v <= max; v += step) values.add(v)
-      continue
-    }
-
-    // a-b(/n)? or 単一値
-    const m = part.match(/^([0-9]+)(?:-([0-9]+))?(?:\/(\d+))?$/)
-    if (!m) throw new Error(`フィールド${idx + 1}の値「${part}」が不正です`)
-    const s = Number(m[1])
-    const e = m[2] ? Number(m[2]) : s
-    const st = m[3] ? Number(m[3]) : 1
-
-    if (
-      !Number.isInteger(s) ||
-      !Number.isInteger(e) ||
-      !Number.isInteger(st) ||
-      st <= 0 ||
-      s < min ||
-      e > max ||
-      s > e
-    ) {
-      throw new Error(`フィールド${idx + 1}の範囲「${part}」が不正です`)
-    }
-
-    for (let v = s; v <= e; v += st) values.add(v)
+  // a-b(/s)?
+  const m = tok.match(/^(\d+)-(\d+)(?:\/(\d+))?$/)
+  if (m) {
+    const a = clamp(Number(m[1]), lo, hi)
+    const b = clamp(Number(m[2]), lo, hi)
+    const s = Math.max(1, Number(m[3] ?? 1))
+    const from = Math.min(a, b)
+    const to = Math.max(a, b)
+    return range(from, to, s)
   }
 
-  const arr = Array.from(values).sort((a, b) => a - b)
-  if (arr.length === 0) throw new Error(`フィールド${idx + 1}が空です`)
-  return { values: arr, isStar: false }
+  // 単一数値
+  const n = Number(tok)
+  if (Number.isFinite(n)) return [clamp(n, lo, hi)]
+
+  return []
 }
 
-function parseCron(expr: string): CronSpec {
-  const parts = expr.trim().split(/\s+/)
-  if (parts.length !== 5) {
-    throw new Error('crontab は「分 時 日 月 曜日」の5フィールドで指定してください')
+/** フィールド文字列を配列へ展開（カンマでマージ） */
+function expandField(s: string, lo: number, hi: number): number[] {
+  const parts = s.split(',').map(t => t.trim()).filter(Boolean)
+  const all: number[] = []
+  for (const p of parts) all.push(...expandToken(p, lo, hi))
+  return uniqSorted(all.length ? all : range(lo, hi))
+}
+
+/** public: Cron文字列を構造体へ */
+export function parseCron(expr: string): CronSpec {
+  const f = expr.trim().split(/\s+/)
+  if (f.length < 5) {
+    throw new Error('cron 式は「分 時 日 月 曜日」の5フィールドが必要です')
   }
+  const [minS, hourS, domS, monS, dowS] = f as [string, string, string, string, string]
 
-  // ここを追加（as でタプル固定）
-  const [minS, hourS, domS, monthS, dowS] = parts as [string, string, string, string, string]
+  const mins   = expandField(minS, 0, 59)
+  const hours  = expandField(hourS, 0, 23)
+  const dom    = expandField(domS, 1, 31)
+  const months = expandField(monS, 1, 12)
+  // 0/7=Sun として 7→0 に正規化
+  const dow0to6 = expandField(dowS, 0, 7).map(n => (n === 7 ? 0 : n))
+  const dow = uniqSorted(dow0to6)
 
-  return {
-    minute: parseField(minS, 0),
-    hour: parseField(hourS, 1),
-    dom: parseField(domS, 2),
-    month: parseField(monthS, 3),
-    dow: parseField(dowS, 4),
+  return { mins, hours, dom, months, dow }
+}
+
+// ---- 次回実行算出 ------------------------------------------------------------
+
+const WEEKIDX: Record<string, number> = {
+  Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6
+}
+
+const dtfCache = new Map<string, Intl.DateTimeFormat>()
+function getDtf(tz: string) {
+  let dtf = dtfCache.get(tz)
+  if (!dtf) {
+    dtf = new Intl.DateTimeFormat('en-US', {
+      timeZone: tz,
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+      hour12: false,
+      weekday: 'short'
+    })
+    dtfCache.set(tz, dtf)
   }
+  return dtf
 }
 
-// JST の年月日/時分/曜日(0=Sun)を、Intlで安全に取り出す
-function getTZParts(
-  dt: Date,
-  tz: string
-): { y: number; mo: number; d: number; h: number; m: number; wd: number } {
-  // ここがポイント: hourCycle:'h23' を強制して 00..23 に揃える
-  const fmt = new Intl.DateTimeFormat('en-GB', {
-    timeZone: tz,
-    year: 'numeric',
-    month: 'numeric',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: 'numeric',
-    hour12: false,
-    hourCycle: 'h23',
-    weekday: 'short',
-  })
-
-  const parts = fmt.formatToParts(dt)
-  const get = (t: Intl.DateTimeFormatPartTypes) => parts.find(p => p.type === t)?.value ?? ''
-
-  const y = Number(get('year'))
-  const mo = Number(get('month'))
-  const d = Number(get('day'))
-  let h = Number(get('hour')) // h23 なので 0..23 が保証される
-  h = Math.min(23, Number(get('hour')) | 0)
-  const m = Number(get('minute'))
-
-  const wdName = get('weekday') // Sun, Mon, ...
-  const wdMap: Record<string, number> = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 }
-  const wd = wdMap[wdName] ?? 0
-
-  return { y, mo, d, h, m, wd }
-}
-
-// Vixie cron の DoM/DOW 合成規則
-function dayMatches(spec: CronSpec, d: number, wd: number): boolean {
-  if (spec.domStar && spec.dowStar) return true
-  if (spec.domStar) return spec.dow.includes(wd)
-  if (spec.dowStar) return spec.dom.includes(d)
-  return spec.dom.includes(d) || spec.dow.includes(wd)
-}
-
-function* nextRunGen(spec: CronSpec, from: Date, tz: string): Generator<Date> {
-  if (tz !== 'Asia/Tokyo') throw new Error('Asia/Tokyoのみ対応')
-
-  // from直後の1分から探索（「直近以降」定義）
-  const dt = new Date(from.getTime())
-  dt.setSeconds(0, 0)
-  dt.setMinutes(dt.getMinutes() + 1)
-
-  // 年越しでも見つかるよう上限を拡張（600,000分 ≈ 416日）
-  for (let i = 0; i < 600000; i++) {
-    const { mo, d, h, m, wd } = getTZParts(dt, tz)
-
-    if (
-      spec.minute.includes(m) &&
-      spec.hour.includes(h) &&
-      spec.month.includes(mo) &&
-      dayMatches(spec, d, wd)
-    ) {
-      yield new Date(dt.getTime())
-    }
-
-    dt.setMinutes(dt.getMinutes() + 1)
+/** 与えた UTC Date の各フィールドを「tz」視点で取り出す */
+function partsInTz(d: Date, tz: string) {
+  const dtf = getDtf(tz)
+  const parts = dtf.formatToParts(d)
+  let minute = 0, hour = 0, day = 1, month = 1, dow = 0
+  for (const p of parts) {
+    if (p.type === 'minute') minute = Number(p.value)
+    else if (p.type === 'hour') hour = Number(p.value)
+    else if (p.type === 'day') day = Number(p.value)
+    else if (p.type === 'month') month = Number(p.value)
+    else if (p.type === 'weekday') dow = WEEKIDX[p.value as keyof typeof WEEKIDX] ?? 0
   }
+  return { minute, hour, day, month, dow }
 }
 
-// 追加ヘルパー
-const JST_OFFSET = 9
-function makeDateJST(y: number, mo: number, d: number, h: number, m: number): Date {
-  // JST の y/mo/d h:m を表す Date を作る（内部は UTC）
-  return new Date(Date.UTC(y, mo - 1, d, h - JST_OFFSET, m, 0, 0))
-}
-function daysInMonth(y: number, mo: number): number {
-  // mo: 1..12
-  return new Date(Date.UTC(y, mo, 0)).getUTCDate()
-}
-function rangeSize(idx: number): number {
-  const [min, max] = FIELD_RANGES[idx]
-  return max - min + 1
-}
-function isAll(values: number[], idx: number): boolean {
-  return values.length === rangeSize(idx)
-}
-
-// ★ getTZParts は hourCycle: 'h23' を使う版にしておいてね（前回入れていればOK）
-
-// ここから置換
-export function nextRuns(spec: CronSpec, now: Date, tz: string, count = 5): Date[] {
-  if (tz !== 'Asia/Tokyo') throw new Error('Asia/Tokyoのみ対応')
-
-  // 探索開始基準（秒以下は切り捨て）
-  const start = new Date(now.getTime())
-  start.setSeconds(0, 0)
-
-  const { y: sy, mo: smo, d: sd, h: sh, m: sm } = getTZParts(start, tz)
-
-  const domAll = isAll(spec.dom, 2)
-  const dowAll = isAll(spec.dow, 4)
-
-  const months = spec.month.slice().sort((a, b) => a - b)
-  const hours = spec.hour.slice().sort((a, b) => a - b)
-  const minutes = spec.minute.slice().sort((a, b) => a - b)
-
+/**
+ * public: 次回「n」件の実行時刻（UTC Date配列）を返す
+ * @param spec parseCron の戻り値
+ * @param baseFrom 基準の瞬間（この時刻以降）
+ * @param tz "Asia/Tokyo" など IANA TZ
+ * @param n 件数（上限 200 程度想定）
+ */
+export function nextRuns(
+  spec: CronSpec,
+  baseFrom: Date,
+  tz: string,
+  n: number
+): Date[] {
   const out: Date[] = []
-
-  // 最大2年先まで見れば 1/1 系でも必ず見つかる
-  for (let y = sy; y <= sy + 2 && out.length < count; y++) {
-    for (const mo of months) {
-      if (y === sy && mo < smo) continue
-
-      const dim = daysInMonth(y, mo)
-      const dayStart = y === sy && mo === smo ? sd : 1
-
-      for (let d = dayStart; d <= dim && out.length < count; d++) {
-        // JST のその日の曜日（正午基準でズレ対策）
-        const wd = new Date(Date.UTC(y, mo - 1, d, 12 - JST_OFFSET)).getUTCDay()
-
-        const domMatch = spec.dom.includes(d)
-        const dowMatch = spec.dow.includes(wd)
-
-        // cron の DOM/DOW ルール:
-        // - どちらも * なら毎日
-        // - DOM が * なら DOW のみ見る
-        // - DOW が * なら DOM のみ見る
-        // - どちらも指定なら OR
-        const allowDay =
-          domAll && dowAll ? true : domAll ? dowMatch : dowAll ? domMatch : domMatch || dowMatch
-
-        if (!allowDay) continue
-
-        const hourStart = y === sy && mo === smo && d === sd ? sh : 0
-        for (const h of hours) {
-          if (h < hourStart) continue
-
-          const minuteStart = y === sy && mo === smo && d === sd && h === sh ? sm + 1 : 0
-          for (const m of minutes) {
-            if (m < minuteStart) continue
-
-            const cand = makeDateJST(y, mo, d, h, m)
-            if (cand.getTime() <= start.getTime()) continue
-            if (CRON_DEBUG) console.debug('CAND', { y, mo, d, h, m, iso: cand.toISOString() })
-            out.push(cand)
-            if (out.length >= count) break
-          }
-        }
-      }
-    }
+  // 秒を切り上げて次の分から探索
+  const start = new Date(baseFrom.getTime())
+  if (start.getSeconds() > 0 || start.getMilliseconds() > 0) {
+    start.setUTCMinutes(start.getUTCMinutes() + 1, 0, 0)
+  } else {
+    start.setUTCSeconds(0, 0)
   }
 
+  let cur = start
+  const limit = 525600 /* 1年分 */  // 安全弁
+  let steps = 0
+
+  while (out.length < n && steps < limit) {
+    const p = partsInTz(cur, tz)
+    if (
+      spec.mins.includes(p.minute) &&
+      spec.hours.includes(p.hour) &&
+      spec.dom.includes(p.day) &&
+      spec.months.includes(p.month) &&
+      spec.dow.includes(p.dow)
+    ) {
+      out.push(new Date(cur.getTime()))
+      // 次の分へ
+      cur = new Date(cur.getTime() + 60_000)
+      cur.setUTCSeconds(0, 0)
+    } else {
+      // 1分ずつ進める（200件程度なら十分高速）
+      cur = new Date(cur.getTime() + 60_000)
+      cur.setUTCSeconds(0, 0)
+    }
+    steps++
+  }
   return out
 }
