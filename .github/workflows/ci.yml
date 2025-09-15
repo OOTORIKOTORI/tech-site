@@ -23,10 +23,11 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Install pnpm
+      - name: Setup pnpm (respect package.json#packageManager)
         uses: pnpm/action-setup@v4
         with:
-          version: 10
+          run_install: false
+          # package_json_path: ./package.json  # ルート以外なら明示
 
       - name: Get pnpm store directory
         shell: bash
@@ -49,6 +50,11 @@ jobs:
 
       - name: Rebuild better-sqlite3 (ensure native module)
         run: pnpm rebuild better-sqlite3 || true
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20 # or your version
+          cache: 'pnpm'
 
       - name: Run linter
         run: pnpm run lint
