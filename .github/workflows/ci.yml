@@ -16,13 +16,27 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-
       # Node を先にセットアップ（pnpm キャッシュも有効化）
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: pnpm
+
+      - name: Enable corepack (pnpm follows packageManager)
+        run: |
+          corepack enable
+          pnpm --version
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Set pnpm store dir
+        run: pnpm config set store-dir ~/.pnpm-store
 
       # package.json の packageManager を尊重して pnpm を用意（versionは固定しない）
       - name: Setup pnpm (respect packageManager)
@@ -40,14 +54,22 @@ jobs:
       - name: Rebuild native deps (optional)
         run: pnpm rebuild better-sqlite3 || true
 
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Rebuild better-sqlite3 (ensure native module)
+        run: pnpm rebuild better-sqlite3 || true
+
       - name: Run linter
         run: pnpm run lint
 
       - name: Type check
-        run: pnpm run typecheck --if-present
+        run: pnpm run typecheck
 
       - name: Run tests
-        run: pnpm run test --if-present
+        run: pnpm test --if-present
 
       - name: Build
         run: pnpm run build
+        env:
+          NODE_OPTIONS: --max_old_space_size=4096
