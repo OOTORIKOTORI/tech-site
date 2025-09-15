@@ -1,7 +1,8 @@
 // content.config.ts
-import { defineContentConfig } from '#content/config'
+import { defineContentConfig } from '@nuxt/content'
 
 export default defineContentConfig({
-  // 最小の有効設定（必要になったらコレクションを足す想定）
+  // 将来的にコレクション/スキーマを増やす予定がなくても
+  // TypeScriptの型エラーを避けるために空オブジェクトを渡しておく
   collections: {},
 })
