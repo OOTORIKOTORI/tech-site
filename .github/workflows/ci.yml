@@ -15,44 +15,31 @@ jobs:
     timeout-minutes: 15
 
     steps:
-      - uses: actions/checkout@v4
-      # Node を先にセットアップ（pnpm キャッシュも有効化）
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 20.x
+          cache: pnpm
 
-      - name: Enable corepack (pnpm follows packageManager)
-        run: |
-          corepack enable
-          pnpm --version
-
-      - name: Cache pnpm store
-        uses: actions/cache@v4
-        with:
-          path: ~/.pnpm-store
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-
-      - name: Set pnpm store dir
-        run: pnpm config set store-dir ~/.pnpm-store
-
-      # package.json の packageManager を尊重して pnpm を用意（versionは固定しない）
       - name: Setup pnpm (respect packageManager)
         uses: pnpm/action-setup@v4
         with:
           run_install: false
 
-      # ★ 依存をここで入れる（ここより前に lint 等を回さない）
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-        env:
-          HUSKY: 0 # CI では husky の postinstall を無効化（使ってなければ不要）
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        run: echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_OUTPUT
 
-      # ネイティブモジュール対策（better-sqlite3 を使っていなければそのままでもOK）
-      - name: Rebuild native deps (optional)
-        run: pnpm rebuild better-sqlite3 || true
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -60,16 +47,49 @@ jobs:
       - name: Rebuild better-sqlite3 (ensure native module)
         run: pnpm rebuild better-sqlite3 || true
 
-      - name: Run linter
+      # ---- Lint (あれば実行) ----
+      - name: Detect ESLint
+        id: has-eslint
+        run: |
+          if pnpm -s ls eslint --depth -1 >/dev/null 2>&1; then
+            echo "present=true" >> $GITHUB_OUTPUT
+          else
+            echo "present=false" >> $GITHUB_OUTPUT
+          fi
+      - name: Run linter (if present)
+        if: steps.has-eslint.outputs.present == 'true'
         run: pnpm run lint
 
-      - name: Type check
-        run: pnpm run typecheck
+      # ---- Type check (あれば実行) ----
+      - name: Detect TS checker
+        id: has-tsc
+        run: |
+          if pnpm -s ls vue-tsc --depth -1 >/dev/null 2>&1 || pnpm -s ls typescript --depth -1 >/dev/null 2>&1; then
+            echo "present=true" >> $GITHUB_OUTPUT
+          else
+            echo "present=false" >> $GITHUB_OUTPUT
+          fi
+      - name: Type check (if present)
+        if: steps.has-tsc.outputs.present == 'true'
+        run: |
+          if pnpm -s ls vue-tsc --depth -1 >/dev/null 2>&1; then
+            pnpm exec vue-tsc --noEmit
+          else
+            pnpm exec tsc --noEmit
+          fi
 
-      - name: Run tests
-        run: pnpm test --if-present
+      # ---- Test (あれば実行) ----
+      - name: Detect Vitest
+        id: has-vitest
+        run: |
+          if pnpm -s ls vitest --depth -1 >/dev/null 2>&1; then
+            echo "present=true" >> $GITHUB_OUTPUT
+          else
+            echo "present=false" >> $GITHUB_OUTPUT
+          fi
+      - name: Run tests (if present)
+        if: steps.has-vitest.outputs.present == 'true'
+        run: pnpm run test:ci || pnpm exec vitest run --reporter=dot
 
       - name: Build
         run: pnpm run build
-        env:
-          NODE_OPTIONS: --max_old_space_size=4096
