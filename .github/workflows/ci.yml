@@ -1,95 +1,68 @@
-name: CI
+name: ci
 
 on:
   push:
     branches: [main]
   pull_request:
-    branches: [main]
 
-permissions:
-  contents: read
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   ci:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # 1) Node だけ先に入れる（ここでは pnpm を呼ばせない）
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20.x
-          cache: pnpm
+          # cache は使わない。pnpm はこの後に入れるため
+          # cache: 'pnpm' ← これが原因だったので外す
 
-      - name: Setup pnpm (respect packageManager)
+      # 2) pnpm をインストール
+      - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
+          # プロジェクトで使っているメジャーに合わせておく（例: 9）
+          version: 9
           run_install: false
 
+      # 3) pnpm ストアをキャッシュ
       - name: Get pnpm store directory
-        id: pnpm-cache
-        run: echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_OUTPUT
+        id: pnpm-store
+        run: echo "PNPM_STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
 
       - name: Cache pnpm store
         uses: actions/cache@v4
         with:
-          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          path: ${{ env.PNPM_STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
 
+      # 4) 依存関係をインストール
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # better-sqlite3 などネイティブ依存対策（失敗は無視）
       - name: Rebuild better-sqlite3 (ensure native module)
         run: pnpm rebuild better-sqlite3 || true
 
-      # ---- Lint (あれば実行) ----
-      - name: Detect ESLint
-        id: has-eslint
-        run: |
-          if pnpm -s ls eslint --depth -1 >/dev/null 2>&1; then
-            echo "present=true" >> $GITHUB_OUTPUT
-          else
-            echo "present=false" >> $GITHUB_OUTPUT
-          fi
-      - name: Run linter (if present)
-        if: steps.has-eslint.outputs.present == 'true'
+      # 5) Lint / Type Check / Test / Build
+      - name: ESLint
         run: pnpm run lint
 
-      # ---- Type check (あれば実行) ----
-      - name: Detect TS checker
-        id: has-tsc
-        run: |
-          if pnpm -s ls vue-tsc --depth -1 >/dev/null 2>&1 || pnpm -s ls typescript --depth -1 >/dev/null 2>&1; then
-            echo "present=true" >> $GITHUB_OUTPUT
-          else
-            echo "present=false" >> $GITHUB_OUTPUT
-          fi
-      - name: Type check (if present)
-        if: steps.has-tsc.outputs.present == 'true'
-        run: |
-          if pnpm -s ls vue-tsc --depth -1 >/dev/null 2>&1; then
-            pnpm exec vue-tsc --noEmit
-          else
-            pnpm exec tsc --noEmit
-          fi
+      - name: Type check
+        run: pnpm run type-check
 
-      # ---- Test (あれば実行) ----
-      - name: Detect Vitest
-        id: has-vitest
-        run: |
-          if pnpm -s ls vitest --depth -1 >/dev/null 2>&1; then
-            echo "present=true" >> $GITHUB_OUTPUT
-          else
-            echo "present=false" >> $GITHUB_OUTPUT
-          fi
-      - name: Run tests (if present)
-        if: steps.has-vitest.outputs.present == 'true'
-        run: pnpm run test:ci || pnpm exec vitest run --reporter=dot
+      - name: Run tests
+        run: pnpm run test --if-present
 
       - name: Build
         run: pnpm run build
