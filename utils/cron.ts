@@ -8,6 +8,8 @@ const FIELD_RANGES = [
   [0, 6], // 曜日(0=日)
 ] as const
 
+const CRON_DEBUG = typeof process !== 'undefined' && (process as any).env?.CRON_DEBUG
+
 type CronSpec = {
   minute: number[]
   hour: number[]
@@ -20,6 +22,9 @@ type CronSpec = {
 
 type ParsedField = { values: number[]; isStar: boolean }
 
+// これを追加（または既存の位置に）
+type FieldIndex = 0 | 1 | 2 | 3 | 4
+
 function fullRange(idx: number): number[] {
   const [min, max] = FIELD_RANGES[idx]
   const arr: number[] = []
@@ -27,8 +32,8 @@ function fullRange(idx: number): number[] {
   return arr
 }
 
-function parseField(expr: string, idx: number): ParsedField {
-  const [min, max] = FIELD_RANGES[idx]
+function parseField(part: string, idx: FieldIndex) {
+  const [MIN, MAX] = FIELD_RANGES[idx] // ← undefined にならない
   const values = new Set<number>()
 
   if (expr === '*') {
@@ -74,24 +79,21 @@ function parseField(expr: string, idx: number): ParsedField {
   return { values: arr, isStar: false }
 }
 
-export function parseCron(expr: string): CronSpec {
-  const fields = expr.trim().split(/\s+/)
-  if (fields.length !== 5) throw new Error('フィールド数が5つではありません')
+function parseCron(expr: string): CronSpec {
+  const parts = expr.trim().split(/\s+/)
+  if (parts.length !== 5) {
+    throw new Error('crontab は「分 時 日 月 曜日」の5フィールドで指定してください')
+  }
 
-  const min = parseField(fields[0], 0)
-  const hr = parseField(fields[1], 1)
-  const dom = parseField(fields[2], 2)
-  const mon = parseField(fields[3], 3)
-  const dow = parseField(fields[4], 4)
+  // ここを追加（as でタプル固定）
+  const [minS, hourS, domS, monthS, dowS] = parts as [string, string, string, string, string]
 
   return {
-    minute: min.values,
-    hour: hr.values,
-    dom: dom.values,
-    month: mon.values,
-    dow: dow.values,
-    domStar: dom.isStar,
-    dowStar: dow.isStar,
+    minute: parseField(minS, 0),
+    hour: parseField(hourS, 1),
+    dom: parseField(domS, 2),
+    month: parseField(monthS, 3),
+    dow: parseField(dowS, 4),
   }
 }
 
@@ -237,8 +239,7 @@ export function nextRuns(spec: CronSpec, now: Date, tz: string, count = 5): Date
 
             const cand = makeDateJST(y, mo, d, h, m)
             if (cand.getTime() <= start.getTime()) continue
-            if (process.env.CRON_DEBUG)
-              console.debug('CAND', { y, mo, d, h, m, iso: cand.toISOString() })
+            if (CRON_DEBUG) console.debug('CAND', { y, mo, d, h, m, iso: cand.toISOString() })
             out.push(cand)
             if (out.length >= count) break
           }

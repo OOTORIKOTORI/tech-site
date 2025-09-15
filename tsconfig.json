@@ -1,6 +1,10 @@
 {
   // https://nuxt.com/docs/guide/concepts/typescript
   "compilerOptions": {
+    "types": ["node", "vitest/globals"],
+    "moduleResolution": "bundler",
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM"],
     "strict": true,
     "noImplicitAny": true,
     "noImplicitReturns": true,
@@ -10,8 +14,7 @@
     "strictBindCallApply": true,
     "strictPropertyInitialization": true,
     "noImplicitOverride": true,
-    "exactOptionalPropertyTypes": true,
-    "types": ["vitest/globals"]
+    "exactOptionalPropertyTypes": true
   },
   "files": [],
   "references": [
