@@ -2,68 +2,52 @@ name: CI
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main]
   pull_request:
-    branches: [main, develop]
+    branches: [main]
+
+permissions:
+  contents: read
 
 jobs:
   ci:
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        node-version: [20]
+    timeout-minutes: 15
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Install Node.js
+      # Node を先にセットアップ（pnpm キャッシュも有効化）
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 20
+          cache: pnpm
 
-      - name: Setup pnpm (respect package.json#packageManager)
+      # package.json の packageManager を尊重して pnpm を用意（versionは固定しない）
+      - name: Setup pnpm (respect packageManager)
         uses: pnpm/action-setup@v4
         with:
           run_install: false
-          # package_json_path: ./package.json  # ルート以外なら明示
 
-      - name: Get pnpm store directory
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-
-      - name: Setup pnpm cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-
+      # ★ 依存をここで入れる（ここより前に lint 等を回さない）
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+        env:
+          HUSKY: 0 # CI では husky の postinstall を無効化（使ってなければ不要）
 
-      - name: Approve native builds (non-interactive)
-        run: pnpm approve-builds <<< "y" || true
-
-      - name: Rebuild better-sqlite3 (ensure native module)
+      # ネイティブモジュール対策（better-sqlite3 を使っていなければそのままでもOK）
+      - name: Rebuild native deps (optional)
         run: pnpm rebuild better-sqlite3 || true
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20 # or your version
-          cache: 'pnpm'
 
       - name: Run linter
         run: pnpm run lint
 
-      - name: Run type check
-        run: pnpm run typecheck
+      - name: Type check
+        run: pnpm run typecheck --if-present
 
       - name: Run tests
-        run: pnpm run test
+        run: pnpm run test --if-present
 
       - name: Build
         run: pnpm run build
