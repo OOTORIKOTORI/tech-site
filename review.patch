@@ -1,850 +1,3039 @@
-diff --git a/.gitignore b/.gitignore
-index ce04d68..d25b09a 100644
---- a/.gitignore
-+++ b/.gitignore
-@@ -23,3 +23,5 @@ logs
- .env
- .env.*
- !.env.example
-+memo.txt
-+review.patch
-diff --git a/app.vue b/app.vue
-new file mode 100644
-index 0000000..dfa254e
---- /dev/null
-+++ b/app.vue
-@@ -0,0 +1,5 @@
-+﻿<template>
-+  <NuxtLayout>
-+    <NuxtPage />
-+  </NuxtLayout>
-+</template>
-diff --git a/app/app.vue b/app/app.vue
-deleted file mode 100644
-index 09f935b..0000000
---- a/app/app.vue
-+++ /dev/null
-@@ -1,6 +0,0 @@
--<template>
--  <div>
--    <NuxtRouteAnnouncer />
--    <NuxtWelcome />
--  </div>
--</template>
-diff --git a/assets/css/tailwind.css b/assets/css/tailwind.css
-index bd6213e..81465ab 100644
---- a/assets/css/tailwind.css
-+++ b/assets/css/tailwind.css
-@@ -1,3 +1,3 @@
--@tailwind base;
-+﻿@tailwind base;
- @tailwind components;
--@tailwind utilities;
-\ No newline at end of file
-+@tailwind utilities;
-diff --git a/nuxt.config.ts b/nuxt.config.ts
-index 4369d22..3a19896 100644
---- a/nuxt.config.ts
-+++ b/nuxt.config.ts
-@@ -1,13 +1,17 @@
- ﻿import { defineNuxtConfig } from 'nuxt/config'
- 
- export default defineNuxtConfig({
-+  modules: ['@nuxt/content', '@nuxtjs/tailwindcss'],
-+  css: ['@@/assets/css/tailwind.css'],
-+  pages: true,
-+
-+  tailwindcss: {
-+    cssPath: '@@/assets/css/tailwind.css',
-+  },
-   compatibilityDate: '2025-07-15',
-   devtools: { enabled: true },
-   typescript: { strict: true },
- 
--  modules: ['@nuxt/content', '@nuxtjs/tailwindcss'],
--  css: ['~/assets/css/tailwind.css'],
--
-   //  ここでpostcssを設定（postcss.config.jsは不要）
-   postcss: {
-     plugins: {
-diff --git a/pages/index.vue b/pages/index.vue
-new file mode 100644
-index 0000000..ccc4459
---- /dev/null
-+++ b/pages/index.vue
-@@ -0,0 +1,7 @@
-+﻿<template>
-+  <div class="p-8 space-y-4">
-+    <h1 class="text-2xl font-bold">トップ</h1>
-+    <NuxtLink class="underline" to="/tools">/tools へ</NuxtLink>
-+    <NuxtLink class="underline" to="/tools/cron-jst">/tools/cron-jst へ</NuxtLink>
-+  </div>
-+</template>
-diff --git a/pages/tools.vue b/pages/tools.vue
-index c3511c1..44e95e1 100644
---- a/pages/tools.vue
-+++ b/pages/tools.vue
-@@ -1,98 +1,7 @@
--<template>
--  <div class="container mx-auto px-4 py-8 max-w-4xl">
--    <div class="mb-8">
--      <h1 class="text-4xl font-bold text-gray-900 mb-4">開発ツール</h1>
--      <p class="text-gray-600 text-lg">
--        開発に役立つ各種ツールをご利用いただけます。すべてのツールはブラウザ内で動作し、データがサーバーに送信されることはありません。
--      </p>
--    </div>
--
--    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
--      <!-- JWT Decoder -->
--      <NuxtLink to="/tools/jwt-decode"
--        class="block group bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200 p-6 hover:border-blue-300">
--        <div class="flex items-center mb-4">
--          <div
--            class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center group-hover:bg-blue-200 transition-colors">
--            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
--              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
--                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
--            </svg>
--          </div>
--        </div>
--        <h3 class="text-xl font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
--          JWT Decoder
--        </h3>
--        <p class="text-gray-600 text-sm mb-4">
--          JWT（JSON Web Token）をデコードして、ヘッダーとペイロードの内容を確認できます。
--        </p>
--        <div class="flex items-center text-blue-600 text-sm font-medium group-hover:text-blue-700">
--          ツールを使用する
--          <svg class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor"
--            viewBox="0 0 24 24">
--            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
--          </svg>
--        </div>
--      </NuxtLink>
--
--      <!-- Cron JST -->
--      <NuxtLink to="/tools/cron-jst"
--        class="block group bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200 p-6 hover:border-green-300">
--        <div class="flex items-center mb-4">
--          <div
--            class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center group-hover:bg-green-200 transition-colors">
--            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
--              <circle cx="12" cy="12" r="9" stroke-width="2" />
--              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 7v5l3 3" />
--            </svg>
--          </div>
--        </div>
--        <h3 class="text-xl font-semibold text-gray-900 mb-2 group-hover:text-green-600 transition-colors">
--          Cron JST 予測
--        </h3>
--        <p class="text-gray-600 text-sm mb-4">
--          crontab形式のスケジュールから、JSTで次回実行時刻を予測します。
--        </p>
--        <div class="flex items-center text-green-600 text-sm font-medium group-hover:text-green-700">
--          ツールを使用する
--          <svg class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor"
--            viewBox="0 0 24 24">
--            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
--          </svg>
--        </div>
--      </NuxtLink>
--
--      <!-- 将来のツール用のプレースホルダー -->
--      <div
--        class="bg-gray-50 rounded-lg border-2 border-dashed border-gray-200 p-6 flex flex-col items-center justify-center min-h-[200px]">
--        <div class="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center mb-4">
--          <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
--            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
--          </svg>
--        </div>
--        <h3 class="text-lg font-medium text-gray-400 mb-2">新しいツール</h3>
--        <p class="text-gray-400 text-sm text-center">
--          近日公開予定
--        </p>
--      </div>
--    </div>
--
--    <div class="mt-12 bg-blue-50 border border-blue-200 rounded-lg p-6">
--      <h2 class="text-lg font-semibold text-blue-900 mb-2">プライバシーについて</h2>
--      <p class="text-blue-800 text-sm">
--        このサイトのすべてのツールは、お使いのブラウザ内でローカルに動作します。
--        入力されたデータがサーバーに送信されることはなく、完全にプライベートで安全にご利用いただけます。
--      </p>
--    </div>
-+﻿<template>
-+  <div class="container mx-auto max-w-5xl py-8 px-4">
-+    <h1 class="text-3xl font-bold mb-6">開発ツール</h1>
-+    <!-- ここに /tools 以下の子ページが差し込まれる -->
-+    <NuxtPage />
-   </div>
- </template>
--
--<script setup lang="ts">
--// メタデータ設定
--useHead({
--  title: '開発ツール',
--  meta: [
--    { name: 'description', content: '開発に役立つ各種ツールをご利用いただけます。JWT Decoder など、ブラウザ内で安全に動作するツールを提供しています。' }
--  ]
--})
--</script>
 diff --git a/pages/tools/cron-jst.vue b/pages/tools/cron-jst.vue
-index 42becf5..1efa3af 100644
+index 69a7395..ec8140d 100644
 --- a/pages/tools/cron-jst.vue
 +++ b/pages/tools/cron-jst.vue
-@@ -1,72 +1,211 @@
--<template>
--  <div class="container mx-auto max-w-2xl py-8 px-4">
--    <h1 class="text-2xl font-bold mb-4">Cron JST 次回実行予測</h1>
--    <form @submit.prevent="onCheck" class="mb-4">
--      <label for="cron" class="block font-medium mb-1">crontab 形式（分 時 日 月 曜日）</label>
--      <textarea id="cron" v-model="input" rows="2" class="w-full border rounded p-2 font-mono text-base mb-2"
--        :aria-invalid="!!error" aria-describedby="cron-help" aria-live="polite" spellcheck="false"
--        autocomplete="off"></textarea>
--      <div id="cron-help" class="text-xs text-gray-500 mb-2">
-+﻿<template>
-+  <div class="container mx-auto max-w-3xl py-8 px-4 space-y-6">
-+    <h1 class="text-2xl font-bold">Cron JST 次回実行予測</h1>
-+
-+    <div class="rounded-md bg-blue-50 text-blue-900 text-sm p-3">
-+      入力はローカルでのみ処理されます。サーバーへ送信されることはありません。
-+    </div>
-+
-+    <form @submit.prevent="onCheck" class="space-y-3">
-+      <label for="cron" class="block font-medium">crontab 形式（分 時 日 月 曜日）</label>
-+      <textarea id="cron" v-model="input" rows="2" class="w-full border rounded p-2 font-mono text-base"
-+        :aria-invalid="!!error" aria-describedby="cron-help" spellcheck="false" autocomplete="off"></textarea>
-+      <div id="cron-help" class="text-xs text-gray-500">
-         例: <code>*/5 9-18 * * 1-5</code>（平日9-18時に5分毎）
-       </div>
--      <div class="flex gap-2 mb-2">
-+
-+      <div class="flex flex-wrap items-center gap-3">
-         <button type="submit" class="btn-primary">今すぐチェック</button>
-         <button type="button" class="btn-secondary" @click="onClear">クリア</button>
-         <button type="button" class="btn-secondary" @click="onSample">サンプル挿入</button>
-+
-+        <div class="ml-auto flex items-center gap-2">
-+          <label class="text-sm">表示タイムゾーン:</label>
-+          <label class="text-sm inline-flex items-center gap-1">
-+            <input type="radio" value="Asia/Tokyo" v-model="tzDisp" /> JST
-+          </label>
-+          <label class="text-sm inline-flex items-center gap-1">
-+            <input type="radio" value="UTC" v-model="tzDisp" /> UTC
-+          </label>
-+        </div>
-+
-+        <div class="flex items-center gap-2">
-+          <label for="count" class="text-sm">件数:</label>
-+          <input id="count" type="number" min="1" max="20" class="w-20 border rounded p-1" v-model.number="count" />
-+        </div>
-+
-+        <div class="flex items-center gap-2">
-+          <button type="button" class="btn-secondary" @click="copyLink">共有リンクをコピー</button>
-+          <span v-if="copied" class="text-xs text-green-700">コピーしました</span>
-+        </div>
-       </div>
--      <div v-if="error" class="text-red-600 font-semibold mb-2" aria-live="polite">{{ error }}</div>
-+
-+      <div v-if="error" class="text-red-600 font-semibold">{{ error }}</div>
-     </form>
--    <div v-if="results.length" class="mb-4">
--      <h2 class="font-semibold mb-2">次回実行予定（JST）</h2>
--      <ul class="list-disc pl-6">
--        <li v-for="(dt, i) in results" :key="i" class="font-mono">{{ format(dt) }}</li>
-+
-+    <div v-if="results.length" class="space-y-3">
-+      <h2 class="font-semibold">次回実行予定（{{ tzDisp === 'UTC' ? 'UTC' : 'JST' }}表示）</h2>
-+
-+      <ul class="list-disc pl-6 space-y-1">
-+        <li v-for="dt in results" :key="dt.toISOString()" class="font-mono">
-+          {{ format(dt, tzDisp) }}
-+          <span class="text-gray-500 ml-2">（{{ relative(dt) }}）</span>
-+        </li>
-       </ul>
--    </div>
--    <div class="text-xs text-gray-500 mt-6">
--      ※ 入力はローカルでのみ処理され、サーバー送信はありません。
-+
-+      <div class="flex items-center gap-3 pt-2">
-+        <button type="button" class="btn-secondary" @click="loadMore" v-if="canLoadMore">
-+          もっと表示（+{{ stepForMore }}件）
-+        </button>
-+        <span v-else class="text-xs text-gray-500">これ以上は表示できません（最大 {{ MAX_TOTAL }} 件）</span>
-+
-+        <button type="button" class="btn-primary" @click="downloadCsv" :disabled="!results.length">
-+          CSV でダウンロード
-+        </button>
-+      </div>
-     </div>
-   </div>
+@@ -27,6 +27,11 @@
+           <label class="text-sm inline-flex items-center gap-1">
+             <input type="radio" value="UTC" v-model="tzDisp" /> UTC
+           </label>
++          <div class="flex items-center gap-2">
++            <label for="baseAt" class="text-sm">基準時刻:</label>
++            <input id="baseAt" type="datetime-local" class="border rounded p-1" v-model="baseInput" />
++            <button type="button" class="btn-secondary" @click="setBaseNow">今</button>
++          </div>
+         </div>
+ 
+         <div class="flex items-center gap-2">
+@@ -72,7 +77,7 @@
  </template>
  
  <script setup lang="ts">
--import { ref } from 'vue'
-+import { ref, onMounted, watch, computed } from 'vue'
-+import { useRoute } from '#imports'
+-import { ref, onMounted, computed, watch } from 'vue'
++import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
+ import { useRoute } from '#imports'
  import { parseCron, nextRuns } from '~/utils/cron'
  
- const input = ref('')
- const error = ref('')
- const results = ref<Date[]>([])
-+const tzDisp = ref<'Asia/Tokyo' | 'UTC'>('Asia/Tokyo') // 表示だけ切替（計算はJST固定）
-+const count = ref(5) // 初回件数＆「もっと表示」のステップ
-+const copied = ref(false)
+@@ -82,6 +87,14 @@ const results = ref<Date[]>([])
+ const tzDisp = ref<'Asia/Tokyo' | 'UTC'>('Asia/Tokyo')
+ const count = ref(5)
+ const copied = ref(false)
++const baseInput = ref('') // datetime-local の値
++const baseFrom = ref<Date | null>(null) // UTC基準の瞬間
 +
-+const MAX_TOTAL = 200
-+
-+// 1..20 に丸めたステップ数
-+const countClamped = computed(() => Math.max(1, Math.min(Number(count.value ?? 5), 20)))
-+
-+// 直近のパース済みspecと、末尾日時を保持
-+const lastSpec = ref<ReturnType<typeof parseCron> | null>(null)
-+const lastAt = ref<Date | null>(null)
++// 相対表示用の現在時刻（30秒毎に更新：境界に揃えて開始）
++const now = ref<number>(Date.now())
++let nowIv: ReturnType<typeof setInterval> | null = null
++let nowTo: ReturnType<typeof setTimeout> | null = null
++const tick = () => { now.value = Date.now() }
  
- function onCheck() {
-   error.value = ''
-   results.value = []
-+  lastAt.value = null
+ // 上限と増分
+ const MAX_TOTAL = 200
+@@ -97,7 +110,6 @@ const displayed = computed(() => results.value.slice(0, countClamped.value))
+ 
+ // 直近の spec と「基準時刻」（今すぐチェック押下時の時刻）
+ const lastSpec = ref<ReturnType<typeof parseCron> | null>(null)
+-const baseFrom = ref<Date | null>(null)
+ 
+ // 「もっと表示」ボタンの表示可否と、増やす件数の表示
+ const canLoadMore = computed(() => countClamped.value < MAX_TOTAL)
+@@ -117,10 +129,22 @@ function onCheck() {
    try {
      const spec = parseCron(input.value.trim())
--    results.value = nextRuns(spec, new Date(), 'Asia/Tokyo', 5)
-+    lastSpec.value = spec
-+    // 計算は安全のため JST に固定
-+    const n = countClamped.value
-+    results.value = nextRuns(spec, new Date(), 'Asia/Tokyo', n)
-+    lastAt.value = results.value.at(-1) ?? null
+     lastSpec.value = spec
+-    // 基準時刻を“今”に固定（連打しても秒ずれしにくいように ms は 0 にしておく）
+-    const now = new Date()
+-    now.setMilliseconds(0)
+-    baseFrom.value = now
++
++    // 入力があれば優先、未入力/不正なら「今」で初期化
++    const parsed = baseInput.value ? fromInputValue(baseInput.value, tzDisp.value) : null
++    if (parsed) {
++      baseFrom.value = parsed
++    } else {
++      // ← ここは setBaseNow() でも OK（下で秒0化済み）
++      const anchor = new Date()
++      anchor.setSeconds(0, 0)         // 秒・ミリ秒を 0 に
++      baseFrom.value = anchor
++    }
++
++    // UI 側のフォーマットも現在のTZで揃える
++    baseInput.value = toInputValue(baseFrom.value!, tzDisp.value)
++
++    // 再計算
+     recompute(countClamped.value)
    } catch (e: any) {
--    error.value = e.message || '不明なエラーが発生しました'
-+    error.value = e?.message || '不明なエラーが発生しました'
-   }
+     error.value = e?.message || '不明なエラーが発生しました'
+@@ -150,18 +174,37 @@ function format(dt: Date, tz: 'Asia/Tokyo' | 'UTC') {
  }
- function onClear() {
-   input.value = ''
-   error.value = ''
-   results.value = []
-+  lastSpec.value = null
-+  lastAt.value = null
+ 
+ function relative(dt: Date) {
+-  const diff = dt.getTime() - Date.now()
+-  const sec = Math.round(Math.abs(diff) / 1000)
+-  const mins = Math.floor(sec / 60), hrs = Math.floor(mins / 60), days = Math.floor(hrs / 24)
+-  const s = days ? `${days}日` : hrs ? `${hrs}時間` : mins ? `${mins}分` : `${sec}秒`
+-  return diff >= 0 ? `あと ${s}` : `${s} 前`
++  const diffMs = dt.getTime() - now.value
++  const future = diffMs >= 0
++  const absSec = Math.max(0, Math.floor(Math.abs(diffMs) / 1000))
++
++  // 表示用フォーマッタ
++  const fmt = (val: number, unit: '分' | '時間' | '日') =>
++    future ? `あと ${val}${unit}` : `${val}${unit} 前`
++
++  // 90秒未満は「約1分」に寄せてブレを抑える
++  if (absSec < 90) return fmt(1, '分')
++
++  // 分
++  const mins = future ? Math.ceil(absSec / 60) : Math.floor(absSec / 60)
++  if (mins < 60) return fmt(mins, '分')
++
++  // 時間
++  const hours = future ? Math.ceil(mins / 60) : Math.floor(mins / 60)
++  if (hours < 48) return fmt(hours, '時間')
++
++  // 日
++  const days = future ? Math.ceil(hours / 24) : Math.floor(hours / 24)
++  return fmt(days, '日')
  }
- function onSample() {
-   input.value = '*/5 9-18 * * 1-5'
-   error.value = ''
-   results.value = []
-+  onCheck()
-+}
-+function format(dt: Date, tz: 'Asia/Tokyo' | 'UTC') {
-+  return dt.toLocaleString('ja-JP', {
+ 
++
+ async function copyLink() {
+   const url = new URL(window.location.href)
+   url.searchParams.set('expr', input.value.trim())
+   url.searchParams.set('n', String(countClamped.value))
+   url.searchParams.set('tz', tzDisp.value)
++  if (baseInput.value) url.searchParams.set('from', baseInput.value)
+   await navigator.clipboard.writeText(url.toString())
+   copied.value = true
+   setTimeout(() => (copied.value = false), 1200)
+@@ -197,17 +240,86 @@ function downloadCsv() {
+   URL.revokeObjectURL(a.href)
+ }
+ 
+-// プリフィル
++// ---- 基準時刻関連ヘルパー ----
++function toInputValue(d: Date, tz: 'Asia/Tokyo' | 'UTC') {
++  const fmt = new Intl.DateTimeFormat('sv-SE', {
 +    timeZone: tz,
-+    year: 'numeric', month: 'numeric', day: 'numeric',
-+    hour: '2-digit', minute: '2-digit', second: '2-digit',
-+    hour12: false
-+  })
- }
--function format(dt: Date) {
--  return dt.toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo', hour12: false })
-+function relative(dt: Date) {
-+  const diff = dt.getTime() - Date.now()
-+  const sec = Math.round(Math.abs(diff) / 1000)
-+  const mins = Math.floor(sec / 60), hrs = Math.floor(mins / 60), days = Math.floor(hrs / 24)
-+  const s = days ? `${days}日` : hrs ? `${hrs}時間` : mins ? `${mins}分` : `${sec}秒`
-+  return diff >= 0 ? `あと ${s}` : `${s} 前`
- }
-+async function copyLink() {
-+  const url = new URL(window.location.href)
-+  url.searchParams.set('expr', input.value.trim())
-+  url.searchParams.set('n', String(countClamped.value))
-+  url.searchParams.set('tz', tzDisp.value)
-+  await navigator.clipboard.writeText(url.toString())
-+  copied.value = true
-+  setTimeout(() => (copied.value = false), 1200)
++    year: 'numeric', month: '2-digit', day: '2-digit',
++    hour: '2-digit', minute: '2-digit', hour12: false
++  }).format(d) // YYYY-MM-DD HH:mm
++  return fmt.replace(' ', 'T')
 +}
++function fromInputValue(s: string, tz: 'Asia/Tokyo' | 'UTC'): Date | null {
++  // "YYYY-MM-DDTHH:mm" だけ受け付け
++  if (!s || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(s)) return null
 +
-+// もっと表示
-+const canLoadMore = computed(() => !!lastSpec.value && !!lastAt.value && results.value.length < MAX_TOTAL)
-+const stepForMore = computed(() => Math.min(countClamped.value, MAX_TOTAL - results.value.length))
++  const [dateStr, timeStr] = s.split('T')           // "YYYY-MM-DD" / "HH:mm"
++  const [y, m, d] = dateStr.split('-').map(Number)  // 年, 月(1-12), 日
++  const [hh, mm] = timeStr.split(':').map(Number)
 +
-+function loadMore() {
-+  if (!canLoadMore.value || !lastSpec.value || !lastAt.value) return
-+  const from = new Date(lastAt.value.getTime() + 1000) // 重複防止
-+  const more = nextRuns(lastSpec.value, from, 'Asia/Tokyo', stepForMore.value)
-+  results.value.push(...more)
-+  lastAt.value = results.value.at(-1) ?? lastAt.value
-+}
++  // まず UTC 基準で秒・ミリ秒 0 の Date を作る
++  const utc = new Date(Date.UTC(y, m - 1, d, hh, mm, 0, 0))
 +
-+// CSV ダウンロード
-+function downloadCsv() {
-+  if (!results.value.length) return
-+  // 4列: iso, jst, utc, relative
-+  const header = ['iso', 'jst', 'utc', 'relative']
-+  const rows = results.value.map(dt => {
-+    const iso = dt.toISOString()
-+    const jst = format(dt, 'Asia/Tokyo')
-+    const utc = format(dt, 'UTC')
-+    const rel = relative(dt)
-+    return [iso, jst, utc, rel]
-+  })
-+  const lines = [header, ...rows].map(cols =>
-+    cols.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')
-+  )
-+  const csv = lines.join('\r\n')
-+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
-+  const a = document.createElement('a')
-+  a.href = URL.createObjectURL(blob)
-+  a.download = 'cron-jst-schedule.csv'
-+  a.click()
-+  URL.revokeObjectURL(a.href)
-+}
-+
-+// ?expr= でプリフィル
-+const route = useRoute()
-+onMounted(() => {
-+  const q = route.query?.expr
-+  if (typeof q === 'string' && q.trim()) {
-+    input.value = q
-+    onCheck()
++  if (tz === 'Asia/Tokyo') {
++    // 入力が JST（UTC+9）の「壁時計」なら、UTC に戻すため 9h だけ引く
++    utc.setUTCHours(utc.getUTCHours() - 9)
 +  }
-+  const n = Number(route.query?.n)
-+  if (Number.isFinite(n) && n >= 1) count.value = Math.min(n, 20)
++  return utc
++}
++
++function setBaseNow() {
++  const anchor = new Date()
++  anchor.setSeconds(0, 0)     // ここが入っていればOK
++  baseFrom.value = anchor
++  baseInput.value = toInputValue(anchor, tzDisp.value)
++  recompute(countClamped.value)
++}
++
++// watchers
++watch(baseInput, (v) => {
++  if (!v) return
++  const parsed = fromInputValue(v, tzDisp.value)
++  if (parsed) {
++    baseFrom.value = parsed
++    recompute(countClamped.value)
++  }
++})
++watch(tzDisp, (tz) => {
++  if (baseFrom.value) baseInput.value = toInputValue(baseFrom.value, tz)
++})
++
++// プリフィル & タイマー開始
+ const route = useRoute()
+ onMounted(() => {
++  // 相対時間の即時更新（任意。ぴたり合わせたい場合）
++  now.value = Date.now()
++  tick()
++  const delay = 30_000 - (Date.now() % 30_000)
++  nowTo = setTimeout(() => { tick(); nowIv = setInterval(tick, 30_000) }, delay)
++  // 1. tz
 +  const tz = route.query?.tz
 +  if (tz === 'UTC' || tz === 'Asia/Tokyo') tzDisp.value = tz
-+})
++  // 2. from
++  const fromQ = route.query?.from
++  if (typeof fromQ === 'string') {
++    baseInput.value = fromQ
++    const parsed = fromInputValue(fromQ, tzDisp.value)
++    if (parsed) baseFrom.value = parsed
++  }
++  if (!baseFrom.value) setBaseNow()
++  // 3. expr / n
+   const q = route.query?.expr
+   if (typeof q === 'string' && q.trim()) input.value = q
+   const n = Number(route.query?.n)
+   if (Number.isFinite(n) && n >= 1) count.value = Math.min(n, MAX_TOTAL)
+-  const tz = route.query?.tz
+-  if (tz === 'UTC' || tz === 'Asia/Tokyo') tzDisp.value = tz
++  // 4. 計算
+   onCheck()
+ })
 +
-+// 件数が変わったら“初回の出し直し”に合わせて再計算
-+watch(count, () => {
-+  if (!lastSpec.value) return
-+  const n = countClamped.value
-+  results.value = nextRuns(lastSpec.value, new Date(), 'Asia/Tokyo', n)
-+  lastAt.value = results.value.at(-1) ?? null
++onUnmounted(() => {
++  if (nowTo) { clearTimeout(nowTo); nowTo = null }
++  if (nowIv) { clearInterval(nowIv); nowIv = null }
 +})
  </script>
  
--<style scoped lang="postcss">
-+<style scoped>
- .btn-primary {
-   @apply bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700 transition;
- }
- 
- .btn-secondary {
--  @apply bg-gray-200 text-gray-800 px-4 py-1 rounded hover:bg-gray-300 transition;
-+  @apply bg-gray-200 text-gray-800 px-3 py-1 rounded hover:bg-gray-300 transition;
- }
- </style>
-diff --git a/pages/tools/index.vue b/pages/tools/index.vue
-new file mode 100644
-index 0000000..c3511c1
---- /dev/null
-+++ b/pages/tools/index.vue
-@@ -0,0 +1,98 @@
-+<template>
-+  <div class="container mx-auto px-4 py-8 max-w-4xl">
-+    <div class="mb-8">
-+      <h1 class="text-4xl font-bold text-gray-900 mb-4">開発ツール</h1>
-+      <p class="text-gray-600 text-lg">
-+        開発に役立つ各種ツールをご利用いただけます。すべてのツールはブラウザ内で動作し、データがサーバーに送信されることはありません。
-+      </p>
-+    </div>
-+
-+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-+      <!-- JWT Decoder -->
-+      <NuxtLink to="/tools/jwt-decode"
-+        class="block group bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200 p-6 hover:border-blue-300">
-+        <div class="flex items-center mb-4">
-+          <div
-+            class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center group-hover:bg-blue-200 transition-colors">
-+            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-+            </svg>
-+          </div>
-+        </div>
-+        <h3 class="text-xl font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
-+          JWT Decoder
-+        </h3>
-+        <p class="text-gray-600 text-sm mb-4">
-+          JWT（JSON Web Token）をデコードして、ヘッダーとペイロードの内容を確認できます。
-+        </p>
-+        <div class="flex items-center text-blue-600 text-sm font-medium group-hover:text-blue-700">
-+          ツールを使用する
-+          <svg class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor"
-+            viewBox="0 0 24 24">
-+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-+          </svg>
-+        </div>
-+      </NuxtLink>
-+
-+      <!-- Cron JST -->
-+      <NuxtLink to="/tools/cron-jst"
-+        class="block group bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200 p-6 hover:border-green-300">
-+        <div class="flex items-center mb-4">
-+          <div
-+            class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center group-hover:bg-green-200 transition-colors">
-+            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-+              <circle cx="12" cy="12" r="9" stroke-width="2" />
-+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 7v5l3 3" />
-+            </svg>
-+          </div>
-+        </div>
-+        <h3 class="text-xl font-semibold text-gray-900 mb-2 group-hover:text-green-600 transition-colors">
-+          Cron JST 予測
-+        </h3>
-+        <p class="text-gray-600 text-sm mb-4">
-+          crontab形式のスケジュールから、JSTで次回実行時刻を予測します。
-+        </p>
-+        <div class="flex items-center text-green-600 text-sm font-medium group-hover:text-green-700">
-+          ツールを使用する
-+          <svg class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor"
-+            viewBox="0 0 24 24">
-+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-+          </svg>
-+        </div>
-+      </NuxtLink>
-+
-+      <!-- 将来のツール用のプレースホルダー -->
-+      <div
-+        class="bg-gray-50 rounded-lg border-2 border-dashed border-gray-200 p-6 flex flex-col items-center justify-center min-h-[200px]">
-+        <div class="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center mb-4">
-+          <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-+          </svg>
-+        </div>
-+        <h3 class="text-lg font-medium text-gray-400 mb-2">新しいツール</h3>
-+        <p class="text-gray-400 text-sm text-center">
-+          近日公開予定
-+        </p>
-+      </div>
-+    </div>
-+
-+    <div class="mt-12 bg-blue-50 border border-blue-200 rounded-lg p-6">
-+      <h2 class="text-lg font-semibold text-blue-900 mb-2">プライバシーについて</h2>
-+      <p class="text-blue-800 text-sm">
-+        このサイトのすべてのツールは、お使いのブラウザ内でローカルに動作します。
-+        入力されたデータがサーバーに送信されることはなく、完全にプライベートで安全にご利用いただけます。
-+      </p>
-+    </div>
-+  </div>
-+</template>
-+
-+<script setup lang="ts">
-+// メタデータ設定
-+useHead({
-+  title: '開発ツール',
-+  meta: [
-+    { name: 'description', content: '開発に役立つ各種ツールをご利用いただけます。JWT Decoder など、ブラウザ内で安全に動作するツールを提供しています。' }
-+  ]
-+})
-+</script>
-diff --git a/pages/tools/jwt-decode.vue b/pages/tools/jwt-decode.vue
-index ae0d8dc..9093b54 100644
---- a/pages/tools/jwt-decode.vue
-+++ b/pages/tools/jwt-decode.vue
-@@ -1,211 +1,114 @@
--<template>
--  <div class="container mx-auto px-4 py-8 max-w-6xl">
--    <div class="mb-8">
--      <h1 class="text-3xl font-bold text-gray-900 mb-4">JWT Decoder</h1>
--      <p class="text-gray-600 mb-2">
--        JWT（JSON Web Token）をデコードして、ヘッダーとペイロードの内容を確認できます。
--      </p>
--      <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
--        <p class="text-sm text-blue-800">
--          <strong>プライバシー保護:</strong> すべての処理はお使いのブラウザ内でローカルに実行されます。データがサーバーに送信されることはありません。
--        </p>
--      </div>
--    </div>
--
--    <div class="grid lg:grid-cols-2 gap-8">
--      <!-- 入力エリア -->
--      <div class="space-y-4">
--        <div>
--          <label for="jwt-input" class="block text-sm font-medium text-gray-700 mb-2">
--            JWT トークン
--          </label>
--          <textarea id="jwt-input" v-model="jwtInput"
--            class="w-full h-48 p-3 border rounded-lg font-mono text-sm resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
--            :class="{ 'border-red-500 bg-red-50': hasError }"
--            placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
--            aria-describedby="jwt-error"></textarea>
-+﻿<template>
-+  <div class="container mx-auto max-w-5xl py-8 px-4 space-y-6">
-+    <h1 class="text-2xl font-bold">JWT Decoder</h1>
- 
--          <div id="jwt-error" class="mt-2 min-h-[1.5rem]" aria-live="polite" aria-atomic="true">
--            <p v-if="errorMessage" class="text-sm text-red-600">
--              {{ errorMessage }}
--            </p>
--          </div>
--        </div>
-+    <div class="rounded-md bg-blue-50 text-blue-900 text-sm p-3">
-+      プライバシー保護: すべての処理はお使いのブラウザ内でローカルに実行されます。データがサーバーに送信されることはありません。
-+    </div>
- 
--        <div class="flex flex-wrap gap-2">
--          <button @click="clearInput"
--            class="px-4 py-2 text-sm bg-gray-500 text-white rounded-lg hover:bg-gray-600 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors">
--            クリア
--          </button>
--          <button @click="insertSample"
--            class="px-4 py-2 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
--            サンプル挿入
--          </button>
--        </div>
-+    <section class="space-y-2">
-+      <label for="jwt" class="block font-medium">JWT トークン</label>
-+      <textarea id="jwt" v-model="token" rows="5" class="w-full border rounded p-2 font-mono text-sm"
-+        spellcheck="false"></textarea>
-+      <div class="flex gap-2">
-+        <button class="btn-secondary" @click="onClear">クリア</button>
-+        <button class="btn-secondary" @click="onSample">サンプル挿入</button>
-       </div>
-+    </section>
- 
--      <!-- 出力エリア -->
--      <div class="space-y-6">
--        <!-- ヘッダー -->
--        <div>
--          <div class="flex items-center justify-between mb-2">
--            <h3 class="text-lg font-semibold text-gray-900">Header</h3>
--            <button v-if="parsedJwt?.header" @click="copyToClipboard(formattedHeader)"
--              class="px-3 py-1 text-xs bg-gray-100 text-gray-700 rounded hover:bg-gray-200 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors">
--              コピー
--            </button>
--          </div>
--          <div class="bg-gray-50 border rounded-lg p-4 min-h-[120px]">
--            <pre v-if="parsedJwt?.header"
--              class="text-sm text-gray-800 whitespace-pre-wrap break-words">{{ formattedHeader }}</pre>
--            <p v-else class="text-gray-500 text-sm">
--              有効なJWTを入力するとヘッダーが表示されます
--            </p>
--          </div>
--        </div>
--
--        <!-- ペイロード -->
--        <div>
--          <div class="flex items-center justify-between mb-2">
--            <h3 class="text-lg font-semibold text-gray-900">Payload</h3>
--            <button v-if="parsedJwt?.payload" @click="copyToClipboard(formattedPayload)"
--              class="px-3 py-1 text-xs bg-gray-100 text-gray-700 rounded hover:bg-gray-200 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors">
--              コピー
--            </button>
--          </div>
--          <div class="bg-gray-50 border rounded-lg p-4 min-h-[120px]">
--            <pre v-if="parsedJwt?.payload"
--              class="text-sm text-gray-800 whitespace-pre-wrap break-words">{{ formattedPayload }}</pre>
--            <p v-else class="text-gray-500 text-sm">
--              有効なJWTを入力するとペイロードが表示されます
--            </p>
--          </div>
--        </div>
-+    <section class="grid md:grid-cols-2 gap-4">
-+      <div class="rounded border bg-gray-50 p-3">
-+        <h2 class="font-semibold mb-2">Header</h2>
-+        <pre class="text-xs overflow-auto"><code>{{ pretty(header) }}</code></pre>
-       </div>
--    </div>
--
--    <!-- 通知 -->
--    <div v-if="notification"
--      class="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg transition-opacity duration-300"
--      :class="{ 'opacity-0': !showNotification }">
--      {{ notification }}
--    </div>
-+      <div class="rounded border bg-gray-50 p-3">
-+        <h2 class="font-semibold mb-2">Payload</h2>
-+        <pre class="text-xs overflow-auto"><code>{{ pretty(payload) }}</code></pre>
-+      </div>
-+    </section>
-+
-+    <section v-if="payload" class="rounded border p-3 space-y-2">
-+      <h2 class="font-semibold">基本クレーム（読みやすく）</h2>
-+      <table class="text-sm">
-+        <tbody>
-+          <tr v-if="payload.exp">
-+            <th class="text-left pr-4">exp</th>
-+            <td>{{ asDate(payload.exp) }}（{{ relFromNow(payload.exp) }}）</td>
-+          </tr>
-+          <tr v-if="payload.iat">
-+            <th class="text-left pr-4">iat</th>
-+            <td>{{ asDate(payload.iat) }}（{{ relFromNow(payload.iat) }}）</td>
-+          </tr>
-+          <tr v-if="payload.nbf">
-+            <th class="text-left pr-4">nbf</th>
-+            <td>{{ asDate(payload.nbf) }}（{{ relFromNow(payload.nbf) }}）</td>
-+          </tr>
-+          <tr v-if="payload.sub">
-+            <th class="text-left pr-4">sub</th>
-+            <td class="font-mono">{{ payload.sub }}</td>
-+          </tr>
-+          <tr v-if="payload.iss">
-+            <th class="text-left pr-4">iss</th>
-+            <td class="font-mono break-all">{{ payload.iss }}</td>
-+          </tr>
-+          <tr v-if="payload.aud">
-+            <th class="text-left pr-4">aud</th>
-+            <td class="font-mono break-all">{{ payload.aud }}</td>
-+          </tr>
-+        </tbody>
-+      </table>
-+      <p class="text-xs text-gray-500 mt-1"> 署名検証は未実装です（必要なら後日JWKS対応を追加します）。</p>
-+    </section>
-   </div>
- </template>
- 
- <script setup lang="ts">
--import { ref, computed, watch } from 'vue'
--import { parseJwt, isProbablyJwt } from '../../utils/jwt'
--
--// メタデータ設定
--useHead({
--  title: 'JWT Decoder | Tools',
--  meta: [
--    { name: 'description', content: 'JWT（JSON Web Token）をデコードしてヘッダーとペイロードの内容を確認するツールです。' }
--  ]
--})
--
--// リアクティブデータ
--const jwtInput = ref('')
--const parsedJwt = ref<{ header: unknown; payload: unknown } | null>(null)
--const errorMessage = ref('')
--const notification = ref('')
--const showNotification = ref(false)
--
--// 計算プロパティ
--const hasError = computed(() => !!errorMessage.value)
-+import { ref, computed } from 'vue'
- 
--const formattedHeader = computed(() => {
--  if (!parsedJwt.value?.header) return ''
--  return JSON.stringify(parsedJwt.value.header, null, 2)
--})
-+const token = ref('')
- 
--const formattedPayload = computed(() => {
--  if (!parsedJwt.value?.payload) return ''
--  return JSON.stringify(parsedJwt.value.payload, null, 2)
--})
--
--// JWTパース処理（リアルタイム）
--watch(jwtInput, (newValue: string) => {
--  errorMessage.value = ''
--  parsedJwt.value = null
--
--  if (!newValue.trim()) {
--    return
--  }
--
--  if (!isProbablyJwt(newValue.trim())) {
--    errorMessage.value = 'JWT形式ではありません。header.payload.signature の形式で入力してください。'
--    return
--  }
--
--  try {
--    parsedJwt.value = parseJwt(newValue.trim())
--  } catch (error) {
--    if (error instanceof Error) {
--      errorMessage.value = error.message
--    } else {
--      errorMessage.value = '予期しないエラーが発生しました。'
--    }
--  }
--}, { immediate: true })
--
--// メソッド
--function clearInput(): void {
--  jwtInput.value = ''
-+function onClear() { token.value = '' }
-+function onSample() {
-+  token.value =
-+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.' +
-+    'eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNjE2MjM5MDIyfQ.' +
-+    'SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'
- }
- 
--function insertSample(): void {
--  // サンプルJWT（実際の署名は無効だが、header/payloadは有効）
--  jwtInput.value = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjE1MTYyNDI2MjJ9.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'
-+function b64urlDecode(s: string) {
-+  s = s.replace(/-/g, '+').replace(/_/g, '/')
-+  const pad = s.length % 4 ? 4 - (s.length % 4) : 0
-+  return atob(s + '='.repeat(pad))
- }
--
--async function copyToClipboard(text: string): Promise<void> {
--  // 早期 return: 空文字をコピーしない
--  if (!text) {
--    showNotificationMessage('コピーする内容がありません')
--    return
--  }
--
--  try {
--    if (navigator?.clipboard?.writeText) {
--      await navigator.clipboard.writeText(text)
--      showNotificationMessage('コピーしました')
--      return
--    }
--    throw new Error('Clipboard API が利用できません')
--  } catch (primaryErr) {
--    // Fallback for古いブラウザ
--    try {
--      const textArea = document.createElement('textarea')
--      textArea.value = text
--      textArea.style.position = 'fixed'
--      textArea.style.top = '-1000px'
--      document.body.appendChild(textArea)
--      textArea.focus()
--      textArea.select()
--      const succeeded = document.execCommand('copy')
--      document.body.removeChild(textArea)
--      if (succeeded) {
--        showNotificationMessage('コピーしました')
--      } else {
--        showNotificationMessage('コピーに失敗しました（手動で選択してください）')
--      }
--    } catch (fallbackErr) {
--      showNotificationMessage('コピーに失敗しました（手動で選択してください）')
--    }
--  }
-+function parsePart<T = any>(part: string | undefined): T | null {
-+  if (!part) return null
-+  try { return JSON.parse(b64urlDecode(part)) as T } catch { return null }
- }
-+const parts = computed(() => token.value.split('.'))
-+const header = computed(() => parsePart(parts.value[0]))
-+const payload = computed(() => parsePart(parts.value[1]))
- 
--function showNotificationMessage(message: string): void {
--  notification.value = message
--  showNotification.value = true
--
--  setTimeout(() => {
--    showNotification.value = false
--    setTimeout(() => {
--      notification.value = ''
--    }, 300)
--  }, 2000)
-+function pretty(v: any) {
-+  return v ? JSON.stringify(v, null, 2) : '（有効なJWTを入力すると表示されます）'
-+}
-+function asDate(sec: number) {
-+  if (typeof sec !== 'number') return ''
-+  const d = new Date(sec * 1000)
-+  const jst = d.toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo', hour12: false })
-+  const utc = d.toUTCString().replace(' GMT', '')
-+  return `${jst} JST / ${utc} UTC`
-+}
-+function relFromNow(sec: number) {
-+  const diff = sec * 1000 - Date.now()
-+  const abs = Math.abs(diff)
-+  const mins = Math.floor(abs / 60000), hrs = Math.floor(mins / 60), days = Math.floor(hrs / 24)
-+  const s = days ? `${days}日` : hrs ? `${hrs}時間` : mins ? `${mins}分` : `${Math.floor(abs / 1000)}秒`
-+  return diff >= 0 ? `あと ${s}` : `${s} 前`
- }
- </script>
-+
-+<style scoped>
-+.btn-secondary {
-+  @apply bg-gray-200 text-gray-800 px-3 py-1 rounded hover:bg-gray-300 transition;
-+}
-+</style>
+ <style scoped>
 diff --git a/review.patch b/review.patch
-index de3ab90..bcb5f32 100644
-Binary files a/review.patch and b/review.patch differ
+index a90fd78..d86c1bc 100644
+--- a/review.patch
++++ b/review.patch
+@@ -1,850 +1,2004 @@
+-diff --git a/.gitignore b/.gitignore
+-index ce04d68..d25b09a 100644
+---- a/.gitignore
+-+++ b/.gitignore
+-@@ -23,3 +23,5 @@ logs
+- .env
+- .env.*
+- !.env.example
+-+memo.txt
+-+review.patch
+-diff --git a/app.vue b/app.vue
+-new file mode 100644
+-index 0000000..dfa254e
+---- /dev/null
+-+++ b/app.vue
+-@@ -0,0 +1,5 @@
+-+﻿<template>
+-+  <NuxtLayout>
+-+    <NuxtPage />
+-+  </NuxtLayout>
+-+</template>
+-diff --git a/app/app.vue b/app/app.vue
+-deleted file mode 100644
+-index 09f935b..0000000
+---- a/app/app.vue
+-+++ /dev/null
+-@@ -1,6 +0,0 @@
+--<template>
+--  <div>
+--    <NuxtRouteAnnouncer />
+--    <NuxtWelcome />
+--  </div>
+--</template>
+-diff --git a/assets/css/tailwind.css b/assets/css/tailwind.css
+-index bd6213e..81465ab 100644
+---- a/assets/css/tailwind.css
+-+++ b/assets/css/tailwind.css
+-@@ -1,3 +1,3 @@
+--@tailwind base;
+-+﻿@tailwind base;
+- @tailwind components;
+--@tailwind utilities;
+-\ No newline at end of file
+-+@tailwind utilities;
+-diff --git a/nuxt.config.ts b/nuxt.config.ts
+-index 4369d22..3a19896 100644
+---- a/nuxt.config.ts
+-+++ b/nuxt.config.ts
+-@@ -1,13 +1,17 @@
+- ﻿import { defineNuxtConfig } from 'nuxt/config'
+- 
+- export default defineNuxtConfig({
+-+  modules: ['@nuxt/content', '@nuxtjs/tailwindcss'],
+-+  css: ['@@/assets/css/tailwind.css'],
+-+  pages: true,
+-+
+-+  tailwindcss: {
+-+    cssPath: '@@/assets/css/tailwind.css',
+-+  },
+-   compatibilityDate: '2025-07-15',
+-   devtools: { enabled: true },
+-   typescript: { strict: true },
+- 
+--  modules: ['@nuxt/content', '@nuxtjs/tailwindcss'],
+--  css: ['~/assets/css/tailwind.css'],
+--
+-   //  ここでpostcssを設定（postcss.config.jsは不要）
+-   postcss: {
+-     plugins: {
+-diff --git a/pages/index.vue b/pages/index.vue
+-new file mode 100644
+-index 0000000..ccc4459
+---- /dev/null
+-+++ b/pages/index.vue
+-@@ -0,0 +1,7 @@
+-+﻿<template>
+-+  <div class="p-8 space-y-4">
+-+    <h1 class="text-2xl font-bold">トップ</h1>
+-+    <NuxtLink class="underline" to="/tools">/tools へ</NuxtLink>
+-+    <NuxtLink class="underline" to="/tools/cron-jst">/tools/cron-jst へ</NuxtLink>
+-+  </div>
+-+</template>
+-diff --git a/pages/tools.vue b/pages/tools.vue
+-index c3511c1..44e95e1 100644
+---- a/pages/tools.vue
+-+++ b/pages/tools.vue
+-@@ -1,98 +1,7 @@
+--<template>
+--  <div class="container mx-auto px-4 py-8 max-w-4xl">
+--    <div class="mb-8">
+--      <h1 class="text-4xl font-bold text-gray-900 mb-4">開発ツール</h1>
+--      <p class="text-gray-600 text-lg">
+--        開発に役立つ各種ツールをご利用いただけます。すべてのツールはブラウザ内で動作し、データがサーバーに送信されることはありません。
+--      </p>
+--    </div>
+--
+--    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+--      <!-- JWT Decoder -->
+--      <NuxtLink to="/tools/jwt-decode"
+--        class="block group bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200 p-6 hover:border-blue-300">
+--        <div class="flex items-center mb-4">
+--          <div
+--            class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center group-hover:bg-blue-200 transition-colors">
+--            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+--              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+--                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+--            </svg>
+--          </div>
+--        </div>
+--        <h3 class="text-xl font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
+--          JWT Decoder
+--        </h3>
+--        <p class="text-gray-600 text-sm mb-4">
+--          JWT（JSON Web Token）をデコードして、ヘッダーとペイロードの内容を確認できます。
+--        </p>
+--        <div class="flex items-center text-blue-600 text-sm font-medium group-hover:text-blue-700">
+--          ツールを使用する
+--          <svg class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor"
+--            viewBox="0 0 24 24">
+--            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+--          </svg>
+--        </div>
+--      </NuxtLink>
+--
+--      <!-- Cron JST -->
+--      <NuxtLink to="/tools/cron-jst"
+--        class="block group bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200 p-6 hover:border-green-300">
+--        <div class="flex items-center mb-4">
+--          <div
+--            class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center group-hover:bg-green-200 transition-colors">
+--            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+--              <circle cx="12" cy="12" r="9" stroke-width="2" />
+--              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 7v5l3 3" />
+--            </svg>
+--          </div>
+--        </div>
+--        <h3 class="text-xl font-semibold text-gray-900 mb-2 group-hover:text-green-600 transition-colors">
+--          Cron JST 予測
+--        </h3>
+--        <p class="text-gray-600 text-sm mb-4">
+--          crontab形式のスケジュールから、JSTで次回実行時刻を予測します。
+--        </p>
+--        <div class="flex items-center text-green-600 text-sm font-medium group-hover:text-green-700">
+--          ツールを使用する
+--          <svg class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor"
+--            viewBox="0 0 24 24">
+--            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+--          </svg>
+--        </div>
+--      </NuxtLink>
+--
+--      <!-- 将来のツール用のプレースホルダー -->
+--      <div
+--        class="bg-gray-50 rounded-lg border-2 border-dashed border-gray-200 p-6 flex flex-col items-center justify-center min-h-[200px]">
+--        <div class="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center mb-4">
+--          <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+--            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+--          </svg>
+--        </div>
+--        <h3 class="text-lg font-medium text-gray-400 mb-2">新しいツール</h3>
+--        <p class="text-gray-400 text-sm text-center">
+--          近日公開予定
+--        </p>
+--      </div>
+--    </div>
+--
+--    <div class="mt-12 bg-blue-50 border border-blue-200 rounded-lg p-6">
+--      <h2 class="text-lg font-semibold text-blue-900 mb-2">プライバシーについて</h2>
+--      <p class="text-blue-800 text-sm">
+--        このサイトのすべてのツールは、お使いのブラウザ内でローカルに動作します。
+--        入力されたデータがサーバーに送信されることはなく、完全にプライベートで安全にご利用いただけます。
+--      </p>
+--    </div>
+-+﻿<template>
+-+  <div class="container mx-auto max-w-5xl py-8 px-4">
+-+    <h1 class="text-3xl font-bold mb-6">開発ツール</h1>
+-+    <!-- ここに /tools 以下の子ページが差し込まれる -->
+-+    <NuxtPage />
+-   </div>
+- </template>
+--
+--<script setup lang="ts">
+--// メタデータ設定
+--useHead({
+--  title: '開発ツール',
+--  meta: [
+--    { name: 'description', content: '開発に役立つ各種ツールをご利用いただけます。JWT Decoder など、ブラウザ内で安全に動作するツールを提供しています。' }
+--  ]
+--})
+--</script>
+ diff --git a/pages/tools/cron-jst.vue b/pages/tools/cron-jst.vue
+-index 42becf5..1efa3af 100644
++index 69a7395..b0408e3 100644
+ --- a/pages/tools/cron-jst.vue
+ +++ b/pages/tools/cron-jst.vue
+-@@ -1,72 +1,211 @@
+--<template>
+--  <div class="container mx-auto max-w-2xl py-8 px-4">
+--    <h1 class="text-2xl font-bold mb-4">Cron JST 次回実行予測</h1>
+--    <form @submit.prevent="onCheck" class="mb-4">
+--      <label for="cron" class="block font-medium mb-1">crontab 形式（分 時 日 月 曜日）</label>
+--      <textarea id="cron" v-model="input" rows="2" class="w-full border rounded p-2 font-mono text-base mb-2"
+--        :aria-invalid="!!error" aria-describedby="cron-help" aria-live="polite" spellcheck="false"
+--        autocomplete="off"></textarea>
+--      <div id="cron-help" class="text-xs text-gray-500 mb-2">
+-+﻿<template>
+-+  <div class="container mx-auto max-w-3xl py-8 px-4 space-y-6">
+-+    <h1 class="text-2xl font-bold">Cron JST 次回実行予測</h1>
+-+
+-+    <div class="rounded-md bg-blue-50 text-blue-900 text-sm p-3">
+-+      入力はローカルでのみ処理されます。サーバーへ送信されることはありません。
+-+    </div>
+-+
+-+    <form @submit.prevent="onCheck" class="space-y-3">
+-+      <label for="cron" class="block font-medium">crontab 形式（分 時 日 月 曜日）</label>
+-+      <textarea id="cron" v-model="input" rows="2" class="w-full border rounded p-2 font-mono text-base"
+-+        :aria-invalid="!!error" aria-describedby="cron-help" spellcheck="false" autocomplete="off"></textarea>
+-+      <div id="cron-help" class="text-xs text-gray-500">
+-         例: <code>*/5 9-18 * * 1-5</code>（平日9-18時に5分毎）
+-       </div>
+--      <div class="flex gap-2 mb-2">
+-+
+-+      <div class="flex flex-wrap items-center gap-3">
+-         <button type="submit" class="btn-primary">今すぐチェック</button>
+-         <button type="button" class="btn-secondary" @click="onClear">クリア</button>
+-         <button type="button" class="btn-secondary" @click="onSample">サンプル挿入</button>
+-+
+-+        <div class="ml-auto flex items-center gap-2">
+-+          <label class="text-sm">表示タイムゾーン:</label>
+-+          <label class="text-sm inline-flex items-center gap-1">
+-+            <input type="radio" value="Asia/Tokyo" v-model="tzDisp" /> JST
+-+          </label>
+-+          <label class="text-sm inline-flex items-center gap-1">
+-+            <input type="radio" value="UTC" v-model="tzDisp" /> UTC
+-+          </label>
+-+        </div>
+-+
+-+        <div class="flex items-center gap-2">
+-+          <label for="count" class="text-sm">件数:</label>
+-+          <input id="count" type="number" min="1" max="20" class="w-20 border rounded p-1" v-model.number="count" />
+-+        </div>
+-+
+-+        <div class="flex items-center gap-2">
+-+          <button type="button" class="btn-secondary" @click="copyLink">共有リンクをコピー</button>
+-+          <span v-if="copied" class="text-xs text-green-700">コピーしました</span>
+-+        </div>
+-       </div>
+--      <div v-if="error" class="text-red-600 font-semibold mb-2" aria-live="polite">{{ error }}</div>
+-+
+-+      <div v-if="error" class="text-red-600 font-semibold">{{ error }}</div>
+-     </form>
+--    <div v-if="results.length" class="mb-4">
+--      <h2 class="font-semibold mb-2">次回実行予定（JST）</h2>
+--      <ul class="list-disc pl-6">
+--        <li v-for="(dt, i) in results" :key="i" class="font-mono">{{ format(dt) }}</li>
+-+
+-+    <div v-if="results.length" class="space-y-3">
+-+      <h2 class="font-semibold">次回実行予定（{{ tzDisp === 'UTC' ? 'UTC' : 'JST' }}表示）</h2>
+-+
+-+      <ul class="list-disc pl-6 space-y-1">
+-+        <li v-for="dt in results" :key="dt.toISOString()" class="font-mono">
+-+          {{ format(dt, tzDisp) }}
+-+          <span class="text-gray-500 ml-2">（{{ relative(dt) }}）</span>
+-+        </li>
+-       </ul>
+--    </div>
+--    <div class="text-xs text-gray-500 mt-6">
+--      ※ 入力はローカルでのみ処理され、サーバー送信はありません。
+-+
+-+      <div class="flex items-center gap-3 pt-2">
+-+        <button type="button" class="btn-secondary" @click="loadMore" v-if="canLoadMore">
+-+          もっと表示（+{{ stepForMore }}件）
+-+        </button>
+-+        <span v-else class="text-xs text-gray-500">これ以上は表示できません（最大 {{ MAX_TOTAL }} 件）</span>
+-+
+-+        <button type="button" class="btn-primary" @click="downloadCsv" :disabled="!results.length">
+-+          CSV でダウンロード
+-+        </button>
+-+      </div>
+-     </div>
+-   </div>
++@@ -27,6 +27,11 @@
++           <label class="text-sm inline-flex items-center gap-1">
++             <input type="radio" value="UTC" v-model="tzDisp" /> UTC
++           </label>
+++          <div class="flex items-center gap-2">
+++            <label for="baseAt" class="text-sm">基準時刻:</label>
+++            <input id="baseAt" type="datetime-local" class="border rounded p-1" v-model="baseInput" />
+++            <button type="button" class="btn-secondary" @click="setBaseNow">今</button>
+++          </div>
++         </div>
++ 
++         <div class="flex items-center gap-2">
++@@ -72,7 +77,7 @@
+  </template>
+  
+  <script setup lang="ts">
+--import { ref } from 'vue'
+-+import { ref, onMounted, watch, computed } from 'vue'
+-+import { useRoute } from '#imports'
++-import { ref, onMounted, computed, watch } from 'vue'
+++import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
++ import { useRoute } from '#imports'
+  import { parseCron, nextRuns } from '~/utils/cron'
+  
+- const input = ref('')
+- const error = ref('')
+- const results = ref<Date[]>([])
+-+const tzDisp = ref<'Asia/Tokyo' | 'UTC'>('Asia/Tokyo') // 表示だけ切替（計算はJST固定）
+-+const count = ref(5) // 初回件数＆「もっと表示」のステップ
+-+const copied = ref(false)
+-+
+-+const MAX_TOTAL = 200
+-+
+-+// 1..20 に丸めたステップ数
+-+const countClamped = computed(() => Math.max(1, Math.min(Number(count.value ?? 5), 20)))
++@@ -82,6 +87,14 @@ const results = ref<Date[]>([])
++ const tzDisp = ref<'Asia/Tokyo' | 'UTC'>('Asia/Tokyo')
++ const count = ref(5)
++ const copied = ref(false)
+++const baseInput = ref('') // datetime-local の値
+++const baseFrom = ref<Date | null>(null) // UTC基準の瞬間
+ +
+-+// 直近のパース済みspecと、末尾日時を保持
+-+const lastSpec = ref<ReturnType<typeof parseCron> | null>(null)
+-+const lastAt = ref<Date | null>(null)
+++// 相対表示用の現在時刻（30秒毎に更新：境界に揃えて開始）
+++const now = ref<number>(Date.now())
+++let nowIv: ReturnType<typeof setInterval> | null = null
+++let nowTo: ReturnType<typeof setTimeout> | null = null
+++const tick = () => { now.value = Date.now() }
+  
+- function onCheck() {
+-   error.value = ''
+-   results.value = []
+-+  lastAt.value = null
++ // 上限と増分
++ const MAX_TOTAL = 200
++@@ -97,7 +110,6 @@ const displayed = computed(() => results.value.slice(0, countClamped.value))
++ 
++ // 直近の spec と「基準時刻」（今すぐチェック押下時の時刻）
++ const lastSpec = ref<ReturnType<typeof parseCron> | null>(null)
++-const baseFrom = ref<Date | null>(null)
++ 
++ // 「もっと表示」ボタンの表示可否と、増やす件数の表示
++ const canLoadMore = computed(() => countClamped.value < MAX_TOTAL)
++@@ -117,10 +129,14 @@ function onCheck() {
+    try {
+      const spec = parseCron(input.value.trim())
+--    results.value = nextRuns(spec, new Date(), 'Asia/Tokyo', 5)
+-+    lastSpec.value = spec
+-+    // 計算は安全のため JST に固定
+-+    const n = countClamped.value
+-+    results.value = nextRuns(spec, new Date(), 'Asia/Tokyo', n)
+-+    lastAt.value = results.value.at(-1) ?? null
++     lastSpec.value = spec
++-    // 基準時刻を“今”に固定（連打しても秒ずれしにくいように ms は 0 にしておく）
++-    const now = new Date()
++-    now.setMilliseconds(0)
++-    baseFrom.value = now
+++    // 入力された基準時刻（表示TZ）をUTC瞬間に変換
+++    const parsed = baseInput.value ? fromInputValue(baseInput.value, tzDisp.value) : null
+++    if (parsed) {
+++      baseFrom.value = parsed
+++    } else {
+++      setBaseNow()
+++    }
+++    if (baseFrom.value) baseInput.value = toInputValue(baseFrom.value, tzDisp.value)
++     recompute(countClamped.value)
+    } catch (e: any) {
+--    error.value = e.message || '不明なエラーが発生しました'
+-+    error.value = e?.message || '不明なエラーが発生しました'
+-   }
+- }
+- function onClear() {
+-   input.value = ''
+-   error.value = ''
+-   results.value = []
+-+  lastSpec.value = null
+-+  lastAt.value = null
+- }
+- function onSample() {
+-   input.value = '*/5 9-18 * * 1-5'
+-   error.value = ''
+-   results.value = []
+-+  onCheck()
+-+}
+-+function format(dt: Date, tz: 'Asia/Tokyo' | 'UTC') {
+-+  return dt.toLocaleString('ja-JP', {
+-+    timeZone: tz,
+-+    year: 'numeric', month: 'numeric', day: 'numeric',
+-+    hour: '2-digit', minute: '2-digit', second: '2-digit',
+-+    hour12: false
+-+  })
+- }
+--function format(dt: Date) {
+--  return dt.toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo', hour12: false })
+-+function relative(dt: Date) {
+-+  const diff = dt.getTime() - Date.now()
+-+  const sec = Math.round(Math.abs(diff) / 1000)
+-+  const mins = Math.floor(sec / 60), hrs = Math.floor(mins / 60), days = Math.floor(hrs / 24)
+-+  const s = days ? `${days}日` : hrs ? `${hrs}時間` : mins ? `${mins}分` : `${sec}秒`
+-+  return diff >= 0 ? `あと ${s}` : `${s} 前`
+- }
+-+async function copyLink() {
+-+  const url = new URL(window.location.href)
+-+  url.searchParams.set('expr', input.value.trim())
+-+  url.searchParams.set('n', String(countClamped.value))
+-+  url.searchParams.set('tz', tzDisp.value)
+-+  await navigator.clipboard.writeText(url.toString())
+-+  copied.value = true
+-+  setTimeout(() => (copied.value = false), 1200)
+-+}
+-+
+-+// もっと表示
+-+const canLoadMore = computed(() => !!lastSpec.value && !!lastAt.value && results.value.length < MAX_TOTAL)
+-+const stepForMore = computed(() => Math.min(countClamped.value, MAX_TOTAL - results.value.length))
+-+
+-+function loadMore() {
+-+  if (!canLoadMore.value || !lastSpec.value || !lastAt.value) return
+-+  const from = new Date(lastAt.value.getTime() + 1000) // 重複防止
+-+  const more = nextRuns(lastSpec.value, from, 'Asia/Tokyo', stepForMore.value)
+-+  results.value.push(...more)
+-+  lastAt.value = results.value.at(-1) ?? lastAt.value
+-+}
+-+
+-+// CSV ダウンロード
+-+function downloadCsv() {
+-+  if (!results.value.length) return
+-+  // 4列: iso, jst, utc, relative
+-+  const header = ['iso', 'jst', 'utc', 'relative']
+-+  const rows = results.value.map(dt => {
+-+    const iso = dt.toISOString()
+-+    const jst = format(dt, 'Asia/Tokyo')
+-+    const utc = format(dt, 'UTC')
+-+    const rel = relative(dt)
+-+    return [iso, jst, utc, rel]
+-+  })
+-+  const lines = [header, ...rows].map(cols =>
+-+    cols.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')
+-+  )
+-+  const csv = lines.join('\r\n')
+-+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+-+  const a = document.createElement('a')
+-+  a.href = URL.createObjectURL(blob)
+-+  a.download = 'cron-jst-schedule.csv'
+-+  a.click()
+-+  URL.revokeObjectURL(a.href)
+-+}
+-+
+-+// ?expr= でプリフィル
+-+const route = useRoute()
+-+onMounted(() => {
+-+  const q = route.query?.expr
+-+  if (typeof q === 'string' && q.trim()) {
+-+    input.value = q
+-+    onCheck()
+-+  }
+-+  const n = Number(route.query?.n)
+-+  if (Number.isFinite(n) && n >= 1) count.value = Math.min(n, 20)
+-+  const tz = route.query?.tz
+-+  if (tz === 'UTC' || tz === 'Asia/Tokyo') tzDisp.value = tz
+-+})
+-+
+-+// 件数が変わったら“初回の出し直し”に合わせて再計算
+-+watch(count, () => {
+-+  if (!lastSpec.value) return
+-+  const n = countClamped.value
+-+  results.value = nextRuns(lastSpec.value, new Date(), 'Asia/Tokyo', n)
+-+  lastAt.value = results.value.at(-1) ?? null
+-+})
+- </script>
+- 
+--<style scoped lang="postcss">
+-+<style scoped>
+- .btn-primary {
+-   @apply bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700 transition;
++     error.value = e?.message || '不明なエラーが発生しました'
++@@ -150,18 +166,37 @@ function format(dt: Date, tz: 'Asia/Tokyo' | 'UTC') {
+  }
+  
+- .btn-secondary {
+--  @apply bg-gray-200 text-gray-800 px-4 py-1 rounded hover:bg-gray-300 transition;
+-+  @apply bg-gray-200 text-gray-800 px-3 py-1 rounded hover:bg-gray-300 transition;
+- }
+- </style>
+-diff --git a/pages/tools/index.vue b/pages/tools/index.vue
+-new file mode 100644
+-index 0000000..c3511c1
+---- /dev/null
+-+++ b/pages/tools/index.vue
+-@@ -0,0 +1,98 @@
+-+<template>
+-+  <div class="container mx-auto px-4 py-8 max-w-4xl">
+-+    <div class="mb-8">
+-+      <h1 class="text-4xl font-bold text-gray-900 mb-4">開発ツール</h1>
+-+      <p class="text-gray-600 text-lg">
+-+        開発に役立つ各種ツールをご利用いただけます。すべてのツールはブラウザ内で動作し、データがサーバーに送信されることはありません。
+-+      </p>
+-+    </div>
+-+
+-+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+-+      <!-- JWT Decoder -->
+-+      <NuxtLink to="/tools/jwt-decode"
+-+        class="block group bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200 p-6 hover:border-blue-300">
+-+        <div class="flex items-center mb-4">
+-+          <div
+-+            class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center group-hover:bg-blue-200 transition-colors">
+-+            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+-+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+-+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+-+            </svg>
+-+          </div>
+-+        </div>
+-+        <h3 class="text-xl font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
+-+          JWT Decoder
+-+        </h3>
+-+        <p class="text-gray-600 text-sm mb-4">
+-+          JWT（JSON Web Token）をデコードして、ヘッダーとペイロードの内容を確認できます。
+-+        </p>
+-+        <div class="flex items-center text-blue-600 text-sm font-medium group-hover:text-blue-700">
+-+          ツールを使用する
+-+          <svg class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor"
+-+            viewBox="0 0 24 24">
+-+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+-+          </svg>
+-+        </div>
+-+      </NuxtLink>
++ function relative(dt: Date) {
++-  const diff = dt.getTime() - Date.now()
++-  const sec = Math.round(Math.abs(diff) / 1000)
++-  const mins = Math.floor(sec / 60), hrs = Math.floor(mins / 60), days = Math.floor(hrs / 24)
++-  const s = days ? `${days}日` : hrs ? `${hrs}時間` : mins ? `${mins}分` : `${sec}秒`
++-  return diff >= 0 ? `あと ${s}` : `${s} 前`
+++  const diffMs = dt.getTime() - now.value
+++  const future = diffMs >= 0
+++  const absSec = Math.max(0, Math.floor(Math.abs(diffMs) / 1000))
+ +
+-+      <!-- Cron JST -->
+-+      <NuxtLink to="/tools/cron-jst"
+-+        class="block group bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200 p-6 hover:border-green-300">
+-+        <div class="flex items-center mb-4">
+-+          <div
+-+            class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center group-hover:bg-green-200 transition-colors">
+-+            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+-+              <circle cx="12" cy="12" r="9" stroke-width="2" />
+-+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 7v5l3 3" />
+-+            </svg>
+-+          </div>
+-+        </div>
+-+        <h3 class="text-xl font-semibold text-gray-900 mb-2 group-hover:text-green-600 transition-colors">
+-+          Cron JST 予測
+-+        </h3>
+-+        <p class="text-gray-600 text-sm mb-4">
+-+          crontab形式のスケジュールから、JSTで次回実行時刻を予測します。
+-+        </p>
+-+        <div class="flex items-center text-green-600 text-sm font-medium group-hover:text-green-700">
+-+          ツールを使用する
+-+          <svg class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor"
+-+            viewBox="0 0 24 24">
+-+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+-+          </svg>
+-+        </div>
+-+      </NuxtLink>
+++  // 表示用フォーマッタ
+++  const fmt = (val: number, unit: '分' | '時間' | '日') =>
+++    future ? `あと ${val}${unit}` : `${val}${unit} 前`
+ +
+-+      <!-- 将来のツール用のプレースホルダー -->
+-+      <div
+-+        class="bg-gray-50 rounded-lg border-2 border-dashed border-gray-200 p-6 flex flex-col items-center justify-center min-h-[200px]">
+-+        <div class="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center mb-4">
+-+          <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+-+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+-+          </svg>
+-+        </div>
+-+        <h3 class="text-lg font-medium text-gray-400 mb-2">新しいツール</h3>
+-+        <p class="text-gray-400 text-sm text-center">
+-+          近日公開予定
+-+        </p>
+-+      </div>
+-+    </div>
+++  // 90秒未満は「約1分」に寄せてブレを抑える
+++  if (absSec < 90) return fmt(1, '分')
+ +
+-+    <div class="mt-12 bg-blue-50 border border-blue-200 rounded-lg p-6">
+-+      <h2 class="text-lg font-semibold text-blue-900 mb-2">プライバシーについて</h2>
+-+      <p class="text-blue-800 text-sm">
+-+        このサイトのすべてのツールは、お使いのブラウザ内でローカルに動作します。
+-+        入力されたデータがサーバーに送信されることはなく、完全にプライベートで安全にご利用いただけます。
+-+      </p>
+-+    </div>
+-+  </div>
+-+</template>
+++  // 分
+++  const mins = future ? Math.ceil(absSec / 60) : Math.floor(absSec / 60)
+++  if (mins < 60) return fmt(mins, '分')
+ +
+-+<script setup lang="ts">
+-+// メタデータ設定
+-+useHead({
+-+  title: '開発ツール',
+-+  meta: [
+-+    { name: 'description', content: '開発に役立つ各種ツールをご利用いただけます。JWT Decoder など、ブラウザ内で安全に動作するツールを提供しています。' }
+-+  ]
+-+})
+-+</script>
+-diff --git a/pages/tools/jwt-decode.vue b/pages/tools/jwt-decode.vue
+-index ae0d8dc..9093b54 100644
+---- a/pages/tools/jwt-decode.vue
+-+++ b/pages/tools/jwt-decode.vue
+-@@ -1,211 +1,114 @@
+--<template>
+--  <div class="container mx-auto px-4 py-8 max-w-6xl">
+--    <div class="mb-8">
+--      <h1 class="text-3xl font-bold text-gray-900 mb-4">JWT Decoder</h1>
+--      <p class="text-gray-600 mb-2">
+--        JWT（JSON Web Token）をデコードして、ヘッダーとペイロードの内容を確認できます。
+--      </p>
+--      <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+--        <p class="text-sm text-blue-800">
+--          <strong>プライバシー保護:</strong> すべての処理はお使いのブラウザ内でローカルに実行されます。データがサーバーに送信されることはありません。
+--        </p>
+--      </div>
+--    </div>
+--
+--    <div class="grid lg:grid-cols-2 gap-8">
+--      <!-- 入力エリア -->
+--      <div class="space-y-4">
+--        <div>
+--          <label for="jwt-input" class="block text-sm font-medium text-gray-700 mb-2">
+--            JWT トークン
+--          </label>
+--          <textarea id="jwt-input" v-model="jwtInput"
+--            class="w-full h-48 p-3 border rounded-lg font-mono text-sm resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+--            :class="{ 'border-red-500 bg-red-50': hasError }"
+--            placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+--            aria-describedby="jwt-error"></textarea>
+-+﻿<template>
+-+  <div class="container mx-auto max-w-5xl py-8 px-4 space-y-6">
+-+    <h1 class="text-2xl font-bold">JWT Decoder</h1>
+- 
+--          <div id="jwt-error" class="mt-2 min-h-[1.5rem]" aria-live="polite" aria-atomic="true">
+--            <p v-if="errorMessage" class="text-sm text-red-600">
+--              {{ errorMessage }}
+--            </p>
+--          </div>
+--        </div>
+-+    <div class="rounded-md bg-blue-50 text-blue-900 text-sm p-3">
+-+      プライバシー保護: すべての処理はお使いのブラウザ内でローカルに実行されます。データがサーバーに送信されることはありません。
+-+    </div>
+- 
+--        <div class="flex flex-wrap gap-2">
+--          <button @click="clearInput"
+--            class="px-4 py-2 text-sm bg-gray-500 text-white rounded-lg hover:bg-gray-600 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors">
+--            クリア
+--          </button>
+--          <button @click="insertSample"
+--            class="px-4 py-2 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
+--            サンプル挿入
+--          </button>
+--        </div>
+-+    <section class="space-y-2">
+-+      <label for="jwt" class="block font-medium">JWT トークン</label>
+-+      <textarea id="jwt" v-model="token" rows="5" class="w-full border rounded p-2 font-mono text-sm"
+-+        spellcheck="false"></textarea>
+-+      <div class="flex gap-2">
+-+        <button class="btn-secondary" @click="onClear">クリア</button>
+-+        <button class="btn-secondary" @click="onSample">サンプル挿入</button>
+-       </div>
+-+    </section>
+- 
+--      <!-- 出力エリア -->
+--      <div class="space-y-6">
+--        <!-- ヘッダー -->
+--        <div>
+--          <div class="flex items-center justify-between mb-2">
+--            <h3 class="text-lg font-semibold text-gray-900">Header</h3>
+--            <button v-if="parsedJwt?.header" @click="copyToClipboard(formattedHeader)"
+--              class="px-3 py-1 text-xs bg-gray-100 text-gray-700 rounded hover:bg-gray-200 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors">
+--              コピー
+--            </button>
+--          </div>
+--          <div class="bg-gray-50 border rounded-lg p-4 min-h-[120px]">
+--            <pre v-if="parsedJwt?.header"
+--              class="text-sm text-gray-800 whitespace-pre-wrap break-words">{{ formattedHeader }}</pre>
+--            <p v-else class="text-gray-500 text-sm">
+--              有効なJWTを入力するとヘッダーが表示されます
+--            </p>
+--          </div>
+--        </div>
+--
+--        <!-- ペイロード -->
+--        <div>
+--          <div class="flex items-center justify-between mb-2">
+--            <h3 class="text-lg font-semibold text-gray-900">Payload</h3>
+--            <button v-if="parsedJwt?.payload" @click="copyToClipboard(formattedPayload)"
+--              class="px-3 py-1 text-xs bg-gray-100 text-gray-700 rounded hover:bg-gray-200 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors">
+--              コピー
+--            </button>
+--          </div>
+--          <div class="bg-gray-50 border rounded-lg p-4 min-h-[120px]">
+--            <pre v-if="parsedJwt?.payload"
+--              class="text-sm text-gray-800 whitespace-pre-wrap break-words">{{ formattedPayload }}</pre>
+--            <p v-else class="text-gray-500 text-sm">
+--              有効なJWTを入力するとペイロードが表示されます
+--            </p>
+--          </div>
+--        </div>
+-+    <section class="grid md:grid-cols-2 gap-4">
+-+      <div class="rounded border bg-gray-50 p-3">
+-+        <h2 class="font-semibold mb-2">Header</h2>
+-+        <pre class="text-xs overflow-auto"><code>{{ pretty(header) }}</code></pre>
+-       </div>
+--    </div>
+--
+--    <!-- 通知 -->
+--    <div v-if="notification"
+--      class="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg transition-opacity duration-300"
+--      :class="{ 'opacity-0': !showNotification }">
+--      {{ notification }}
+--    </div>
+-+      <div class="rounded border bg-gray-50 p-3">
+-+        <h2 class="font-semibold mb-2">Payload</h2>
+-+        <pre class="text-xs overflow-auto"><code>{{ pretty(payload) }}</code></pre>
+-+      </div>
+-+    </section>
+++  // 時間
+++  const hours = future ? Math.ceil(mins / 60) : Math.floor(mins / 60)
+++  if (hours < 48) return fmt(hours, '時間')
+ +
+-+    <section v-if="payload" class="rounded border p-3 space-y-2">
+-+      <h2 class="font-semibold">基本クレーム（読みやすく）</h2>
+-+      <table class="text-sm">
+-+        <tbody>
+-+          <tr v-if="payload.exp">
+-+            <th class="text-left pr-4">exp</th>
+-+            <td>{{ asDate(payload.exp) }}（{{ relFromNow(payload.exp) }}）</td>
+-+          </tr>
+-+          <tr v-if="payload.iat">
+-+            <th class="text-left pr-4">iat</th>
+-+            <td>{{ asDate(payload.iat) }}（{{ relFromNow(payload.iat) }}）</td>
+-+          </tr>
+-+          <tr v-if="payload.nbf">
+-+            <th class="text-left pr-4">nbf</th>
+-+            <td>{{ asDate(payload.nbf) }}（{{ relFromNow(payload.nbf) }}）</td>
+-+          </tr>
+-+          <tr v-if="payload.sub">
+-+            <th class="text-left pr-4">sub</th>
+-+            <td class="font-mono">{{ payload.sub }}</td>
+-+          </tr>
+-+          <tr v-if="payload.iss">
+-+            <th class="text-left pr-4">iss</th>
+-+            <td class="font-mono break-all">{{ payload.iss }}</td>
+-+          </tr>
+-+          <tr v-if="payload.aud">
+-+            <th class="text-left pr-4">aud</th>
+-+            <td class="font-mono break-all">{{ payload.aud }}</td>
+-+          </tr>
+-+        </tbody>
+-+      </table>
+-+      <p class="text-xs text-gray-500 mt-1"> 署名検証は未実装です（必要なら後日JWKS対応を追加します）。</p>
+-+    </section>
+-   </div>
+- </template>
+- 
+- <script setup lang="ts">
+--import { ref, computed, watch } from 'vue'
+--import { parseJwt, isProbablyJwt } from '../../utils/jwt'
+--
+--// メタデータ設定
+--useHead({
+--  title: 'JWT Decoder | Tools',
+--  meta: [
+--    { name: 'description', content: 'JWT（JSON Web Token）をデコードしてヘッダーとペイロードの内容を確認するツールです。' }
+--  ]
+--})
+--
+--// リアクティブデータ
+--const jwtInput = ref('')
+--const parsedJwt = ref<{ header: unknown; payload: unknown } | null>(null)
+--const errorMessage = ref('')
+--const notification = ref('')
+--const showNotification = ref(false)
+--
+--// 計算プロパティ
+--const hasError = computed(() => !!errorMessage.value)
+-+import { ref, computed } from 'vue'
+- 
+--const formattedHeader = computed(() => {
+--  if (!parsedJwt.value?.header) return ''
+--  return JSON.stringify(parsedJwt.value.header, null, 2)
+--})
+-+const token = ref('')
+- 
+--const formattedPayload = computed(() => {
+--  if (!parsedJwt.value?.payload) return ''
+--  return JSON.stringify(parsedJwt.value.payload, null, 2)
+--})
+--
+--// JWTパース処理（リアルタイム）
+--watch(jwtInput, (newValue: string) => {
+--  errorMessage.value = ''
+--  parsedJwt.value = null
+--
+--  if (!newValue.trim()) {
+--    return
+--  }
+--
+--  if (!isProbablyJwt(newValue.trim())) {
+--    errorMessage.value = 'JWT形式ではありません。header.payload.signature の形式で入力してください。'
+--    return
+--  }
+--
+--  try {
+--    parsedJwt.value = parseJwt(newValue.trim())
+--  } catch (error) {
+--    if (error instanceof Error) {
+--      errorMessage.value = error.message
+--    } else {
+--      errorMessage.value = '予期しないエラーが発生しました。'
+--    }
+--  }
+--}, { immediate: true })
+--
+--// メソッド
+--function clearInput(): void {
+--  jwtInput.value = ''
+-+function onClear() { token.value = '' }
+-+function onSample() {
+-+  token.value =
+-+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.' +
+-+    'eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNjE2MjM5MDIyfQ.' +
+-+    'SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'
+++  // 日
+++  const days = future ? Math.ceil(hours / 24) : Math.floor(hours / 24)
+++  return fmt(days, '日')
+  }
+  
+--function insertSample(): void {
+--  // サンプルJWT（実際の署名は無効だが、header/payloadは有効）
+--  jwtInput.value = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjE1MTYyNDI2MjJ9.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'
+-+function b64urlDecode(s: string) {
+-+  s = s.replace(/-/g, '+').replace(/_/g, '/')
+-+  const pad = s.length % 4 ? 4 - (s.length % 4) : 0
+-+  return atob(s + '='.repeat(pad))
+- }
+--
+--async function copyToClipboard(text: string): Promise<void> {
+--  // 早期 return: 空文字をコピーしない
+--  if (!text) {
+--    showNotificationMessage('コピーする内容がありません')
+--    return
+--  }
+--
+--  try {
+--    if (navigator?.clipboard?.writeText) {
+--      await navigator.clipboard.writeText(text)
+--      showNotificationMessage('コピーしました')
+--      return
+--    }
+--    throw new Error('Clipboard API が利用できません')
+--  } catch (primaryErr) {
+--    // Fallback for古いブラウザ
+--    try {
+--      const textArea = document.createElement('textarea')
+--      textArea.value = text
+--      textArea.style.position = 'fixed'
+--      textArea.style.top = '-1000px'
+--      document.body.appendChild(textArea)
+--      textArea.focus()
+--      textArea.select()
+--      const succeeded = document.execCommand('copy')
+--      document.body.removeChild(textArea)
+--      if (succeeded) {
+--        showNotificationMessage('コピーしました')
+--      } else {
+--        showNotificationMessage('コピーに失敗しました（手動で選択してください）')
+--      }
+--    } catch (fallbackErr) {
+--      showNotificationMessage('コピーに失敗しました（手動で選択してください）')
+--    }
+--  }
+-+function parsePart<T = any>(part: string | undefined): T | null {
+-+  if (!part) return null
+-+  try { return JSON.parse(b64urlDecode(part)) as T } catch { return null }
+++
++ async function copyLink() {
++   const url = new URL(window.location.href)
++   url.searchParams.set('expr', input.value.trim())
++   url.searchParams.set('n', String(countClamped.value))
++   url.searchParams.set('tz', tzDisp.value)
+++  if (baseInput.value) url.searchParams.set('from', baseInput.value)
++   await navigator.clipboard.writeText(url.toString())
++   copied.value = true
++   setTimeout(() => (copied.value = false), 1200)
++@@ -197,17 +232,87 @@ function downloadCsv() {
++   URL.revokeObjectURL(a.href)
+  }
+-+const parts = computed(() => token.value.split('.'))
+-+const header = computed(() => parsePart(parts.value[0]))
+-+const payload = computed(() => parsePart(parts.value[1]))
+  
+--function showNotificationMessage(message: string): void {
+--  notification.value = message
+--  showNotification.value = true
+--
+--  setTimeout(() => {
+--    showNotification.value = false
+--    setTimeout(() => {
+--      notification.value = ''
+--    }, 300)
+--  }, 2000)
+-+function pretty(v: any) {
+-+  return v ? JSON.stringify(v, null, 2) : '（有効なJWTを入力すると表示されます）'
++-// プリフィル
+++// ---- 基準時刻関連ヘルパー ----
+++function toInputValue(d: Date, tz: 'Asia/Tokyo' | 'UTC') {
+++  const fmt = new Intl.DateTimeFormat('sv-SE', {
+++    timeZone: tz,
+++    year: 'numeric', month: '2-digit', day: '2-digit',
+++    hour: '2-digit', minute: '2-digit', hour12: false
+++  }).format(d) // YYYY-MM-DD HH:mm
+++  return fmt.replace(' ', 'T')
+ +}
+-+function asDate(sec: number) {
+-+  if (typeof sec !== 'number') return ''
+-+  const d = new Date(sec * 1000)
+-+  const jst = d.toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo', hour12: false })
+-+  const utc = d.toUTCString().replace(' GMT', '')
+-+  return `${jst} JST / ${utc} UTC`
+++function fromInputValue(s: string, tz: 'Asia/Tokyo' | 'UTC'): Date | null {
+++  if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(s)) return null
+++  const parts = s.split('T')
+++  if (parts.length !== 2) return null
+++  const datePart: string | undefined = parts[0]
+++  const timePart: string | undefined = parts[1]
+++  if (!datePart || !timePart) return null
+++  const dSeg = datePart.split('-')
+++  const tSeg = timePart.split(':')
+++  if (dSeg.length !== 3 || tSeg.length !== 2) return null
+++  const Y = Number(dSeg[0])
+++  const M = Number(dSeg[1])
+++  const D = Number(dSeg[2])
+++  const h = Number(tSeg[0])
+++  const m = Number(tSeg[1])
+++  if ([Y, M, D, h, m].some(n => !Number.isFinite(n))) return null
+++  if (M < 1 || M > 12 || D < 1 || D > 31 || h < 0 || h > 23 || m < 0 || m > 59) return null
+++  const utcMs = tz === 'UTC'
+++    ? Date.UTC(Y, M - 1, D, h, m, 0, 0)
+++    : Date.UTC(Y, M - 1, D, h - 9, m, 0, 0)
+++  return new Date(utcMs)
+ +}
+-+function relFromNow(sec: number) {
+-+  const diff = sec * 1000 - Date.now()
+-+  const abs = Math.abs(diff)
+-+  const mins = Math.floor(abs / 60000), hrs = Math.floor(mins / 60), days = Math.floor(hrs / 24)
+-+  const s = days ? `${days}日` : hrs ? `${hrs}時間` : mins ? `${mins}分` : `${Math.floor(abs / 1000)}秒`
+-+  return diff >= 0 ? `あと ${s}` : `${s} 前`
+- }
+- </script>
+-+
+-+<style scoped>
+-+.btn-secondary {
+-+  @apply bg-gray-200 text-gray-800 px-3 py-1 rounded hover:bg-gray-300 transition;
+++function setBaseNow() {
+++  const d = new Date()
+++  d.setMilliseconds(0)
+++  baseFrom.value = d
+++  baseInput.value = toInputValue(d, tzDisp.value)
+ +}
+-+</style>
+++
+++// watchers
+++watch(baseInput, (v) => {
+++  if (!v) return
+++  const parsed = fromInputValue(v, tzDisp.value)
+++  if (parsed) {
+++    baseFrom.value = parsed
+++    recompute(countClamped.value)
+++  }
+++})
+++watch(tzDisp, (tz) => {
+++  if (baseFrom.value) baseInput.value = toInputValue(baseFrom.value, tz)
+++})
+++
+++// プリフィル & タイマー開始
++ const route = useRoute()
++ onMounted(() => {
+++  tick()
+++  const delay = 30_000 - (Date.now() % 30_000)
+++  nowTo = setTimeout(() => { tick(); nowIv = setInterval(tick, 30_000) }, delay)
+++  // 1. tz
+++  const tz = route.query?.tz
+++  if (tz === 'UTC' || tz === 'Asia/Tokyo') tzDisp.value = tz
+++  // 2. from
+++  const fromQ = route.query?.from
+++  if (typeof fromQ === 'string') {
+++    baseInput.value = fromQ
+++    const parsed = fromInputValue(fromQ, tzDisp.value)
+++    if (parsed) baseFrom.value = parsed
+++  }
+++  if (!baseFrom.value) setBaseNow()
+++  // 3. expr / n
++   const q = route.query?.expr
++   if (typeof q === 'string' && q.trim()) input.value = q
++   const n = Number(route.query?.n)
++   if (Number.isFinite(n) && n >= 1) count.value = Math.min(n, MAX_TOTAL)
++-  const tz = route.query?.tz
++-  if (tz === 'UTC' || tz === 'Asia/Tokyo') tzDisp.value = tz
+++  // 4. 計算
++   onCheck()
++ })
+++
+++onUnmounted(() => {
+++  if (nowTo) { clearTimeout(nowTo); nowTo = null }
+++  if (nowIv) { clearInterval(nowIv); nowIv = null }
+++})
++ </script>
++ 
++ <style scoped>
+ diff --git a/review.patch b/review.patch
+-index de3ab90..bcb5f32 100644
+-Binary files a/review.patch and b/review.patch differ
++index a90fd78..a65c1b0 100644
++--- a/review.patch
+++++ b/review.patch
++@@ -1,850 +1,965 @@
++-diff --git a/.gitignore b/.gitignore
++-index ce04d68..d25b09a 100644
++---- a/.gitignore
++-+++ b/.gitignore
++-@@ -23,3 +23,5 @@ logs
++- .env
++- .env.*
++- !.env.example
++-+memo.txt
++-+review.patch
++-diff --git a/app.vue b/app.vue
++-new file mode 100644
++-index 0000000..dfa254e
++---- /dev/null
++-+++ b/app.vue
++-@@ -0,0 +1,5 @@
++-+﻿<template>
++-+  <NuxtLayout>
++-+    <NuxtPage />
++-+  </NuxtLayout>
++-+</template>
++-diff --git a/app/app.vue b/app/app.vue
++-deleted file mode 100644
++-index 09f935b..0000000
++---- a/app/app.vue
++-+++ /dev/null
++-@@ -1,6 +0,0 @@
++--<template>
++--  <div>
++--    <NuxtRouteAnnouncer />
++--    <NuxtWelcome />
++--  </div>
++--</template>
++-diff --git a/assets/css/tailwind.css b/assets/css/tailwind.css
++-index bd6213e..81465ab 100644
++---- a/assets/css/tailwind.css
++-+++ b/assets/css/tailwind.css
++-@@ -1,3 +1,3 @@
++--@tailwind base;
++-+﻿@tailwind base;
++- @tailwind components;
++--@tailwind utilities;
++-\ No newline at end of file
++-+@tailwind utilities;
++-diff --git a/nuxt.config.ts b/nuxt.config.ts
++-index 4369d22..3a19896 100644
++---- a/nuxt.config.ts
++-+++ b/nuxt.config.ts
++-@@ -1,13 +1,17 @@
++- ﻿import { defineNuxtConfig } from 'nuxt/config'
++- 
++- export default defineNuxtConfig({
++-+  modules: ['@nuxt/content', '@nuxtjs/tailwindcss'],
++-+  css: ['@@/assets/css/tailwind.css'],
++-+  pages: true,
++-+
++-+  tailwindcss: {
++-+    cssPath: '@@/assets/css/tailwind.css',
++-+  },
++-   compatibilityDate: '2025-07-15',
++-   devtools: { enabled: true },
++-   typescript: { strict: true },
++- 
++--  modules: ['@nuxt/content', '@nuxtjs/tailwindcss'],
++--  css: ['~/assets/css/tailwind.css'],
++--
++-   //  ここでpostcssを設定（postcss.config.jsは不要）
++-   postcss: {
++-     plugins: {
++-diff --git a/pages/index.vue b/pages/index.vue
++-new file mode 100644
++-index 0000000..ccc4459
++---- /dev/null
++-+++ b/pages/index.vue
++-@@ -0,0 +1,7 @@
++-+﻿<template>
++-+  <div class="p-8 space-y-4">
++-+    <h1 class="text-2xl font-bold">トップ</h1>
++-+    <NuxtLink class="underline" to="/tools">/tools へ</NuxtLink>
++-+    <NuxtLink class="underline" to="/tools/cron-jst">/tools/cron-jst へ</NuxtLink>
++-+  </div>
++-+</template>
++-diff --git a/pages/tools.vue b/pages/tools.vue
++-index c3511c1..44e95e1 100644
++---- a/pages/tools.vue
++-+++ b/pages/tools.vue
++-@@ -1,98 +1,7 @@
++--<template>
++--  <div class="container mx-auto px-4 py-8 max-w-4xl">
++--    <div class="mb-8">
++--      <h1 class="text-4xl font-bold text-gray-900 mb-4">開発ツール</h1>
++--      <p class="text-gray-600 text-lg">
++--        開発に役立つ各種ツールをご利用いただけます。すべてのツールはブラウザ内で動作し、データがサーバーに送信されることはありません。
++--      </p>
++--    </div>
++--
++--    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
++--      <!-- JWT Decoder -->
++--      <NuxtLink to="/tools/jwt-decode"
++--        class="block group bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200 p-6 hover:border-blue-300">
++--        <div class="flex items-center mb-4">
++--          <div
++--            class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center group-hover:bg-blue-200 transition-colors">
++--            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
++--              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
++--                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
++--            </svg>
++--          </div>
++--        </div>
++--        <h3 class="text-xl font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
++--          JWT Decoder
++--        </h3>
++--        <p class="text-gray-600 text-sm mb-4">
++--          JWT（JSON Web Token）をデコードして、ヘッダーとペイロードの内容を確認できます。
++--        </p>
++--        <div class="flex items-center text-blue-600 text-sm font-medium group-hover:text-blue-700">
++--          ツールを使用する
++--          <svg class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor"
++--            viewBox="0 0 24 24">
++--            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
++--          </svg>
++--        </div>
++--      </NuxtLink>
++--
++--      <!-- Cron JST -->
++--      <NuxtLink to="/tools/cron-jst"
++--        class="block group bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200 p-6 hover:border-green-300">
++--        <div class="flex items-center mb-4">
++--          <div
++--            class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center group-hover:bg-green-200 transition-colors">
++--            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
++--              <circle cx="12" cy="12" r="9" stroke-width="2" />
++--              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 7v5l3 3" />
++--            </svg>
++--          </div>
++--        </div>
++--        <h3 class="text-xl font-semibold text-gray-900 mb-2 group-hover:text-green-600 transition-colors">
++--          Cron JST 予測
++--        </h3>
++--        <p class="text-gray-600 text-sm mb-4">
++--          crontab形式のスケジュールから、JSTで次回実行時刻を予測します。
++--        </p>
++--        <div class="flex items-center text-green-600 text-sm font-medium group-hover:text-green-700">
++--          ツールを使用する
++--          <svg class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor"
++--            viewBox="0 0 24 24">
++--            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
++--          </svg>
++--        </div>
++--      </NuxtLink>
++--
++--      <!-- 将来のツール用のプレースホルダー -->
++--      <div
++--        class="bg-gray-50 rounded-lg border-2 border-dashed border-gray-200 p-6 flex flex-col items-center justify-center min-h-[200px]">
++--        <div class="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center mb-4">
++--          <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
++--            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
++--          </svg>
++--        </div>
++--        <h3 class="text-lg font-medium text-gray-400 mb-2">新しいツール</h3>
++--        <p class="text-gray-400 text-sm text-center">
++--          近日公開予定
++--        </p>
++--      </div>
++--    </div>
++--
++--    <div class="mt-12 bg-blue-50 border border-blue-200 rounded-lg p-6">
++--      <h2 class="text-lg font-semibold text-blue-900 mb-2">プライバシーについて</h2>
++--      <p class="text-blue-800 text-sm">
++--        このサイトのすべてのツールは、お使いのブラウザ内でローカルに動作します。
++--        入力されたデータがサーバーに送信されることはなく、完全にプライベートで安全にご利用いただけます。
++--      </p>
++--    </div>
++-+﻿<template>
++-+  <div class="container mx-auto max-w-5xl py-8 px-4">
++-+    <h1 class="text-3xl font-bold mb-6">開発ツール</h1>
++-+    <!-- ここに /tools 以下の子ページが差し込まれる -->
++-+    <NuxtPage />
++-   </div>
++- </template>
++--
++--<script setup lang="ts">
++--// メタデータ設定
++--useHead({
++--  title: '開発ツール',
++--  meta: [
++--    { name: 'description', content: '開発に役立つ各種ツールをご利用いただけます。JWT Decoder など、ブラウザ内で安全に動作するツールを提供しています。' }
++--  ]
++--})
++--</script>
++ diff --git a/pages/tools/cron-jst.vue b/pages/tools/cron-jst.vue
++-index 42becf5..1efa3af 100644
+++index 69a7395..6d9e2db 100644
++ --- a/pages/tools/cron-jst.vue
++ +++ b/pages/tools/cron-jst.vue
++-@@ -1,72 +1,211 @@
++--<template>
++--  <div class="container mx-auto max-w-2xl py-8 px-4">
++--    <h1 class="text-2xl font-bold mb-4">Cron JST 次回実行予測</h1>
++--    <form @submit.prevent="onCheck" class="mb-4">
++--      <label for="cron" class="block font-medium mb-1">crontab 形式（分 時 日 月 曜日）</label>
++--      <textarea id="cron" v-model="input" rows="2" class="w-full border rounded p-2 font-mono text-base mb-2"
++--        :aria-invalid="!!error" aria-describedby="cron-help" aria-live="polite" spellcheck="false"
++--        autocomplete="off"></textarea>
++--      <div id="cron-help" class="text-xs text-gray-500 mb-2">
++-+﻿<template>
++-+  <div class="container mx-auto max-w-3xl py-8 px-4 space-y-6">
++-+    <h1 class="text-2xl font-bold">Cron JST 次回実行予測</h1>
++-+
++-+    <div class="rounded-md bg-blue-50 text-blue-900 text-sm p-3">
++-+      入力はローカルでのみ処理されます。サーバーへ送信されることはありません。
++-+    </div>
++-+
++-+    <form @submit.prevent="onCheck" class="space-y-3">
++-+      <label for="cron" class="block font-medium">crontab 形式（分 時 日 月 曜日）</label>
++-+      <textarea id="cron" v-model="input" rows="2" class="w-full border rounded p-2 font-mono text-base"
++-+        :aria-invalid="!!error" aria-describedby="cron-help" spellcheck="false" autocomplete="off"></textarea>
++-+      <div id="cron-help" class="text-xs text-gray-500">
++-         例: <code>*/5 9-18 * * 1-5</code>（平日9-18時に5分毎）
++-       </div>
++--      <div class="flex gap-2 mb-2">
++-+
++-+      <div class="flex flex-wrap items-center gap-3">
++-         <button type="submit" class="btn-primary">今すぐチェック</button>
++-         <button type="button" class="btn-secondary" @click="onClear">クリア</button>
++-         <button type="button" class="btn-secondary" @click="onSample">サンプル挿入</button>
++-+
++-+        <div class="ml-auto flex items-center gap-2">
++-+          <label class="text-sm">表示タイムゾーン:</label>
++-+          <label class="text-sm inline-flex items-center gap-1">
++-+            <input type="radio" value="Asia/Tokyo" v-model="tzDisp" /> JST
++-+          </label>
++-+          <label class="text-sm inline-flex items-center gap-1">
++-+            <input type="radio" value="UTC" v-model="tzDisp" /> UTC
++-+          </label>
++-+        </div>
++-+
++-+        <div class="flex items-center gap-2">
++-+          <label for="count" class="text-sm">件数:</label>
++-+          <input id="count" type="number" min="1" max="20" class="w-20 border rounded p-1" v-model.number="count" />
++-+        </div>
++-+
++-+        <div class="flex items-center gap-2">
++-+          <button type="button" class="btn-secondary" @click="copyLink">共有リンクをコピー</button>
++-+          <span v-if="copied" class="text-xs text-green-700">コピーしました</span>
++-+        </div>
++-       </div>
++--      <div v-if="error" class="text-red-600 font-semibold mb-2" aria-live="polite">{{ error }}</div>
++-+
++-+      <div v-if="error" class="text-red-600 font-semibold">{{ error }}</div>
++-     </form>
++--    <div v-if="results.length" class="mb-4">
++--      <h2 class="font-semibold mb-2">次回実行予定（JST）</h2>
++--      <ul class="list-disc pl-6">
++--        <li v-for="(dt, i) in results" :key="i" class="font-mono">{{ format(dt) }}</li>
++-+
++-+    <div v-if="results.length" class="space-y-3">
++-+      <h2 class="font-semibold">次回実行予定（{{ tzDisp === 'UTC' ? 'UTC' : 'JST' }}表示）</h2>
++-+
++-+      <ul class="list-disc pl-6 space-y-1">
++-+        <li v-for="dt in results" :key="dt.toISOString()" class="font-mono">
++-+          {{ format(dt, tzDisp) }}
++-+          <span class="text-gray-500 ml-2">（{{ relative(dt) }}）</span>
++-+        </li>
++-       </ul>
++--    </div>
++--    <div class="text-xs text-gray-500 mt-6">
++--      ※ 入力はローカルでのみ処理され、サーバー送信はありません。
++-+
++-+      <div class="flex items-center gap-3 pt-2">
++-+        <button type="button" class="btn-secondary" @click="loadMore" v-if="canLoadMore">
++-+          もっと表示（+{{ stepForMore }}件）
++-+        </button>
++-+        <span v-else class="text-xs text-gray-500">これ以上は表示できません（最大 {{ MAX_TOTAL }} 件）</span>
++-+
++-+        <button type="button" class="btn-primary" @click="downloadCsv" :disabled="!results.length">
++-+          CSV でダウンロード
++-+        </button>
++-+      </div>
++-     </div>
++-   </div>
+++@@ -72,7 +72,7 @@
++  </template>
++  
++  <script setup lang="ts">
++--import { ref } from 'vue'
++-+import { ref, onMounted, watch, computed } from 'vue'
++-+import { useRoute } from '#imports'
+++-import { ref, onMounted, computed, watch } from 'vue'
++++import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
+++ import { useRoute } from '#imports'
++  import { parseCron, nextRuns } from '~/utils/cron'
++  
++- const input = ref('')
++- const error = ref('')
++- const results = ref<Date[]>([])
++-+const tzDisp = ref<'Asia/Tokyo' | 'UTC'>('Asia/Tokyo') // 表示だけ切替（計算はJST固定）
++-+const count = ref(5) // 初回件数＆「もっと表示」のステップ
++-+const copied = ref(false)
++-+
++-+const MAX_TOTAL = 200
++-+
++-+// 1..20 に丸めたステップ数
++-+const countClamped = computed(() => Math.max(1, Math.min(Number(count.value ?? 5), 20)))
++-+
++-+// 直近のパース済みspecと、末尾日時を保持
++-+const lastSpec = ref<ReturnType<typeof parseCron> | null>(null)
++-+const lastAt = ref<Date | null>(null)
+++@@ -82,6 +82,9 @@ const results = ref<Date[]>([])
+++ const tzDisp = ref<'Asia/Tokyo' | 'UTC'>('Asia/Tokyo')
+++ const count = ref(5)
+++ const copied = ref(false)
++++// 相対表示用の現在時刻（30秒毎に更新）
++++const now = ref(Date.now())
++++let nowTimer: ReturnType<typeof setInterval> | null = null
++  
++- function onCheck() {
++-   error.value = ''
++-   results.value = []
++-+  lastAt.value = null
++-   try {
++-     const spec = parseCron(input.value.trim())
++--    results.value = nextRuns(spec, new Date(), 'Asia/Tokyo', 5)
++-+    lastSpec.value = spec
++-+    // 計算は安全のため JST に固定
++-+    const n = countClamped.value
++-+    results.value = nextRuns(spec, new Date(), 'Asia/Tokyo', n)
++-+    lastAt.value = results.value.at(-1) ?? null
++-   } catch (e: any) {
++--    error.value = e.message || '不明なエラーが発生しました'
++-+    error.value = e?.message || '不明なエラーが発生しました'
++-   }
++- }
++- function onClear() {
++-   input.value = ''
++-   error.value = ''
++-   results.value = []
++-+  lastSpec.value = null
++-+  lastAt.value = null
++- }
++- function onSample() {
++-   input.value = '*/5 9-18 * * 1-5'
++-   error.value = ''
++-   results.value = []
++-+  onCheck()
++-+}
++-+function format(dt: Date, tz: 'Asia/Tokyo' | 'UTC') {
++-+  return dt.toLocaleString('ja-JP', {
++-+    timeZone: tz,
++-+    year: 'numeric', month: 'numeric', day: 'numeric',
++-+    hour: '2-digit', minute: '2-digit', second: '2-digit',
++-+    hour12: false
++-+  })
+++ // 上限と増分
+++ const MAX_TOTAL = 200
+++@@ -150,9 +153,12 @@ function format(dt: Date, tz: 'Asia/Tokyo' | 'UTC') {
++  }
++--function format(dt: Date) {
++--  return dt.toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo', hour12: false })
++-+function relative(dt: Date) {
++-+  const diff = dt.getTime() - Date.now()
++-+  const sec = Math.round(Math.abs(diff) / 1000)
++-+  const mins = Math.floor(sec / 60), hrs = Math.floor(mins / 60), days = Math.floor(hrs / 24)
++-+  const s = days ? `${days}日` : hrs ? `${hrs}時間` : mins ? `${mins}分` : `${sec}秒`
++-+  return diff >= 0 ? `あと ${s}` : `${s} 前`
+++ 
+++ function relative(dt: Date) {
+++-  const diff = dt.getTime() - Date.now()
++++  // ここでは schedule は再計算せず now の変化だけで再描画される
++++  const diff = dt.getTime() - now.value
+++   const sec = Math.round(Math.abs(diff) / 1000)
+++-  const mins = Math.floor(sec / 60), hrs = Math.floor(mins / 60), days = Math.floor(hrs / 24)
++++  const mins = Math.floor(sec / 60)
++++  const hrs = Math.floor(mins / 60)
++++  const days = Math.floor(hrs / 24)
+++   const s = days ? `${days}日` : hrs ? `${hrs}時間` : mins ? `${mins}分` : `${sec}秒`
+++   return diff >= 0 ? `あと ${s}` : `${s} 前`
++  }
++-+async function copyLink() {
++-+  const url = new URL(window.location.href)
++-+  url.searchParams.set('expr', input.value.trim())
++-+  url.searchParams.set('n', String(countClamped.value))
++-+  url.searchParams.set('tz', tzDisp.value)
++-+  await navigator.clipboard.writeText(url.toString())
++-+  copied.value = true
++-+  setTimeout(() => (copied.value = false), 1200)
++-+}
++-+
++-+// もっと表示
++-+const canLoadMore = computed(() => !!lastSpec.value && !!lastAt.value && results.value.length < MAX_TOTAL)
++-+const stepForMore = computed(() => Math.min(countClamped.value, MAX_TOTAL - results.value.length))
++-+
++-+function loadMore() {
++-+  if (!canLoadMore.value || !lastSpec.value || !lastAt.value) return
++-+  const from = new Date(lastAt.value.getTime() + 1000) // 重複防止
++-+  const more = nextRuns(lastSpec.value, from, 'Asia/Tokyo', stepForMore.value)
++-+  results.value.push(...more)
++-+  lastAt.value = results.value.at(-1) ?? lastAt.value
++-+}
+++@@ -200,6 +206,8 @@ function downloadCsv() {
+++ // プリフィル
+++ const route = useRoute()
+++ onMounted(() => {
++++  // 相対時間更新タイマー（SSR安全）
++++  nowTimer = setInterval(() => { now.value = Date.now() }, 30_000)
+++   const q = route.query?.expr
+++   if (typeof q === 'string' && q.trim()) input.value = q
+++   const n = Number(route.query?.n)
+++@@ -208,6 +216,13 @@ onMounted(() => {
+++   if (tz === 'UTC' || tz === 'Asia/Tokyo') tzDisp.value = tz
+++   onCheck()
+++ })
++ +
++-+// CSV ダウンロード
++-+function downloadCsv() {
++-+  if (!results.value.length) return
++-+  // 4列: iso, jst, utc, relative
++-+  const header = ['iso', 'jst', 'utc', 'relative']
++-+  const rows = results.value.map(dt => {
++-+    const iso = dt.toISOString()
++-+    const jst = format(dt, 'Asia/Tokyo')
++-+    const utc = format(dt, 'UTC')
++-+    const rel = relative(dt)
++-+    return [iso, jst, utc, rel]
++-+  })
++-+  const lines = [header, ...rows].map(cols =>
++-+    cols.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')
++-+  )
++-+  const csv = lines.join('\r\n')
++-+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
++-+  const a = document.createElement('a')
++-+  a.href = URL.createObjectURL(blob)
++-+  a.download = 'cron-jst-schedule.csv'
++-+  a.click()
++-+  URL.revokeObjectURL(a.href)
++-+}
++-+
++-+// ?expr= でプリフィル
++-+const route = useRoute()
++-+onMounted(() => {
++-+  const q = route.query?.expr
++-+  if (typeof q === 'string' && q.trim()) {
++-+    input.value = q
++-+    onCheck()
++++onUnmounted(() => {
++++  if (nowTimer) {
++++    clearInterval(nowTimer)
++++    nowTimer = null
++ +  }
++-+  const n = Number(route.query?.n)
++-+  if (Number.isFinite(n) && n >= 1) count.value = Math.min(n, 20)
++-+  const tz = route.query?.tz
++-+  if (tz === 'UTC' || tz === 'Asia/Tokyo') tzDisp.value = tz
++-+})
++-+
++-+// 件数が変わったら“初回の出し直し”に合わせて再計算
++-+watch(count, () => {
++-+  if (!lastSpec.value) return
++-+  const n = countClamped.value
++-+  results.value = nextRuns(lastSpec.value, new Date(), 'Asia/Tokyo', n)
++-+  lastAt.value = results.value.at(-1) ?? null
++ +})
++  </script>
++  
++--<style scoped lang="postcss">
++-+<style scoped>
++- .btn-primary {
++-   @apply bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700 transition;
++- }
++- 
++- .btn-secondary {
++--  @apply bg-gray-200 text-gray-800 px-4 py-1 rounded hover:bg-gray-300 transition;
++-+  @apply bg-gray-200 text-gray-800 px-3 py-1 rounded hover:bg-gray-300 transition;
++- }
++- </style>
++-diff --git a/pages/tools/index.vue b/pages/tools/index.vue
++-new file mode 100644
++-index 0000000..c3511c1
++---- /dev/null
++-+++ b/pages/tools/index.vue
++-@@ -0,0 +1,98 @@
++-+<template>
++-+  <div class="container mx-auto px-4 py-8 max-w-4xl">
++-+    <div class="mb-8">
++-+      <h1 class="text-4xl font-bold text-gray-900 mb-4">開発ツール</h1>
++-+      <p class="text-gray-600 text-lg">
++-+        開発に役立つ各種ツールをご利用いただけます。すべてのツールはブラウザ内で動作し、データがサーバーに送信されることはありません。
++-+      </p>
++-+    </div>
++-+
++-+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
++-+      <!-- JWT Decoder -->
++-+      <NuxtLink to="/tools/jwt-decode"
++-+        class="block group bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200 p-6 hover:border-blue-300">
++-+        <div class="flex items-center mb-4">
++-+          <div
++-+            class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center group-hover:bg-blue-200 transition-colors">
++-+            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
++-+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
++-+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
++-+            </svg>
++-+          </div>
++-+        </div>
++-+        <h3 class="text-xl font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
++-+          JWT Decoder
++-+        </h3>
++-+        <p class="text-gray-600 text-sm mb-4">
++-+          JWT（JSON Web Token）をデコードして、ヘッダーとペイロードの内容を確認できます。
++-+        </p>
++-+        <div class="flex items-center text-blue-600 text-sm font-medium group-hover:text-blue-700">
++-+          ツールを使用する
++-+          <svg class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor"
++-+            viewBox="0 0 24 24">
++-+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
++-+          </svg>
++-+        </div>
++-+      </NuxtLink>
++-+
++-+      <!-- Cron JST -->
++-+      <NuxtLink to="/tools/cron-jst"
++-+        class="block group bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200 p-6 hover:border-green-300">
++-+        <div class="flex items-center mb-4">
++-+          <div
++-+            class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center group-hover:bg-green-200 transition-colors">
++-+            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
++-+              <circle cx="12" cy="12" r="9" stroke-width="2" />
++-+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 7v5l3 3" />
++-+            </svg>
++-+          </div>
++-+        </div>
++-+        <h3 class="text-xl font-semibold text-gray-900 mb-2 group-hover:text-green-600 transition-colors">
++-+          Cron JST 予測
++-+        </h3>
++-+        <p class="text-gray-600 text-sm mb-4">
++-+          crontab形式のスケジュールから、JSTで次回実行時刻を予測します。
++-+        </p>
++-+        <div class="flex items-center text-green-600 text-sm font-medium group-hover:text-green-700">
++-+          ツールを使用する
++-+          <svg class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor"
++-+            viewBox="0 0 24 24">
++-+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
++-+          </svg>
++-+        </div>
++-+      </NuxtLink>
++-+
++-+      <!-- 将来のツール用のプレースホルダー -->
++-+      <div
++-+        class="bg-gray-50 rounded-lg border-2 border-dashed border-gray-200 p-6 flex flex-col items-center justify-center min-h-[200px]">
++-+        <div class="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center mb-4">
++-+          <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
++-+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
++-+          </svg>
++-+        </div>
++-+        <h3 class="text-lg font-medium text-gray-400 mb-2">新しいツール</h3>
++-+        <p class="text-gray-400 text-sm text-center">
++-+          近日公開予定
++-+        </p>
++-+      </div>
++-+    </div>
++-+
++-+    <div class="mt-12 bg-blue-50 border border-blue-200 rounded-lg p-6">
++-+      <h2 class="text-lg font-semibold text-blue-900 mb-2">プライバシーについて</h2>
++-+      <p class="text-blue-800 text-sm">
++-+        このサイトのすべてのツールは、お使いのブラウザ内でローカルに動作します。
++-+        入力されたデータがサーバーに送信されることはなく、完全にプライベートで安全にご利用いただけます。
++-+      </p>
++-+    </div>
++-+  </div>
++-+</template>
++-+
++-+<script setup lang="ts">
++-+// メタデータ設定
++-+useHead({
++-+  title: '開発ツール',
++-+  meta: [
++-+    { name: 'description', content: '開発に役立つ各種ツールをご利用いただけます。JWT Decoder など、ブラウザ内で安全に動作するツールを提供しています。' }
++-+  ]
++-+})
++-+</script>
++-diff --git a/pages/tools/jwt-decode.vue b/pages/tools/jwt-decode.vue
++-index ae0d8dc..9093b54 100644
++---- a/pages/tools/jwt-decode.vue
++-+++ b/pages/tools/jwt-decode.vue
++-@@ -1,211 +1,114 @@
++--<template>
++--  <div class="container mx-auto px-4 py-8 max-w-6xl">
++--    <div class="mb-8">
++--      <h1 class="text-3xl font-bold text-gray-900 mb-4">JWT Decoder</h1>
++--      <p class="text-gray-600 mb-2">
++--        JWT（JSON Web Token）をデコードして、ヘッダーとペイロードの内容を確認できます。
++--      </p>
++--      <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
++--        <p class="text-sm text-blue-800">
++--          <strong>プライバシー保護:</strong> すべての処理はお使いのブラウザ内でローカルに実行されます。データがサーバーに送信されることはありません。
++--        </p>
++--      </div>
++--    </div>
++--
++--    <div class="grid lg:grid-cols-2 gap-8">
++--      <!-- 入力エリア -->
++--      <div class="space-y-4">
++--        <div>
++--          <label for="jwt-input" class="block text-sm font-medium text-gray-700 mb-2">
++--            JWT トークン
++--          </label>
++--          <textarea id="jwt-input" v-model="jwtInput"
++--            class="w-full h-48 p-3 border rounded-lg font-mono text-sm resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
++--            :class="{ 'border-red-500 bg-red-50': hasError }"
++--            placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
++--            aria-describedby="jwt-error"></textarea>
++-+﻿<template>
++-+  <div class="container mx-auto max-w-5xl py-8 px-4 space-y-6">
++-+    <h1 class="text-2xl font-bold">JWT Decoder</h1>
++- 
++--          <div id="jwt-error" class="mt-2 min-h-[1.5rem]" aria-live="polite" aria-atomic="true">
++--            <p v-if="errorMessage" class="text-sm text-red-600">
++--              {{ errorMessage }}
++--            </p>
++--          </div>
++--        </div>
++-+    <div class="rounded-md bg-blue-50 text-blue-900 text-sm p-3">
++-+      プライバシー保護: すべての処理はお使いのブラウザ内でローカルに実行されます。データがサーバーに送信されることはありません。
++-+    </div>
++- 
++--        <div class="flex flex-wrap gap-2">
++--          <button @click="clearInput"
++--            class="px-4 py-2 text-sm bg-gray-500 text-white rounded-lg hover:bg-gray-600 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors">
++--            クリア
++--          </button>
++--          <button @click="insertSample"
++--            class="px-4 py-2 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
++--            サンプル挿入
++--          </button>
++--        </div>
++-+    <section class="space-y-2">
++-+      <label for="jwt" class="block font-medium">JWT トークン</label>
++-+      <textarea id="jwt" v-model="token" rows="5" class="w-full border rounded p-2 font-mono text-sm"
++-+        spellcheck="false"></textarea>
++-+      <div class="flex gap-2">
++-+        <button class="btn-secondary" @click="onClear">クリア</button>
++-+        <button class="btn-secondary" @click="onSample">サンプル挿入</button>
++-       </div>
++-+    </section>
++- 
++--      <!-- 出力エリア -->
++--      <div class="space-y-6">
++--        <!-- ヘッダー -->
++--        <div>
++--          <div class="flex items-center justify-between mb-2">
++--            <h3 class="text-lg font-semibold text-gray-900">Header</h3>
++--            <button v-if="parsedJwt?.header" @click="copyToClipboard(formattedHeader)"
++--              class="px-3 py-1 text-xs bg-gray-100 text-gray-700 rounded hover:bg-gray-200 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors">
++--              コピー
++--            </button>
++--          </div>
++--          <div class="bg-gray-50 border rounded-lg p-4 min-h-[120px]">
++--            <pre v-if="parsedJwt?.header"
++--              class="text-sm text-gray-800 whitespace-pre-wrap break-words">{{ formattedHeader }}</pre>
++--            <p v-else class="text-gray-500 text-sm">
++--              有効なJWTを入力するとヘッダーが表示されます
++--            </p>
++--          </div>
++--        </div>
++--
++--        <!-- ペイロード -->
++--        <div>
++--          <div class="flex items-center justify-between mb-2">
++--            <h3 class="text-lg font-semibold text-gray-900">Payload</h3>
++--            <button v-if="parsedJwt?.payload" @click="copyToClipboard(formattedPayload)"
++--              class="px-3 py-1 text-xs bg-gray-100 text-gray-700 rounded hover:bg-gray-200 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors">
++--              コピー
++--            </button>
++--          </div>
++--          <div class="bg-gray-50 border rounded-lg p-4 min-h-[120px]">
++--            <pre v-if="parsedJwt?.payload"
++--              class="text-sm text-gray-800 whitespace-pre-wrap break-words">{{ formattedPayload }}</pre>
++--            <p v-else class="text-gray-500 text-sm">
++--              有効なJWTを入力するとペイロードが表示されます
++--            </p>
++--          </div>
++--        </div>
++-+    <section class="grid md:grid-cols-2 gap-4">
++-+      <div class="rounded border bg-gray-50 p-3">
++-+        <h2 class="font-semibold mb-2">Header</h2>
++-+        <pre class="text-xs overflow-auto"><code>{{ pretty(header) }}</code></pre>
++-       </div>
++--    </div>
++--
++--    <!-- 通知 -->
++--    <div v-if="notification"
++--      class="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg transition-opacity duration-300"
++--      :class="{ 'opacity-0': !showNotification }">
++--      {{ notification }}
++--    </div>
++-+      <div class="rounded border bg-gray-50 p-3">
++-+        <h2 class="font-semibold mb-2">Payload</h2>
++-+        <pre class="text-xs overflow-auto"><code>{{ pretty(payload) }}</code></pre>
++-+      </div>
++-+    </section>
++-+
++-+    <section v-if="payload" class="rounded border p-3 space-y-2">
++-+      <h2 class="font-semibold">基本クレーム（読みやすく）</h2>
++-+      <table class="text-sm">
++-+        <tbody>
++-+          <tr v-if="payload.exp">
++-+            <th class="text-left pr-4">exp</th>
++-+            <td>{{ asDate(payload.exp) }}（{{ relFromNow(payload.exp) }}）</td>
++-+          </tr>
++-+          <tr v-if="payload.iat">
++-+            <th class="text-left pr-4">iat</th>
++-+            <td>{{ asDate(payload.iat) }}（{{ relFromNow(payload.iat) }}）</td>
++-+          </tr>
++-+          <tr v-if="payload.nbf">
++-+            <th class="text-left pr-4">nbf</th>
++-+            <td>{{ asDate(payload.nbf) }}（{{ relFromNow(payload.nbf) }}）</td>
++-+          </tr>
++-+          <tr v-if="payload.sub">
++-+            <th class="text-left pr-4">sub</th>
++-+            <td class="font-mono">{{ payload.sub }}</td>
++-+          </tr>
++-+          <tr v-if="payload.iss">
++-+            <th class="text-left pr-4">iss</th>
++-+            <td class="font-mono break-all">{{ payload.iss }}</td>
++-+          </tr>
++-+          <tr v-if="payload.aud">
++-+            <th class="text-left pr-4">aud</th>
++-+            <td class="font-mono break-all">{{ payload.aud }}</td>
++-+          </tr>
++-+        </tbody>
++-+      </table>
++-+      <p class="text-xs text-gray-500 mt-1"> 署名検証は未実装です（必要なら後日JWKS対応を追加します）。</p>
++-+    </section>
++-   </div>
++- </template>
++- 
++- <script setup lang="ts">
++--import { ref, computed, watch } from 'vue'
++--import { parseJwt, isProbablyJwt } from '../../utils/jwt'
++--
++--// メタデータ設定
++--useHead({
++--  title: 'JWT Decoder | Tools',
++--  meta: [
++--    { name: 'description', content: 'JWT（JSON Web Token）をデコードしてヘッダーとペイロードの内容を確認するツールです。' }
++--  ]
++--})
++--
++--// リアクティブデータ
++--const jwtInput = ref('')
++--const parsedJwt = ref<{ header: unknown; payload: unknown } | null>(null)
++--const errorMessage = ref('')
++--const notification = ref('')
++--const showNotification = ref(false)
++--
++--// 計算プロパティ
++--const hasError = computed(() => !!errorMessage.value)
++-+import { ref, computed } from 'vue'
++- 
++--const formattedHeader = computed(() => {
++--  if (!parsedJwt.value?.header) return ''
++--  return JSON.stringify(parsedJwt.value.header, null, 2)
++--})
++-+const token = ref('')
++- 
++--const formattedPayload = computed(() => {
++--  if (!parsedJwt.value?.payload) return ''
++--  return JSON.stringify(parsedJwt.value.payload, null, 2)
++--})
++--
++--// JWTパース処理（リアルタイム）
++--watch(jwtInput, (newValue: string) => {
++--  errorMessage.value = ''
++--  parsedJwt.value = null
++--
++--  if (!newValue.trim()) {
++--    return
++--  }
++--
++--  if (!isProbablyJwt(newValue.trim())) {
++--    errorMessage.value = 'JWT形式ではありません。header.payload.signature の形式で入力してください。'
++--    return
++--  }
++--
++--  try {
++--    parsedJwt.value = parseJwt(newValue.trim())
++--  } catch (error) {
++--    if (error instanceof Error) {
++--      errorMessage.value = error.message
++--    } else {
++--      errorMessage.value = '予期しないエラーが発生しました。'
++--    }
++--  }
++--}, { immediate: true })
++--
++--// メソッド
++--function clearInput(): void {
++--  jwtInput.value = ''
++-+function onClear() { token.value = '' }
++-+function onSample() {
++-+  token.value =
++-+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.' +
++-+    'eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNjE2MjM5MDIyfQ.' +
++-+    'SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'
++- }
++- 
++--function insertSample(): void {
++--  // サンプルJWT（実際の署名は無効だが、header/payloadは有効）
++--  jwtInput.value = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjE1MTYyNDI2MjJ9.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'
++-+function b64urlDecode(s: string) {
++-+  s = s.replace(/-/g, '+').replace(/_/g, '/')
++-+  const pad = s.length % 4 ? 4 - (s.length % 4) : 0
++-+  return atob(s + '='.repeat(pad))
++- }
++--
++--async function copyToClipboard(text: string): Promise<void> {
++--  // 早期 return: 空文字をコピーしない
++--  if (!text) {
++--    showNotificationMessage('コピーする内容がありません')
++--    return
++--  }
++--
++--  try {
++--    if (navigator?.clipboard?.writeText) {
++--      await navigator.clipboard.writeText(text)
++--      showNotificationMessage('コピーしました')
++--      return
++--    }
++--    throw new Error('Clipboard API が利用できません')
++--  } catch (primaryErr) {
++--    // Fallback for古いブラウザ
++--    try {
++--      const textArea = document.createElement('textarea')
++--      textArea.value = text
++--      textArea.style.position = 'fixed'
++--      textArea.style.top = '-1000px'
++--      document.body.appendChild(textArea)
++--      textArea.focus()
++--      textArea.select()
++--      const succeeded = document.execCommand('copy')
++--      document.body.removeChild(textArea)
++--      if (succeeded) {
++--        showNotificationMessage('コピーしました')
++--      } else {
++--        showNotificationMessage('コピーに失敗しました（手動で選択してください）')
++--      }
++--    } catch (fallbackErr) {
++--      showNotificationMessage('コピーに失敗しました（手動で選択してください）')
++--    }
++--  }
++-+function parsePart<T = any>(part: string | undefined): T | null {
++-+  if (!part) return null
++-+  try { return JSON.parse(b64urlDecode(part)) as T } catch { return null }
++- }
++-+const parts = computed(() => token.value.split('.'))
++-+const header = computed(() => parsePart(parts.value[0]))
++-+const payload = computed(() => parsePart(parts.value[1]))
++- 
++--function showNotificationMessage(message: string): void {
++--  notification.value = message
++--  showNotification.value = true
++--
++--  setTimeout(() => {
++--    showNotification.value = false
++--    setTimeout(() => {
++--      notification.value = ''
++--    }, 300)
++--  }, 2000)
++-+function pretty(v: any) {
++-+  return v ? JSON.stringify(v, null, 2) : '（有効なJWTを入力すると表示されます）'
++-+}
++-+function asDate(sec: number) {
++-+  if (typeof sec !== 'number') return ''
++-+  const d = new Date(sec * 1000)
++-+  const jst = d.toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo', hour12: false })
++-+  const utc = d.toUTCString().replace(' GMT', '')
++-+  return `${jst} JST / ${utc} UTC`
++-+}
++-+function relFromNow(sec: number) {
++-+  const diff = sec * 1000 - Date.now()
++-+  const abs = Math.abs(diff)
++-+  const mins = Math.floor(abs / 60000), hrs = Math.floor(mins / 60), days = Math.floor(hrs / 24)
++-+  const s = days ? `${days}日` : hrs ? `${hrs}時間` : mins ? `${mins}分` : `${Math.floor(abs / 1000)}秒`
++-+  return diff >= 0 ? `あと ${s}` : `${s} 前`
++- }
++- </script>
++-+
++-+<style scoped>
++-+.btn-secondary {
++-+  @apply bg-gray-200 text-gray-800 px-3 py-1 rounded hover:bg-gray-300 transition;
++-+}
++-+</style>
+++ <style scoped>
++ diff --git a/review.patch b/review.patch
++-index de3ab90..bcb5f32 100644
++-Binary files a/review.patch and b/review.patch differ
+++index a90fd78..d42b64c 100644
+++--- a/review.patch
++++++ b/review.patch
+++@@ -1,850 +1,61 @@
+++-diff --git a/.gitignore b/.gitignore
+++-index ce04d68..d25b09a 100644
+++---- a/.gitignore
+++-+++ b/.gitignore
+++-@@ -23,3 +23,5 @@ logs
+++- .env
+++- .env.*
+++- !.env.example
+++-+memo.txt
+++-+review.patch
+++-diff --git a/app.vue b/app.vue
+++-new file mode 100644
+++-index 0000000..dfa254e
+++---- /dev/null
+++-+++ b/app.vue
+++-@@ -0,0 +1,5 @@
+++-+﻿<template>
+++-+  <NuxtLayout>
+++-+    <NuxtPage />
+++-+  </NuxtLayout>
+++-+</template>
+++-diff --git a/app/app.vue b/app/app.vue
+++-deleted file mode 100644
+++-index 09f935b..0000000
+++---- a/app/app.vue
+++-+++ /dev/null
+++-@@ -1,6 +0,0 @@
+++--<template>
+++--  <div>
+++--    <NuxtRouteAnnouncer />
+++--    <NuxtWelcome />
+++--  </div>
+++--</template>
+++-diff --git a/assets/css/tailwind.css b/assets/css/tailwind.css
+++-index bd6213e..81465ab 100644
+++---- a/assets/css/tailwind.css
+++-+++ b/assets/css/tailwind.css
+++-@@ -1,3 +1,3 @@
+++--@tailwind base;
+++-+﻿@tailwind base;
+++- @tailwind components;
+++--@tailwind utilities;
+++-\ No newline at end of file
+++-+@tailwind utilities;
+++-diff --git a/nuxt.config.ts b/nuxt.config.ts
+++-index 4369d22..3a19896 100644
+++---- a/nuxt.config.ts
+++-+++ b/nuxt.config.ts
+++-@@ -1,13 +1,17 @@
+++- ﻿import { defineNuxtConfig } from 'nuxt/config'
+++- 
+++- export default defineNuxtConfig({
+++-+  modules: ['@nuxt/content', '@nuxtjs/tailwindcss'],
+++-+  css: ['@@/assets/css/tailwind.css'],
+++-+  pages: true,
+++-+
+++-+  tailwindcss: {
+++-+    cssPath: '@@/assets/css/tailwind.css',
+++-+  },
+++-   compatibilityDate: '2025-07-15',
+++-   devtools: { enabled: true },
+++-   typescript: { strict: true },
+++- 
+++--  modules: ['@nuxt/content', '@nuxtjs/tailwindcss'],
+++--  css: ['~/assets/css/tailwind.css'],
+++--
+++-   //  ここでpostcssを設定（postcss.config.jsは不要）
+++-   postcss: {
+++-     plugins: {
+++-diff --git a/pages/index.vue b/pages/index.vue
+++-new file mode 100644
+++-index 0000000..ccc4459
+++---- /dev/null
+++-+++ b/pages/index.vue
+++-@@ -0,0 +1,7 @@
+++-+﻿<template>
+++-+  <div class="p-8 space-y-4">
+++-+    <h1 class="text-2xl font-bold">トップ</h1>
+++-+    <NuxtLink class="underline" to="/tools">/tools へ</NuxtLink>
+++-+    <NuxtLink class="underline" to="/tools/cron-jst">/tools/cron-jst へ</NuxtLink>
+++-+  </div>
+++-+</template>
+++-diff --git a/pages/tools.vue b/pages/tools.vue
+++-index c3511c1..44e95e1 100644
+++---- a/pages/tools.vue
+++-+++ b/pages/tools.vue
+++-@@ -1,98 +1,7 @@
+++--<template>
+++--  <div class="container mx-auto px-4 py-8 max-w-4xl">
+++--    <div class="mb-8">
+++--      <h1 class="text-4xl font-bold text-gray-900 mb-4">開発ツール</h1>
+++--      <p class="text-gray-600 text-lg">
+++--        開発に役立つ各種ツールをご利用いただけます。すべてのツールはブラウザ内で動作し、データがサーバーに送信されることはありません。
+++--      </p>
+++--    </div>
+++--
+++--    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+++--      <!-- JWT Decoder -->
+++--      <NuxtLink to="/tools/jwt-decode"
+++--        class="block group bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200 p-6 hover:border-blue-300">
+++--        <div class="flex items-center mb-4">
+++--          <div
+++--            class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center group-hover:bg-blue-200 transition-colors">
+++--            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+++--              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+++--                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+++--            </svg>
+++--          </div>
+++--        </div>
+++--        <h3 class="text-xl font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
+++--          JWT Decoder
+++--        </h3>
+++--        <p class="text-gray-600 text-sm mb-4">
+++--          JWT（JSON Web Token）をデコードして、ヘッダーとペイロードの内容を確認できます。
+++--        </p>
+++--        <div class="flex items-center text-blue-600 text-sm font-medium group-hover:text-blue-700">
+++--          ツールを使用する
+++--          <svg class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor"
+++--            viewBox="0 0 24 24">
+++--            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+++--          </svg>
+++--        </div>
+++--      </NuxtLink>
+++--
+++--      <!-- Cron JST -->
+++--      <NuxtLink to="/tools/cron-jst"
+++--        class="block group bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200 p-6 hover:border-green-300">
+++--        <div class="flex items-center mb-4">
+++--          <div
+++--            class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center group-hover:bg-green-200 transition-colors">
+++--            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+++--              <circle cx="12" cy="12" r="9" stroke-width="2" />
+++--              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 7v5l3 3" />
+++--            </svg>
+++--          </div>
+++--        </div>
+++--        <h3 class="text-xl font-semibold text-gray-900 mb-2 group-hover:text-green-600 transition-colors">
+++--          Cron JST 予測
+++--        </h3>
+++--        <p class="text-gray-600 text-sm mb-4">
+++--          crontab形式のスケジュールから、JSTで次回実行時刻を予測します。
+++--        </p>
+++--        <div class="flex items-center text-green-600 text-sm font-medium group-hover:text-green-700">
+++--          ツールを使用する
+++--          <svg class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor"
+++--            viewBox="0 0 24 24">
+++--            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+++--          </svg>
+++--        </div>
+++--      </NuxtLink>
+++--
+++--      <!-- 将来のツール用のプレースホルダー -->
+++--      <div
+++--        class="bg-gray-50 rounded-lg border-2 border-dashed border-gray-200 p-6 flex flex-col items-center justify-center min-h-[200px]">
+++--        <div class="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center mb-4">
+++--          <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+++--            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+++--          </svg>
+++--        </div>
+++--        <h3 class="text-lg font-medium text-gray-400 mb-2">新しいツール</h3>
+++--        <p class="text-gray-400 text-sm text-center">
+++--          近日公開予定
+++--        </p>
+++--      </div>
+++--    </div>
+++--
+++--    <div class="mt-12 bg-blue-50 border border-blue-200 rounded-lg p-6">
+++--      <h2 class="text-lg font-semibold text-blue-900 mb-2">プライバシーについて</h2>
+++--      <p class="text-blue-800 text-sm">
+++--        このサイトのすべてのツールは、お使いのブラウザ内でローカルに動作します。
+++--        入力されたデータがサーバーに送信されることはなく、完全にプライベートで安全にご利用いただけます。
+++--      </p>
+++--    </div>
+++-+﻿<template>
+++-+  <div class="container mx-auto max-w-5xl py-8 px-4">
+++-+    <h1 class="text-3xl font-bold mb-6">開発ツール</h1>
+++-+    <!-- ここに /tools 以下の子ページが差し込まれる -->
+++-+    <NuxtPage />
+++-   </div>
+++- </template>
+++--
+++--<script setup lang="ts">
+++--// メタデータ設定
+++--useHead({
+++--  title: '開発ツール',
+++--  meta: [
+++--    { name: 'description', content: '開発に役立つ各種ツールをご利用いただけます。JWT Decoder など、ブラウザ内で安全に動作するツールを提供しています。' }
+++--  ]
+++--})
+++--</script>
+++ diff --git a/pages/tools/cron-jst.vue b/pages/tools/cron-jst.vue
+++-index 42becf5..1efa3af 100644
++++index 69a7395..6d9e2db 100644
+++ --- a/pages/tools/cron-jst.vue
+++ +++ b/pages/tools/cron-jst.vue
+++-@@ -1,72 +1,211 @@
+++--<template>
+++--  <div class="container mx-auto max-w-2xl py-8 px-4">
+++--    <h1 class="text-2xl font-bold mb-4">Cron JST 次回実行予測</h1>
+++--    <form @submit.prevent="onCheck" class="mb-4">
+++--      <label for="cron" class="block font-medium mb-1">crontab 形式（分 時 日 月 曜日）</label>
+++--      <textarea id="cron" v-model="input" rows="2" class="w-full border rounded p-2 font-mono text-base mb-2"
+++--        :aria-invalid="!!error" aria-describedby="cron-help" aria-live="polite" spellcheck="false"
+++--        autocomplete="off"></textarea>
+++--      <div id="cron-help" class="text-xs text-gray-500 mb-2">
+++-+﻿<template>
+++-+  <div class="container mx-auto max-w-3xl py-8 px-4 space-y-6">
+++-+    <h1 class="text-2xl font-bold">Cron JST 次回実行予測</h1>
+++-+
+++-+    <div class="rounded-md bg-blue-50 text-blue-900 text-sm p-3">
+++-+      入力はローカルでのみ処理されます。サーバーへ送信されることはありません。
+++-+    </div>
+++-+
+++-+    <form @submit.prevent="onCheck" class="space-y-3">
+++-+      <label for="cron" class="block font-medium">crontab 形式（分 時 日 月 曜日）</label>
+++-+      <textarea id="cron" v-model="input" rows="2" class="w-full border rounded p-2 font-mono text-base"
+++-+        :aria-invalid="!!error" aria-describedby="cron-help" spellcheck="false" autocomplete="off"></textarea>
+++-+      <div id="cron-help" class="text-xs text-gray-500">
+++-         例: <code>*/5 9-18 * * 1-5</code>（平日9-18時に5分毎）
+++-       </div>
+++--      <div class="flex gap-2 mb-2">
+++-+
+++-+      <div class="flex flex-wrap items-center gap-3">
+++-         <button type="submit" class="btn-primary">今すぐチェック</button>
+++-         <button type="button" class="btn-secondary" @click="onClear">クリア</button>
+++-         <button type="button" class="btn-secondary" @click="onSample">サンプル挿入</button>
+++-+
+++-+        <div class="ml-auto flex items-center gap-2">
+++-+          <label class="text-sm">表示タイムゾーン:</label>
+++-+          <label class="text-sm inline-flex items-center gap-1">
+++-+            <input type="radio" value="Asia/Tokyo" v-model="tzDisp" /> JST
+++-+          </label>
+++-+          <label class="text-sm inline-flex items-center gap-1">
+++-+            <input type="radio" value="UTC" v-model="tzDisp" /> UTC
+++-+          </label>
+++-+        </div>
+++-+
+++-+        <div class="flex items-center gap-2">
+++-+          <label for="count" class="text-sm">件数:</label>
+++-+          <input id="count" type="number" min="1" max="20" class="w-20 border rounded p-1" v-model.number="count" />
+++-+        </div>
+++-+
+++-+        <div class="flex items-center gap-2">
+++-+          <button type="button" class="btn-secondary" @click="copyLink">共有リンクをコピー</button>
+++-+          <span v-if="copied" class="text-xs text-green-700">コピーしました</span>
+++-+        </div>
+++-       </div>
+++--      <div v-if="error" class="text-red-600 font-semibold mb-2" aria-live="polite">{{ error }}</div>
+++-+
+++-+      <div v-if="error" class="text-red-600 font-semibold">{{ error }}</div>
+++-     </form>
+++--    <div v-if="results.length" class="mb-4">
+++--      <h2 class="font-semibold mb-2">次回実行予定（JST）</h2>
+++--      <ul class="list-disc pl-6">
+++--        <li v-for="(dt, i) in results" :key="i" class="font-mono">{{ format(dt) }}</li>
+++-+
+++-+    <div v-if="results.length" class="space-y-3">
+++-+      <h2 class="font-semibold">次回実行予定（{{ tzDisp === 'UTC' ? 'UTC' : 'JST' }}表示）</h2>
+++-+
+++-+      <ul class="list-disc pl-6 space-y-1">
+++-+        <li v-for="dt in results" :key="dt.toISOString()" class="font-mono">
+++-+          {{ format(dt, tzDisp) }}
+++-+          <span class="text-gray-500 ml-2">（{{ relative(dt) }}）</span>
+++-+        </li>
+++-       </ul>
+++--    </div>
+++--    <div class="text-xs text-gray-500 mt-6">
+++--      ※ 入力はローカルでのみ処理され、サーバー送信はありません。
+++-+
+++-+      <div class="flex items-center gap-3 pt-2">
+++-+        <button type="button" class="btn-secondary" @click="loadMore" v-if="canLoadMore">
+++-+          もっと表示（+{{ stepForMore }}件）
+++-+        </button>
+++-+        <span v-else class="text-xs text-gray-500">これ以上は表示できません（最大 {{ MAX_TOTAL }} 件）</span>
+++-+
+++-+        <button type="button" class="btn-primary" @click="downloadCsv" :disabled="!results.length">
+++-+          CSV でダウンロード
+++-+        </button>
+++-+      </div>
+++-     </div>
+++-   </div>
++++@@ -72,7 +72,7 @@
+++  </template>
+++  
+++  <script setup lang="ts">
+++--import { ref } from 'vue'
+++-+import { ref, onMounted, watch, computed } from 'vue'
+++-+import { useRoute } from '#imports'
++++-import { ref, onMounted, computed, watch } from 'vue'
+++++import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
++++ import { useRoute } from '#imports'
+++  import { parseCron, nextRuns } from '~/utils/cron'
+++  
+++- const input = ref('')
+++- const error = ref('')
+++- const results = ref<Date[]>([])
+++-+const tzDisp = ref<'Asia/Tokyo' | 'UTC'>('Asia/Tokyo') // 表示だけ切替（計算はJST固定）
+++-+const count = ref(5) // 初回件数＆「もっと表示」のステップ
+++-+const copied = ref(false)
+++-+
+++-+const MAX_TOTAL = 200
+++-+
+++-+// 1..20 に丸めたステップ数
+++-+const countClamped = computed(() => Math.max(1, Math.min(Number(count.value ?? 5), 20)))
+++-+
+++-+// 直近のパース済みspecと、末尾日時を保持
+++-+const lastSpec = ref<ReturnType<typeof parseCron> | null>(null)
+++-+const lastAt = ref<Date | null>(null)
+++- 
+++- function onCheck() {
+++-   error.value = ''
+++-   results.value = []
+++-+  lastAt.value = null
+++-   try {
+++-     const spec = parseCron(input.value.trim())
+++--    results.value = nextRuns(spec, new Date(), 'Asia/Tokyo', 5)
+++-+    lastSpec.value = spec
+++-+    // 計算は安全のため JST に固定
+++-+    const n = countClamped.value
+++-+    results.value = nextRuns(spec, new Date(), 'Asia/Tokyo', n)
+++-+    lastAt.value = results.value.at(-1) ?? null
+++-   } catch (e: any) {
+++--    error.value = e.message || '不明なエラーが発生しました'
+++-+    error.value = e?.message || '不明なエラーが発生しました'
+++-   }
+++- }
+++- function onClear() {
+++-   input.value = ''
+++-   error.value = ''
+++-   results.value = []
+++-+  lastSpec.value = null
+++-+  lastAt.value = null
+++- }
+++- function onSample() {
+++-   input.value = '*/5 9-18 * * 1-5'
+++-   error.value = ''
+++-   results.value = []
+++-+  onCheck()
+++-+}
+++-+function format(dt: Date, tz: 'Asia/Tokyo' | 'UTC') {
+++-+  return dt.toLocaleString('ja-JP', {
+++-+    timeZone: tz,
+++-+    year: 'numeric', month: 'numeric', day: 'numeric',
+++-+    hour: '2-digit', minute: '2-digit', second: '2-digit',
+++-+    hour12: false
+++-+  })
+++- }
+++--function format(dt: Date) {
+++--  return dt.toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo', hour12: false })
+++-+function relative(dt: Date) {
+++-+  const diff = dt.getTime() - Date.now()
+++-+  const sec = Math.round(Math.abs(diff) / 1000)
+++-+  const mins = Math.floor(sec / 60), hrs = Math.floor(mins / 60), days = Math.floor(hrs / 24)
+++-+  const s = days ? `${days}日` : hrs ? `${hrs}時間` : mins ? `${mins}分` : `${sec}秒`
+++-+  return diff >= 0 ? `あと ${s}` : `${s} 前`
+++- }
+++-+async function copyLink() {
+++-+  const url = new URL(window.location.href)
+++-+  url.searchParams.set('expr', input.value.trim())
+++-+  url.searchParams.set('n', String(countClamped.value))
+++-+  url.searchParams.set('tz', tzDisp.value)
+++-+  await navigator.clipboard.writeText(url.toString())
+++-+  copied.value = true
+++-+  setTimeout(() => (copied.value = false), 1200)
+++-+}
+++-+
+++-+// もっと表示
+++-+const canLoadMore = computed(() => !!lastSpec.value && !!lastAt.value && results.value.length < MAX_TOTAL)
+++-+const stepForMore = computed(() => Math.min(countClamped.value, MAX_TOTAL - results.value.length))
+++-+
+++-+function loadMore() {
+++-+  if (!canLoadMore.value || !lastSpec.value || !lastAt.value) return
+++-+  const from = new Date(lastAt.value.getTime() + 1000) // 重複防止
+++-+  const more = nextRuns(lastSpec.value, from, 'Asia/Tokyo', stepForMore.value)
+++-+  results.value.push(...more)
+++-+  lastAt.value = results.value.at(-1) ?? lastAt.value
+++-+}
+++-+
+++-+// CSV ダウンロード
+++-+function downloadCsv() {
+++-+  if (!results.value.length) return
+++-+  // 4列: iso, jst, utc, relative
+++-+  const header = ['iso', 'jst', 'utc', 'relative']
+++-+  const rows = results.value.map(dt => {
+++-+    const iso = dt.toISOString()
+++-+    const jst = format(dt, 'Asia/Tokyo')
+++-+    const utc = format(dt, 'UTC')
+++-+    const rel = relative(dt)
+++-+    return [iso, jst, utc, rel]
+++-+  })
+++-+  const lines = [header, ...rows].map(cols =>
+++-+    cols.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')
+++-+  )
+++-+  const csv = lines.join('\r\n')
+++-+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+++-+  const a = document.createElement('a')
+++-+  a.href = URL.createObjectURL(blob)
+++-+  a.download = 'cron-jst-schedule.csv'
+++-+  a.click()
+++-+  URL.revokeObjectURL(a.href)
+++-+}
+++-+
+++-+// ?expr= でプリフィル
+++-+const route = useRoute()
+++-+onMounted(() => {
+++-+  const q = route.query?.expr
+++-+  if (typeof q === 'string' && q.trim()) {
+++-+    input.value = q
+++-+    onCheck()
++++@@ -82,6 +82,9 @@ const results = ref<Date[]>([])
++++ const tzDisp = ref<'Asia/Tokyo' | 'UTC'>('Asia/Tokyo')
++++ const count = ref(5)
++++ const copied = ref(false)
+++++// 相対表示用の現在時刻（30秒毎に更新）
+++++const now = ref(Date.now())
+++++let nowTimer: ReturnType<typeof setInterval> | null = null
++++ 
++++ // 上限と増分
++++ const MAX_TOTAL = 200
++++@@ -150,9 +153,12 @@ function format(dt: Date, tz: 'Asia/Tokyo' | 'UTC') {
++++ }
++++ 
++++ function relative(dt: Date) {
++++-  const diff = dt.getTime() - Date.now()
+++++  // ここでは schedule は再計算せず now の変化だけで再描画される
+++++  const diff = dt.getTime() - now.value
++++   const sec = Math.round(Math.abs(diff) / 1000)
++++-  const mins = Math.floor(sec / 60), hrs = Math.floor(mins / 60), days = Math.floor(hrs / 24)
+++++  const mins = Math.floor(sec / 60)
+++++  const hrs = Math.floor(mins / 60)
+++++  const days = Math.floor(hrs / 24)
++++   const s = days ? `${days}日` : hrs ? `${hrs}時間` : mins ? `${mins}分` : `${sec}秒`
++++   return diff >= 0 ? `あと ${s}` : `${s} 前`
++++ }
++++@@ -200,6 +206,8 @@ function downloadCsv() {
++++ // プリフィル
++++ const route = useRoute()
++++ onMounted(() => {
+++++  // 相対時間更新タイマー（SSR安全）
+++++  nowTimer = setInterval(() => { now.value = Date.now() }, 30_000)
++++   const q = route.query?.expr
++++   if (typeof q === 'string' && q.trim()) input.value = q
++++   const n = Number(route.query?.n)
++++@@ -208,6 +216,13 @@ onMounted(() => {
++++   if (tz === 'UTC' || tz === 'Asia/Tokyo') tzDisp.value = tz
++++   onCheck()
++++ })
+++++
+++++onUnmounted(() => {
+++++  if (nowTimer) {
+++++    clearInterval(nowTimer)
+++++    nowTimer = null
+++ +  }
+++-+  const n = Number(route.query?.n)
+++-+  if (Number.isFinite(n) && n >= 1) count.value = Math.min(n, 20)
+++-+  const tz = route.query?.tz
+++-+  if (tz === 'UTC' || tz === 'Asia/Tokyo') tzDisp.value = tz
+++-+})
+++-+
+++-+// 件数が変わったら“初回の出し直し”に合わせて再計算
+++-+watch(count, () => {
+++-+  if (!lastSpec.value) return
+++-+  const n = countClamped.value
+++-+  results.value = nextRuns(lastSpec.value, new Date(), 'Asia/Tokyo', n)
+++-+  lastAt.value = results.value.at(-1) ?? null
+++ +})
+++  </script>
+++  
+++--<style scoped lang="postcss">
+++-+<style scoped>
+++- .btn-primary {
+++-   @apply bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700 transition;
+++- }
+++- 
+++- .btn-secondary {
+++--  @apply bg-gray-200 text-gray-800 px-4 py-1 rounded hover:bg-gray-300 transition;
+++-+  @apply bg-gray-200 text-gray-800 px-3 py-1 rounded hover:bg-gray-300 transition;
+++- }
+++- </style>
+++-diff --git a/pages/tools/index.vue b/pages/tools/index.vue
+++-new file mode 100644
+++-index 0000000..c3511c1
+++---- /dev/null
+++-+++ b/pages/tools/index.vue
+++-@@ -0,0 +1,98 @@
+++-+<template>
+++-+  <div class="container mx-auto px-4 py-8 max-w-4xl">
+++-+    <div class="mb-8">
+++-+      <h1 class="text-4xl font-bold text-gray-900 mb-4">開発ツール</h1>
+++-+      <p class="text-gray-600 text-lg">
+++-+        開発に役立つ各種ツールをご利用いただけます。すべてのツールはブラウザ内で動作し、データがサーバーに送信されることはありません。
+++-+      </p>
+++-+    </div>
+++-+
+++-+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+++-+      <!-- JWT Decoder -->
+++-+      <NuxtLink to="/tools/jwt-decode"
+++-+        class="block group bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200 p-6 hover:border-blue-300">
+++-+        <div class="flex items-center mb-4">
+++-+          <div
+++-+            class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center group-hover:bg-blue-200 transition-colors">
+++-+            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+++-+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+++-+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+++-+            </svg>
+++-+          </div>
+++-+        </div>
+++-+        <h3 class="text-xl font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
+++-+          JWT Decoder
+++-+        </h3>
+++-+        <p class="text-gray-600 text-sm mb-4">
+++-+          JWT（JSON Web Token）をデコードして、ヘッダーとペイロードの内容を確認できます。
+++-+        </p>
+++-+        <div class="flex items-center text-blue-600 text-sm font-medium group-hover:text-blue-700">
+++-+          ツールを使用する
+++-+          <svg class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor"
+++-+            viewBox="0 0 24 24">
+++-+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+++-+          </svg>
+++-+        </div>
+++-+      </NuxtLink>
+++-+
+++-+      <!-- Cron JST -->
+++-+      <NuxtLink to="/tools/cron-jst"
+++-+        class="block group bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200 p-6 hover:border-green-300">
+++-+        <div class="flex items-center mb-4">
+++-+          <div
+++-+            class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center group-hover:bg-green-200 transition-colors">
+++-+            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+++-+              <circle cx="12" cy="12" r="9" stroke-width="2" />
+++-+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 7v5l3 3" />
+++-+            </svg>
+++-+          </div>
+++-+        </div>
+++-+        <h3 class="text-xl font-semibold text-gray-900 mb-2 group-hover:text-green-600 transition-colors">
+++-+          Cron JST 予測
+++-+        </h3>
+++-+        <p class="text-gray-600 text-sm mb-4">
+++-+          crontab形式のスケジュールから、JSTで次回実行時刻を予測します。
+++-+        </p>
+++-+        <div class="flex items-center text-green-600 text-sm font-medium group-hover:text-green-700">
+++-+          ツールを使用する
+++-+          <svg class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor"
+++-+            viewBox="0 0 24 24">
+++-+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+++-+          </svg>
+++-+        </div>
+++-+      </NuxtLink>
+++-+
+++-+      <!-- 将来のツール用のプレースホルダー -->
+++-+      <div
+++-+        class="bg-gray-50 rounded-lg border-2 border-dashed border-gray-200 p-6 flex flex-col items-center justify-center min-h-[200px]">
+++-+        <div class="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center mb-4">
+++-+          <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+++-+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+++-+          </svg>
+++-+        </div>
+++-+        <h3 class="text-lg font-medium text-gray-400 mb-2">新しいツール</h3>
+++-+        <p class="text-gray-400 text-sm text-center">
+++-+          近日公開予定
+++-+        </p>
+++-+      </div>
+++-+    </div>
+++-+
+++-+    <div class="mt-12 bg-blue-50 border border-blue-200 rounded-lg p-6">
+++-+      <h2 class="text-lg font-semibold text-blue-900 mb-2">プライバシーについて</h2>
+++-+      <p class="text-blue-800 text-sm">
+++-+        このサイトのすべてのツールは、お使いのブラウザ内でローカルに動作します。
+++-+        入力されたデータがサーバーに送信されることはなく、完全にプライベートで安全にご利用いただけます。
+++-+      </p>
+++-+    </div>
+++-+  </div>
+++-+</template>
+++-+
+++-+<script setup lang="ts">
+++-+// メタデータ設定
+++-+useHead({
+++-+  title: '開発ツール',
+++-+  meta: [
+++-+    { name: 'description', content: '開発に役立つ各種ツールをご利用いただけます。JWT Decoder など、ブラウザ内で安全に動作するツールを提供しています。' }
+++-+  ]
+++-+})
+++-+</script>
+++-diff --git a/pages/tools/jwt-decode.vue b/pages/tools/jwt-decode.vue
+++-index ae0d8dc..9093b54 100644
+++---- a/pages/tools/jwt-decode.vue
+++-+++ b/pages/tools/jwt-decode.vue
+++-@@ -1,211 +1,114 @@
+++--<template>
+++--  <div class="container mx-auto px-4 py-8 max-w-6xl">
+++--    <div class="mb-8">
+++--      <h1 class="text-3xl font-bold text-gray-900 mb-4">JWT Decoder</h1>
+++--      <p class="text-gray-600 mb-2">
+++--        JWT（JSON Web Token）をデコードして、ヘッダーとペイロードの内容を確認できます。
+++--      </p>
+++--      <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+++--        <p class="text-sm text-blue-800">
+++--          <strong>プライバシー保護:</strong> すべての処理はお使いのブラウザ内でローカルに実行されます。データがサーバーに送信されることはありません。
+++--        </p>
+++--      </div>
+++--    </div>
+++--
+++--    <div class="grid lg:grid-cols-2 gap-8">
+++--      <!-- 入力エリア -->
+++--      <div class="space-y-4">
+++--        <div>
+++--          <label for="jwt-input" class="block text-sm font-medium text-gray-700 mb-2">
+++--            JWT トークン
+++--          </label>
+++--          <textarea id="jwt-input" v-model="jwtInput"
+++--            class="w-full h-48 p-3 border rounded-lg font-mono text-sm resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+++--            :class="{ 'border-red-500 bg-red-50': hasError }"
+++--            placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+++--            aria-describedby="jwt-error"></textarea>
+++-+﻿<template>
+++-+  <div class="container mx-auto max-w-5xl py-8 px-4 space-y-6">
+++-+    <h1 class="text-2xl font-bold">JWT Decoder</h1>
+++- 
+++--          <div id="jwt-error" class="mt-2 min-h-[1.5rem]" aria-live="polite" aria-atomic="true">
+++--            <p v-if="errorMessage" class="text-sm text-red-600">
+++--              {{ errorMessage }}
+++--            </p>
+++--          </div>
+++--        </div>
+++-+    <div class="rounded-md bg-blue-50 text-blue-900 text-sm p-3">
+++-+      プライバシー保護: すべての処理はお使いのブラウザ内でローカルに実行されます。データがサーバーに送信されることはありません。
+++-+    </div>
+++- 
+++--        <div class="flex flex-wrap gap-2">
+++--          <button @click="clearInput"
+++--            class="px-4 py-2 text-sm bg-gray-500 text-white rounded-lg hover:bg-gray-600 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors">
+++--            クリア
+++--          </button>
+++--          <button @click="insertSample"
+++--            class="px-4 py-2 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
+++--            サンプル挿入
+++--          </button>
+++--        </div>
+++-+    <section class="space-y-2">
+++-+      <label for="jwt" class="block font-medium">JWT トークン</label>
+++-+      <textarea id="jwt" v-model="token" rows="5" class="w-full border rounded p-2 font-mono text-sm"
+++-+        spellcheck="false"></textarea>
+++-+      <div class="flex gap-2">
+++-+        <button class="btn-secondary" @click="onClear">クリア</button>
+++-+        <button class="btn-secondary" @click="onSample">サンプル挿入</button>
+++-       </div>
+++-+    </section>
+++- 
+++--      <!-- 出力エリア -->
+++--      <div class="space-y-6">
+++--        <!-- ヘッダー -->
+++--        <div>
+++--          <div class="flex items-center justify-between mb-2">
+++--            <h3 class="text-lg font-semibold text-gray-900">Header</h3>
+++--            <button v-if="parsedJwt?.header" @click="copyToClipboard(formattedHeader)"
+++--              class="px-3 py-1 text-xs bg-gray-100 text-gray-700 rounded hover:bg-gray-200 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors">
+++--              コピー
+++--            </button>
+++--          </div>
+++--          <div class="bg-gray-50 border rounded-lg p-4 min-h-[120px]">
+++--            <pre v-if="parsedJwt?.header"
+++--              class="text-sm text-gray-800 whitespace-pre-wrap break-words">{{ formattedHeader }}</pre>
+++--            <p v-else class="text-gray-500 text-sm">
+++--              有効なJWTを入力するとヘッダーが表示されます
+++--            </p>
+++--          </div>
+++--        </div>
+++--
+++--        <!-- ペイロード -->
+++--        <div>
+++--          <div class="flex items-center justify-between mb-2">
+++--            <h3 class="text-lg font-semibold text-gray-900">Payload</h3>
+++--            <button v-if="parsedJwt?.payload" @click="copyToClipboard(formattedPayload)"
+++--              class="px-3 py-1 text-xs bg-gray-100 text-gray-700 rounded hover:bg-gray-200 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors">
+++--              コピー
+++--            </button>
+++--          </div>
+++--          <div class="bg-gray-50 border rounded-lg p-4 min-h-[120px]">
+++--            <pre v-if="parsedJwt?.payload"
+++--              class="text-sm text-gray-800 whitespace-pre-wrap break-words">{{ formattedPayload }}</pre>
+++--            <p v-else class="text-gray-500 text-sm">
+++--              有効なJWTを入力するとペイロードが表示されます
+++--            </p>
+++--          </div>
+++--        </div>
+++-+    <section class="grid md:grid-cols-2 gap-4">
+++-+      <div class="rounded border bg-gray-50 p-3">
+++-+        <h2 class="font-semibold mb-2">Header</h2>
+++-+        <pre class="text-xs overflow-auto"><code>{{ pretty(header) }}</code></pre>
+++-       </div>
+++--    </div>
+++--
+++--    <!-- 通知 -->
+++--    <div v-if="notification"
+++--      class="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg transition-opacity duration-300"
+++--      :class="{ 'opacity-0': !showNotification }">
+++--      {{ notification }}
+++--    </div>
+++-+      <div class="rounded border bg-gray-50 p-3">
+++-+        <h2 class="font-semibold mb-2">Payload</h2>
+++-+        <pre class="text-xs overflow-auto"><code>{{ pretty(payload) }}</code></pre>
+++-+      </div>
+++-+    </section>
+++-+
+++-+    <section v-if="payload" class="rounded border p-3 space-y-2">
+++-+      <h2 class="font-semibold">基本クレーム（読みやすく）</h2>
+++-+      <table class="text-sm">
+++-+        <tbody>
+++-+          <tr v-if="payload.exp">
+++-+            <th class="text-left pr-4">exp</th>
+++-+            <td>{{ asDate(payload.exp) }}（{{ relFromNow(payload.exp) }}）</td>
+++-+          </tr>
+++-+          <tr v-if="payload.iat">
+++-+            <th class="text-left pr-4">iat</th>
+++-+            <td>{{ asDate(payload.iat) }}（{{ relFromNow(payload.iat) }}）</td>
+++-+          </tr>
+++-+          <tr v-if="payload.nbf">
+++-+            <th class="text-left pr-4">nbf</th>
+++-+            <td>{{ asDate(payload.nbf) }}（{{ relFromNow(payload.nbf) }}）</td>
+++-+          </tr>
+++-+          <tr v-if="payload.sub">
+++-+            <th class="text-left pr-4">sub</th>
+++-+            <td class="font-mono">{{ payload.sub }}</td>
+++-+          </tr>
+++-+          <tr v-if="payload.iss">
+++-+            <th class="text-left pr-4">iss</th>
+++-+            <td class="font-mono break-all">{{ payload.iss }}</td>
+++-+          </tr>
+++-+          <tr v-if="payload.aud">
+++-+            <th class="text-left pr-4">aud</th>
+++-+            <td class="font-mono break-all">{{ payload.aud }}</td>
+++-+          </tr>
+++-+        </tbody>
+++-+      </table>
+++-+      <p class="text-xs text-gray-500 mt-1"> 署名検証は未実装です（必要なら後日JWKS対応を追加します）。</p>
+++-+    </section>
+++-   </div>
+++- </template>
+++- 
+++- <script setup lang="ts">
+++--import { ref, computed, watch } from 'vue'
+++--import { parseJwt, isProbablyJwt } from '../../utils/jwt'
+++--
+++--// メタデータ設定
+++--useHead({
+++--  title: 'JWT Decoder | Tools',
+++--  meta: [
+++--    { name: 'description', content: 'JWT（JSON Web Token）をデコードしてヘッダーとペイロードの内容を確認するツールです。' }
+++--  ]
+++--})
+++--
+++--// リアクティブデータ
+++--const jwtInput = ref('')
+++--const parsedJwt = ref<{ header: unknown; payload: unknown } | null>(null)
+++--const errorMessage = ref('')
+++--const notification = ref('')
+++--const showNotification = ref(false)
+++--
+++--// 計算プロパティ
+++--const hasError = computed(() => !!errorMessage.value)
+++-+import { ref, computed } from 'vue'
+++- 
+++--const formattedHeader = computed(() => {
+++--  if (!parsedJwt.value?.header) return ''
+++--  return JSON.stringify(parsedJwt.value.header, null, 2)
+++--})
+++-+const token = ref('')
+++- 
+++--const formattedPayload = computed(() => {
+++--  if (!parsedJwt.value?.payload) return ''
+++--  return JSON.stringify(parsedJwt.value.payload, null, 2)
+++--})
+++--
+++--// JWTパース処理（リアルタイム）
+++--watch(jwtInput, (newValue: string) => {
+++--  errorMessage.value = ''
+++--  parsedJwt.value = null
+++--
+++--  if (!newValue.trim()) {
+++--    return
+++--  }
+++--
+++--  if (!isProbablyJwt(newValue.trim())) {
+++--    errorMessage.value = 'JWT形式ではありません。header.payload.signature の形式で入力してください。'
+++--    return
+++--  }
+++--
+++--  try {
+++--    parsedJwt.value = parseJwt(newValue.trim())
+++--  } catch (error) {
+++--    if (error instanceof Error) {
+++--      errorMessage.value = error.message
+++--    } else {
+++--      errorMessage.value = '予期しないエラーが発生しました。'
+++--    }
+++--  }
+++--}, { immediate: true })
+++--
+++--// メソッド
+++--function clearInput(): void {
+++--  jwtInput.value = ''
+++-+function onClear() { token.value = '' }
+++-+function onSample() {
+++-+  token.value =
+++-+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.' +
+++-+    'eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNjE2MjM5MDIyfQ.' +
+++-+    'SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'
+++- }
+++- 
+++--function insertSample(): void {
+++--  // サンプルJWT（実際の署名は無効だが、header/payloadは有効）
+++--  jwtInput.value = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjE1MTYyNDI2MjJ9.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'
+++-+function b64urlDecode(s: string) {
+++-+  s = s.replace(/-/g, '+').replace(/_/g, '/')
+++-+  const pad = s.length % 4 ? 4 - (s.length % 4) : 0
+++-+  return atob(s + '='.repeat(pad))
+++- }
+++--
+++--async function copyToClipboard(text: string): Promise<void> {
+++--  // 早期 return: 空文字をコピーしない
+++--  if (!text) {
+++--    showNotificationMessage('コピーする内容がありません')
+++--    return
+++--  }
+++--
+++--  try {
+++--    if (navigator?.clipboard?.writeText) {
+++--      await navigator.clipboard.writeText(text)
+++--      showNotificationMessage('コピーしました')
+++--      return
+++--    }
+++--    throw new Error('Clipboard API が利用できません')
+++--  } catch (primaryErr) {
+++--    // Fallback for古いブラウザ
+++--    try {
+++--      const textArea = document.createElement('textarea')
+++--      textArea.value = text
+++--      textArea.style.position = 'fixed'
+++--      textArea.style.top = '-1000px'
+++--      document.body.appendChild(textArea)
+++--      textArea.focus()
+++--      textArea.select()
+++--      const succeeded = document.execCommand('copy')
+++--      document.body.removeChild(textArea)
+++--      if (succeeded) {
+++--        showNotificationMessage('コピーしました')
+++--      } else {
+++--        showNotificationMessage('コピーに失敗しました（手動で選択してください）')
+++--      }
+++--    } catch (fallbackErr) {
+++--      showNotificationMessage('コピーに失敗しました（手動で選択してください）')
+++--    }
+++--  }
+++-+function parsePart<T = any>(part: string | undefined): T | null {
+++-+  if (!part) return null
+++-+  try { return JSON.parse(b64urlDecode(part)) as T } catch { return null }
+++- }
+++-+const parts = computed(() => token.value.split('.'))
+++-+const header = computed(() => parsePart(parts.value[0]))
+++-+const payload = computed(() => parsePart(parts.value[1]))
+++- 
+++--function showNotificationMessage(message: string): void {
+++--  notification.value = message
+++--  showNotification.value = true
+++--
+++--  setTimeout(() => {
+++--    showNotification.value = false
+++--    setTimeout(() => {
+++--      notification.value = ''
+++--    }, 300)
+++--  }, 2000)
+++-+function pretty(v: any) {
+++-+  return v ? JSON.stringify(v, null, 2) : '（有効なJWTを入力すると表示されます）'
+++-+}
+++-+function asDate(sec: number) {
+++-+  if (typeof sec !== 'number') return ''
+++-+  const d = new Date(sec * 1000)
+++-+  const jst = d.toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo', hour12: false })
+++-+  const utc = d.toUTCString().replace(' GMT', '')
+++-+  return `${jst} JST / ${utc} UTC`
+++-+}
+++-+function relFromNow(sec: number) {
+++-+  const diff = sec * 1000 - Date.now()
+++-+  const abs = Math.abs(diff)
+++-+  const mins = Math.floor(abs / 60000), hrs = Math.floor(mins / 60), days = Math.floor(hrs / 24)
+++-+  const s = days ? `${days}日` : hrs ? `${hrs}時間` : mins ? `${mins}分` : `${Math.floor(abs / 1000)}秒`
+++-+  return diff >= 0 ? `あと ${s}` : `${s} 前`
+++- }
+++- </script>
+++-+
+++-+<style scoped>
+++-+.btn-secondary {
+++-+  @apply bg-gray-200 text-gray-800 px-3 py-1 rounded hover:bg-gray-300 transition;
+++-+}
+++-+</style>
+++-diff --git a/review.patch b/review.patch
+++-index de3ab90..bcb5f32 100644
+++-Binary files a/review.patch and b/review.patch differ
++++ <style scoped>

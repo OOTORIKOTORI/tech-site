@@ -27,7 +27,24 @@
           <label class="text-sm inline-flex items-center gap-1">
             <input type="radio" value="UTC" v-model="tzDisp" /> UTC
           </label>
+          <div class="flex items-center gap-2">
+            <span class="text-sm">相対基準:</span>
+            <label class="text-sm inline-flex items-center gap-1">
+              <input type="radio" value="now" v-model="relMode" /> 今
+            </label>
+            <label class="text-sm inline-flex items-center gap-1">
+              <input type="radio" value="base" v-model="relMode" /> 基準時刻
+            </label>
+          </div>
         </div>
+
+        <div class="flex items-center gap-2">
+          <label for="baseAt" class="text-sm">基準時刻:</label>
+          <input id="baseAt" type="datetime-local" step="60" class="border rounded p-1" v-model="baseInput"
+            :disabled="relMode !== 'base'" />
+          <button type="button" class="btn-secondary" @click="setBaseNow" :disabled="relMode !== 'base'">今</button>
+        </div>
+
 
         <div class="flex items-center gap-2">
           <label for="count" class="text-sm">件数:</label>
@@ -72,7 +89,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
 import { useRoute } from '#imports'
 import { parseCron, nextRuns } from '~/utils/cron'
 
@@ -82,6 +99,14 @@ const results = ref<Date[]>([])
 const tzDisp = ref<'Asia/Tokyo' | 'UTC'>('Asia/Tokyo')
 const count = ref(5)
 const copied = ref(false)
+const baseInput = ref('') // datetime-local の値
+const baseFrom = ref<Date | null>(null) // UTC基準の瞬間
+
+// 相対表示用の現在時刻（30秒毎に更新：境界に揃えて開始）
+const now = ref<number>(Date.now())
+let nowIv: ReturnType<typeof setInterval> | null = null
+let nowTo: ReturnType<typeof setTimeout> | null = null
+const tick = () => { now.value = Date.now() }
 
 // 上限と増分
 const MAX_TOTAL = 200
@@ -97,13 +122,14 @@ const displayed = computed(() => results.value.slice(0, countClamped.value))
 
 // 直近の spec と「基準時刻」（今すぐチェック押下時の時刻）
 const lastSpec = ref<ReturnType<typeof parseCron> | null>(null)
-const baseFrom = ref<Date | null>(null)
 
 // 「もっと表示」ボタンの表示可否と、増やす件数の表示
 const canLoadMore = computed(() => countClamped.value < MAX_TOTAL)
 const stepForMore = computed(() =>
   Math.min(MORE_STEP, MAX_TOTAL - countClamped.value)
 )
+
+const relMode = ref<'now' | 'base'>('now')
 
 // 基準時刻 from から n 件を丸ごと作り直す
 function recompute(n: number) {
@@ -117,10 +143,22 @@ function onCheck() {
   try {
     const spec = parseCron(input.value.trim())
     lastSpec.value = spec
-    // 基準時刻を“今”に固定（連打しても秒ずれしにくいように ms は 0 にしておく）
-    const now = new Date()
-    now.setMilliseconds(0)
-    baseFrom.value = now
+
+    // 入力があれば優先、未入力/不正なら「今」で初期化
+    const parsed = baseInput.value ? fromInputValue(baseInput.value, tzDisp.value) : null
+    if (parsed) {
+      baseFrom.value = parsed
+    } else {
+      // ← ここは setBaseNow() でも OK（下で秒0化済み）
+      const anchor = new Date()
+      anchor.setSeconds(0, 0)         // 秒・ミリ秒を 0 に
+      baseFrom.value = anchor
+    }
+
+    // UI 側のフォーマットも現在のTZで揃える
+    baseInput.value = toInputValue(baseFrom.value!, tzDisp.value)
+
+    // 再計算
     recompute(countClamped.value)
   } catch (e: any) {
     error.value = e?.message || '不明なエラーが発生しました'
@@ -133,6 +171,7 @@ function onClear() {
   results.value = []
   lastSpec.value = null
   baseFrom.value = null
+  baseInput.value = ''
 }
 
 function onSample() {
@@ -150,11 +189,25 @@ function format(dt: Date, tz: 'Asia/Tokyo' | 'UTC') {
 }
 
 function relative(dt: Date) {
-  const diff = dt.getTime() - Date.now()
-  const sec = Math.round(Math.abs(diff) / 1000)
-  const mins = Math.floor(sec / 60), hrs = Math.floor(mins / 60), days = Math.floor(hrs / 24)
-  const s = days ? `${days}日` : hrs ? `${hrs}時間` : mins ? `${mins}分` : `${sec}秒`
-  return diff >= 0 ? `あと ${s}` : `${s} 前`
+  const anchorMs =
+    relMode.value === 'base' && baseFrom.value
+      ? baseFrom.value.getTime()
+      : now.value
+
+  const diffMs = dt.getTime() - anchorMs
+  const future = diffMs >= 0
+  const absSec = Math.max(0, Math.floor(Math.abs(diffMs) / 1000))
+
+  const fmt = (val: number, unit: '分' | '時間' | '日') =>
+    future ? `あと ${val}${unit}` : `${val}${unit} 前`
+
+  if (absSec < 90) return fmt(1, '分')
+  const mins = future ? Math.ceil(absSec / 60) : Math.floor(absSec / 60)
+  if (mins < 60) return fmt(mins, '分')
+  const hours = future ? Math.ceil(mins / 60) : Math.floor(mins / 60)
+  if (hours < 48) return fmt(hours, '時間')
+  const days = future ? Math.ceil(hours / 24) : Math.floor(hours / 24)
+  return fmt(days, '日')
 }
 
 async function copyLink() {
@@ -162,6 +215,12 @@ async function copyLink() {
   url.searchParams.set('expr', input.value.trim())
   url.searchParams.set('n', String(countClamped.value))
   url.searchParams.set('tz', tzDisp.value)
+  url.searchParams.set('rel', relMode.value)
+  if (relMode.value === 'base' && baseInput.value) {
+    url.searchParams.set('from', baseInput.value)
+  } else {
+    url.searchParams.delete('from')
+  }
   await navigator.clipboard.writeText(url.toString())
   copied.value = true
   setTimeout(() => (copied.value = false), 1200)
@@ -197,16 +256,98 @@ function downloadCsv() {
   URL.revokeObjectURL(a.href)
 }
 
-// プリフィル
+// ---- 基準時刻関連ヘルパー ----
+function pad(n: number) { return String(n).padStart(2, '0') }
+function toInputValue(d: Date, tz: 'Asia/Tokyo' | 'UTC') {
+  const y = tz === 'UTC' ? d.getUTCFullYear() : d.getFullYear()
+  const mo = pad((tz === 'UTC' ? d.getUTCMonth() : d.getMonth()) + 1)
+  const da = pad(tz === 'UTC' ? d.getUTCDate() : d.getDate())
+  const hh = pad(tz === 'UTC' ? d.getUTCHours() : d.getHours())
+  const mi = pad(tz === 'UTC' ? d.getUTCMinutes() : d.getMinutes())
+  return `${y}-${mo}-${da}T${hh}:${mi}`
+}
+
+function fromInputValue(s: string, tz: 'Asia/Tokyo' | 'UTC'): Date | null {
+  const m = s.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/);
+  if (!m) return null;
+  const yy = Number(m[1]);
+  const MM = Number(m[2]);
+  const dd = Number(m[3]);
+  const HH = Number(m[4]);
+  const mm = Number(m[5]);
+  // 入力の“壁時計”時刻を UTC の瞬間に正規化
+  const d = new Date(Date.UTC(yy, MM - 1, dd, HH, mm, 0, 0));
+  if (tz === 'Asia/Tokyo') d.setUTCHours(d.getUTCHours() - 9);
+  return d;
+}
+
+function setBaseNow() {
+  const anchor = new Date()
+  anchor.setSeconds(0, 0)     // ここが入っていればOK
+  baseFrom.value = anchor
+  baseInput.value = toInputValue(anchor, tzDisp.value)
+  recompute(countClamped.value)
+}
+
+// watchers
+watch(baseInput, (v) => {
+  if (relMode.value !== 'base' || !v) return
+  const parsed = fromInputValue(v, tzDisp.value)
+  if (parsed) {
+    baseFrom.value = parsed
+    recompute(countClamped.value)
+  }
+})
+watch(tzDisp, (tz) => {
+  if (relMode.value === 'base' && baseFrom.value) {
+    baseInput.value = toInputValue(baseFrom.value, tz)
+  }
+})
+// 既存の watchers 群の近くに追加
+watch(relMode, (mode) => {
+  if (mode === 'base' && !baseInput.value) {
+    setBaseNow();            // 入力も結果も即揃う
+  }
+  if (mode === 'now') {
+    // 表示URLの“from”を消したい場合はここで（UI表示はすでに無効化済み）
+    // baseInput.value = ''   // ←好みで
+  }
+});
+
+
+// プリフィル & タイマー開始
 const route = useRoute()
 onMounted(() => {
+  const rel = route.query?.rel
+  if (rel === 'now' || rel === 'base') relMode.value = rel
+  // 相対時間の即時更新（任意。ぴたり合わせたい場合）
+  now.value = Date.now()
+  tick()
+  const delay = 30_000 - (Date.now() % 30_000)
+  nowTo = setTimeout(() => { tick(); nowIv = setInterval(tick, 30_000) }, delay)
+  // 1. tz
+  const tz = route.query?.tz
+  if (tz === 'UTC' || tz === 'Asia/Tokyo') tzDisp.value = tz
+  // 2. from
+  const fromQ = route.query?.from
+  if (typeof fromQ === 'string') {
+    baseInput.value = fromQ
+    const parsed = fromInputValue(fromQ, tzDisp.value)
+    if (parsed) baseFrom.value = parsed
+  }
+  if (!baseFrom.value) setBaseNow()
+  // 3. expr / n
   const q = route.query?.expr
   if (typeof q === 'string' && q.trim()) input.value = q
   const n = Number(route.query?.n)
   if (Number.isFinite(n) && n >= 1) count.value = Math.min(n, MAX_TOTAL)
-  const tz = route.query?.tz
-  if (tz === 'UTC' || tz === 'Asia/Tokyo') tzDisp.value = tz
+  // 4. 計算
   onCheck()
+})
+
+onUnmounted(() => {
+  if (nowTo) { clearTimeout(nowTo); nowTo = null }
+  if (nowIv) { clearInterval(nowIv); nowIv = null }
 })
 </script>
 
