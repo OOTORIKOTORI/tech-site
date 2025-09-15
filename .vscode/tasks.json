@@ -1,0 +1,190 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Run tests",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"test",
+				"--",
+				"--run"
+			],
+			"problemMatcher": [
+				"$tsc"
+			],
+			"group": "test"
+		},
+		{
+			"label": "Run tests",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"test",
+				"--",
+				"--run"
+			],
+			"problemMatcher": [
+				"$tsc"
+			],
+			"group": "test"
+		},
+		{
+			"label": "Run tests",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"test",
+				"tests/utils/cron.test.ts",
+				"--",
+				"--run"
+			],
+			"group": "test"
+		},
+		{
+			"label": "Run tests",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"test",
+				"--",
+				"--run"
+			],
+			"group": "test"
+		},
+		{
+			"label": "Run tests",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"test",
+				"--",
+				"--run"
+			],
+			"group": "test"
+		},
+		{
+			"label": "Run tests",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"test",
+				"tests/utils/cron.test.ts",
+				"--",
+				"--run"
+			],
+			"group": "test"
+		},
+		{
+			"label": "Run tests",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"test",
+				"--",
+				"--run"
+			],
+			"group": "test"
+		},
+		{
+			"label": "Run tests",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"test",
+				"tests/utils/cron.test.ts",
+				"--",
+				"--run"
+			],
+			"group": "test"
+		},
+		{
+			"label": "Run tests",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"test",
+				"tests/utils/cron.test.ts",
+				"--",
+				"--run"
+			],
+			"group": "test"
+		},
+		{
+			"label": "Run tests",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"test",
+				"--",
+				"--run"
+			],
+			"group": "test"
+		},
+		{
+			"label": "Run tests",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"test"
+			],
+			"group": "test"
+		},
+		{
+			"label": "Typecheck",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"typecheck"
+			]
+		},
+		{
+			"label": "Run Vitest Once",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"test",
+				"--",
+				"--run"
+			]
+		},
+		{
+			"label": "Run Vitest Once",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"test",
+				"--",
+				"--run"
+			]
+		},
+		{
+			"label": "Typecheck",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"typecheck"
+			]
+		},
+		{
+			"label": "Run Vitest Once",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"test",
+				"--",
+				"--run"
+			]
+		},
+		{
+			"label": "Run Vitest Once",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"test",
+				"--",
+				"--run"
+			]
+		}
+	]
+}

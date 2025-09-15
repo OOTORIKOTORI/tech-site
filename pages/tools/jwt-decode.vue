@@ -31,29 +31,29 @@
       <h2 class="font-semibold">基本クレーム（読みやすく）</h2>
       <table class="text-sm">
         <tbody>
-          <tr v-if="payload.exp">
+          <tr v-if="(payload as any)?.exp">
             <th class="text-left pr-4">exp</th>
-            <td>{{ asDate(payload.exp) }}（{{ relFromNow(payload.exp) }}）</td>
+            <td>{{ asDate((payload as any).exp) }}（{{ relFromNow((payload as any).exp) }}）</td>
           </tr>
-          <tr v-if="payload.iat">
+          <tr v-if="(payload as any)?.iat">
             <th class="text-left pr-4">iat</th>
-            <td>{{ asDate(payload.iat) }}（{{ relFromNow(payload.iat) }}）</td>
+            <td>{{ asDate((payload as any).iat) }}（{{ relFromNow((payload as any).iat) }}）</td>
           </tr>
-          <tr v-if="payload.nbf">
+          <tr v-if="(payload as any)?.nbf">
             <th class="text-left pr-4">nbf</th>
-            <td>{{ asDate(payload.nbf) }}（{{ relFromNow(payload.nbf) }}）</td>
+            <td>{{ asDate((payload as any).nbf) }}（{{ relFromNow((payload as any).nbf) }}）</td>
           </tr>
-          <tr v-if="payload.sub">
+          <tr v-if="(payload as any)?.sub">
             <th class="text-left pr-4">sub</th>
-            <td class="font-mono">{{ payload.sub }}</td>
+            <td class="font-mono">{{ (payload as any).sub }}</td>
           </tr>
-          <tr v-if="payload.iss">
+          <tr v-if="(payload as any)?.iss">
             <th class="text-left pr-4">iss</th>
-            <td class="font-mono break-all">{{ payload.iss }}</td>
+            <td class="font-mono break-all">{{ (payload as any).iss }}</td>
           </tr>
-          <tr v-if="payload.aud">
+          <tr v-if="(payload as any)?.aud">
             <th class="text-left pr-4">aud</th>
-            <td class="font-mono break-all">{{ payload.aud }}</td>
+            <td class="font-mono break-all">{{ (payload as any).aud }}</td>
           </tr>
         </tbody>
       </table>
@@ -80,7 +80,7 @@ function b64urlDecode(s: string) {
   const pad = s.length % 4 ? 4 - (s.length % 4) : 0
   return atob(s + '='.repeat(pad))
 }
-function parsePart<T = any>(part: string | undefined): T | null {
+function parsePart<T = unknown>(part: string | undefined): T | null {
   if (!part) return null
   try { return JSON.parse(b64urlDecode(part)) as T } catch { return null }
 }
@@ -88,7 +88,7 @@ const parts = computed(() => token.value.split('.'))
 const header = computed(() => parsePart(parts.value[0]))
 const payload = computed(() => parsePart(parts.value[1]))
 
-function pretty(v: any) {
+function pretty(v: unknown) {
   return v ? JSON.stringify(v, null, 2) : '（有効なJWTを入力すると表示されます）'
 }
 function asDate(sec: number) {

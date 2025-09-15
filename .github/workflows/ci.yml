@@ -1,65 +1,35 @@
 name: ci
-
 on:
   push:
   pull_request:
+permissions:
+  contents: read
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  ci:
+  build:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
-
-      # Node だけ入れる（ここで cache: pnpm は使わない）
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20.x
-
-      # pnpm は package.json の packageManager を使って入れる（version は指定しない）
-      - name: Setup pnpm (from packageManager)
+          node-version: 20
+          cache: pnpm
+      - name: Setup pnpm (respect packageManager)
         uses: pnpm/action-setup@v4
         with:
           run_install: false
-
-      # pnpm のストアをキャッシュ
-      - name: Get pnpm store directory
-        id: pnpm-cache
-        shell: bash
-        run: echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-
-      - name: Cache pnpm store
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.STORE_PATH }}
-          # ロックファイルが無い場合に備えて package.json もキーに含める
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-
-
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
-
-      # better-sqlite3 のネイティブ再ビルド（無くても落ちないように）
-      - name: Rebuild better-sqlite3 (ensure native module)
-        run: pnpm rebuild better-sqlite3 || true
-
-      # ESLint が入っている時だけ実行（現状 package.json に eslint は無いのでスキップになる想定）
-      - name: ESLint
-        shell: bash
-        run: |
-          if pnpm exec eslint -v >/dev/null 2>&1; then
-            pnpm run lint
-          else
-            echo "ESLint not installed; skipping lint step."
-          fi
-
+        run: pnpm install --frozen-lockfile
       - name: Type check
-        run: pnpm run typecheck --if-present
-
-      - name: Run tests
-        run: pnpm run test --if-present
-
+        run: pnpm typecheck
+      - name: Lint
+        run: pnpm lint
+      - name: Test
+        run: pnpm test -- --run
+      # optional:
       - name: Build
-        run: pnpm run build
+        run: pnpm build

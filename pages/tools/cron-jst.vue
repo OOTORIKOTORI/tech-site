@@ -6,7 +6,7 @@
       入力はローカルでのみ処理されます。サーバーへ送信されることはありません。
     </div>
 
-    <form @submit.prevent="onCheck" class="space-y-3">
+    <form class="space-y-3" @submit.prevent="onCheck">
       <label for="cron" class="block font-medium">crontab 形式（分 時 日 月 曜日）</label>
       <textarea id="cron" v-model="input" rows="2" class="w-full border rounded p-2 font-mono text-base"
         :aria-invalid="!!error" aria-describedby="cron-help" spellcheck="false" autocomplete="off"></textarea>
@@ -22,34 +22,34 @@
         <div class="ml-auto flex items-center gap-2">
           <label class="text-sm">表示タイムゾーン:</label>
           <label class="text-sm inline-flex items-center gap-1">
-            <input type="radio" value="Asia/Tokyo" v-model="tzDisp" /> JST
+            <input v-model="tzDisp" type="radio" value="Asia/Tokyo" /> JST
           </label>
           <label class="text-sm inline-flex items-center gap-1">
-            <input type="radio" value="UTC" v-model="tzDisp" /> UTC
+            <input v-model="tzDisp" type="radio" value="UTC" /> UTC
           </label>
           <div class="flex items-center gap-2">
             <span class="text-sm">相対基準:</span>
             <label class="text-sm inline-flex items-center gap-1">
-              <input type="radio" value="now" v-model="relMode" /> 今
+              <input v-model="relMode" type="radio" value="now" /> 今
             </label>
             <label class="text-sm inline-flex items-center gap-1">
-              <input type="radio" value="base" v-model="relMode" /> 基準時刻
+              <input v-model="relMode" type="radio" value="base" /> 基準時刻
             </label>
           </div>
         </div>
 
         <div class="flex items-center gap-2">
           <label for="baseAt" class="text-sm">基準時刻:</label>
-          <input id="baseAt" type="datetime-local" step="60" class="border rounded p-1" v-model="baseInput"
+          <input id="baseAt" v-model="baseInput" type="datetime-local" step="60" class="border rounded p-1"
             :disabled="relMode !== 'base'" />
-          <button type="button" class="btn-secondary" @click="setBaseNow" :disabled="relMode !== 'base'">今</button>
+          <button type="button" class="btn-secondary" :disabled="relMode !== 'base'" @click="setBaseNow">今</button>
         </div>
 
 
         <div class="flex items-center gap-2">
           <label for="count" class="text-sm">件数:</label>
-          <input id="count" type="number" min="1" :max="MAX_TOTAL" class="w-20 border rounded p-1"
-            v-model.number="count" />
+          <input id="count" v-model.number="count" type="number" min="1" :max="MAX_TOTAL"
+            class="w-20 border rounded p-1" />
         </div>
 
         <div class="flex items-center gap-2">
@@ -75,12 +75,12 @@
       </ul>
 
       <div class="flex items-center gap-3 pt-2">
-        <button type="button" class="btn-secondary" @click="loadMore" v-if="canLoadMore">
+        <button v-if="canLoadMore" type="button" class="btn-secondary" @click="loadMore">
           もっと表示（+{{ stepForMore }}件）
         </button>
         <span v-else class="text-xs text-gray-500">これ以上は表示できません（最大 {{ MAX_TOTAL }} 件）</span>
 
-        <button type="button" class="btn-primary" @click="downloadCsv" :disabled="!displayed.length">
+        <button type="button" class="btn-primary" :disabled="!displayed.length" @click="downloadCsv">
           CSV でダウンロード
         </button>
       </div>
@@ -160,8 +160,8 @@ function onCheck() {
 
     // 再計算
     recompute(countClamped.value)
-  } catch (e: any) {
-    error.value = e?.message || '不明なエラーが発生しました'
+  } catch (e: unknown) {
+    error.value = (e instanceof Error ? e.message : String(e)) || '不明なエラーが発生しました'
   }
 }
 

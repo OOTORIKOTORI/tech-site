@@ -78,8 +78,8 @@ describe('JWT Utils', () => {
 
     it('空文字やnullを正しく判定する', () => {
       expect(isProbablyJwt('')).toBe(false)
-      expect(isProbablyJwt(null as any)).toBe(false)
-      expect(isProbablyJwt(undefined as any)).toBe(false)
+      expect(isProbablyJwt(null as unknown as string)).toBe(false)
+      expect(isProbablyJwt(undefined as unknown as string)).toBe(false)
     })
   })
 })

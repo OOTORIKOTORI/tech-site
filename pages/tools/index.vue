@@ -88,6 +88,7 @@
 </template>
 
 <script setup lang="ts">
+import { useHead } from '#imports'
 // メタデータ設定
 useHead({
   title: '開発ツール',
