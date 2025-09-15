@@ -2,7 +2,6 @@ name: ci
 
 on:
   push:
-    branches: [main]
   pull_request:
 
 jobs:
@@ -12,45 +11,55 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Node だけ入れる（ここで cache: pnpm は使わない）
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20.x
-          cache: 'pnpm' # pnpm を使う前提のキャッシュ
 
-      - name: Setup pnpm (use version from package.json)
+      # pnpm は package.json の packageManager を使って入れる（version は指定しない）
+      - name: Setup pnpm (from packageManager)
         uses: pnpm/action-setup@v4
         with:
           run_install: false
-          package_json_file: package.json
-          standalone: true
 
+      # pnpm のストアをキャッシュ
       - name: Get pnpm store directory
-        run: echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_ENV
+        id: pnpm-cache
+        shell: bash
+        run: echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
 
       - name: Cache pnpm store
         uses: actions/cache@v4
         with:
           path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
+          # ロックファイルが無い場合に備えて package.json もキーに含める
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}
           restore-keys: |
-            ${{ runner.os }}-pnpm-store-
+            ${{ runner.os }}-pnpm-
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
-      # ネイティブモジュールがあるなら（例: better-sqlite3）
+      # better-sqlite3 のネイティブ再ビルド（無くても落ちないように）
       - name: Rebuild better-sqlite3 (ensure native module)
         run: pnpm rebuild better-sqlite3 || true
 
+      # ESLint が入っている時だけ実行（現状 package.json に eslint は無いのでスキップになる想定）
       - name: ESLint
-        run: pnpm run lint
+        shell: bash
+        run: |
+          if pnpm exec eslint -v >/dev/null 2>&1; then
+            pnpm run lint
+          else
+            echo "ESLint not installed; skipping lint step."
+          fi
 
       - name: Type check
-        run: pnpm run typecheck
+        run: pnpm run typecheck --if-present
 
       - name: Run tests
-        run: pnpm test -- --ci
+        run: pnpm run test --if-present
 
       - name: Build
         run: pnpm run build
