@@ -5,64 +5,52 @@ on:
     branches: [main]
   pull_request:
 
-concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   ci:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      # 1) Node だけ先に入れる（ここでは pnpm を呼ばせない）
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20.x
-          # cache は使わない。pnpm はこの後に入れるため
-          # cache: 'pnpm' ← これが原因だったので外す
+          cache: 'pnpm' # pnpm を使う前提のキャッシュ
 
-      # 2) pnpm をインストール
-      - name: Setup pnpm
+      - name: Setup pnpm (use version from package.json)
         uses: pnpm/action-setup@v4
         with:
-          # プロジェクトで使っているメジャーに合わせておく（例: 9）
-          version: 9
           run_install: false
+          package_json_file: package.json
+          standalone: true
 
-      # 3) pnpm ストアをキャッシュ
       - name: Get pnpm store directory
-        id: pnpm-store
-        run: echo "PNPM_STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+        run: echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_ENV
 
       - name: Cache pnpm store
         uses: actions/cache@v4
         with:
-          path: ${{ env.PNPM_STORE_PATH }}
+          path: ${{ env.STORE_PATH }}
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
 
-      # 4) 依存関係をインストール
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # better-sqlite3 などネイティブ依存対策（失敗は無視）
+      # ネイティブモジュールがあるなら（例: better-sqlite3）
       - name: Rebuild better-sqlite3 (ensure native module)
         run: pnpm rebuild better-sqlite3 || true
 
-      # 5) Lint / Type Check / Test / Build
       - name: ESLint
         run: pnpm run lint
 
       - name: Type check
-        run: pnpm run type-check
+        run: pnpm run typecheck
 
       - name: Run tests
-        run: pnpm run test --if-present
+        run: pnpm test -- --ci
 
       - name: Build
         run: pnpm run build
