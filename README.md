@@ -182,6 +182,81 @@ Check out the [deployment documentation](https://nuxt.com/docs/getting-started/d
 
 Tech Site は、開発者向けの Web ツール群を提供する Nuxt 4 ベースのアプリケーションです。Cron 予測ツールは v1.1 仕様に対応し、柔軟なスケジューリングと自動リロード機能を備えています。
 
+## JWT ツール (Beta)
+
+ブラウザのみで動作する JWT Decode / Verify ツールを搭載しています。
+
+### 対応アルゴリズム
+
+- HS256 (HMAC-SHA256)
+- RS256 (RSA PKCS#1 v1.5 SHA-256)
+- ES256 (P-256 ECDSA, 署名フォーマット一部制限あり)
+
+### 機能一覧
+
+- Header / Payload の即時デコード（ローカル処理）
+- 主要 Claims (iss / sub / aud / exp / nbf / iat) のテーブル表示と相対期限表示
+- 署名検証 (任意): HS256 シークレット / RS256 / ES256 公開鍵 PEM
+- JWKS 取得 (ユーザー明示許可時のみ・既定 OFF・kid マッチ)
+- leeway 指定による exp / nbf / iat のゆらぎ許容
+- 折りたたみ表示, コピー/クリア, デモ JWT 挿入
+- 鍵のドラッグ&ドロップ / 貼り付け入力
+
+### 制限事項
+
+- JWE (暗号化 JWT) 未対応 (4~5 パートは即エラー)
+- 巨大 JWT (Header+Payload 合計 > ~200KB) はブラウザ表示パフォーマンス低下の可能性
+- ES256: 署名フォーマット (DER vs JOSE compact) 差異補正は最小限
+- x5c / 証明書チェーン検証・revocation 未対応
+
+### JWKS について
+
+- デフォルトは取得無効 (外部通信なし)
+- チェックボックスを有効化すると指定 URL (例: `https://issuer/.well-known/jwks.json`) から `keys` を取得
+- kid 一致 RSA 公開鍵を自動選択し PEM を生成して検証
+- 失敗時は `ERR_JWKS_FETCH / ERR_JWKS_INVALID` 等のエラー表示
+- キャッシュはメモリ 5 分・「再取得」ボタンで強制更新
+
+### 安全な使い方
+
+1. 本番環境の長期有効アクセストークンは貼らない（テスト用または短期トークン推奨）
+2. HS256 シークレットは共有済みのテスト値のみに限定する（機密値をブラウザに貼らない）
+3. JWKS を有効化した場合でも 送信されるのは HTTP GET のみで JWT 本文は送信されないことを確認
+4. 出力結果のコピー前に秘匿クレーム（email や内部 ID）が含まれないか目視確認する
+5. 期限切れ表示は参考値であり、サーバー側検証ロジックが最終的な真実である点を理解する
+6. 署名検証に成功しても `aud` / `iss` の期待値確認を忘れない（ツールは任意指定がない限り単純比較のみ）
+7. デモ JWT は学習用途専用。実運用向けのセキュリティ評価には使用しない。
+
+### HS256 検証手順 (例)
+
+1. JWT を貼り付け
+2. タブを Verify に切替
+3. 期待アルゴリズムで HS256 を選択
+4. シークレットを入力し「検証」をクリック
+5. 緑バッジ「検証成功」表示で署名/Claims が許容範囲内
+
+### RS256 (JWKS) 検証手順 (例)
+
+1. JWT を貼り付け (header に kid が含まれていること)
+2. Verify タブで アルゴリズム RS256 を選択
+3. 「JWKS を取得して検証」を有効化し URL を指定
+4. 「取得」→ 鍵数バッジ確認 → 「検証」
+5. 成功時は kid 対応鍵で署名/Claims 検証
+
+### エラーコード概要 (抜粋)
+
+| Code                | 意味                    |
+| ------------------- | ----------------------- |
+| ERR_ALG_NONE        | alg=none 拒否           |
+| ERR_ALG_MISMATCH    | ヘッダ alg と期待不一致 |
+| ERR_SIGNATURE       | 署名不一致              |
+| ERR_EXPIRED         | exp 期限切れ            |
+| ERR_NOT_BEFORE      | nbf 未来未到達          |
+| ERR_IAT_FUTURE      | iat 未来時刻            |
+| ERR_JWE_UNSUPPORTED | 暗号化 JWT 未対応       |
+| ERR_JWKS_FETCH      | JWKS 取得失敗           |
+| ERR_JWKS_INVALID    | JWKS 構造不正           |
+
 ## クイックスタート
 
 1. リポジトリをクローンし依存関係をインストール
