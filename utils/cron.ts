@@ -363,5 +363,6 @@ export function nextRuns(
     }
   }
 
-  return out
+  // 最終的に重複排除（getTimeで一意化）
+  return Array.from(new Map(out.map(d => [d.getTime(), d])).values())
 }
