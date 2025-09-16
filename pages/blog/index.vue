@@ -29,6 +29,7 @@
 <script setup lang="ts">
 import TagChip from '~/components/TagChip.vue'
 import { useRoute, useAsyncData } from '#imports'
+import { ref, computed } from 'vue'
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const queryContent: any = (globalThis as any).queryContent
 

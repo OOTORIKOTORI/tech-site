@@ -30,7 +30,7 @@ export default defineNuxtConfig({
     },
   },
   hooks: {
-    ready: nuxt => {
+    ready: () => {
       if (!process.env.NUXT_PUBLIC_SITE_URL && process.env.NODE_ENV !== 'test') {
         // eslint-disable-next-line no-console
         console.warn(
