@@ -1,39 +1,51 @@
 ﻿<template>
   <div class="container mx-auto max-w-3xl py-8 px-4 space-y-6">
     <h1 class="text-2xl font-bold">Cron JST 次回実行予測</h1>
+    <div class="mt-2 text-sm">
+      <NuxtLink to="/blog" class="text-blue-700 underline hover:text-blue-900">Tech Blogはこちら</NuxtLink>
+    </div>
 
-    <div class="rounded-md bg-blue-50 text-blue-900 text-sm p-3">
+    <div class="rounded-md bg-blue-50 text-blue-900 text-sm p-3" role="status" aria-live="polite">
       入力はローカルでのみ処理されます。サーバーへ送信されることはありません。
     </div>
 
     <form class="space-y-3" @submit.prevent="onCheck">
       <label for="cron" class="block font-medium">crontab 形式（分 時 日 月 曜日）</label>
       <textarea id="cron" v-model="input" rows="2" class="w-full border rounded p-2 font-mono text-base"
-        :aria-invalid="!!error" aria-describedby="cron-help" spellcheck="false" autocomplete="off"></textarea>
+        :aria-invalid="!!error" aria-describedby="cron-help share-link-desc" spellcheck="false" autocomplete="off"
+        aria-label="crontab形式の入力欄。例: */5 9-18 * * 1-5（平日9-18時に5分毎） 曜日は0-6（0=Sun）、7は非対応。"
+      ></textarea>
       <div id="cron-help" class="text-xs text-gray-500">
         例: <code>*/5 9-18 * * 1-5</code>（平日9-18時に5分毎） / 曜日は 0-6（0=Sun）。7 は非対応。
       </div>
 
       <div class="flex flex-wrap items-center gap-3">
-        <button type="submit" class="btn-primary">今すぐチェック</button>
-        <button type="button" class="btn-secondary" @click="onClear">クリア</button>
-        <button type="button" class="btn-secondary" @click="onSample">サンプル挿入</button>
+  <button type="submit" class="btn-primary" aria-label="cron式をチェック">今すぐチェック</button>
+  <button type="button" class="btn-secondary" @click="onClear" aria-label="入力をクリア">クリア</button>
+
+        <div class="flex items-center gap-2">
+          <label for="preset" class="text-sm">プリセット:</label>
+          <select id="preset" class="border rounded p-1 text-sm font-mono" @change="onPreset($event)">
+            <option value="">選択してください</option>
+            <option v-for="p in presets" :key="p.value" :value="p.value">{{ p.label }}</option>
+          </select>
+        </div>
 
         <div class="ml-auto flex items-center gap-2">
           <label class="text-sm">表示タイムゾーン:</label>
           <label class="text-sm inline-flex items-center gap-1">
-            <input v-model="tzDisp" type="radio" value="Asia/Tokyo" /> JST
+            <input v-model="tzDisp" type="radio" value="Asia/Tokyo" aria-label="JST（日本標準時）" /> JST
           </label>
           <label class="text-sm inline-flex items-center gap-1">
-            <input v-model="tzDisp" type="radio" value="UTC" /> UTC
+            <input v-model="tzDisp" type="radio" value="UTC" aria-label="UTC（協定世界時）" /> UTC
           </label>
           <div class="flex items-center gap-2">
             <span class="text-sm">相対基準:</span>
             <label class="text-sm inline-flex items-center gap-1">
-              <input v-model="relMode" type="radio" value="now" /> 今
+              <input v-model="relMode" type="radio" value="now" aria-label="今（現在時刻を基準）" /> 今
             </label>
             <label class="text-sm inline-flex items-center gap-1">
-              <input v-model="relMode" type="radio" value="base" /> 基準時刻
+              <input v-model="relMode" type="radio" value="base" aria-label="基準時刻を指定" /> 基準時刻
             </label>
           </div>
         </div>
@@ -41,24 +53,33 @@
         <div class="flex items-center gap-2">
           <label for="baseAt" class="text-sm">基準時刻:</label>
           <input id="baseAt" v-model="baseInput" type="datetime-local" step="60" class="border rounded p-1"
-            :disabled="relMode !== 'base'" />
-          <button type="button" class="btn-secondary" :disabled="relMode !== 'base'" @click="setBaseNow">今</button>
+            :disabled="relMode !== 'base'" aria-label="基準時刻（datetime-local）" />
+          <button type="button" class="btn-secondary" :disabled="relMode !== 'base'" @click="setBaseNow" aria-label="基準時刻を今に設定">今</button>
         </div>
 
 
         <div class="flex items-center gap-2">
           <label for="count" class="text-sm">件数:</label>
           <input id="count" v-model.number="count" type="number" min="1" :max="MAX_TOTAL"
-            class="w-20 border rounded p-1" />
+            class="w-20 border rounded p-1" aria-label="表示件数" />
         </div>
 
-        <div class="flex items-center gap-2">
-          <button type="button" class="btn-secondary" @click="copyLink">共有リンクをコピー</button>
-          <span v-if="copied" class="text-xs text-green-700">コピーしました</span>
+        <div class="flex flex-col gap-1 w-full max-w-xs">
+          <div class="flex items-center gap-2">
+            <button type="button" class="btn-secondary" @click="copyLink" aria-label="現在の設定で共有リンクをコピー">
+              共有リンクをコピー
+            </button>
+            <span v-if="copied" class="text-xs text-green-700" aria-live="polite">コピーしました</span>
+          </div>
+          <div class="text-xs text-gray-500" id="share-link-desc">
+            現在のcron式・件数・タイムゾーン・基準時刻をURLに反映した共有リンクを生成します。<br>
+            受け取った人は同じ条件で即座に次回実行予測ができます。<br>
+            <span class="font-mono">expr=</span>や<span class="font-mono">tz=</span>などのクエリパラメータで状態を再現します。
+          </div>
         </div>
       </div>
 
-      <div v-if="error" class="text-red-600 font-semibold">{{ error }}</div>
+  <div v-if="error" class="text-red-600 font-semibold" role="alert" aria-live="assertive">{{ error }}</div>
     </form>
 
     <div v-if="displayed.length" class="space-y-3">
@@ -80,7 +101,7 @@
         </button>
         <span v-else class="text-xs text-gray-500">これ以上は表示できません（最大 {{ MAX_TOTAL }} 件）</span>
 
-        <button type="button" class="btn-primary" :disabled="!displayed.length" @click="downloadCsv">
+        <button type="button" class="btn-primary" :disabled="!displayed.length" @click="downloadCsv" aria-label="CSVでダウンロード">
           CSV でダウンロード
         </button>
       </div>
@@ -89,6 +110,22 @@
 </template>
 
 <script setup lang="ts">
+import { useHead } from '#imports'
+
+useHead({
+  title: 'Cron JST 次回実行予測 | Tech Site',
+  meta: [
+    { name: 'description', content: 'crontab形式のスケジュールから日本時間・UTCで次回実行時刻を予測。共有リンク・プリセット・CSVダウンロード対応。全処理ローカル。' },
+    { property: 'og:title', content: 'Cron JST 次回実行予測 | Tech Site' },
+    { property: 'og:description', content: 'crontab形式のスケジュールから日本時間・UTCで次回実行時刻を予測。共有リンク・プリセット・CSVダウンロード対応。全処理ローカル。' },
+    { property: 'og:type', content: 'website' },
+    { property: 'og:url', content: 'https://tech-site-docs.com/tools/cron-jst' },
+    { property: 'og:image', content: '/favicon.ico' },
+    { name: 'twitter:card', content: 'summary' },
+    { name: 'twitter:title', content: 'Cron JST 次回実行予測 | Tech Site' },
+    { name: 'twitter:description', content: 'crontab形式のスケジュールから日本時間・UTCで次回実行時刻を予測。共有リンク・プリセット・CSVダウンロード対応。全処理ローカル。' }
+  ]
+})
 import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
 import { useRoute } from '#imports'
 import { parseCron, nextRuns } from '~/utils/cron'
@@ -96,6 +133,27 @@ import { parseCron, nextRuns } from '~/utils/cron'
 const input = ref('')
 const error = ref('')
 const results = ref<Date[]>([])
+
+// プリセット定義
+const presets = [
+  { label: '平日9-18時に5分毎 (*/5 9-18 * * 1-5)', value: '*/5 9-18 * * 1-5' },
+  { label: '毎日0時 (0 0 * * *)', value: '0 0 * * *' },
+  { label: '毎時0分 (0 * * * *)', value: '0 * * * *' },
+  { label: '毎月1日0時 (0 0 1 * *)', value: '0 0 1 * *' },
+  { label: '毎週日曜12時 (0 12 * * 0)', value: '0 12 * * 0' },
+  { label: '毎週月曜9時 (0 9 * * 1)', value: '0 9 * * 1' },
+  { label: '毎分 (毎時毎分) (* * * * *)', value: '* * * * *' },
+]
+
+function onPreset(e: Event) {
+  const val = (e.target as HTMLSelectElement).value
+  if (val) {
+    input.value = val
+    error.value = ''
+    results.value = []
+    onCheck()
+  }
+}
 const tzDisp = ref<'Asia/Tokyo' | 'UTC'>('Asia/Tokyo')
 const count = ref(5)
 const copied = ref(false)
@@ -174,12 +232,7 @@ function onClear() {
   baseInput.value = ''
 }
 
-function onSample() {
-  input.value = '*/5 9-18 * * 1-5'
-  error.value = ''
-  results.value = []
-  onCheck()
-}
+
 
 function format(dt: Date, tz: 'Asia/Tokyo' | 'UTC') {
   return dt.toLocaleString('ja-JP', {
@@ -353,10 +406,10 @@ onUnmounted(() => {
 
 <style scoped>
 .btn-primary {
-  @apply bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700 transition;
+  @apply bg-blue-700 text-white px-4 py-1 rounded hover:bg-blue-800 transition outline-none focus:ring-2 focus:ring-blue-400;
 }
 
 .btn-secondary {
-  @apply bg-gray-200 text-gray-800 px-3 py-1 rounded hover:bg-gray-300 transition;
+  @apply bg-gray-200 text-gray-900 px-3 py-1 rounded hover:bg-gray-300 transition outline-none focus:ring-2 focus:ring-blue-300;
 }
 </style>
