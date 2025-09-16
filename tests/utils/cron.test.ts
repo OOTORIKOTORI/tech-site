@@ -1,6 +1,14 @@
 import { describe, it, expect } from 'vitest'
 import { parseCron, nextRuns } from '../../utils/cron'
 
+// JST/UTCなど任意タイムゾーンで曜日(0=Sun..6=Sat)を取得
+function getWeekdayInTZ(date: Date, tz: string): number {
+  // Intl.DateTimeFormatで曜日名を取得し、0..6にマップ
+  const fmt = new Intl.DateTimeFormat('en-US', { timeZone: tz, weekday: 'short' })
+  const wd = fmt.format(date) // 'Sun'..'Sat'
+  return ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].indexOf(wd)
+}
+
 describe('cron utils', () => {
   it('generates 5-min weekday runs in JST', () => {
     const spec = parseCron('*/5 9-18 * * 1-5')
@@ -56,7 +64,7 @@ describe('cron utils', () => {
     const s0 = parseCron('0 0 * * 0')
     const base = new Date('2025-09-15T00:00:00Z')
     const r0 = nextRuns(s0, base, 'UTC', 1)[0]!
-    expect(r0.getDay()).toBe(0)
+    expect(getWeekdayInTZ(r0, 'UTC')).toBe(0)
     expect(() => parseCron('0 0 * * 7')).toThrow()
   })
 
@@ -73,9 +81,9 @@ describe('cron utils', () => {
     const spec = parseCron('* * * * 0,MON')
     const base = new Date('2025-09-14T14:59:00.000Z') // JST 23:59 (Sun)
     const runs = nextRuns(spec, base, 'Asia/Tokyo', 3)
-    expect(runs[0]!.getDay()).toBe(0)
-    expect(runs[1]!.getDay()).toBe(1)
-    expect(runs[2]!.getDay()).toBe(1)
+    expect(getWeekdayInTZ(runs[0]!, 'Asia/Tokyo')).toBe(0)
+    expect(getWeekdayInTZ(runs[1]!, 'Asia/Tokyo')).toBe(1)
+    expect(getWeekdayInTZ(runs[2]!, 'Asia/Tokyo')).toBe(1)
   })
 
   it('accepts name ranges and is case-insensitive (JAN-MAR/2, MON-FRI)', () => {
