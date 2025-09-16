@@ -3,7 +3,7 @@
 ## Features (v1.1)
 
 - **DOM×DOW Logic**: `dowDomMode: 'OR'|'AND'` (default 'OR')
-- **'*' Interpretation**: OR=unrestricted / AND=always-true
+- **'\*' Interpretation**: OR=unrestricted / AND=always-true
 - **DOW Range**: dow=0–6 (0=Sun); 7 unsupported, **name tokens unsupported**
 - **Auto-reload**: tick=10s, `configVersion`/`settingsUpdatedAt` change→**next tick** reload, in-flight continue
 
@@ -12,6 +12,28 @@
 1. Install dependencies (`pnpm install`)
 2. Set `dowDomMode` in config if needed (default is 'OR')
 3. Start server and use the cron tool
+
+### Configuration Examples
+
+**Default (OR mode):**
+
+```json
+{
+  "scheduler": {
+    "dowDomMode": "OR"
+  }
+}
+```
+
+**AND mode:**
+
+```json
+{
+  "scheduler": {
+    "dowDomMode": "AND"
+  }
+}
+```
 
 ## Configuration
 

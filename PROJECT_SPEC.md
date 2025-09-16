@@ -8,7 +8,7 @@
 
 ### 概要
 
-開発に役立つ Web ツールを提供する Nuxt 4 ベースの Web アプリケーションです。すべての処理はクライアントサイド（ブラウザ内）で実行され、プライバシーとセキュリティを重視した設計になっています。
+開発に役立つ Web ツールを提供する Nuxt 4 ベースの Web アプリケーションです。多くの処理はクライアントサイド（ブラウザ内）で実行可能で、プライバシーとセキュリティを考慮した設計になっています。
 
 ### 主要機能
 
@@ -43,6 +43,9 @@
 
 - `nuxt.config.ts`: Nuxt.js の設定ファイル
 - `tailwind.config.ts`: Tailwind CSS の設定ファイル
+- `scheduler.tickSeconds`: 10（自動再読込の間隔）
+- `scheduler.dowDomMode`: 'OR'|'AND'（省略時 'OR'）
+- **Auto-reload**: configVersion/settingsUpdatedAt 変化 → 次 tick で再読込、in-flight 継続
 
 ## 🔗 リンク
 
@@ -60,12 +63,10 @@
 ## v1.1 仕様
 
 - **DOM×DOW 論理**: `dowDomMode ('OR'|'AND', 既定 OR)` で切替可能。未指定時は 'OR'。
-- **'*' の解釈**: OR=制限なし（片方が '*' ならもう片方のみ判定）/ AND=常時 true と等価。
+- **'\*' の解釈**: OR=制限なし（片方が '\*' ならもう片方のみ判定）/ AND=常時 true と等価。
 - **値域**: `dow=0–6（0=Sun）, 7非対応`, **名前トークン未対応**。dom=1–31, mon=1–12。
-- **Auto-reload**: tick=10s、`configVersion`/`settingsUpdatedAt` 変化→**次のtick**再読込、in-flight継続。
+- **Auto-reload**: tick=10s、`configVersion`/`settingsUpdatedAt` 変化 →**次の tick**再読込、in-flight 継続。
 - **互換性**: `dowDomMode` 未指定時は OR 互換。
-
----
 
 ---
 
@@ -81,4 +82,4 @@
 ## 📅 リリースノート
 
 - **v1.0**: 初期リリース
-- **v1.1**: ユーザー認証機能の追加、UI 改善、バグ修正
+- **v1.1**: DOM×DOW 切替（dowDomMode）とドキュメント整備

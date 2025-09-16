@@ -40,7 +40,7 @@ function expandField(src: string, min: number, max: number): number[] {
       throw new Error('Step must be a positive integer')
     }
     const step = Math.floor(stepNum)
-    
+
     if (rawRange === '*' && step > 1) {
       // ステップ計算: DOM では 1 から開始
       for (let v = min; v <= max; v += step) {
@@ -185,7 +185,7 @@ function matchesParts(
   p: { minute: number; hour: number; dom: number; month: number; dow: number }
 ): boolean {
   const inSet = (f: CronField, v: number) => f.star || f.values.includes(v)
-  
+
   // 基本フィールドチェック
   if (!inSet(spec.minute, p.minute) || !inSet(spec.hour, p.hour) || !inSet(spec.month, p.month)) {
     return false
