@@ -31,8 +31,19 @@ export default defineNuxtConfig({
     },
   },
 
+  // サイトURLを環境変数から取得
+  hooks: {
+    ready: () => {
+      if (!process.env.NUXT_PUBLIC_SITE_URL) {
+        // eslint-disable-next-line no-console
+        console.warn(
+          '[nuxt] NUXT_PUBLIC_SITE_URL が未設定です。sitemapやRSSのURLが正しくなりません。'
+        )
+      }
+    },
+  },
   sitemap: {
-    hostname: 'https://tech-site-docs.com',
+    hostname: process.env.NUXT_PUBLIC_SITE_URL || 'https://tech-site-docs.com',
     gzip: true,
     routes: async () => [],
   },
@@ -41,15 +52,16 @@ export default defineNuxtConfig({
       path: '/feed.xml',
       type: 'rss2',
       create: async () => {
+        const siteUrl = process.env.NUXT_PUBLIC_SITE_URL || 'https://tech-site-docs.com'
         const { serverQueryContent } = await import('#content/server')
         const list = await serverQueryContent('/blog').find()
         return {
           title: 'Tech Site Blog RSS',
-          link: 'https://tech-site-docs.com/feed.xml',
+          link: siteUrl + '/feed.xml',
           description: 'Tech Siteの技術ブログRSS',
           items: list.map((a: any) => ({
             title: a.title,
-            link: `https://tech-site-docs.com${a._path}`,
+            link: siteUrl + (a._path || ''),
             description: a.description,
             pubDate: a.date,
           })),

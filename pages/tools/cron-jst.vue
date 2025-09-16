@@ -13,15 +13,14 @@
       <label for="cron" class="block font-medium">crontab 形式（分 時 日 月 曜日）</label>
       <textarea id="cron" v-model="input" rows="2" class="w-full border rounded p-2 font-mono text-base"
         :aria-invalid="!!error" aria-describedby="cron-help share-link-desc" spellcheck="false" autocomplete="off"
-        aria-label="crontab形式の入力欄。例: */5 9-18 * * 1-5（平日9-18時に5分毎） 曜日は0-6（0=Sun）、7は非対応。"
-      ></textarea>
+        aria-label="crontab形式の入力欄。例: */5 9-18 * * 1-5（平日9-18時に5分毎） 曜日は0-6（0=Sun）、7は非対応。"></textarea>
       <div id="cron-help" class="text-xs text-gray-500">
         例: <code>*/5 9-18 * * 1-5</code>（平日9-18時に5分毎） / 曜日は 0-6（0=Sun）。7 は非対応。
       </div>
 
       <div class="flex flex-wrap items-center gap-3">
-  <button type="submit" class="btn-primary" aria-label="cron式をチェック">今すぐチェック</button>
-  <button type="button" class="btn-secondary" @click="onClear" aria-label="入力をクリア">クリア</button>
+        <button type="submit" class="btn-primary" aria-label="cron式をチェック">今すぐチェック</button>
+        <button type="button" class="btn-secondary" @click="onClear" aria-label="入力をクリア">クリア</button>
 
         <div class="flex items-center gap-2">
           <label for="preset" class="text-sm">プリセット:</label>
@@ -54,7 +53,8 @@
           <label for="baseAt" class="text-sm">基準時刻:</label>
           <input id="baseAt" v-model="baseInput" type="datetime-local" step="60" class="border rounded p-1"
             :disabled="relMode !== 'base'" aria-label="基準時刻（datetime-local）" />
-          <button type="button" class="btn-secondary" :disabled="relMode !== 'base'" @click="setBaseNow" aria-label="基準時刻を今に設定">今</button>
+          <button type="button" class="btn-secondary" :disabled="relMode !== 'base'" @click="setBaseNow"
+            aria-label="基準時刻を今に設定">今</button>
         </div>
 
 
@@ -79,7 +79,7 @@
         </div>
       </div>
 
-  <div v-if="error" class="text-red-600 font-semibold" role="alert" aria-live="assertive">{{ error }}</div>
+      <div v-if="error" class="text-red-600 font-semibold" role="alert" aria-live="assertive">{{ error }}</div>
     </form>
 
     <div v-if="displayed.length" class="space-y-3">
@@ -101,7 +101,8 @@
         </button>
         <span v-else class="text-xs text-gray-500">これ以上は表示できません（最大 {{ MAX_TOTAL }} 件）</span>
 
-        <button type="button" class="btn-primary" :disabled="!displayed.length" @click="downloadCsv" aria-label="CSVでダウンロード">
+        <button type="button" class="btn-primary" :disabled="!displayed.length" @click="downloadCsv"
+          aria-label="CSVでダウンロード">
           CSV でダウンロード
         </button>
       </div>
@@ -112,6 +113,8 @@
 <script setup lang="ts">
 import { useHead } from '#imports'
 
+const SITE_URL = (process.env.NUXT_PUBLIC_SITE_URL || 'https://tech-site-docs.com').replace(/\/$/, '')
+
 useHead({
   title: 'Cron JST 次回実行予測 | Tech Site',
   meta: [
@@ -119,11 +122,27 @@ useHead({
     { property: 'og:title', content: 'Cron JST 次回実行予測 | Tech Site' },
     { property: 'og:description', content: 'crontab形式のスケジュールから日本時間・UTCで次回実行時刻を予測。共有リンク・プリセット・CSVダウンロード対応。全処理ローカル。' },
     { property: 'og:type', content: 'website' },
-    { property: 'og:url', content: 'https://tech-site-docs.com/tools/cron-jst' },
-    { property: 'og:image', content: '/favicon.ico' },
+    { property: 'og:url', content: SITE_URL + '/tools/cron-jst' },
+    { property: 'og:image', content: SITE_URL + '/favicon.ico' },
     { name: 'twitter:card', content: 'summary' },
     { name: 'twitter:title', content: 'Cron JST 次回実行予測 | Tech Site' },
     { name: 'twitter:description', content: 'crontab形式のスケジュールから日本時間・UTCで次回実行時刻を予測。共有リンク・プリセット・CSVダウンロード対応。全処理ローカル。' }
+  ],
+  script: [
+    {
+      type: 'application/ld+json',
+      innerHTML: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'SoftwareApplication',
+        name: 'Cron JST 次回実行予測',
+        url: SITE_URL + '/tools/cron-jst',
+        applicationCategory: 'DeveloperApplication',
+        operatingSystem: 'All',
+        offers: { '@type': 'Offer', price: '0', priceCurrency: 'JPY' },
+        description: 'crontab形式のスケジュールから日本時間・UTCで次回実行時刻を予測。共有リンク・プリセット・CSVダウンロード対応。全処理ローカル。',
+        image: SITE_URL + '/favicon.ico'
+      })
+    }
   ]
 })
 import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
@@ -265,7 +284,8 @@ function relative(dt: Date) {
 
 async function copyLink() {
   const url = new URL(window.location.href)
-  url.searchParams.set('expr', input.value.trim())
+  // encode cron式: +/スペースを%20に
+  url.searchParams.set('expr', encodeURIComponent(input.value.trim()).replace(/%20/g, '+'))
   url.searchParams.set('n', String(countClamped.value))
   url.searchParams.set('tz', tzDisp.value)
   url.searchParams.set('rel', relMode.value)
@@ -274,9 +294,25 @@ async function copyLink() {
   } else {
     url.searchParams.delete('from')
   }
-  await navigator.clipboard.writeText(url.toString())
-  copied.value = true
-  setTimeout(() => (copied.value = false), 1200)
+  const shareUrl = url.toString()
+  // クリップボードAPIが使えない場合はtextarea fallback
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(shareUrl)
+    } else {
+      const textarea = document.createElement('textarea')
+      textarea.value = shareUrl
+      document.body.appendChild(textarea)
+      textarea.select()
+      document.execCommand('copy')
+      document.body.removeChild(textarea)
+    }
+    copied.value = true
+    setTimeout(() => (copied.value = false), 1200)
+  } catch {
+    copied.value = false
+    alert('クリップボードへのコピーに失敗しました')
+  }
 }
 
 // もっと表示：件数を増やすだけ（再計算は watch で一括実行）
@@ -368,12 +404,13 @@ watch(relMode, (mode) => {
 });
 
 
-// プリフィル & タイマー開始
+
 const route = useRoute()
 onMounted(() => {
+  // クライアントのみ
+  if (typeof window === 'undefined') return
   const rel = route.query?.rel
   if (rel === 'now' || rel === 'base') relMode.value = rel
-  // 相対時間の即時更新（任意。ぴたり合わせたい場合）
   now.value = Date.now()
   tick()
   const delay = 30_000 - (Date.now() % 30_000)
@@ -390,12 +427,31 @@ onMounted(() => {
   }
   if (!baseFrom.value) setBaseNow()
   // 3. expr / n
-  const q = route.query?.expr
-  if (typeof q === 'string' && q.trim()) input.value = q
+  let q = route.query?.expr
+  if (typeof q === 'string' && q.trim()) {
+    // decode: +→スペース, decodeURIComponent
+    try {
+      q = decodeURIComponent(q.replace(/\+/g, ' '))
+      input.value = q
+    } catch {
+      input.value = ''
+    }
+  } else {
+    input.value = ''
+  }
   const n = Number(route.query?.n)
   if (Number.isFinite(n) && n >= 1) count.value = Math.min(n, MAX_TOTAL)
-  // 4. 計算
-  onCheck()
+  // 4. 計算（無効クエリはデフォルト）
+  try {
+    onCheck()
+  } catch {
+    input.value = ''
+    count.value = 5
+    tzDisp.value = 'Asia/Tokyo'
+    relMode.value = 'now'
+    setBaseNow()
+    onCheck()
+  }
 })
 
 onUnmounted(() => {
