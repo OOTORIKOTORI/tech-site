@@ -12,7 +12,7 @@ export type CronField = { values: number[]; star: boolean }
  *
  * メモ:
  * - DOW は 0-6（0=Sun）。7 は非対応（エラー想定）。
- * - DOM×DOW は OR（どちらか一致で通過）。
+ * - DOM×DOW は dowDomMode ('OR'|'AND') で切替。'*' は OR=unrestricted/AND=always-true。
  * - 名前トークン（JAN..DEC, SUN..SAT）は大小文字を無視。
  * - ステップ指定（例: asterisk/5, a-b/2）に対応。0 以下のステップは不正。
  * - 基準の秒・ミリ秒があるときは“次の分”に切り上げ。ちょうど分なら包括開始。
@@ -131,7 +131,7 @@ function mapNamedTokens(src: string, dict: Record<string, number>): string {
  * 仕様要点:
  * - フィールドは `minute hour dom month dow` の 5 つ。
  * - DOW: 0-6（0=Sun）。7 は非対応（エラー想定）。
- * - DOM×DOW は OR。
+ * - DOM×DOW は dowDomMode ('OR'|'AND') で切替。'*' は OR=unrestricted/AND=always-true。
  * - 名前トークン（JAN..DEC, SUN..SAT）は大小文字を無視。
  * - ステップ指定（例: asterisk/5, a-b/5）で 0 以下や NaN は不正。
  *
