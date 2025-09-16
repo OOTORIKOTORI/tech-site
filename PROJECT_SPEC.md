@@ -62,7 +62,7 @@
 
 ## v1.1 仕様
 
-- **DOM×DOW 論理**: `dowDomMode ('OR'|'AND', 既定 OR)` で切替可能。未指定時は 'OR'。
+- **DOM×DOW は dowDomMode ('OR'|'AND') で切替。'\*' は OR=unrestricted / AND=always-true。**
 - **'\*' の解釈**: OR=制限なし（片方が '\*' ならもう片方のみ判定）/ AND=常時 true と等価。
 - **値域**: `dow=0–6（0=Sun）, 7非対応`, **名前トークン未対応**。dom=1–31, mon=1–12。
 - **Auto-reload**: tick=10s、`configVersion`/`settingsUpdatedAt` 変化 →**次の tick**再読込、in-flight 継続。

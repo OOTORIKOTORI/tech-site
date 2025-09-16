@@ -156,7 +156,13 @@ export function parseCron(expr: string, opts?: { dowDomMode?: 'OR' | 'AND' }): C
   const dw = /[A-Za-z]/.test(dow) ? makeDowField(mapNamedTokens(dow, DOW_NAME)) : makeDowField(dow)
   const mode = opts?.dowDomMode === 'AND' ? 'AND' : 'OR'
   // INFOログ（テスト環境では抑制）
-  if (typeof console !== 'undefined' && console.info && typeof process === 'undefined') {
+  if (
+    typeof console !== 'undefined' &&
+    console.info &&
+    typeof process !== 'undefined' &&
+    process.env &&
+    process.env.NODE_ENV !== 'test'
+  ) {
     console.info(`[cron] dowDomMode: ${mode}`)
   }
   return { minute, hour, dom: d, month: mo, dow: dw, dowDomMode: mode }

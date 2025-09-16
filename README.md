@@ -2,7 +2,7 @@
 
 ## Features (v1.1)
 
-- **DOM×DOW Logic**: `dowDomMode: 'OR'|'AND'` (default 'OR')
+- **DOM×DOW は dowDomMode ('OR'|'AND') で切替。'\*' は OR=unrestricted / AND=always-true。**
 - **'\*' Interpretation**: OR=unrestricted / AND=always-true
 - **DOW Range**: dow=0–6 (0=Sun); 7 unsupported, **name tokens unsupported**
 - **Auto-reload**: tick=10s, `configVersion`/`settingsUpdatedAt` change→**next tick** reload, in-flight continue

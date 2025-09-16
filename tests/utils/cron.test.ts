@@ -1,13 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { parseCron, nextRuns } from '../../utils/cron'
-
-// JST/UTCなど任意タイムゾーンで曜日(0=Sun..6=Sat)を取得
-function getWeekdayInTZ(date: Date, tz: string): number {
-  // Intl.DateTimeFormatで曜日名を取得し、0..6にマップ
-  const fmt = new Intl.DateTimeFormat('en-US', { timeZone: tz, weekday: 'short' })
-  const wd = fmt.format(date) // 'Sun'..'Sat'
-  return ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].indexOf(wd)
-}
+import { getWeekdayInTZ } from './time'
 
 describe('cron utils', () => {
   it('generates 5-min weekday runs in JST', () => {
