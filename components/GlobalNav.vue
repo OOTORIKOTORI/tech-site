@@ -3,6 +3,7 @@
     <NuxtLink to="/" class="font-bold text-lg">Tech Site</NuxtLink>
     <NuxtLink to="/tools/cron-jst" class="hover:underline">Cron JST</NuxtLink>
     <NuxtLink to="/blog" class="hover:underline" :aria-current="$route.path.startsWith('/blog') ? 'page' : undefined">
-      Blog</NuxtLink>
+      Blog
+    </NuxtLink>
   </nav>
 </template>

@@ -2,7 +2,8 @@
   <div class="container mx-auto max-w-3xl py-8 px-4">
     <article v-if="doc">
       <h1 class="text-2xl font-bold mb-2">{{ doc.title }}</h1>
-      <div class="text-xs text-gray-500 mb-4">{{ doc.date }}<span v-if="doc.tags"> ｜ {{ doc.tags.join(', ') }}</span>
+      <div class="text-xs text-gray-500 mb-4">
+        {{ doc.date }}<span v-if="doc.tags"> ｜ {{ doc.tags.join(', ') }}</span>
       </div>
       <div v-if="toc?.links?.length" class="mb-6">
         <h2 class="text-sm font-semibold mb-1">目次</h2>

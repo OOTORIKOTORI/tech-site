@@ -19,8 +19,12 @@
       </div>
 
       <div class="flex flex-wrap items-center gap-3">
-        <button type="submit" class="btn-primary" aria-label="cron式をチェック">今すぐチェック</button>
-        <button type="button" class="btn-secondary" @click="onClear" aria-label="入力をクリア">クリア</button>
+        <button type="submit" class="btn-primary" aria-label="cron式をチェック">
+          今すぐチェック
+        </button>
+        <button type="button" class="btn-secondary" aria-label="入力をクリア" @click="onClear">
+          クリア
+        </button>
 
         <div class="flex items-center gap-2">
           <label for="preset" class="text-sm">プリセット:</label>
@@ -51,10 +55,12 @@
 
         <div class="flex items-center gap-2">
           <label for="baseAt" class="text-sm">基準時刻:</label>
-          <input id="baseAt" v-model="baseInput" type="datetime-local" step="60" class="border rounded p-1"
-            :disabled="relMode !== 'base'" aria-label="基準時刻（datetime-local）" />
-          <button type="button" class="btn-secondary" :disabled="relMode !== 'base'" @click="setBaseNow"
-            aria-label="基準時刻を今に設定">今</button>
+          <input id="baseAt" v-model="baseInput" type="datetime-local" step="60" :disabled="relMode !== 'base'"
+            class="border rounded p-1" aria-label="基準時刻（datetime-local）" />
+          <button type="button" class="btn-secondary" aria-label="基準時刻を今に設定" :disabled="relMode !== 'base'"
+            @click="setBaseNow">
+            今
+          </button>
         </div>
 
 
@@ -66,12 +72,12 @@
 
         <div class="flex flex-col gap-1 w-full max-w-xs">
           <div class="flex items-center gap-2">
-            <button type="button" class="btn-secondary" @click="copyLink" aria-label="現在の設定で共有リンクをコピー">
+            <button type="button" class="btn-secondary" aria-label="現在の設定で共有リンクをコピー" @click="copyLink">
               共有リンクをコピー
             </button>
             <span v-if="copied" class="text-xs text-green-700" aria-live="polite">コピーしました</span>
           </div>
-          <div class="text-xs text-gray-500" id="share-link-desc">
+          <div id="share-link-desc" class="text-xs text-gray-500">
             現在のcron式・件数・タイムゾーン・基準時刻をURLに反映した共有リンクを生成します。<br>
             受け取った人は同じ条件で即座に次回実行予測ができます。<br>
             <span class="font-mono">expr=</span>や<span class="font-mono">tz=</span>などのクエリパラメータで状態を再現します。
@@ -101,8 +107,8 @@
         </button>
         <span v-else class="text-xs text-gray-500">これ以上は表示できません（最大 {{ MAX_TOTAL }} 件）</span>
 
-        <button type="button" class="btn-primary" :disabled="!displayed.length" @click="downloadCsv"
-          aria-label="CSVでダウンロード">
+        <button type="button" class="btn-primary" aria-label="CSVでダウンロード" :disabled="!displayed.length"
+          @click="downloadCsv">
           CSV でダウンロード
         </button>
       </div>
