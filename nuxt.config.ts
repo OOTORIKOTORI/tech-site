@@ -1,7 +1,7 @@
 ﻿import { defineNuxtConfig } from 'nuxt/config'
 
 export default defineNuxtConfig({
-  modules: ['@nuxt/content', '@nuxtjs/tailwindcss', '@nuxtjs/sitemap', '@nuxtjs/feed'],
+  modules: ['@nuxt/content', '@nuxtjs/tailwindcss', '@nuxtjs/sitemap'],
   css: ['@@/assets/css/tailwind.css'],
   pages: true,
 
@@ -31,44 +31,24 @@ export default defineNuxtConfig({
     },
   },
 
-  // サイトURLを環境変数から取得
+  runtimeConfig: {
+    public: {
+      siteUrl: process.env.NUXT_PUBLIC_SITE_URL || 'http://localhost:3000',
+    },
+  },
   hooks: {
-    ready: () => {
-      if (!process.env.NUXT_PUBLIC_SITE_URL) {
+    ready: nuxt => {
+      if (!process.env.NUXT_PUBLIC_SITE_URL && process.env.NODE_ENV !== 'test') {
         // eslint-disable-next-line no-console
         console.warn(
-          '[nuxt] NUXT_PUBLIC_SITE_URL が未設定です。sitemapやRSSのURLが正しくなりません。'
+          '[nuxt] NUXT_PUBLIC_SITE_URL 未設定のためデフォルト http://localhost:3000 を使用します'
         )
       }
     },
   },
   sitemap: {
-    hostname: process.env.NUXT_PUBLIC_SITE_URL || 'https://tech-site-docs.com',
-    gzip: true,
-    routes: async () => [],
+    siteUrl: process.env.NUXT_PUBLIC_SITE_URL || 'http://localhost:3000',
   },
-  feed: [
-    {
-      path: '/feed.xml',
-      type: 'rss2',
-      create: async () => {
-        const siteUrl = process.env.NUXT_PUBLIC_SITE_URL || 'https://tech-site-docs.com'
-        const { serverQueryContent } = await import('#content/server')
-        const list = await serverQueryContent('/blog').find()
-        return {
-          title: 'Tech Site Blog RSS',
-          link: siteUrl + '/feed.xml',
-          description: 'Tech Siteの技術ブログRSS',
-          items: list.map((a: any) => ({
-            title: a.title,
-            link: siteUrl + (a._path || ''),
-            description: a.description,
-            pubDate: a.date,
-          })),
-        }
-      },
-    },
-  ],
   app: {
     head: {
       title: 'Tech Tools & Notes',
