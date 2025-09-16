@@ -69,12 +69,15 @@ function makeDowField(src: string): CronField {
   if (s === '*') {
     return { values: [0, 1, 2, 3, 4, 5, 6], star: true }
   }
+  // expandFieldで一旦数値化
   const vals = expandField(src, 0, 7)
+  // 7が含まれていたらエラー
   if (vals.some(v => v === 7)) throw new Error('DOW supports 0-6 (0=Sun). 7 is not supported.')
-  const uniq = Array.from(new Set(vals))
-    .filter(v => v >= 0 && v <= 6)
-    .sort((a, b) => a - b)
-  return { values: uniq, star: false }
+  // 0..6以外は除外し、重複排除・昇順
+  const uniq = Array.from(
+    new Set(vals.map(v => (v >= 0 && v <= 6 ? v : undefined)).filter(v => v !== undefined))
+  ).sort((a, b) => a - b)
+  return { values: uniq as number[], star: false }
 }
 
 const MON_NAME: Record<string, number> = {
@@ -123,6 +126,7 @@ function mapNamedTokens(src: string, dict: Record<string, number>): string {
       }
     })
     .join(',')
+  // 名前トークンは必ず0..6にマップ
 }
 
 /**
