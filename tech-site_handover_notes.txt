@@ -1,0 +1,229 @@
+tech-site / 開発引き継ぎメモ
+================================
+
+最終更新: 2025-09-15T12:27:52Z
+
+■ プロジェクト概要
+------------------
+- スタック: Nuxt 4.1.2, Vue 3.5.x, Vite, TypeScript, Tailwind CSS 3.4.x
+- コンテンツ: @nuxt/content 3.6.x（SQLite: better-sqlite3 12.x を利用）
+- テスト: Vitest 3.2.x + jsdom
+- Lint: ESLint 8.57 + @typescript-eslint + eslint-plugin-vue
+- パッケージマネージャ: pnpm 10.x（package.json の "packageManager": "pnpm@10.16.0"）
+- Node: 20.x
+
+■ 追加したツール / ページ
+-------------------------
+### 「Cron JST 次回実行予測」
+- 位置: `pages/tools/cron-jst.vue`, ロジック: `utils/cron.ts`
+- 機能:
+  - crontab 形式（分 時 日 月 曜日）入力を JST/UTC で次回実行候補に展開
+  - 表示タイムゾーンの切替（JST / UTC）
+  - 相対表示の基準を「今 / 基準時刻」で切替
+  - 基準時刻は `datetime-local`（分単位）で選択、JST/UTC どちらの壁時計でも解釈可能
+  - 共有リンク生成（`expr`, `n`, `tz`, `rel`, `from` をクエリ化）
+  - CSV ダウンロード、もっと表示（ページング）
+  - 相対時間ラベルは 30 秒ごとに境界揃えで更新
+
+- 実装メモ:
+  - `fromInputValue` / `toInputValue` で UI の壁時計(JST/UTC) ⇔ UTCの瞬間 を正規化
+  - `setBaseNow()`・`onCheck()` で **秒:00** に丸める（ off-by-one を避ける）
+  - `now` は 30 秒境界に合わせて `setTimeout`→`setInterval` で更新開始
+
+■ cron ユーティリティ（utils/cron.ts）
+--------------------------------------
+- 主要 API:
+  - `parseCron(expr: string): CronSpec`
+    - 各フィールド（minute, hour, dom, mon, dow）を数値配列に展開
+    - サポート: `*` / 数値 / カンマ列 `1,2,3` / 範囲 `1-5` / ステップ `*/5` `9-18/2`
+    - フィールド境界は LIMITS (分0-59, 時0-23, 日1-31, 月1-12, 曜0-6) にクリップ
+  - `nextRuns(spec: CronSpec, baseFrom: Date, tz: 'Asia/Tokyo'|'UTC', n: number): Date[]`
+    - `baseFrom` 以降の n 件の実行日時（UTCの Date）を返す
+    - **分単位の切り上げロジック**: 基準が秒付きのとき次の分に繰り上げ、以後分粒度で探索
+    - JST/UTC の壁時計値を求めて判定し、UTC の `Date` を構築
+
+- テスト（`tests/utils/cron.test.ts`, `tests/utils/cron.extra.test.ts`）:
+  - 5分刻み・平日 9-18 時の展開（JST）
+  - 年始 0:00 JST を毎年実行する cron の検証
+  - out-of-range クリップの検証
+  - **秒あり基準の切り上げ**、**連続分の重複なし** などの端ケース
+
+- 既知・未決事項（次スレ候補）:
+  - **DOM と DOW の関係（AND vs OR）**: 現状は「標準的 crontab（OR）」を想定するか、厳密運用に合わせるか。要件確定とユニットテスト追加。
+  - パフォーマンス: 連続分探索のショートカット（次の候補分まで一気にジャンプ）
+  - 範囲＋ステップの厳密仕様（例: `1-59/5` の端点含有）
+  - 夏時間地域の将来対応（JST/UTC以外を視野に）
+
+■ ESLint / TypeScript 方針（“CIが通る”寄せ）
+--------------------------------------------
+- ルート `.eslintrc.cjs` は `@typescript-eslint`, `eslint-plugin-vue` を導入。
+- ページ/テストは厳しすぎるルールを緩和（`no-explicit-any` の overrides 等）。
+- CI では **ESLint が未インストールでも落とさない** ガードを導入済み（実体はあるので現在は通る）。
+- `pnpm lint` は warning 多め（vue の整形系）があるが、CI は error のみで失敗。
+
+■ CI（GitHub Actions）最終形
+----------------------------
+目的: 「pnpm を早期に PATH 参照せず、アクションで確実に導入」
+
+ワークフロー要点:
+1) `actions/setup-node@v4`（**cache: pnpm を指定しない**）
+2) `pnpm/action-setup@v4`（version は package.json の packageManager に従う）
+3) `actions/cache` で pnpm store をキャッシュ  
+   - `path: ~/setup-pnpm/node_modules/.bin/store/v10`（self-installer の実体に合わせる）
+4) `pnpm install --no-frozen-lockfile`
+5) ネイティブモジュール再ビルド: `better-sqlite3`（`prebuild-install || node-gyp rebuild --release` が postinstallで走る）
+6) `pnpm typecheck` → `pnpm test` → `pnpm -s exec eslint -v >/dev/null 2>&1 || echo 'skip'` → `pnpm lint`（必要に応じて） → `pnpm build`
+
+これで **pnpm が見つからない / pnpm の多重 version 指定** といった初期の落とし穴を解消。  
+（以前は `setup-node@v4 cache: pnpm` が pnpm を暗黙参照 → PATH 未解決でクラッシュしていた）
+
+■ @nuxt/content 設定
+---------------------
+- `content.config.ts` は以下の形に整理しタイプエラーを解消:
+  ```ts
+  import { defineContentConfig } from '@nuxt/content'
+  export default defineContentConfig({
+    collections: {}
+  })
+  ```
+- `nuxt prepare`（postinstall）で `#content/config` 解決エラーが出ないのを確認。
+
+■ ローカル確認フロー（最終版）
+-------------------------------
+```bash
+pnpm i        # postinstallで nuxt prepare
+pnpm typecheck
+pnpm test     # 現在 3 files / 24 tests すべて green
+pnpm dev      # 手動動作確認
+pnpm build
+```
+
+■ CI が通るワークフローの骨子（YAML 抜粋イメージ）
+-------------------------------------------------
+```yaml
+- uses: actions/setup-node@v4
+  with:
+    node-version: 20
+
+- uses: pnpm/action-setup@v4
+  with:
+    run_install: false    # インストールは自分で実行
+    dest: ~/setup-pnpm    # self-installer の固定場所
+
+- uses: actions/cache@v4
+  with:
+    path: ~/setup-pnpm/node_modules/.bin/store/v10
+    key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+    restore-keys: ${{ runner.os }}-pnpm-store-
+
+- run: pnpm install --no-frozen-lockfile
+- run: pnpm typecheck
+- run: pnpm test
+- run: pnpm -s exec eslint -v >/dev/null 2>&1 || echo "eslint not installed, skip"
+- run: pnpm lint
+- run: pnpm build
+```
+
+■ 直前までの作業ログ（ダイジェスト）
+-------------------------------
+- cron UI 実装（JST/UTC, 相対表示, 共有リンク, CSV, もっと表示）
+- `parseCron` と `nextRuns` を初期実装 → テスト作成
+- 型/ESLint エラーを洗い出し（`@types/node`, content config など）
+- **分の切り上げ**・**連続分の重複** バグを修正し、テスト追加（`cron.extra.test.ts`）
+- CI 側で **pnpm が未検出** → `cache: pnpm` を削除し `pnpm/action-setup` + `actions/cache` に移行 → **成功**
+- 最終状態: ローカル `pnpm typecheck` / `pnpm test` green、Actions も green
+
+■ 次の一手（別スレで開始したいタスク）
+-------------------------------------
+1) DOM×DOW の論理（OR/AND）を要件化 → どちらにせよ分岐実装とテストを追加  
+2) `nextRuns` のパフォーマンス改善（次候補分へのジャンプ、二分探索寄せ）  
+3) UI 微調整（アクセシビリティ: フォーム要素の aria, ラベル結合確認、レスポンシブ余白）  
+4) README に CI badge, 開発手順, コマンド一覧を追記  
+5) （将来）JST 以外の TZ 対応の拡張
+
+■ Copilot 用プロンプト雛形
+---------------------------
+- 「DOMとDOWのAND/OR切替を追加して。`CronSpec` に `dowDomMode: 'OR'|'AND'` を追加し、`nextRuns` 内で判定を分岐。テストを `tests/utils/cron.dom-dow.test.ts` に追加。既存テストは壊さないこと。」
+- 「`nextRuns` を O(minutes) から O(candidates) に改善。現在の分が条件を満たさないとき、各フィールドの次の有効値をもとに分/時/日の繰り上げを最短で行うジャンプアルゴリズムに置き換え。新しいベンチテストを追加。」
+
+■ 参考コマンド
+--------------
+- Lint: `pnpm lint` / 自動修正 `pnpm lint:fix`
+- 型: `pnpm typecheck`
+- テスト: `pnpm test --run`
+- 開発: `pnpm dev`
+- ビルド: `pnpm build`
+
+以上です。次スレは「DOM/DOW 仕様の確定 & 実装」から入るのがスムーズです。
+
+
+-------------------------------------------------------------------------------------------------------------
+
+Cron JST ツール 仕様（v1・確定）
+1) フィールド仕様（分 時 日 月 曜日）
+
+記法: *, ,, -, / の組み合わせ（空白区切り5フィールド）。
+
+妥当範囲
+
+分: 0–59
+
+時: 0–23
+
+日(DOM): 1–31（存在しない日はスキップ。例: 2月の 30/31 は発火しない）
+
+月: 1–12（数値のみ。英略称は未対応）
+
+曜日(DOW): 0–6 固定（0=Sun, 1=Mon … 6=Sat）。7=Sun は現状エラー。
+
+ステップ: */x, a-b/x をサポート。x=0 はエラー。
+
+範囲+ステップの端点: 開始端点は含む。上端は「範囲内で割り切れた場合のみ含む」
+例) 1-10/4 → 1,5,9
+
+単発の境界外数値（例: 60）は 境界にクリップ（= 59）する方針。ただし構文不正（*/0, abc, 2-/5 等）は 即エラー。
+
+2) DOM×DOW の論理
+
+v1 は OR（どちらか一致で発火）。
+後日、UI/パーサに dowDomMode: 'OR' | 'AND' 切替を追加予定（バックログ）。
+
+3) 時刻計算の基準とTZ
+
+nextRuns(spec, baseFromUtc: Date, tz: 'Asia/Tokyo' | 'UTC', n: number) 的なAPIで、計算ロジックは JST を基準に解釈。
+
+baseFromUtc が「秒>0」のときは 次の分へ切り上げ。秒=0 ちょうどは 含む（inclusive）。
+
+結果の日時は Date（UTCの瞬間）。表示は UI の tzDisp（JST/UTC）でローカライズ。
+
+4) UI/リンク/CSV
+
+共有リンク:
+
+expr はURLエンコード。
+
+from は YYYY-MM-DDTHH:mm（壁時計文字列）、tz で壁時計のタイムゾーンを明示 → 復元時に UTC瞬間へ正規化。
+
+相対時間ラベル: 30秒境界で更新。非アクティブ時は 1分間隔に抑制（復帰時に再同期）[実装は後追いでOK]。
+
+CSV: UTF-8(BOM)。当面は #, ISO, JST, UTC, relative を出力（現行どおり）。将来 tz, expr, base_from, mode 追加を検討（バックログ）。
+
+5) アルゴリズム/性能
+
+現状は O(minutes) の逐次探索。将来「分→時→日→月→曜日」の候補ジャンプで O(candidates) 化を検討（バックログ）。
+
+UIの件数上限は 200（既存どおり）。ベンチは必要になったら追加。
+
+6) テスト方針（v1で担保済み＋追加候補）
+
+秒付き基準の切り上げ/inclusive、月跨ぎ、DOM×DOW(OR)、境界値、*/x、a-b/x の端点。
+
+追加候補: うるう年 2/29、月末→翌月1日、7 をDOWに入れた場合のエラー確認、エラーメッセージの明確化（ID/コード）。
+
+7) CI/開発体験（決定事項）
+
+Actions: setup-node では cache: pnpm を使わず、pnpm/action-setup で明示インストール → 早期 pnpm 参照エラーを回避。
+
+ESLint: CIは --max-warnings=0 で必須。ローカルは自由。
+
+better-sqlite3: いまは Linux x64 前提でOK。将来マトリクス拡張時は prebuild を優先。

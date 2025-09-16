@@ -23,6 +23,10 @@ export type CronSpec = {
   dom: CronField
   month: CronField
   dow: CronField
+  /**
+   * DOM×DOW 判定モード: 'OR'|'AND'（未指定は 'OR'）
+   */
+  dowDomMode: 'OR' | 'AND'
 }
 
 function expandField(src: string, min: number, max: number): number[] {
@@ -36,14 +40,22 @@ function expandField(src: string, min: number, max: number): number[] {
       throw new Error('Step must be a positive integer')
     }
     const step = Math.floor(stepNum)
-    const range = rawRange === '*' ? `${min}-${max}` : rawRange
-    const [startStr, endStr] = range.includes('-') ? range.split('-') : [range, range]
-    let start = Number(startStr)
-    let end = Number(endStr ?? startStr)
-    start = Math.max(min, Math.min(max, start))
-    end = Math.max(min, Math.min(max, end))
-    if (start > end) [start, end] = [end, start]
-    for (let v = start; v <= end; v += step) set.add(v)
+    
+    if (rawRange === '*' && step > 1) {
+      // ステップ計算: DOM では 1 から開始
+      for (let v = min; v <= max; v += step) {
+        set.add(v)
+      }
+    } else {
+      const range = rawRange === '*' ? `${min}-${max}` : rawRange
+      const [startStr, endStr] = range.includes('-') ? range.split('-') : [range, range]
+      let start = Number(startStr)
+      let end = Number(endStr ?? startStr)
+      start = Math.max(min, Math.min(max, start))
+      end = Math.max(min, Math.min(max, end))
+      if (start > end) [start, end] = [end, start]
+      for (let v = start; v <= end; v += step) set.add(v)
+    }
   }
   return Array.from(set).sort((a, b) => a - b)
 }
@@ -127,7 +139,7 @@ function mapNamedTokens(src: string, dict: Record<string, number>): string {
  * - asterisk/5 9-18 * * 1-5
  * - 0 0 1 JAN *
  */
-export function parseCron(expr: string): CronSpec {
+export function parseCron(expr: string, opts?: { dowDomMode?: 'OR' | 'AND' }): CronSpec {
   const fields = expr.trim().split(/\s+/)
   if (fields.length !== 5) throw new Error('Cron expression must have exactly 5 fields')
   const [m, h, dom, mon, dow] = fields as [string, string, string, string, string]
@@ -138,7 +150,12 @@ export function parseCron(expr: string): CronSpec {
     ? makeField(mapNamedTokens(mon, MON_NAME), 1, 12)
     : makeField(mon, 1, 12)
   const dw = /[A-Za-z]/.test(dow) ? makeDowField(mapNamedTokens(dow, DOW_NAME)) : makeDowField(dow)
-  return { minute, hour, dom: d, month: mo, dow: dw }
+  const mode = opts?.dowDomMode === 'AND' ? 'AND' : 'OR'
+  // INFOログ（テスト環境では抑制）
+  if (typeof console !== 'undefined' && console.info && typeof process === 'undefined') {
+    console.info(`[cron] dowDomMode: ${mode}`)
+  }
+  return { minute, hour, dom: d, month: mo, dow: dw, dowDomMode: mode }
 }
 
 function partsInTZ(date: Date, tz: 'Asia/Tokyo' | 'UTC') {
@@ -168,14 +185,33 @@ function matchesParts(
   p: { minute: number; hour: number; dom: number; month: number; dow: number }
 ): boolean {
   const inSet = (f: CronField, v: number) => f.star || f.values.includes(v)
-  let dayOk: boolean
-  if (spec.dom.star && spec.dow.star) dayOk = true
-  else if (spec.dom.star) dayOk = inSet(spec.dow, p.dow)
-  else if (spec.dow.star) dayOk = inSet(spec.dom, p.dom)
-  else dayOk = inSet(spec.dom, p.dom) || inSet(spec.dow, p.dow)
-  return (
-    inSet(spec.minute, p.minute) && inSet(spec.hour, p.hour) && inSet(spec.month, p.month) && dayOk
-  )
+  
+  // 基本フィールドチェック
+  if (!inSet(spec.minute, p.minute) || !inSet(spec.hour, p.hour) || !inSet(spec.month, p.month)) {
+    return false
+  }
+
+  // DOM×DOW 判定
+  const mode = spec.dowDomMode === 'AND' ? 'AND' : 'OR'
+  const domHit = inSet(spec.dom, p.dom)
+  const dowHit = inSet(spec.dow, p.dow)
+
+  if (mode === 'AND') {
+    // AND モード: 両方が true (star は常時 true)
+    return (spec.dom.star || domHit) && (spec.dow.star || dowHit)
+  } else {
+    // OR モード: どちらかが true または両方が star
+    if (spec.dom.star && spec.dow.star) {
+      return true // 両方が * なら常に true
+    }
+    if (spec.dom.star) {
+      return dowHit // dom=* なら dow のみチェック
+    }
+    if (spec.dow.star) {
+      return domHit // dow=* なら dom のみチェック
+    }
+    return domHit || dowHit // 通常の OR
+  }
 }
 
 function buildDateInTZ(
@@ -244,14 +280,34 @@ export function nextRuns(
       p = partsInTZ(cur, tz)
     }
 
-    // 日（OR）: 不一致なら日単位の小ループ（DOWのみ:7, それ以外:31）
+    // 日（DOM×DOW）: dowDomMode に応じて判定
     const inSet = (f: CronField, v: number) => f.star || f.values.includes(v)
-    const domDowOk = (pp: { dom: number; dow: number }) =>
-      (spec.dom.star && spec.dow.star) ||
-      (spec.dom.star && inSet(spec.dow, pp.dow)) ||
-      (spec.dow.star && inSet(spec.dom, pp.dom)) ||
-      inSet(spec.dom, pp.dom) ||
-      inSet(spec.dow, pp.dow)
+    const domDowOk = (pp: { dom: number; dow: number }) => {
+      // 実在日チェック: 日付が存在しない場合は false
+      const pFull = partsInTZ(cur, tz)
+      const actualDate = new Date(yearInTZ(cur, tz), pFull.month - 1, pp.dom)
+      if (actualDate.getDate() !== pp.dom) return false
+
+      const mode = spec.dowDomMode === 'AND' ? 'AND' : 'OR'
+      const domHit = inSet(spec.dom, pp.dom)
+      const dowHit = inSet(spec.dow, pp.dow)
+
+      if (mode === 'AND') {
+        return (spec.dom.star || domHit) && (spec.dow.star || dowHit)
+      } else {
+        // OR モード: どちらかが true または両方が star
+        if (spec.dom.star && spec.dow.star) {
+          return true // 両方が * なら常に true
+        }
+        if (spec.dom.star) {
+          return dowHit // dom=* なら dow のみチェック
+        }
+        if (spec.dow.star) {
+          return domHit // dow=* なら dom のみチェック
+        }
+        return domHit || dowHit // 通常の OR
+      }
+    }
     let ok = domDowOk(p)
     if (!ok) {
       cur = setInTZ(cur, tz, { hour: hourFirst, minute: minFirst })

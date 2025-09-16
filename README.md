@@ -1,17 +1,28 @@
 # Tech Site
 
-このプロジェクトには Cron 予測ツールが含まれています（JST/UTC 対応）。以下に Cron 仕様と CSV 仕様を明記します。
+## Features (v1.1)
 
-## Cron 仕様
+- **DOM×DOW Logic**: `dowDomMode: 'OR'|'AND'` (default 'OR')
+- **'*' Interpretation**: OR=unrestricted / AND=always-true
+- **DOW Range**: dow=0–6 (0=Sun); 7 unsupported, **name tokens unsupported**
+- **Auto-reload**: tick=10s, `configVersion`/`settingsUpdatedAt` change→**next tick** reload, in-flight continue
 
-- フィールド: `minute hour dom month dow`（crontab 互換の 5 フィールド）
-- DOW: `0-6`（`0=Sun`）。`7`は未対応（エラー扱い）。
-- DOM × DOW: OR で評価（どちらかが一致すれば通過）。
-- 名前トークン: 月は `JAN..DEC`、曜日は `SUN..SAT` をサポート（大文字小文字を無視）。範囲やステップ（例: `JAN-MAR/2`）も可。
-- ステップ: `*/n`、`a-b/n` をサポート。`*/0` など 0 以下はエラー。
-- タイムゾーン: 計算は JST/UTC を選択可能。JST は固定 +9h オフセットとして扱います。
-- 包括開始と切り上げ: 基準時刻に秒・ミリ秒がある場合は「次の分」に切り上げ。ちょうど分の場合は包括。
-- 曜日の正規化: `7` は未対応（エラー）。入力に `7` が含まれても `0` として扱いません。
+## Quick Start
+
+1. Install dependencies (`pnpm install`)
+2. Set `dowDomMode` in config if needed (default is 'OR')
+3. Start server and use the cron tool
+
+## Configuration
+
+- `dowDomMode`: 'OR'|'AND' (default 'OR')
+- dom: 1–31
+- mon: 1–12
+- dow: 0–6 (0=Sun, 7 unsupported)
+
+## Spec
+
+- See [PROJECT_SPEC.md](PROJECT_SPEC.md) for full details
 
 ## CSV 仕様（ダウンロード）
 
@@ -89,4 +100,25 @@ yarn preview
 bun run preview
 ```
 
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information。
+
+## 概要
+
+Tech Site は、開発者向けの Web ツール群を提供する Nuxt 4 ベースのアプリケーションです。Cron 予測ツールは v1.1 仕様に対応し、柔軟なスケジューリングと自動リロード機能を備えています。
+
+## クイックスタート
+
+1. リポジトリをクローンし依存関係をインストール
+2. 設定ファイルで `dowDomMode`（'OR' または 'AND'）を指定（省略時は 'OR'）
+3. サーバー起動後、Cron 予測ツールを利用
+
+## 主要設定
+
+- `dowDomMode`: 'OR'|'AND'（省略時は 'OR'）
+- dom: 1–31
+- mon: 1–12
+- dow: 0–6（0=Sun、7 は未対応）
+
+## リンク
+
+- 詳細な仕様・リリースノートは [PROJECT_SPEC.md](PROJECT_SPEC.md) を参照
