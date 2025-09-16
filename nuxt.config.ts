@@ -21,14 +21,7 @@ export default defineNuxtConfig({
 
   content: {
     experimental: { sqliteConnector: 'native' },
-    highlight: {
-      theme: 'github-dark',
-      preload: ['js', 'ts', 'json', 'bash', 'vue', 'md'],
-    },
-    markdown: {
-      toc: { depth: 3, searchDepth: 3 },
-      anchorLinks: true,
-    },
+    // highlight: { theme: 'github-dark' }, // 型不一致の可能性があるため保留
   },
 
   runtimeConfig: {
@@ -45,9 +38,6 @@ export default defineNuxtConfig({
         )
       }
     },
-  },
-  sitemap: {
-    siteUrl: process.env.NUXT_PUBLIC_SITE_URL || 'http://localhost:3000',
   },
   app: {
     head: {
