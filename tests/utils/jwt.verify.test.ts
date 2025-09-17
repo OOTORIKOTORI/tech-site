@@ -4,7 +4,8 @@ import { vi } from 'vitest'
 if (!(globalThis.crypto as Crypto | undefined)?.subtle) {
   vi.stubGlobal('crypto', webcrypto as unknown as Crypto)
 }
-import { verifyJwt } from '../../utils/jwt'
+import { verifyJwt, encodeBase64Url } from '../../utils/jwt'
+import crypto from 'node:crypto'
 
 // UTC固定時間ヘルパー
 const fixedNow = Date.UTC(2024, 0, 1, 0, 0, 0) // 2024-01-01T00:00:00Z
@@ -13,13 +14,8 @@ const nowSec = Math.floor(fixedNow / 1000)
 // HS256 署名用簡易実装 (HMAC SHA-256) - テスト限定
 async function hs256Sign(header: object, payload: object, secret: string) {
   const enc = new TextEncoder()
-  const base64url = (data: Uint8Array) => {
-    const b64 = btoa(String.fromCharCode(...data))
-    return b64.replace(/=+$/, '').replace(/\+/g, '-').replace(/\//g, '_')
-  }
-  const json = (o: object) => base64url(enc.encode(JSON.stringify(o)))
-  const headerPart = json(header)
-  const payloadPart = json(payload)
+  const headerPart = encodeBase64Url(enc.encode(JSON.stringify(header)))
+  const payloadPart = encodeBase64Url(enc.encode(JSON.stringify(payload)))
   const key = await crypto.subtle.importKey(
     'raw',
     enc.encode(secret),
@@ -28,7 +24,7 @@ async function hs256Sign(header: object, payload: object, secret: string) {
     ['sign']
   )
   const sigBuf = await crypto.subtle.sign('HMAC', key, enc.encode(`${headerPart}.${payloadPart}`))
-  const sig = base64url(new Uint8Array(sigBuf))
+  const sig = encodeBase64Url(new Uint8Array(sigBuf))
   return `${headerPart}.${payloadPart}.${sig}`
 }
 
@@ -40,33 +36,16 @@ const RSA_PRIVATE_PKCS8 =
     ' '
   )
 
-async function rs256Sign(header: any, payload: any) {
+function rs256Sign(header: any, payload: any) {
   const enc = new TextEncoder()
-  const base64url = (data: Uint8Array) => {
-    const b64 = btoa(String.fromCharCode(...data))
-    return b64.replace(/=+$/, '').replace(/\+/g, '-').replace(/\//g, '_')
-  }
-  const json = (o: object) => base64url(enc.encode(JSON.stringify(o)))
-  const headerPart = json(header)
-  const payloadPart = json(payload)
-  // 簡易PEM->DER (PKCS8) 抜粋
-  const pkcs8 = RSA_PRIVATE_PKCS8.replace(/-----BEGIN PRIVATE KEY-----/, '')
-    .replace(/-----END PRIVATE KEY-----/, '')
-    .replace(/\s+/g, '')
-  const der = Uint8Array.from(atob(pkcs8), c => c.charCodeAt(0))
-  const key = await crypto.subtle.importKey(
-    'pkcs8',
-    der.buffer,
-    { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
-    false,
-    ['sign']
-  )
-  const sigBuf = await crypto.subtle.sign(
-    'RSASSA-PKCS1-v1_5',
-    key,
-    enc.encode(`${headerPart}.${payloadPart}`)
-  )
-  const sig = base64url(new Uint8Array(sigBuf))
+  const headerPart = encodeBase64Url(enc.encode(JSON.stringify(header)))
+  const payloadPart = encodeBase64Url(enc.encode(JSON.stringify(payload)))
+  const sign = crypto.createSign('RSA-SHA256')
+  sign.update(`${headerPart}.${payloadPart}`)
+  sign.end()
+  const pkcs8 = RSA_PRIVATE_PKCS8
+  const sigBuf = sign.sign(pkcs8)
+  const sig = encodeBase64Url(new Uint8Array(sigBuf))
   return `${headerPart}.${payloadPart}.${sig}`
 }
 
@@ -79,9 +58,10 @@ describe('verifyJwt', () => {
     )
     const res = await verifyJwt(token, {
       expectedAlg: 'HS256',
-      key: 'secret',
+      key: new TextEncoder().encode('secret'),
       currentTimeSec: nowSec,
     })
+    console.log('HS256 errors:', res.errors)
     expect(res.valid).toBe(true)
     expect(res.errors.length).toBe(0)
   })
@@ -93,6 +73,7 @@ describe('verifyJwt', () => {
       key: RSA_PUBLIC_PEM,
       currentTimeSec: nowSec,
     })
+    console.log('RS256 errors:', res.errors)
     expect(res.valid).toBe(true)
   })
 

@@ -1,3 +1,19 @@
+function toArrayBuffer(input: ArrayBuffer | Uint8Array | Buffer | DataView): ArrayBuffer {
+  if (input instanceof ArrayBuffer) {
+    return input
+  }
+  if (typeof Buffer !== 'undefined' && Buffer.isBuffer(input)) {
+    // Node.js Buffer
+    return input.buffer.slice(input.byteOffset, input.byteOffset + input.byteLength) as ArrayBuffer
+  }
+  if (input instanceof Uint8Array || Object.prototype.toString.call(input) === '[object Uint8Array]') {
+    return (input as Uint8Array).buffer.slice((input as Uint8Array).byteOffset, (input as Uint8Array).byteOffset + (input as Uint8Array).byteLength) as ArrayBuffer
+  }
+  if (input instanceof DataView) {
+    return input.buffer.slice(input.byteOffset, input.byteOffset + input.byteLength) as ArrayBuffer
+  }
+  throw new TypeError('toArrayBuffer: 未対応の型です')
+}
 // Rebuilt clean JWT utilities (signature-first verification)
 // Minimal implementation focusing on current test requirements.
 
@@ -31,28 +47,22 @@ export interface JwtVerifyResult {
 // ---------------- Base64URL ----------------
 // atob/btoa 非依存 (Node でもブラウザでも動作)・厳密バリデーション
 export function decodeBase64Url(input: string): Uint8Array {
-  if (typeof input !== 'string' || input.length === 0) {
-    throw new Error('ERR_B64URL: empty')
+  if (!input) {
+    throw new Error('入力が無効です')
   }
   if (!/^[A-Za-z0-9_-]+$/.test(input)) {
-    throw new Error('ERR_B64URL: invalid chars')
+    throw new Error('Base64URL形式が正しくありません')
   }
-  // padding なしを前提。4の剰余1 は不正
   const rem = input.length % 4
-  if (rem === 1) throw new Error('ERR_B64URL: invalid length')
+  if (rem === 1) throw new Error('Base64URL形式が正しくありません')
   let b64 = input.replace(/-/g, '+').replace(/_/g, '/')
   if (rem === 2) b64 += '=='
   else if (rem === 3) b64 += '='
-  // Node/Browsers 統一: Buffer を利用
   try {
     const buf = Buffer.from(b64, 'base64')
-    // 再エンコード整合性チェック (不正文字検出)
-    if (buf.length === 0 && input !== 'AA') {
-      // heuristic: ただし空バイト列自体は "" -> invalid chars で既に弾く
-    }
     return new Uint8Array(buf)
   } catch {
-    throw new Error('ERR_B64URL: decode fail')
+    throw new Error('Base64URL形式が正しくありません')
   }
 }
 
@@ -68,8 +78,18 @@ export function parseJwt(token: string): ParsedJwt {
   const parts = token.split('.')
   if (parts.length !== 3) throw new Error('JWTの形式が正しくありません')
   const [hB64, pB64] = parts as [string, string, string?]
-  const headerBytes = decodeBase64Url(hB64 as string)
-  const payloadBytes = decodeBase64Url(pB64 as string)
+  let headerBytes: Uint8Array
+  let payloadBytes: Uint8Array
+  try {
+    headerBytes = decodeBase64Url(hB64 as string)
+  } catch (e: any) {
+    throw new Error(e.message)
+  }
+  try {
+    payloadBytes = decodeBase64Url(pB64 as string)
+  } catch (e: any) {
+    throw new Error(e.message)
+  }
   const headerJson = new TextDecoder().decode(headerBytes)
   const payloadJson = new TextDecoder().decode(payloadBytes)
   let header: Record<string, unknown>
@@ -126,33 +146,10 @@ function u8ToArrayBuffer(u: Uint8Array): ArrayBuffer {
   return copy.buffer
 }
 
-async function importHmacSha256(secret: string | Uint8Array): Promise<CryptoKey> {
-  const raw = typeof secret === 'string' ? new TextEncoder().encode(secret) : new Uint8Array(secret)
-  return crypto.subtle.importKey('raw', raw, { name: 'HMAC', hash: 'SHA-256' }, false, [
-    'sign',
-    'verify',
-  ])
-}
 
-async function importRsaSha256Spki(pem: string): Promise<CryptoKey> {
-  let b64 = stripPem(pem).trim()
-  // base64url 変換されている可能性を補正
-  b64 = b64.replace(/-/g, '+').replace(/_/g, '/')
-  const mod = b64.length % 4
-  if (mod === 2) b64 += '=='
-  else if (mod === 3) b64 += '='
-  else if (mod === 1) throw new Error('Invalid base64 length')
-  const der = b64ToBytes(b64)
-  const buf = new ArrayBuffer(der.length)
-  const copy = new Uint8Array(buf)
-  copy.set(der)
-  return crypto.subtle.importKey(
-    'spki',
-    buf,
-    { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
-    false,
-    ['verify']
-  )
+function pemToDer(pem: string, label: string): ArrayBuffer {
+  const b64 = pem.replaceAll('-----BEGIN ' + label + '-----','').replaceAll('-----END ' + label + '-----','').replace(/\s+/g,'')
+  return Uint8Array.from(Buffer.from(b64, 'base64')).buffer
 }
 
 export async function verifyJwt(
@@ -221,9 +218,23 @@ export async function verifyJwt(
           addError(errors, 'ERR_KEY_REQUIRED', 'HS256 検証にはシークレットが必要です')
         } else {
           signatureAttempted = true
-          const key = await importHmacSha256(opts.key)
-          const sigArr = decodeBase64Url(sigB64)
-            const ok = await crypto.subtle.verify('HMAC', key, u8ToArrayBuffer(sigArr), new TextEncoder().encode(signingInput))
+          const keyRaw = typeof opts.key === 'string' ? new TextEncoder().encode(opts.key) : opts.key
+          console.log('HS256 verify: keyRaw type', typeof keyRaw, Object.prototype.toString.call(keyRaw), keyRaw)
+          const key = await crypto.subtle.importKey(
+            'raw',
+            toArrayBuffer(keyRaw),
+            { name: 'HMAC', hash: 'SHA-256' },
+            false,
+            ['verify']
+          )
+          const sigArrRaw = decodeBase64Url(sigB64)
+          const sigArr = new Uint8Array(Array.from(sigArrRaw))
+          const ok = await crypto.subtle.verify(
+            'HMAC',
+            key,
+            sigArr,
+            new TextEncoder().encode(signingInput)
+          )
           if (ok) signatureVerified = true
           else addError(errors, 'ERR_SIGNATURE', 'Invalid signature')
         }
@@ -231,18 +242,31 @@ export async function verifyJwt(
         if (!opts.key || typeof opts.key !== 'string') {
           addError(errors, 'ERR_KEY_REQUIRED', 'RS256 検証には公開鍵(PEM)が必要です')
         } else {
-          // 鍵種別判定: 公開鍵(SPKI)のみ許可
           const trimmed = opts.key.trim()
-          if (/BEGIN PRIVATE KEY/.test(trimmed) || /BEGIN CERTIFICATE/.test(trimmed)) {
-            addError(errors, 'ERR_KEY_FORMAT', 'SPKI 公開鍵のみ受け付けます')
+          if (/BEGIN PRIVATE KEY/.test(trimmed)) {
+            addError(errors, 'ERR_KEY_FORMAT', '秘密鍵（PRIVATE KEY）は受け付けません。公開鍵（PUBLIC KEY）を指定してください')
+          } else if (/BEGIN CERTIFICATE/.test(trimmed)) {
+            addError(errors, 'ERR_KEY_FORMAT', '証明書（CERTIFICATE）は受け付けません。公開鍵（PUBLIC KEY）を指定してください')
           } else if (!/BEGIN PUBLIC KEY/.test(trimmed)) {
             addError(errors, 'ERR_KEY_FORMAT', '公開鍵(-----BEGIN PUBLIC KEY-----) を指定してください')
           } else {
             try {
               signatureAttempted = true
-              const key = await importRsaSha256Spki(trimmed)
+              const spkiDer = pemToDer(trimmed, 'PUBLIC KEY')
+              const key = await crypto.subtle.importKey(
+                'spki',
+                spkiDer,
+                { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
+                false,
+                ['verify']
+              )
               const sigArr = decodeBase64Url(sigB64)
-              const ok = await crypto.subtle.verify('RSASSA-PKCS1-v1_5', key, u8ToArrayBuffer(sigArr), new TextEncoder().encode(signingInput))
+              const ok = await crypto.subtle.verify(
+                'RSASSA-PKCS1-v1_5',
+                key,
+                toArrayBuffer(sigArr),
+                new TextEncoder().encode(signingInput)
+              )
               if (ok) signatureVerified = true
               else addError(errors, 'ERR_SIGNATURE', 'Invalid signature')
             } catch (e) {
