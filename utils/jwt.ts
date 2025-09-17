@@ -82,13 +82,15 @@ export function parseJwt(token: string): ParsedJwt {
   let payloadBytes: Uint8Array
   try {
     headerBytes = decodeBase64Url(hB64 as string)
-  } catch (e: any) {
-    throw new Error(e.message)
+  } catch (e: unknown) {
+    if (e instanceof Error) throw new Error(e.message)
+    throw e
   }
   try {
     payloadBytes = decodeBase64Url(pB64 as string)
-  } catch (e: any) {
-    throw new Error(e.message)
+  } catch (e: unknown) {
+    if (e instanceof Error) throw new Error(e.message)
+    throw e
   }
   const headerJson = new TextDecoder().decode(headerBytes)
   const payloadJson = new TextDecoder().decode(payloadBytes)
@@ -125,26 +127,6 @@ function matchExpected(val: unknown, expected?: string | string[]) {
   return Array.isArray(expected) ? expected.includes(val) : val === expected
 }
 
-function stripPem(pem: string): string {
-  return pem
-    .replace(/-----BEGIN [^-]+-----/g, '')
-    .replace(/-----END [^-]+-----/g, '')
-    .replace(/\s+/g, '')
-}
-
-function b64ToBytes(b64: string): Uint8Array {
-  const bin = atob(b64)
-  const out = new Uint8Array(bin.length)
-  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i)
-  return out
-}
-
-function u8ToArrayBuffer(u: Uint8Array): ArrayBuffer {
-  // コピーして明確な ArrayBuffer を得る (ArrayBufferLike の不整合回避)
-  const copy = new Uint8Array(u.length)
-  copy.set(u)
-  return copy.buffer
-}
 
 
 function pemToDer(pem: string, label: string): ArrayBuffer {
