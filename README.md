@@ -138,6 +138,15 @@ Start the development server on `http://localhost:3000`:
 # npm
 npm run dev
 
+## 環境変数
+
+| 変数名 | 必須 | 用途 | 例 |
+|--------|------|------|----|
+| `NUXT_PUBLIC_SITE_URL` | Yes | OGP/canonical/robots/sitemap で利用するサイトのベース URL（末尾スラッシュ無し推奨） | `https://tech-site-docs.com` / `https://your-project.vercel.app` |
+
+本番デプロイ時は独自ドメインを設定し、その値を Vercel 等の環境変数に登録してください。未設定の場合は `http://localhost:3000` が使用され、OGP や canonical がローカル参照になるため検索エンジン向けには非推奨です。
+
+
 # pnpm
 pnpm dev
 

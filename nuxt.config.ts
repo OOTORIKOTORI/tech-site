@@ -29,6 +29,20 @@ export default defineNuxtConfig({
       siteUrl: process.env.NUXT_PUBLIC_SITE_URL || 'http://localhost:3000',
     },
   },
+  sitemap: {
+    sources: ['/api/__sitemap__/urls'],
+    autoLastmod: true,
+    xsl: false,
+    defaults: { changefreq: 'weekly' },
+  },
+  nitro: {
+    routeRules: {
+      '/assets/**': { headers: { 'cache-control': 'public, max-age=31536000, immutable' } },
+      '/favicon.ico': { headers: { 'cache-control': 'public, max-age=86400' } },
+      '/sitemap.xml': { headers: { 'cache-control': 'public, max-age=3600' } },
+      '/robots.txt': { headers: { 'cache-control': 'public, max-age=3600' } },
+    },
+  },
   hooks: {
     ready: () => {
       if (!process.env.NUXT_PUBLIC_SITE_URL && process.env.NODE_ENV !== 'test') {
@@ -50,6 +64,7 @@ export default defineNuxtConfig({
         { property: 'og:type', content: 'website' },
         { property: 'og:title', content: 'Tech Tools & Notes' },
         { property: 'og:description', content: '便利ツールと実務ノウハウの技術サイト' },
+        { property: 'og:image', content: '/og-default.png' },
         { name: 'twitter:card', content: 'summary_large_image' },
       ],
       link: [{ rel: 'alternate', type: 'application/rss+xml', href: '/feed.xml', title: 'RSS' }],
