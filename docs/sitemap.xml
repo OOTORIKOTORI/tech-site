@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- サンプル: 本採用時は生成に切替 -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://kotorilab.jp/</loc>
+    <changefreq>weekly</changefreq>
+  </url>
+  <url>
+    <loc>https://kotorilab.jp/tools/cron-jst</loc>
+    <changefreq>weekly</changefreq>
+  </url>
+  <url>
+    <loc>https://kotorilab.jp/tools/jwt-decode</loc>
+    <changefreq>weekly</changefreq>
+  </url>
+</urlset>
