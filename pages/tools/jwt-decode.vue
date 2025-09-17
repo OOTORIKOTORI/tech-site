@@ -249,7 +249,8 @@ function onDropKey(e: DragEvent) { const t = e.dataTransfer?.getData('text/plain
 
 // JWKS
 const jwks = reactive({ use: false, url: '', keys: [] as any[], loading: false, error: '' })
-async function fetchJwksKeys(force: boolean) {
+async function fetchJwksKeys(_force: boolean) {
+  void _force
   if (!jwks.url) { jwks.error = 'URL無し'; return }
   jwks.loading = true; jwks.error = ''
   try {
