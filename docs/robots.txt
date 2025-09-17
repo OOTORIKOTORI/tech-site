@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://kotorilab.jp/sitemap.xml

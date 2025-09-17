@@ -2,7 +2,14 @@
 
 フロント/バックエンドの日常作業で「毎回ググって再発明する」小さな処理を“手元で即確認・共有”できるようにする軽量ツール群（Cron/JWT など）と、実装や運用で詰まりやすいポイントを最小編集で整理した技術ブログ（短文ノート）をまとめたサイトです。収益モデルは広告掲載を想定しつつ、ローカルで完結する安全な検証 UI を重視しています。
 
+ブランド: KOTORI Lab / ドメイン: https://kotorilab.jp （公開 URL は切替後に本番へ更新予定）
+
 ---
+
+# Tools
+
+- Cron JST: `/tools/cron-jst`
+- JWT Tool: `/tools/jwt-decode`
 
 # Cron JST 次回実行予測ツール
 
@@ -193,6 +200,12 @@ bun run preview
 
 Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information。
 
+## Deployment (Vercel)
+
+- Import プロジェクト（Root: `./`、Framework: Nuxt Preset）
+- Env: `NUXT_PUBLIC_SITE_URL`=本番 URL（現状: https://tech-site-eight.vercel.app → 切替後: https://kotorilab.jp）
+- ドメイン接続: Vercel で Add Domain → お名前.com の DNS に CNAME/A 設定 → Ready → 環境変数の URL を本番に更新
+
 ## 概要
 
 Tech Site は、開発者向けの Web ツール群を提供する Nuxt 4 ベースのアプリケーションです。Cron 予測ツールは v1.1 仕様に対応し、柔軟なスケジューリングと自動リロード機能を備えています。
@@ -288,3 +301,52 @@ Tech Site は、開発者向けの Web ツール群を提供する Nuxt 4 ベー
 ## リンク
 
 - 詳細な仕様・リリースノートは [PROJECT_SPEC.md](PROJECT_SPEC.md) を参照
+
+---
+
+## ブランド概要（簡易）
+
+- 名称: Tech Site（開発者向けツール＋技術ノート）
+- トーン: 簡潔・直接的・実務志向（敬体）
+- 色: blue-600 / gray-900 / gray-600 を基調、成功=green、警告=amber、エラー=red
+- ロゴ: 当面はテキストロゴ、将来的に `public/logo.svg` を想定
+
+## デプロイ
+
+### 必須環境変数
+
+| 変数名                 | 必須 | 説明                                                              |
+| ---------------------- | ---- | ----------------------------------------------------------------- |
+| `NUXT_PUBLIC_SITE_URL` | Yes  | 本番ドメイン（末尾スラ無し）。OGP/canonical/robots/sitemap に使用 |
+
+### 手順（Vercel 推奨）
+
+1. Vercel で新規プロジェクト作成（GitHub 連携）
+2. 環境変数に `NUXT_PUBLIC_SITE_URL` を設定（Production）
+3. ビルドコマンド `pnpm build` / 開始コマンドは Nuxt 既定
+4. ドメインを割当（`tech-site-docs.com` 等）。`www`→ ルートへ 301 を推奨
+
+### CI チェック順
+
+```bash
+pnpm install
+pnpm typecheck
+pnpm test -- --run
+pnpm build
+```
+
+### SEO/公開前チェック
+
+- robots.txt: 本番のみインデックス許可、プレビューは noindex 推奨
+- サイトマップ: `@nuxtjs/sitemap` 有効、ドメイン指定確認
+- 主要ページの title/description/OGP 確認
+
+### SEO / a11y
+
+- OGP/canonical/robots/sitemap の方針を整備（sitemap は初期は静的出力）
+- コントラスト/キーボード操作/aria/ラベルなど a11y を順次強化
+
+## Known limitations
+
+- JWT: JWE は未対応（4~5 パートは即エラー）
+- 巨大 JWT はブラウザ表示パフォーマンス低下の可能性

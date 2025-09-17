@@ -1,22 +1,22 @@
-# プロジェクト仕様書 - Tech Site
+# プロジェクト仕様書 - KOTORI Lab
 
 ## 📋 プロジェクト概要
 
 ### プロジェクト名
 
-**Tech Site** - 開発者向けツールサイト
+**KOTORI Lab** - 開発者向けツールサイト
 
 ### サイト概要
 
 本サイトは「便利ツール＋技術ブログ」の開発者向け情報サイトです。
-ツールはブラウザ完結を基本とし、記事は実務 SE 向けナレッジを中心に配信します。
+ツールは完全ローカルでの処理（ブラウザ完結）を重視し、記事は実務 SE 向けナレッジを中心に配信します。
+公開ドメイン: https://kotorilab.jp
 
 ---
 
 ### ビジネスモデル
 
-- ウェブ公開を前提に広告収益（ディスプレイ/コンテンツ連動）を主軸とします。
-- 将来的な収益多角化（スポンサー/アフィ/有料ノート/寄付等）の可能性も明記します。
+- 当面はディスプレイ広告中心。将来はスポンサー/アフィ/寄付等を検討。
 
 ---
 
@@ -34,6 +34,9 @@
 - a11y: コントラスト/キーボード操作/aria/ラベル。
 - 解析: ページビュー/コンバージョン（広告クリック）収集の方針（匿名集計）。
 
+- Vercel での CD（自動デプロイ）を採用し、`NUXT_PUBLIC_SITE_URL` は本番独自ドメインを必須（例: https://kotorilab.jp）。
+- robots.txt / sitemap.xml は初期は静的出力。
+
 ---
 
 ### 法務/ポリシー（骨子）
@@ -45,13 +48,13 @@
 
 ### ナビゲーション
 
-- ヘッダ: Tools / Blog / About / Privacy
-- フッタ: プライバシー/利用規約/問い合わせ
+- ヘッダ: Tools / Blog / About / Privacy / Terms / Ads（雛形ページ、順次整備）
+- フッタ: プライバシー/利用規約/広告/問い合わせ（雛形ページ、順次整備）
 
 ### 主要機能
 
-- **JWT Decoder**: JSON Web Token のデコードツール
-- **Cron JST 予測**: crontab 形式のスケジュールから日本時間での次回実行時刻を予測
+- **JWT Decoder**: JSON Web Token のデコードツール（パス: `/tools/jwt-decode`）
+- **Cron JST 予測**: crontab 形式のスケジュールから日本時間での次回実行時刻を予測（パス: `/tools/cron-jst`）
 
 ---
 
@@ -121,3 +124,63 @@
 
 - **v1.0**: 初期リリース
 - **v1.1**: DOM×DOW 切替（dowDomMode）とドキュメント整備
+- **v1.2（予定）**: 独自ドメイン切替とメタ/OGP 整理
+
+---
+
+## 🎨 ブランドガイド（最小版）
+
+- サイト名: 「KOTORI Lab」
+- トーン&マナー: 直接的・簡潔・実務志向（敬体、日本語）
+- カラー（Tailwind 参照目安）
+  - プライマリ: `blue-600`（アクセント/リンク）
+  - テキスト: `gray-900` / 補助: `gray-600`
+  - 成功: `green-600` / 警告: `amber-600` / エラー: `red-600`
+- タイポグラフィ: デフォルト（システム UI）/ 等幅領域に `font-mono`
+- ロゴ: 文字ロゴ（当面）。将来的に SVG ロゴを `public/logo.svg` に配置予定（未実装）
+- アセット: `public/favicon.ico` 既存。OGP 既定画像は今後 `public/og-default.png` を想定（未配置）
+
+備考: 実装と乖離しないよう、配色/コンポーネントは Tailwind ユーティリティを優先して統一。
+
+---
+
+## 🚢 デプロイ & ドメイン/SEO 方針
+
+### ホスティング
+
+- 推奨: Vercel（Node 18+ / pnpm）。ビルドコマンド `pnpm build`、出力 `.output` / Nuxt 4 既定。
+
+### 環境変数（重要）
+
+- `NUXT_PUBLIC_SITE_URL`（必須/本番）: 例 `https://tech-site-docs.com`（末尾スラッシュ無し）
+  - OGP/canonical/robots/sitemap の基準 URL。未設定だと既定 `http://localhost:3000` を使用。
+
+### ドメイン
+
+- ルートドメイン例: `tech-site-docs.com`
+- 推奨設定: `www` → ルートへ 301 リダイレクト（Vercel の Domain 設定でエイリアス/リダイレクト）
+- TLS: Vercel 自動証明書に委任
+
+### SEO/クローラ
+
+- `public/robots.txt` あり（既定 allow）。本番のみインデックス許可、プレビューは noindex を推奨
+  - 運用上の選択肢: プレビュー URL へ `x-robots-tag: noindex` を付与（Vercel ヘッダ設定）
+- サイトマップ: `@nuxtjs/sitemap` を導入済み（`nuxt.config.ts` でドメイン設定とパス除外を調整）
+- 構造化データ: 記事/ツールページで JSON-LD を段階導入（別タスク）
+
+### CI/CD（チェック順）
+
+1. Install: `pnpm install`
+2. 型: `pnpm typecheck`
+3. テスト: `pnpm test -- --run`
+4. ビルド: `pnpm build`
+
+### リリース運用
+
+- `main` → Production、PR → Preview を Vercel で自動化
+- リリース前チェックリスト
+  - [ ] `NUXT_PUBLIC_SITE_URL` を本番環境に設定
+  - [ ] すべてのテスト green（JWT/cron）
+  - [ ] 主要ページの meta/OGP/リンク確認
+  - [ ] robots/sitemap の想定どおり挙動
+  - [ ] 広告を有効化する場合はポリシー/ads.txt/同意導線の準備
