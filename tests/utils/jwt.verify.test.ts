@@ -1,9 +1,8 @@
 import { describe, it, expect } from 'vitest'
 import { webcrypto } from 'node:crypto'
-if (!(globalThis as any).crypto || !(globalThis as any).crypto.subtle) {
-  // Vitest / jsdom 環境で subtle が存在しない場合のフォールバック
-  // @ts-expect-error -- vitest/jsdom で globalThis.crypto を差し替えるための一時的な型抑止
-  globalThis.crypto = webcrypto as unknown as Crypto
+import { vi } from 'vitest'
+if (!(globalThis.crypto as Crypto | undefined)?.subtle) {
+  vi.stubGlobal('crypto', webcrypto as unknown as Crypto)
 }
 import { verifyJwt } from '../../utils/jwt'
 
