@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest'
-import { verifyJwt, decodeBase64Url } from '../../utils/jwt'
+import { webcrypto } from 'node:crypto'
+if (!(globalThis as any).crypto || !(globalThis as any).crypto.subtle) {
+  // Vitest / jsdom 環境で subtle が存在しない場合のフォールバック
+  // @ts-ignore
+  globalThis.crypto = webcrypto as unknown as Crypto
+}
+import { verifyJwt } from '../../utils/jwt'
 
 // UTC固定時間ヘルパー
 const fixedNow = Date.UTC(2024, 0, 1, 0, 0, 0) // 2024-01-01T00:00:00Z

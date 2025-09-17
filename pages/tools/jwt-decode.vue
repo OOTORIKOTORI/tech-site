@@ -95,10 +95,10 @@
           </div>
           <div>
             <label class="block font-medium text-sm mb-1">鍵 / シークレット (ペースト or D&D)</label>
-            <textarea v-model="verifyInput.key" rows="4"
-              class="w-full border rounded p-2 font-mono text-[11px] md:text-xs"
-              placeholder="HS256: 共有シークレット\nRS/ES: -----BEGIN PUBLIC KEY----- ..." @dragover.prevent
-              @drop.prevent="onDropKey"></textarea>
+              <textarea v-model="verifyInput.key" rows="4"
+                id="verify-key" class="w-full border rounded p-2 font-mono text-[11px] md:text-xs" aria-label="検証用鍵/シークレット入力"
+                placeholder="HS256: 共有シークレット\nRS/ES: -----BEGIN PUBLIC KEY----- ..." @dragover.prevent
+                @drop.prevent="onDropKey"></textarea>
             <p class="text-[11px] text-gray-500 mt-1 leading-snug">
               PEM 公開鍵 / 秘密鍵 / 証明書 いずれか可 (検証では公開鍵部分のみ使用)。HS256 の場合はシークレット文字列。<br>
               コンテンツは送信されずローカル処理のみ。<br>
@@ -207,12 +207,17 @@ const header = computed<JwtHeader | null>(() => parseJsonPart<JwtHeader>(parts.v
 const payload = computed<JwtPayload | null>(() => parseJsonPart<JwtPayload>(parts.value[1]))
 function pretty(v: unknown) { return v ? JSON.stringify(v, null, 2) : '（有効なJWTを入力すると表示されます）' }
 
-interface ClaimRow { key: string; value: unknown }
+  interface ClaimRow { key: string; label: string; value: string | number | boolean | null }
 const baseClaims = computed<ClaimRow[]>(() => {
-  const p = payload.value || {}
-  return ['iss', 'sub', 'aud', 'exp', 'nbf', 'iat'].map(k => ({ key: k, value: (p as any)[k] }))
+    const p = payload.value || {}
+    const keys: Array<keyof JwtPayload> = ['iss', 'sub', 'aud', 'exp', 'nbf', 'iat']
+    return keys.map(k => ({
+      key: k as string,
+      label: k as string,
+      value: (p as Record<string, any>)[k] ?? null
+    }))
 })
-const visibleClaims = computed(() => baseClaims.value.filter(c => c.value !== undefined))
+  const visibleClaims = computed<ClaimRow[]>(() => baseClaims.value.filter(c => c.value !== null))
 function formatClaim(key: string, val: unknown) { if (['exp', 'nbf', 'iat'].includes(key) && typeof val === 'number') { return `${val} (${new Date(val * 1000).toISOString()})` } return typeof val === 'string' ? val : JSON.stringify(val) }
 function relativeGeneric(sec: number) { const diff = sec * 1000 - Date.now(); return diff >= 0 ? `あと${fmtDuration(diff)}` : `${fmtDuration(-diff)}前` }
 function relativeExp(sec: number) { const diff = sec * 1000 - Date.now(); return diff >= 0 ? `有効:あと${fmtDuration(diff)}` : `期限切れ:${fmtDuration(-diff)}経過` }
@@ -239,7 +244,7 @@ async function doVerify() {
     const rawHeader = header.value
     if (jwks.use && jwks.keys.length && rawHeader?.kid) {
       const k = findJwksRsaKeyByKid({ keys: jwks.keys }, rawHeader.kid, 'RS256')
-      if (k) { const pem = buildRsaPemFromModExp(k.n, k.e); if (pem) useKey = pem }
+  if (k) { const pem = buildRsaPemFromModExp(k.n as string, k.e as string); if (pem) useKey = pem }
     }
     const res = await verifyJwt(token.value, {
       expectedAlg: verifyInput.expectedAlg as any || undefined,

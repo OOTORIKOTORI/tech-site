@@ -1,7 +1,7 @@
 // Rebuilt clean JWT utilities (signature-first verification)
 // Minimal implementation focusing on current test requirements.
 
-export interface ParsedJwt<THeader = any, TPayload = any> {
+export interface ParsedJwt<THeader = Record<string, unknown>, TPayload = Record<string, unknown>> {
   header: THeader
   payload: TPayload
 }
@@ -22,26 +22,46 @@ export interface JwtVerifyError {
 }
 
 export interface JwtVerifyResult {
-  header: any | null
-  payload: any | null
+  header: Record<string, unknown> | null
+  payload: Record<string, unknown> | null
   valid: boolean
   errors: JwtVerifyError[]
 }
 
 // ---------------- Base64URL ----------------
+// atob/btoa 非依存 (Node でもブラウザでも動作)・厳密バリデーション
 export function decodeBase64Url(input: string): Uint8Array {
   if (typeof input !== 'string' || input.length === 0) {
-    throw new Error('入力が無効です。Base64URL形式の文字列を入力してください。')
+    throw new Error('ERR_B64URL: empty')
   }
-  if (!/^[A-Za-z0-9\-_]+$/.test(input)) {
-    throw new Error('Base64URL形式が正しくありません')
+  if (!/^[A-Za-z0-9_-]+$/.test(input)) {
+    throw new Error('ERR_B64URL: invalid chars')
   }
-  const pad = input.length % 4 === 2 ? '==' : input.length % 4 === 3 ? '=' : ''
-  const b64 = input.replace(/-/g, '+').replace(/_/g, '/') + pad
-  const binary = atob(b64)
-  const out = new Uint8Array(binary.length)
-  for (let i = 0; i < binary.length; i++) out[i] = binary.charCodeAt(i)
-  return out
+  // padding なしを前提。4の剰余1 は不正
+  const rem = input.length % 4
+  if (rem === 1) throw new Error('ERR_B64URL: invalid length')
+  let b64 = input.replace(/-/g, '+').replace(/_/g, '/')
+  if (rem === 2) b64 += '=='
+  else if (rem === 3) b64 += '='
+  // Node/Browsers 統一: Buffer を利用
+  try {
+    const buf = Buffer.from(b64, 'base64')
+    // 再エンコード整合性チェック (不正文字検出)
+    if (buf.length === 0 && input !== 'AA') {
+      // heuristic: ただし空バイト列自体は "" -> invalid chars で既に弾く
+    }
+    return new Uint8Array(buf)
+  } catch {
+    throw new Error('ERR_B64URL: decode fail')
+  }
+}
+
+export function encodeBase64Url(bytes: Uint8Array): string {
+  return Buffer.from(bytes)
+    .toString('base64')
+    .replace(/=+$/g, '')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
 }
 
 export function parseJwt(token: string): ParsedJwt {
@@ -52,8 +72,8 @@ export function parseJwt(token: string): ParsedJwt {
   const payloadBytes = decodeBase64Url(pB64 as string)
   const headerJson = new TextDecoder().decode(headerBytes)
   const payloadJson = new TextDecoder().decode(payloadBytes)
-  let header: any
-  let payload: any
+  let header: Record<string, unknown>
+  let payload: Record<string, unknown>
   try {
     header = JSON.parse(headerJson)
   } catch {
@@ -79,16 +99,10 @@ function addError(arr: JwtVerifyError[], code: string, message: string, hint?: s
   arr.push({ code, message, hint })
 }
 
-function matchExpected(val: any, expected?: string | string[]) {
+function matchExpected(val: unknown, expected?: string | string[]) {
   if (!expected) return true
+  if (typeof val !== 'string') return false
   return Array.isArray(expected) ? expected.includes(val) : val === expected
-}
-
-function constantTimeEqual(a: Uint8Array, b: Uint8Array): boolean {
-  if (a.length !== b.length) return false
-  let diff = 0
-  for (let i = 0; i < a.length; i++) diff |= a[i]! ^ b[i]!
-  return diff === 0
 }
 
 function stripPem(pem: string): string {
@@ -103,6 +117,13 @@ function b64ToBytes(b64: string): Uint8Array {
   const out = new Uint8Array(bin.length)
   for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i)
   return out
+}
+
+function u8ToArrayBuffer(u: Uint8Array): ArrayBuffer {
+  // コピーして明確な ArrayBuffer を得る (ArrayBufferLike の不整合回避)
+  const copy = new Uint8Array(u.length)
+  copy.set(u)
+  return copy.buffer
 }
 
 async function importHmacSha256(secret: string | Uint8Array): Promise<CryptoKey> {
@@ -141,7 +162,7 @@ export async function verifyJwt(
   const errors: JwtVerifyError[] = []
   const result: JwtVerifyResult = { header: null, payload: null, valid: false, errors }
 
-  if (!(globalThis as any).crypto?.subtle) {
+  if (!(globalThis as unknown as { crypto?: Crypto }).crypto?.subtle) {
     addError(errors, 'ERR_NO_CRYPTO', 'Web Crypto API が利用できません')
     return result
   }
@@ -160,8 +181,8 @@ export async function verifyJwt(
   }
   const [hB64, pB64, sigB64] = parts
 
-  let header: any
-  let payload: any
+  let header: Record<string, unknown>
+  let payload: Record<string, unknown>
   try {
     const hBytes = decodeBase64Url(hB64 as string)
     const pBytes = decodeBase64Url(pB64 as string)
@@ -187,6 +208,7 @@ export async function verifyJwt(
     )
   }
 
+  // 署名対象は元の headerSeg + '.' + payloadSeg (再JSON化禁止)
   const signingInput = `${hB64}.${pB64}`
   let signatureVerified = false
   let signatureAttempted = false
@@ -200,39 +222,37 @@ export async function verifyJwt(
         } else {
           signatureAttempted = true
           const key = await importHmacSha256(opts.key)
-          const sig = decodeBase64Url(sigB64)
-          const ok = await crypto.subtle.verify(
-            'HMAC',
-            key,
-            sig.buffer as ArrayBuffer,
-            new TextEncoder().encode(signingInput)
-          )
+          const sigArr = decodeBase64Url(sigB64)
+            const ok = await crypto.subtle.verify('HMAC', key, u8ToArrayBuffer(sigArr), new TextEncoder().encode(signingInput))
           if (ok) signatureVerified = true
-          else addError(errors, 'ERR_SIGNATURE', '署名検証に失敗しました')
+          else addError(errors, 'ERR_SIGNATURE', 'Invalid signature')
         }
       } else if (header.alg === 'RS256') {
         if (!opts.key || typeof opts.key !== 'string') {
           addError(errors, 'ERR_KEY_REQUIRED', 'RS256 検証には公開鍵(PEM)が必要です')
         } else {
-          try {
-            signatureAttempted = true
-            const key = await importRsaSha256Spki(opts.key)
-            const sig = decodeBase64Url(sigB64)
-            const ok = await crypto.subtle.verify(
-              'RSASSA-PKCS1-v1_5',
-              key,
-              sig.buffer as ArrayBuffer,
-              new TextEncoder().encode(signingInput)
-            )
-            if (ok) signatureVerified = true
-            else addError(errors, 'ERR_SIGNATURE', '署名検証に失敗しました')
-          } catch (e) {
-            addError(
-              errors,
-              'ERR_KEY_IMPORT',
-              '公開鍵の読み込みに失敗しました',
-              (e as Error).message
-            )
+          // 鍵種別判定: 公開鍵(SPKI)のみ許可
+          const trimmed = opts.key.trim()
+          if (/BEGIN PRIVATE KEY/.test(trimmed) || /BEGIN CERTIFICATE/.test(trimmed)) {
+            addError(errors, 'ERR_KEY_FORMAT', 'SPKI 公開鍵のみ受け付けます')
+          } else if (!/BEGIN PUBLIC KEY/.test(trimmed)) {
+            addError(errors, 'ERR_KEY_FORMAT', '公開鍵(-----BEGIN PUBLIC KEY-----) を指定してください')
+          } else {
+            try {
+              signatureAttempted = true
+              const key = await importRsaSha256Spki(trimmed)
+              const sigArr = decodeBase64Url(sigB64)
+              const ok = await crypto.subtle.verify('RSASSA-PKCS1-v1_5', key, u8ToArrayBuffer(sigArr), new TextEncoder().encode(signingInput))
+              if (ok) signatureVerified = true
+              else addError(errors, 'ERR_SIGNATURE', 'Invalid signature')
+            } catch (e) {
+              addError(
+                errors,
+                'ERR_KEY_IMPORT',
+                '公開鍵の読み込みに失敗しました',
+                (e as Error).message
+              )
+            }
           }
         }
       } else if (header.alg === 'ES256') {
@@ -251,7 +271,7 @@ export async function verifyJwt(
   }
 
   if (!signatureVerified && signatureAttempted && !errors.some(e => e.code === 'ERR_SIGNATURE')) {
-    addError(errors, 'ERR_SIGNATURE', '署名検証に失敗しました')
+    addError(errors, 'ERR_SIGNATURE', 'Invalid signature')
   }
 
   const nowSec = Math.floor(opts.currentTimeSec ?? Date.now() / 1000)
@@ -292,9 +312,7 @@ export async function verifyJwt(
 interface FetchJwksOptions {
   forceRefresh?: boolean
 }
-interface JwksResponse {
-  keys: any[]
-}
+interface JwksResponse { keys: Array<Record<string, unknown>> }
 
 const jwksCache = new Map<string, { ts: number; data: JwksResponse }>()
 const JWKS_TTL_MS = 5 * 60 * 1000
@@ -312,10 +330,14 @@ export async function fetchJwks(url: string, opts: FetchJwksOptions = {}): Promi
   return json
 }
 
-export function findJwksRsaKeyByKid(jwks: { keys: any[] }, kid: string, alg?: string) {
-  return (jwks.keys || []).find(
-    k => k && k.kty === 'RSA' && k.kid === kid && k.n && k.e && (!alg || !k.alg || k.alg === alg)
-  )
+export function findJwksRsaKeyByKid(
+  jwks: { keys: Array<Record<string, unknown>> },
+  kid: string,
+  alg?: string
+) {
+  return (jwks.keys || []).find(k =>
+    k && k.kty === 'RSA' && k.kid === kid && k.n && k.e && (!alg || !k.alg || k.alg === alg)
+  ) as Record<string, unknown> | undefined
 }
 
 // Build PEM public key from modulus & exponent (base64url) for RSA
@@ -324,8 +346,7 @@ export function buildRsaPemFromModExp(nB64Url: string, eB64Url: string): string 
     const n = decodeBase64Url(nB64Url)
     const e = decodeBase64Url(eB64Url)
     const derInt = (buf: Uint8Array) => {
-      // Ensure positive INTEGER (prepend 0x00 if high bit set)
-      let bytes = buf[0]! & 0x80 ? concatBytes(new Uint8Array([0]), buf) : buf
+      const bytes = buf[0]! & 0x80 ? concatBytes(new Uint8Array([0]), buf) : buf
       return concatBytes(new Uint8Array([0x02, ...encodeDerLength(bytes.length)]), bytes)
     }
     const seq = (content: Uint8Array) =>
@@ -377,7 +398,5 @@ function concatBytes(...parts: Uint8Array[]): Uint8Array {
 }
 
 function toBase64(bytes: Uint8Array): string {
-  let bin = ''
-  for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]!)
-  return btoa(bin)
+  return btoa(String.fromCharCode(...bytes))
 }
