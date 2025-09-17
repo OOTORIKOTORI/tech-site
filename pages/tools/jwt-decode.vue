@@ -31,13 +31,26 @@ JWT ツール
     </nav>
 
     <!-- Common Input -->
-    <section class="space-y-2">
-      <label for="jwt" class="block font-medium">JWT トークン</label>
-      <textarea id="jwt" v-model="token" rows="5" class="w-full border rounded p-2 font-mono text-xs md:text-sm"
-        spellcheck="false" @dragover.prevent @drop.prevent="onDropToken"></textarea>
+    <section class="space-y-3">
+      <div class="flex flex-col md:flex-row md:items-center gap-3">
+        <div class="flex-1 space-y-1">
+          <label for="jwt" class="block font-medium">JWT トークン</label>
+          <textarea id="jwt" v-model="token" rows="5" class="w-full border rounded p-2 font-mono text-xs md:text-sm"
+            spellcheck="false" @dragover.prevent @drop.prevent="onDropToken" aria-label="JWTトークン入力"></textarea>
+        </div>
+        <div class="w-full md:w-64 space-y-1">
+          <label for="sampleSelect" class="block font-medium">サンプル</label>
+          <select id="sampleSelect" v-model="sampleSelected" @change="applySample" class="w-full border rounded px-2 py-1 text-xs md:text-sm" aria-label="サンプルJWT選択">
+            <option value="">(選択してください)</option>
+            <option value="hs256">HS256: シンプル</option>
+            <option value="hs256_expired">HS256: 期限切れ</option>
+            <option value="none">alg=none</option>
+            <option value="rs256">RS256: 署名付き</option>
+          </select>
+        </div>
+      </div>
       <div class="flex flex-wrap gap-2">
         <button class="btn-secondary" @click="onClear">クリア</button>
-        <button class="btn-secondary" @click="onSample">サンプル挿入</button>
         <button class="btn-secondary" :disabled="!token" @click="copyToken">コピー</button>
       </div>
     </section>
@@ -95,26 +108,28 @@ JWT ツール
     <section v-show="activeTab === 'Verify'" class="space-y-6">
       <div class="grid md:grid-cols-2 gap-6">
         <div class="space-y-4">
-          <div>
-            <label class="block font-medium text-sm mb-1">期待アルゴリズム</label>
-            <select v-model="verifyInput.expectedAlg" class="border rounded px-2 py-1 text-sm">
-              <option value="">(指定しない)</option>
-              <option value="HS256">HS256</option>
-              <option value="RS256">RS256</option>
-              <option value="ES256">ES256</option>
-            </select>
-          </div>
-          <div>
-            <label class="block font-medium text-sm mb-1">鍵 / シークレット (ペースト or D&D)</label>
-              <textarea id="verify-key" v-model="verifyInput.key"
-                rows="4" class="w-full border rounded p-2 font-mono text-[11px] md:text-xs" aria-label="検証用鍵/シークレット入力"
-                placeholder="HS256: 共有シークレット\nRS/ES: -----BEGIN PUBLIC KEY----- ..." @dragover.prevent
-                @drop.prevent="onDropKey"></textarea>
-            <p class="text-[11px] text-gray-500 mt-1 leading-snug">
-              PEM 公開鍵 / 秘密鍵 / 証明書 いずれか可 (検証では公開鍵部分のみ使用)。HS256 の場合はシークレット文字列。<br>
-              コンテンツは送信されずローカル処理のみ。<br>
-              証明書チェーン複合やJWEは未対応。
-            </p>
+          <div class="space-y-4">
+            <div>
+              <label class="block font-medium text-sm mb-1">期待アルゴリズム</label>
+              <select v-model="verifyInput.expectedAlg" class="border rounded px-2 py-1 text-sm" aria-label="期待アルゴリズム選択">
+                <option value="">(指定しない)</option>
+                <option value="HS256">HS256</option>
+                <option value="RS256">RS256</option>
+                <option value="ES256" disabled>ES256 (未対応)</option>
+              </select>
+            </div>
+            <div v-if="verifyInput.expectedAlg === 'HS256'">
+              <label for="verify-secret" class="block font-medium text-sm mb-1">共有シークレット</label>
+              <input id="verify-secret" v-model="verifyInput.key" type="text" aria-label="HS256シークレット入力"
+                placeholder="例: secret" class="w-full border rounded px-2 py-1 text-xs md:text-sm font-mono" @dragover.prevent @drop.prevent="onDropKey" />
+              <p class="text-[11px] text-gray-500 mt-1 leading-snug">入力値は送信されません。短期利用の検証テストにのみ使用してください。</p>
+            </div>
+            <div v-else-if="verifyInput.expectedAlg === 'RS256'">
+              <label for="verify-key" class="block font-medium text-sm mb-1">公開鍵(PEM)</label>
+              <textarea id="verify-key" v-model="verifyInput.key" rows="5" aria-label="RS256公開鍵入力"
+                placeholder="-----BEGIN PUBLIC KEY-----\n...\n-----END PUBLIC KEY-----" class="w-full border rounded p-2 font-mono text-[11px] md:text-xs" @dragover.prevent @drop.prevent="onDropKey" />
+              <p class="text-[11px] text-gray-500 mt-1 leading-snug">RS256 検証には SPKI 形式 PUBLIC KEY が必須です。</p>
+            </div>
           </div>
           <div class="grid grid-cols-2 gap-4 text-sm">
             <div>
@@ -150,31 +165,48 @@ JWT ツール
             </div>
             <p class="text-[11px] text-gray-500">送信されるのは JWKS 取得 HTTP リクエストのみ。トークン本文は送信しません。</p>
           </div>
-          <div class="flex gap-2 flex-wrap">
-            <button class="btn-primary" @click="doVerify">検証</button>
-            <button class="btn-secondary" @click="resetVerify">結果クリア</button>
-            <button class="btn-secondary" @click="injectDemo">デモJWT</button>
+          <div class="flex gap-2 flex-wrap items-center">
+            <button class="btn-primary inline-flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed" :disabled="verifyDisabled" @click="doVerify" aria-label="JWT検証ボタン">
+              <span v-if="verifying" class="animate-spin h-3 w-3 border-2 border-white border-t-transparent rounded-full"></span>
+              <span>{{ verifying ? '検証中...' : '検証' }}</span>
+            </button>
+            <button class="btn-secondary" @click="resetVerify" aria-label="結果クリアボタン">結果クリア</button>
+            <button class="btn-secondary" @click="injectDemo" aria-label="デモJWT挿入ボタン">デモJWT</button>
           </div>
         </div>
         <div class="space-y-4">
-          <div class="rounded border p-3 bg-white min-h-[140px]">
-            <h3 class="font-semibold text-sm mb-2">結果</h3>
-            <div v-if="verifyState.errors.length" class="space-y-1">
-              <div v-for="e in verifyState.errors" :key="e.code" class="text-xs flex gap-2">
-                <span class="inline-block px-2 py-0.5 rounded bg-red-100 text-red-700 font-semibold">{{ e.code }}</span>
-                <span class="text-gray-800">{{ e.message }}<span v-if="e.hint" class="text-gray-500"> ({{ e.hint
-                }})</span></span>
+          <div :class="['rounded border p-3 min-h-[160px] transition-colors',
+              verifyState.valid === true ? 'bg-green-50 border-green-300' : verifyState.valid === false && verifyState.errors.length ? 'bg-red-50 border-red-300' : 'bg-white']">
+            <h3 class="font-semibold text-sm mb-2 flex items-center gap-2">結果
+              <span v-if="verifying" class="text-[10px] text-gray-500">(検証中)</span>
+            </h3>
+            <template v-if="sortedErrors.length">
+              <div class="space-y-1">
+                <div v-for="e in sortedErrors" :key="e.code" class="text-xs flex gap-2">
+                  <span class="inline-block px-2 py-0.5 rounded bg-red-100 text-red-700 font-semibold">{{ e.code }}</span>
+                  <span class="text-gray-800">{{ e.message }}<span v-if="e.hint" class="text-gray-500"> ({{ e.hint }})</span></span>
+                </div>
               </div>
-            </div>
-            <div v-else-if="verifyState.valid === true" class="text-green-700 text-sm">署名/クレーム OK</div>
-            <div v-else class="text-xs text-gray-500">検証結果はここに表示されます</div>
+            </template>
+            <template v-else-if="verifyState.valid === true">
+              <div class="text-green-700 text-sm">署名/クレーム OK</div>
+            </template>
+            <template v-else>
+              <div class="text-xs text-gray-500">検証結果はここに表示されます</div>
+            </template>
           </div>
-          <div v-if="verifyState.header" class="rounded border p-3 bg-gray-50">
-            <h3 class="font-semibold text-sm mb-1">検証後 Header</h3>
+          <div v-if="verifyState.valid === true && verifyState.header" class="rounded border p-3 bg-gray-50 space-y-2">
+            <div class="flex items-center justify-between">
+              <h3 class="font-semibold text-sm">Header</h3>
+              <button class="btn-secondary text-[10px] px-2 py-0.5" @click="copyHeader" aria-label="Headerコピー">コピー</button>
+            </div>
             <pre class="text-[11px] md:text-xs overflow-auto"><code>{{ pretty(verifyState.header) }}</code></pre>
           </div>
-          <div v-if="verifyState.payload" class="rounded border p-3 bg-gray-50">
-            <h3 class="font-semibold text-sm mb-1">検証後 Payload</h3>
+          <div v-if="verifyState.valid === true && verifyState.payload" class="rounded border p-3 bg-gray-50 space-y-2">
+            <div class="flex items-center justify-between">
+              <h3 class="font-semibold text-sm">Payload</h3>
+              <button class="btn-secondary text-[10px] px-2 py-0.5" @click="copyPayload" aria-label="Payloadコピー">コピー</button>
+            </div>
             <pre class="text-[11px] md:text-xs overflow-auto"><code>{{ pretty(verifyState.payload) }}</code></pre>
           </div>
         </div>
@@ -212,7 +244,6 @@ const collapsed = reactive({ header: false, payload: false })
 
 function onClear() { token.value = '' }
 function copyToken() { if (!token.value) return; navigator.clipboard?.writeText(token.value) }
-function onSample() { token.value = SAMPLE_JWT }
 function onDropToken(e: DragEvent) { const t = e.dataTransfer?.getData('text/plain'); if (t) token.value = t.trim() }
 
 // --- Decode logic ---
@@ -243,6 +274,8 @@ interface VerifyInput { expectedAlg: string | ''; key: string; leewaySec: number
 interface VerifyError { code: string; message: string; hint?: string }
 interface VerifyState { valid: undefined | boolean; header: JwtHeader | null; payload: JwtPayload | null; errors: VerifyError[] }
 const verifyInput = reactive<VerifyInput>({ expectedAlg: '', key: '', leewaySec: 60 })
+const verifying = ref(false)
+const sampleSelected = ref('')
 const verifyState = reactive<VerifyState>({ valid: undefined, header: null, payload: null, errors: [] })
 function resetVerify() { verifyState.valid = undefined; verifyState.header = null; verifyState.payload = null; verifyState.errors = [] }
 function onDropKey(e: DragEvent) { const t = e.dataTransfer?.getData('text/plain'); if (t) verifyInput.key = t.trim() }
@@ -260,31 +293,85 @@ async function fetchJwksKeys(_force: boolean) {
 }
 
 async function doVerify() {
+  if (verifying.value) return
   resetVerify(); if (!token.value) { return }
+  verifying.value = true
   try {
     let useKey = verifyInput.key
-    // header取得(kid利用)
     const rawHeader = header.value
     if (jwks.use && jwks.keys.length && rawHeader?.kid) {
-  const k = findJwksRsaKeyByKid({ keys: jwks.keys }, rawHeader.kid)
-  if (k) { const pem = buildRsaPemFromModExp(k.n as string, k.e as string); if (pem) useKey = pem }
+      const k = findJwksRsaKeyByKid({ keys: jwks.keys }, rawHeader.kid)
+      if (k) { const pem = buildRsaPemFromModExp(k.n as string, k.e as string); if (pem) useKey = pem }
     }
     const res = await verifyJwt(token.value, {
       expectedAlg: verifyInput.expectedAlg as any || undefined,
-  key: useKey,
+      key: useKey,
       currentTimeSec: verifyInput.nowOverride || undefined,
       leewaySec: verifyInput.leewaySec
     })
     Object.assign(verifyState, res)
   } catch (e: any) { verifyState.errors.push({ code: 'UI_EXCEPTION', message: 'UI処理中例外', hint: e.message }) }
+  finally { verifying.value = false }
 }
 
-function injectDemo() { token.value = SAMPLE_JWT }
+function injectDemo() { token.value = SAMPLE_HS256 }
 
-// Demo JWT (公開サンプル: 署名済みHS256 ダミー)
-const SAMPLE_JWT = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.' +
-  'eyJpc3MiOiJkZW1vLWlzc3VlciIsInN1YiI6InVzZXIxIiwiYXVkIjoiYXBwMSIsImlhdCI6MTcwMDAwMDAwMCwiZXhwIjoxOTAwMDAwMDAwfQ.' +
-  'YVJ9IVd1cfplYfJm3gXpzAtgPn9gR2CQJE0XAgyyLF0'
+// --- Samples ---
+interface SampleDef { token: string; alg?: string; key?: string }
+const SAMPLE_HS256 = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.' +
+  encode('{"sub":"demo","iat":1700000000}') + '.' + 'dummy_signature_hs256'
+// 期限切れ (exp 過去)
+const SAMPLE_HS256_EXPIRED = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.' +
+  encode('{"sub":"expired","exp":1600000000}') + '.' + 'expired_sig'
+// alg=none (署名部空)
+const SAMPLE_NONE = 'eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.' + encode('{"sub":"none"}') + '.'
+// RS256 サンプル（実際の署名検証成功用ではなくUI例示用）
+const SAMPLE_RS256 = 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.' + encode('{"sub":"rs256"}') + '.rs256_sign_placeholder'
+const SAMPLE_RS256_PUBKEY = `-----BEGIN PUBLIC KEY-----\nMFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBALezrHBpjz2uVH54camzatoNgtrENcaw\nMqGfwHTCqkfNNpJBWlAbIYW/W2PASi6DPd7OJbRRqtD9h5pz50jdKkcCAwEAAQ==\n-----END PUBLIC KEY-----`
+
+const samples: Record<string, SampleDef> = {
+  hs256: { token: SAMPLE_HS256, alg: 'HS256', key: 'secret' },
+  hs256_expired: { token: SAMPLE_HS256_EXPIRED, alg: 'HS256', key: 'secret' },
+  none: { token: SAMPLE_NONE, alg: '' },
+  rs256: { token: SAMPLE_RS256, alg: 'RS256', key: SAMPLE_RS256_PUBKEY }
+}
+
+function encode(jsonLiteral: string): string {
+  return btoa(jsonLiteral).replace(/=+$/, '').replace(/\+/g, '-').replace(/\//g, '_')
+}
+
+function applySample() {
+  const s = samples[sampleSelected.value]
+  if (!s) return
+  token.value = s.token
+  verifyInput.expectedAlg = s.alg || ''
+  verifyInput.key = s.key || ''
+  resetVerify()
+}
+
+// Copy helpers
+function copyHeader() { if (verifyState.header) navigator.clipboard?.writeText(JSON.stringify(verifyState.header, null, 2)) }
+function copyPayload() { if (verifyState.payload) navigator.clipboard?.writeText(JSON.stringify(verifyState.payload, null, 2)) }
+
+// Error sort order
+const errorPriority: Record<string, number> = {
+  ERR_ALG_NONE: 1,
+  ERR_ALG_MISMATCH: 2,
+  ERR_SIGNATURE: 3,
+  ERR_KEY_IMPORT: 4,
+  ERR_EXPIRED: 5,
+  ERR_NOT_BEFORE: 6,
+  ERR_JWE_UNSUPPORTED: 7
+}
+const sortedErrors = computed(() => [...verifyState.errors].sort((a, b) => (errorPriority[a.code] || 99) - (errorPriority[b.code] || 99)))
+
+const verifyDisabled = computed(() => {
+  if (verifying.value) return true
+  if (!token.value) return true
+  if (!verifyInput.expectedAlg) return true
+  if (verifyInput.expectedAlg === 'RS256' && !verifyInput.key.trim()) return true
+  return false
+})
 
 watch(() => token.value, () => { if (activeTab.value === 'Verify') resetVerify() })
 </script>

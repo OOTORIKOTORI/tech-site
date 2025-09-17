@@ -1,89 +1,103 @@
 <template>
-  <div class="container mx-auto max-w-3xl py-8 px-4">
-    <article v-if="doc">
-      <h1 class="text-2xl font-bold mb-2">{{ doc.title }}</h1>
-      <div class="text-xs text-gray-500 mb-4">
-        {{ doc.date }}<span v-if="doc.tags"> ｜ {{ doc.tags.join(', ') }}</span>
-      </div>
-      <div v-if="toc?.links?.length" class="mb-6">
-        <h2 class="text-sm font-semibold mb-1">目次</h2>
-        <ul class="text-xs list-disc pl-5">
-          <li v-for="link in toc.links" :key="link.id">
-            <a :href="`#${link.id}`" class="hover:underline">{{ link.text }}</a>
-          </li>
-        </ul>
-      </div>
-      <ContentRenderer :value="doc" />
-      <nav class="flex justify-between mt-8 text-sm">
-        <NuxtLink v-if="prev" :to="prev._path">← {{ prev.title }}</NuxtLink>
-        <NuxtLink v-if="next" :to="next._path">{{ next.title }} →</NuxtLink>
-      </nav>
-    </article>
+  <div class="container mx-auto max-w-4xl py-10 px-4">
+    <NuxtLink to="/blog" class="text-sm text-blue-600 hover:underline">← 一覧へ戻る</NuxtLink>
+    <div class="mt-6 lg:grid lg:grid-cols-[1fr_220px] lg:gap-10">
+      <article v-if="doc" class="prose prose-sm sm:prose base lg:prose-lg max-w-none">
+        <header>
+          <h1 class="mb-2">{{ (doc as any).title }}</h1>
+          <p class="text-gray-500 text-xs">{{ formatDate((doc as any).date) }}</p>
+          <p v-if="(doc as any).description" class="mt-2 text-gray-600 text-sm">{{ (doc as any).description }}</p>
+          <hr class="my-6" />
+        </header>
+        <ContentRenderer :value="doc" />
+        <footer class="mt-12 pt-6 border-t text-xs text-gray-500">
+          <p>Published: {{ formatDate((doc as any).date) }}</p>
+        </footer>
+        <nav class="mt-12 flex flex-col gap-3">
+          <NuxtLink v-if="prev" :to="prev._path" class="text-sm group">
+            <span class="block text-gray-400 text-xs">前の記事</span>
+            <span class="group-hover:underline">{{ prev.title }}</span>
+          </NuxtLink>
+          <NuxtLink v-if="next" :to="next._path" class="text-sm group">
+            <span class="block text-gray-400 text-xs">次の記事</span>
+            <span class="group-hover:underline">{{ next.title }}</span>
+          </NuxtLink>
+        </nav>
+      </article>
+      <aside class="mt-10 lg:mt-0">
+        <div v-if="toc.length" class="sticky top-24 border rounded p-4 bg-white shadow-sm">
+          <p class="font-semibold text-sm mb-2">目次</p>
+          <ul class="space-y-1 text-xs">
+            <li v-for="h in toc" :key="h.id" :class="'ml-' + (h.depth - 2) * 4">
+              <a :href="'#' + h.id" class="hover:underline">{{ h.text }}</a>
+            </li>
+          </ul>
+        </div>
+      </aside>
+    </div>
   </div>
 </template>
-
 <script setup lang="ts">
-import { useRoute, useHead, createError, useAsyncData } from '#imports'
-import { ContentRenderer } from '#components'
-// queryContent 取得: 型エラー回避のため any, 実行時は Nuxt が提供
+import { useRoute, useAsyncData, createError, useHead, computed } from '#imports'
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const queryContent: any = (globalThis as any).queryContent
-if (!queryContent) {
-  // ビルド時 (typecheck) は参照されるが実行されないため安全
-}
-// 簡易 Post 型
-type Post = {
-  title: string
-  description?: string
-  date?: string
-  author?: string
-  tags?: string[]
-  _path?: string
-}
-
-const SITE_URL = (process.env.NUXT_PUBLIC_SITE_URL || 'https://tech-site-docs.com').replace(/\/$/, '')
 const route = useRoute()
 
-const { data: doc } = await useAsyncData<Post | null>(`post-${route.params.slug}`, () =>
-  queryContent('/blog').where({ _path: `/blog/${route.params.slug}` }).findOne()
+function pad(n: number) { return n < 10 ? '0' + n : '' + n }
+function formatDate(d?: string) {
+  if (!d) return ''
+  const dt = new Date(d)
+  if (isNaN(dt.getTime())) return ''
+  return `${dt.getFullYear()}-${pad(dt.getMonth() + 1)}-${pad(dt.getDate())}`
+}
+
+const slug = route.params.slug as string
+
+const { data: doc } = await useAsyncData('blog-doc-' + slug, () =>
+  queryContent('/blog').where({ _path: '/blog/' + slug }).findOne()
 )
 
 if (!doc.value) {
   throw createError({ statusCode: 404, statusMessage: 'Not Found' })
 }
 
-// prev/next を取得 (日付順)
-const { data: siblings } = await useAsyncData<Post[]>(`post-siblings`, () =>
-  queryContent('/blog').sort({ date: -1 }).find()
-)
-const list: Post[] = siblings.value || []
-const index = list.findIndex(p => p._path === doc.value?._path)
-const prev = index > 0 ? list[index - 1] : null
-const next = index >= 0 && index < list.length - 1 ? list[index + 1] : null
-
-// TOC 生成（簡易）: doc.body.toc があれば利用
-// 型安全を緩めに扱う（content v3 の構造依存）
-const toc: any = (doc.value as any)?.body?.toc
-
-useHead({
-  title: doc.value.title,
-  meta: [
-    { name: 'description', content: doc.value.description || '' },
-  ],
-  script: [
-    {
-      type: 'application/ld+json',
-      innerHTML: JSON.stringify({
-        '@context': 'https://schema.org',
-        '@type': 'Article',
-        headline: doc.value.title,
-        datePublished: doc.value.date,
-        author: doc.value.author || 'Tech Site',
-        description: doc.value.description,
-        url: SITE_URL + (doc.value._path || ''),
-        image: SITE_URL + '/favicon.ico'
-      })
-    }
-  ]
+const { data: surrounding } = await useAsyncData('blog-surround-' + slug, () => {
+  const path = (doc.value as any)?._path
+  return path
+    ? queryContent('/blog')
+        .sort({ date: -1 })
+        .only(['title', '_path', 'date'])
+        .findSurround(path)
+    : Promise.resolve([])
 })
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const prev = computed(() => (surrounding.value as any)?.[0])
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const next = computed(() => (surrounding.value as any)?.[1])
+
+const toc = computed(() => {
+  if (!doc.value || !(doc.value as any).body?.children) return [] as Array<{ id: string; depth: number; text: string }>
+  const list: Array<{ id: string; depth: number; text: string }> = []
+  const walk = (nodes: any[]) => {
+    for (const n of nodes) {
+      if (n.tag && /^h[2-3]$/.test(n.tag) && n.props?.id) {
+        const textNode = (n.children || []).find((c: any) => typeof c.value === 'string')
+        list.push({ id: n.props.id, depth: Number(n.tag[1]), text: textNode?.value || '' })
+      }
+      if (Array.isArray(n.children)) walk(n.children)
+    }
+  }
+  walk((doc.value as any).body.children)
+  return list
+})
+
+useHead(() => ({
+  title: (doc.value as any)?.title,
+  meta: [
+    (doc.value as any)?.description ? { name: 'description', content: (doc.value as any).description } : {},
+    (doc.value as any)?.description ? { property: 'og:description', content: (doc.value as any).description } : {},
+    (doc.value as any)?.title ? { property: 'og:title', content: (doc.value as any).title } : {},
+  ].filter(Boolean) as any
+}))
 </script>

@@ -1,58 +1,29 @@
 <template>
-  <div class="container mx-auto max-w-3xl py-8 px-4">
-    <h1 class="text-2xl font-bold mb-6">Tech Blog</h1>
-    <div class="mb-4">
-      <NuxtLink to="/tools/cron-jst" class="text-blue-700 underline hover:text-blue-900">Cron JSTツールはこちら</NuxtLink>
-    </div>
-    <div class="mb-4">
-      <span class="text-sm">タグで絞り込み：</span>
-      <NuxtLink v-for="t in allTags" :key="t" :to="`/blog?tag=${encodeURIComponent(t)}`" class="mr-2">
-        <TagChip :tag="t" />
-      </NuxtLink>
-      <NuxtLink v-if="tag" to="/blog" class="ml-2 text-xs text-gray-600 underline">すべて表示</NuxtLink>
-    </div>
-    <ul class="space-y-6">
-      <li v-for="article in filtered" :key="article._path" class="border-b pb-4">
-        <NuxtLink :to="article._path" class="text-xl font-semibold hover:underline">{{ article.title }}</NuxtLink>
-        <div class="text-xs text-gray-500 mt-1 flex flex-wrap items-center gap-1">
-          <span>{{ article.date }}</span>
-          <template v-if="article.tags">
-            <TagChip v-for="tg in article.tags" :key="tg" :tag="tg" />
-          </template>
-        </div>
-        <div class="mt-2 text-sm text-gray-700 line-clamp-2">{{ article.description }}</div>
-      </li>
-    </ul>
+  <div class="container mx-auto max-w-4xl py-10 px-4 space-y-8">
+    <header class="space-y-2">
+      <h1 class="text-2xl font-bold">Blog</h1>
+      <p class="text-gray-600 text-sm">開発ノウハウやツール設計の考察メモ。</p>
+    </header>
+    <ContentList path="/blog" v-slot="{ list }">
+      <div class="grid gap-6">
+        <article v-for="doc in list" :key="doc._path" class="rounded border p-4 bg-white shadow-sm hover:shadow transition">
+          <NuxtLink :to="doc._path" class="block group">
+            <h2 class="font-semibold text-lg group-hover:text-blue-600">{{ doc.title }}</h2>
+            <p class="text-[11px] text-gray-500 mt-0.5">{{ formatDate(doc.date) }}</p>
+            <p class="text-sm text-gray-700 mt-2 line-clamp-3">{{ doc.description }}</p>
+            <span class="inline-block mt-3 text-xs text-blue-600 group-hover:underline">続きを読む →</span>
+          </NuxtLink>
+        </article>
+      </div>
+    </ContentList>
   </div>
 </template>
-
 <script setup lang="ts">
-import TagChip from '~/components/TagChip.vue'
-import { useRoute, useAsyncData } from '#imports'
-import { ref, computed } from 'vue'
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const queryContent: any = (globalThis as any).queryContent
-
-type Post = {
-  title: string
-  description?: string
-  date?: string
-  author?: string
-  tags?: string[]
-  _path?: string
+function pad(n: number) { return n < 10 ? '0' + n : '' + n }
+function formatDate(d?: string) {
+  if (!d) return ''
+  const dt = new Date(d)
+  if (isNaN(dt.getTime())) return ''
+  return `${dt.getFullYear()}-${pad(dt.getMonth() + 1)}-${pad(dt.getDate())}`
 }
-
-const route = useRoute()
-const tag = ref<string | undefined>(route.query.tag as string | undefined)
-
-const { data: posts } = await useAsyncData<Post[]>('posts', () =>
-  queryContent('/blog').sort({ date: -1 }).find()
-)
-
-const filtered = computed(() => {
-  const list = posts.value || []
-  return tag.value ? list.filter(p => (p.tags || []).includes(tag.value!)) : list
-})
-
-const allTags = computed(() => Array.from(new Set((posts.value || []).flatMap(p => p.tags || []))))
 </script>
