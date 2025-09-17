@@ -40,7 +40,7 @@
 #### 共有リンク例
 
 ```
-https://tech-site-docs.com/tools/cron-jst?expr=0+9+*+*+1&n=10&tz=Asia%2FTokyo&rel=now
+https://kotorilab.jp/tools/cron-jst?expr=0+9+*+*+1&n=10&tz=Asia%2FTokyo&rel=now
 ```
 
 この URL を開くと「毎週月曜 9 時、10 件、JST、基準は今」で即座に予測結果が表示されます。
@@ -149,7 +149,7 @@ npm run dev
 
 | 変数名 | 必須 | 用途 | 例 |
 |--------|------|------|----|
-| `NUXT_PUBLIC_SITE_URL` | Yes | OGP/canonical/robots/sitemap で利用するサイトのベース URL（末尾スラッシュ無し推奨） | `https://tech-site-docs.com` / `https://your-project.vercel.app` |
+| `NUXT_PUBLIC_SITE_URL` | Yes | OGP/canonical/robots/sitemap で利用するサイトのベース URL（末尾スラッシュ無し推奨） | `https://kotorilab.jp` / `https://your-project.vercel.app` |
 
 本番デプロイ時は独自ドメインを設定し、その値を Vercel 等の環境変数に登録してください。未設定の場合は `http://localhost:3000` が使用され、OGP や canonical がローカル参照になるため検索エンジン向けには非推奨です。
 
@@ -324,7 +324,7 @@ Tech Site は、開発者向けの Web ツール群を提供する Nuxt 4 ベー
 1. Vercel で新規プロジェクト作成（GitHub 連携）
 2. 環境変数に `NUXT_PUBLIC_SITE_URL` を設定（Production）
 3. ビルドコマンド `pnpm build` / 開始コマンドは Nuxt 既定
-4. ドメインを割当（`tech-site-docs.com` 等）。`www`→ ルートへ 301 を推奨
+4. ドメインを割当（`kotorilab.jp`）。`www`→ ルートへ 301 を推奨
 
 ### CI チェック順
 
@@ -338,7 +338,7 @@ pnpm build
 ### SEO/公開前チェック
 
 - robots.txt: 本番のみインデックス許可、プレビューは noindex 推奨
-- サイトマップ: `@nuxtjs/sitemap` 有効、ドメイン指定確認
+- サイトマップ: 初期は静的出力（public/sitemap.xml）。将来 @nuxtjs/sitemap に移行。
 - 主要ページの title/description/OGP 確認
 
 ### SEO / a11y

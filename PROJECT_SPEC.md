@@ -91,7 +91,7 @@
 ## 🔗 リンク
 
 - [GitHub リポジトリ](https://github.com/OOTORIKOTORI/tech-site)
-- [ドキュメント](https://tech-site-docs.com)
+- [ドキュメント](https://kotorilab.jp)
 
 ---
 
@@ -152,20 +152,20 @@
 
 ### 環境変数（重要）
 
-- `NUXT_PUBLIC_SITE_URL`（必須/本番）: 例 `https://tech-site-docs.com`（末尾スラッシュ無し）
+- `NUXT_PUBLIC_SITE_URL`（必須/本番）: 例 `https://kotorilab.jp`（末尾スラッシュ無し）
   - OGP/canonical/robots/sitemap の基準 URL。未設定だと既定 `http://localhost:3000` を使用。
 
 ### ドメイン
 
-- ルートドメイン例: `tech-site-docs.com`
-- 推奨設定: `www` → ルートへ 301 リダイレクト（Vercel の Domain 設定でエイリアス/リダイレクト）
-- TLS: Vercel 自動証明書に委任
+- ルートドメイン: `kotorilab.jp`
+- 推奨設定: `www` → ルートへ 301 リダイレクト（Vercel Domain 設定）
+- TLS: Vercel 自動証明書
 
 ### SEO/クローラ
 
 - `public/robots.txt` あり（既定 allow）。本番のみインデックス許可、プレビューは noindex を推奨
   - 運用上の選択肢: プレビュー URL へ `x-robots-tag: noindex` を付与（Vercel ヘッダ設定）
-- サイトマップ: `@nuxtjs/sitemap` を導入済み（`nuxt.config.ts` でドメイン設定とパス除外を調整）
+- サイトマップ: 初期は静的出力（public/sitemap.xml）。将来 @nuxtjs/sitemap の導入を検討。
 - 構造化データ: 記事/ツールページで JSON-LD を段階導入（別タスク）
 
 ### CI/CD（チェック順）

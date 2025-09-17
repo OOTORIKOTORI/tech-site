@@ -12,7 +12,8 @@
     "lint:fix": "eslint . --ext .js,.ts,.vue --fix",
     "test": "vitest --run",
     "test:watch": "vitest",
-    "postinstall": "nuxt prepare"
+    "postinstall": "nuxt prepare",
+    "postbuild": "node ./scripts/gen-meta.mjs"
   },
   "dependencies": {
     "@nuxt/content": "3.6.3",
