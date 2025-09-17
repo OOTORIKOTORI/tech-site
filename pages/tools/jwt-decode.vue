@@ -1,7 +1,8 @@
 ﻿<template>
   <div class="container mx-auto max-w-6xl py-8 px-4 space-y-6">
     <header class="space-y-2">
-      <h1 class="text-2xl font-bold flex items-center gap-3">JWT ツール
+      <h1 class="text-2xl font-bold flex items-center gap-3">
+JWT ツール
         <span v-if="verifyState.valid === true"
           class="inline-flex items-center text-xs font-semibold rounded bg-green-100 text-green-800 px-2 py-1">検証成功</span>
         <span v-else-if="verifyState.valid === false"
@@ -22,9 +23,11 @@
 
     <!-- Tabs -->
     <nav class="flex gap-2 border-b text-sm">
-      <button v-for="t in tabs" :key="t" @click="activeTab = t"
-        :class="['px-4 py-2 -mb-px border-b-2', activeTab === t ? 'border-blue-600 text-blue-700 font-semibold' : 'border-transparent text-gray-500 hover:text-gray-700']">{{
-          t }}</button>
+      <button v-for="t in tabs" :key="t" :class="['px-4 py-2 -mb-px border-b-2', activeTab === t ? 'border-blue-600 text-blue-700 font-semibold' : 'border-transparent text-gray-500 hover:text-gray-700']"
+        @click="activeTab = t">
+{{
+          t }}
+</button>
     </nav>
 
     <!-- Common Input -->
@@ -35,7 +38,7 @@
       <div class="flex flex-wrap gap-2">
         <button class="btn-secondary" @click="onClear">クリア</button>
         <button class="btn-secondary" @click="onSample">サンプル挿入</button>
-        <button class="btn-secondary" @click="copyToken" :disabled="!token">コピー</button>
+        <button class="btn-secondary" :disabled="!token" @click="copyToken">コピー</button>
       </div>
     </section>
 
@@ -45,8 +48,10 @@
         <div class="rounded border bg-gray-50">
           <header class="flex items-center justify-between px-3 py-2 border-b">
             <h2 class="font-semibold text-sm">Header</h2>
-            <button class="text-xs text-blue-600 hover:underline" @click="collapsed.header = !collapsed.header">{{
-              collapsed.header ? '展開' : '折りたたみ' }}</button>
+            <button class="text-xs text-blue-600 hover:underline" @click="collapsed.header = !collapsed.header">
+{{
+              collapsed.header ? '展開' : '折りたたみ' }}
+</button>
           </header>
           <pre v-show="!collapsed.header"
             class="text-[11px] md:text-xs p-3 overflow-auto"><code>{{ pretty(header) }}</code></pre>
@@ -54,8 +59,10 @@
         <div class="rounded border bg-gray-50">
           <header class="flex items-center justify-between px-3 py-2 border-b">
             <h2 class="font-semibold text-sm">Payload</h2>
-            <button class="text-xs text-blue-600 hover:underline" @click="collapsed.payload = !collapsed.payload">{{
-              collapsed.payload ? '展開' : '折りたたみ' }}</button>
+            <button class="text-xs text-blue-600 hover:underline" @click="collapsed.payload = !collapsed.payload">
+{{
+              collapsed.payload ? '展開' : '折りたたみ' }}
+</button>
           </header>
           <pre v-show="!collapsed.payload"
             class="text-[11px] md:text-xs p-3 overflow-auto"><code>{{ pretty(payload) }}</code></pre>
@@ -70,10 +77,14 @@
               <th class="text-left pr-4 align-top">{{ c.key }}</th>
               <td class="font-mono break-all">{{ formatClaim(c.key, c.value) }}</td>
               <td v-if="c.key === 'exp'" class="text-xs text-gray-500 pl-2">{{ relativeExp(c.value as number) }}</td>
-              <td v-else-if="c.key === 'nbf'" class="text-xs text-gray-500 pl-2">{{ relativeGeneric(c.value as number)
-                }}</td>
-              <td v-else-if="c.key === 'iat'" class="text-xs text-gray-500 pl-2">{{ relativeGeneric(c.value as number)
-                }}</td>
+              <td v-else-if="c.key === 'nbf'" class="text-xs text-gray-500 pl-2">
+{{ relativeGeneric(c.value as number)
+                }}
+</td>
+              <td v-else-if="c.key === 'iat'" class="text-xs text-gray-500 pl-2">
+{{ relativeGeneric(c.value as number)
+                }}
+</td>
             </tr>
           </tbody>
         </table>
@@ -95,8 +106,8 @@
           </div>
           <div>
             <label class="block font-medium text-sm mb-1">鍵 / シークレット (ペースト or D&D)</label>
-              <textarea v-model="verifyInput.key" rows="4"
-                id="verify-key" class="w-full border rounded p-2 font-mono text-[11px] md:text-xs" aria-label="検証用鍵/シークレット入力"
+              <textarea id="verify-key" v-model="verifyInput.key"
+                rows="4" class="w-full border rounded p-2 font-mono text-[11px] md:text-xs" aria-label="検証用鍵/シークレット入力"
                 placeholder="HS256: 共有シークレット\nRS/ES: -----BEGIN PUBLIC KEY----- ..." @dragover.prevent
                 @drop.prevent="onDropKey"></textarea>
             <p class="text-[11px] text-gray-500 mt-1 leading-snug">
@@ -108,27 +119,31 @@
           <div class="grid grid-cols-2 gap-4 text-sm">
             <div>
               <label class="block font-medium text-sm mb-1">leeway秒 (exp/nbf/iat)</label>
-              <input type="number" v-model.number="verifyInput.leewaySec"
+              <input v-model.number="verifyInput.leewaySec" type="number"
                 class="w-full border rounded px-2 py-1 text-sm" min="0" />
             </div>
             <div>
               <label class="block font-medium text-sm mb-1">現在時刻(秒, override)</label>
-              <input type="number" v-model.number="verifyInput.nowOverride"
+              <input v-model.number="verifyInput.nowOverride" type="number"
                 class="w-full border rounded px-2 py-1 text-sm" />
             </div>
           </div>
           <div class="space-y-1">
             <label class="inline-flex items-center gap-2 text-sm">
-              <input type="checkbox" v-model="jwks.use" />
+              <input v-model="jwks.use" type="checkbox" />
               <span>JWKS を取得して kid に対応する鍵で検証 (任意)</span>
             </label>
-            <input :disabled="!jwks.use" v-model="jwks.url" placeholder="https://issuer.example/.well-known/jwks.json"
+            <input v-model="jwks.url" :disabled="!jwks.use" placeholder="https://issuer.example/.well-known/jwks.json"
               class="w-full border rounded px-2 py-1 text-xs" />
             <div class="flex gap-2">
               <button class="btn-secondary" :disabled="!jwks.use || jwks.loading"
-                @click="fetchJwksKeys(false)">取得</button>
+                @click="fetchJwksKeys(false)">
+取得
+</button>
               <button class="btn-secondary" :disabled="!jwks.use || jwks.loading"
-                @click="fetchJwksKeys(true)">再取得</button>
+                @click="fetchJwksKeys(true)">
+再取得
+</button>
               <span v-if="jwks.loading" class="text-xs text-gray-500 self-center">取得中...</span>
               <span v-else-if="jwks.error" class="text-xs text-red-600">{{ jwks.error }}</span>
               <span v-else-if="jwks.keys.length" class="text-xs text-green-700">{{ jwks.keys.length }}鍵</span>
@@ -234,7 +249,14 @@ function onDropKey(e: DragEvent) { const t = e.dataTransfer?.getData('text/plain
 
 // JWKS
 const jwks = reactive({ use: false, url: '', keys: [] as any[], loading: false, error: '' })
-async function fetchJwksKeys(force: boolean) { if (!jwks.url) { jwks.error = 'URL無し'; return } jwks.loading = true; jwks.error = ''; try { const data = await fetchJwks(jwks.url, { forceRefresh: force }); jwks.keys = data.keys } catch (e: any) { jwks.error = e.message || '取得失敗' } finally { jwks.loading = false } }
+async function fetchJwksKeys(force: boolean) {
+  if (!jwks.url) { jwks.error = 'URL無し'; return }
+  jwks.loading = true; jwks.error = ''
+  try {
+    const data = await fetchJwks(jwks.url)
+    jwks.keys = Array.isArray(data.keys) ? data.keys : []
+  } catch (e: any) { jwks.error = e.message || '取得失敗' } finally { jwks.loading = false }
+}
 
 async function doVerify() {
   resetVerify(); if (!token.value) { return }
@@ -243,12 +265,12 @@ async function doVerify() {
     // header取得(kid利用)
     const rawHeader = header.value
     if (jwks.use && jwks.keys.length && rawHeader?.kid) {
-      const k = findJwksRsaKeyByKid({ keys: jwks.keys }, rawHeader.kid, 'RS256')
+  const k = findJwksRsaKeyByKid({ keys: jwks.keys }, rawHeader.kid)
   if (k) { const pem = buildRsaPemFromModExp(k.n as string, k.e as string); if (pem) useKey = pem }
     }
     const res = await verifyJwt(token.value, {
       expectedAlg: verifyInput.expectedAlg as any || undefined,
-      key: useKey || undefined,
+  key: useKey,
       currentTimeSec: verifyInput.nowOverride || undefined,
       leewaySec: verifyInput.leewaySec
     })

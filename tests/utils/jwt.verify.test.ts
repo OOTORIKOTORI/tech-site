@@ -12,7 +12,7 @@ const fixedNow = Date.UTC(2024, 0, 1, 0, 0, 0) // 2024-01-01T00:00:00Z
 const nowSec = Math.floor(fixedNow / 1000)
 
 // HS256 署名用簡易実装 (HMAC SHA-256) - テスト限定
-async function hs256Sign(header: object, payload: object, secret: string) {
+async function hs256Sign(header: Record<string, unknown>, payload: Record<string, unknown>, secret: string): Promise<string> {
   const enc = new TextEncoder()
   const headerPart = encodeBase64Url(enc.encode(JSON.stringify(header)))
   const payloadPart = encodeBase64Url(enc.encode(JSON.stringify(payload)))
@@ -30,24 +30,7 @@ async function hs256Sign(header: object, payload: object, secret: string) {
 
 // 簡易RSA (固定鍵) PEM - 実運用しない (テスト専用)
 const RSA_PUBLIC_PEM = `-----BEGIN PUBLIC KEY-----\nMFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBALezrHBpjz2uVH54camzatoNgtrENcaw\nMqGfwHTCqkfNNpJBWlAbIYW/W2PASi6DPd7OJbRRqtD9h5pz50jdKkcCAwEAAQ==\n-----END PUBLIC KEY-----`
-const RSA_PRIVATE_PKCS8 =
-  `-----BEGIN PRIVATE KEY-----\nMIIBVgIBADANBgkqhkiG9w0BAQEFAASCAUAwggE8AgEAAkEAt7Os cGmPPa5Ufnhx\nqbNq2g2C2sQ1xrAyoZ/AdMKqR800kkFaUBshhb9bY8BKL oM93s4ltFGq0P2HmnPn\nSN0qRwIDAQABAkAfz2oxEd4pqco3EQAOEj4mBI9YJrKMgVkpXBJgp7wa9u0edPFs\niEcNWef39/C4R2tQeM+c/fi91tIbp/BKxBAiEA9Fz6nxsVXni4eWh05rq6ArlTcid\n58LLJSUYkqt+1rMCIQDDGJEqn3Ejj6inUeJ8V+RaH//RUW2KIiMzFxLpy0X58wIhA\nKpvNqTJHb7VUOp5PHeTtQKgHdwNwp0UrEGouGZWlznAiEAkI0GhBSPYBQ2PBBkKS6\nGsDz3jAC5vVsQt1zAr72Xd1LSeUCIQC2cqB6f+GO6zkRgZNpmjQe7YQDdyCjTiMQu\nGexiLRNv2Q==\n-----END PRIVATE KEY-----`.replace(
-    /\s+/g,
-    ' '
-  )
-
-function rs256Sign(header: any, payload: any) {
-  const enc = new TextEncoder()
-  const headerPart = encodeBase64Url(enc.encode(JSON.stringify(header)))
-  const payloadPart = encodeBase64Url(enc.encode(JSON.stringify(payload)))
-  const sign = crypto.createSign('RSA-SHA256')
-  sign.update(`${headerPart}.${payloadPart}`)
-  sign.end()
-  const pkcs8 = RSA_PRIVATE_PKCS8
-  const sigBuf = sign.sign(pkcs8)
-  const sig = encodeBase64Url(new Uint8Array(sigBuf))
-  return `${headerPart}.${payloadPart}.${sig}`
-}
+// (旧: PRIVATE KEY 定数 / pemToDer は不要のため削除)
 
 describe('verifyJwt', () => {
   it('HS256 正常検証', async () => {
@@ -61,19 +44,37 @@ describe('verifyJwt', () => {
       key: new TextEncoder().encode('secret'),
       currentTimeSec: nowSec,
     })
-    console.log('HS256 errors:', res.errors)
     expect(res.valid).toBe(true)
     expect(res.errors.length).toBe(0)
   })
 
   it('RS256 正常検証 (公開鍵指定)', async () => {
-    const token = await rs256Sign({ alg: 'RS256', typ: 'JWT' }, { sub: 'u2', iat: nowSec })
+    // 鍵ペア生成
+    const { publicKey, privateKey } = await crypto.subtle.generateKey(
+      { name: 'RSASSA-PKCS1-v1_5', modulusLength: 2048, publicExponent: new Uint8Array([1,0,1]), hash: 'SHA-256' },
+      true, ['sign','verify']
+    )
+    // 公開鍵をSPKI DER→PEM化
+    const spki = await crypto.subtle.exportKey('spki', publicKey)
+    function derToPemSpki(der: ArrayBuffer): string {
+      const b64 = Buffer.from(new Uint8Array(der)).toString('base64')
+      const lines = b64.match(/.{1,64}/g) || []
+      return '-----BEGIN PUBLIC KEY-----\n' + lines.join('\n') + '\n-----END PUBLIC KEY-----'
+    }
+    const publicPem = derToPemSpki(spki)
+    // トークン作成（privateKeyで署名）
+    const enc = new TextEncoder()
+    const headerPart  = encodeBase64Url(enc.encode(JSON.stringify({ alg:'RS256', typ:'JWT' })))
+    const payloadPart = encodeBase64Url(enc.encode(JSON.stringify({ sub:'123', iat: 1700000000 })))
+    const data = enc.encode(`${headerPart}.${payloadPart}`)
+    const sigBuf = await crypto.subtle.sign('RSASSA-PKCS1-v1_5', privateKey, data)
+    const token = `${headerPart}.${payloadPart}.${encodeBase64Url(new Uint8Array(sigBuf))}`
+    // 検証
     const res = await verifyJwt(token, {
       expectedAlg: 'RS256',
-      key: RSA_PUBLIC_PEM,
-      currentTimeSec: nowSec,
+      key: publicPem,
+      currentTimeSec: 1700000000,
     })
-    console.log('RS256 errors:', res.errors)
     expect(res.valid).toBe(true)
   })
 
