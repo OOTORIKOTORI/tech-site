@@ -200,11 +200,24 @@ bun run preview
 
 Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information。
 
+**Post-build outputs**
+
+- `public/robots.txt`（`Sitemap: https://kotorilab.jp/sitemap.xml` を含む）
+- `public/sitemap.xml`（`/`, `/tools/cron-jst`, `/tools/jwt-decode` などの主要ルート）
+
 ## Deployment (Vercel)
 
 - Import プロジェクト（Root: `./`、Framework: Nuxt Preset）
-- Env: `NUXT_PUBLIC_SITE_URL`=本番 URL（現状: https://tech-site-eight.vercel.app → 切替後: https://kotorilab.jp）
+- Env: `NUXT_PUBLIC_SITE_URL`=本番 URL（現状: https://kotorilab.jp）
 - ドメイン接続: Vercel で Add Domain → お名前.com の DNS に CNAME/A 設定 → Ready → 環境変数の URL を本番に更新
+
+**Domain & DNS Quick Start**
+
+- Add Domains in Vercel: `kotorilab.jp`（Connect to Production）, `www.kotorilab.jp`（Redirect to kotorilab.jp, 301）
+- DNS at registrar:
+  - A(@): **216.198.79.1**
+  - CNAME(www): **<project-specific>.vercel-dns-XXX.com**
+- Set `NUXT_PUBLIC_SITE_URL=https://kotorilab.jp` (Production) and redeploy
 
 ## 概要
 
@@ -335,11 +348,15 @@ pnpm test -- --run
 pnpm build
 ```
 
+- `pnpm test`（開発） or `pnpm test:run`（CI 相当）
+
 ### SEO/公開前チェック
 
 - robots.txt: 本番のみインデックス許可、プレビューは noindex 推奨
 - サイトマップ: 初期は静的出力（public/sitemap.xml）。将来 @nuxtjs/sitemap に移行。
 - 主要ページの title/description/OGP 確認
+
+- プレビュー（`*.vercel.app`）は `X-Robots-Tag: noindex, nofollow` を送出
 
 ### SEO / a11y
 

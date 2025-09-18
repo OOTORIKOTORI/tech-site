@@ -161,12 +161,20 @@
 - 推奨設定: `www` → ルートへ 301 リダイレクト（Vercel Domain 設定）
 - TLS: Vercel 自動証明書
 
+#### 現状の公開・ドメイン構成（2025-09）
+
+- Primary: **kotorilab.jp**（Apex を本番に接続）
+- www: **www.kotorilab.jp → kotorilab.jp へ 301 リダイレクト**
+- DNS（お名前.com 例）
+  - A(@): **216.198.79.1**（Vercel 新 A）
+  - CNAME(www): **<project-specific>.vercel-dns-XXX.com**（Vercel が表示する専用値）
+- TLS: Vercel 自動証明書（Let's Encrypt）
+
 ### SEO/クローラ
 
-- `public/robots.txt` あり（既定 allow）。本番のみインデックス許可、プレビューは noindex を推奨
-  - 運用上の選択肢: プレビュー URL へ `x-robots-tag: noindex` を付与（Vercel ヘッダ設定）
-- サイトマップ: 初期は静的出力（public/sitemap.xml）。将来 @nuxtjs/sitemap の導入を検討。
-- 構造化データ: 記事/ツールページで JSON-LD を段階導入（別タスク）
+- `public/robots.txt` あり（既定 allow）。**プレビュー環境（\*.vercel.app）は noindex ヘッダ**で抑止。
+  - 実装: `server/middleware/noindex-preview.ts` で `X-Robots-Tag: noindex, nofollow` を付与（host が `*.vercel.app` のとき）
+- **サイトマップ: 初期は静的出力（public/sitemap.xml）**。将来 `@nuxtjs/sitemap` 導入を検討。
 
 ### CI/CD（チェック順）
 
@@ -174,6 +182,20 @@
 2. 型: `pnpm typecheck`
 3. テスト: `pnpm test -- --run`
 4. ビルド: `pnpm build`
+
+### ビルド後処理（sitemap/robots の静的生成）
+
+- Postbuild で `scripts/gen-meta.mjs` を実行し、`public/sitemap.xml` と `public/robots.txt` を生成
+  - 参照環境変数: `NUXT_PUBLIC_SITE_URL`（`.env` または Vercel 環境変数）
+  - 実行方法例: `package.json` の `"postbuild": "node -r dotenv/config ./scripts/gen-meta.mjs"`
+
+### 実装補足（安定化のための設定）
+
+- `content.config.ts`: 最小スキーマを定義（`defineCollection({ type: 'page', schema: z.object({}) })`）
+- `nuxt.config.ts`（Nitro）: 内部 API を静的化しないため `prerender.ignore = ['/__nuxt_content/**']`
+- `error.vue`: 404/500 共通の簡易ページを用意
+- 法務ページ: `/privacy`, `/terms`, `/ads` の雛形を配置
+- テスト: `test/jwt-es256.spec.ts` で ES256 の DER ↔ JOSE 変換のラウンドトリップを検証
 
 ### リリース運用
 
@@ -184,3 +206,5 @@
   - [ ] 主要ページの meta/OGP/リンク確認
   - [ ] robots/sitemap の想定どおり挙動
   - [ ] 広告を有効化する場合はポリシー/ads.txt/同意導線の準備
+  - [ ] www → ルートの 301 リダイレクトが効いている（Location を確認）
+  - [ ] `robots.txt` / `sitemap.xml` の URL が `https://kotorilab.jp` ベースになっている
