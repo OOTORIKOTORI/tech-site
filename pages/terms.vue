@@ -1,5 +1,6 @@
 // pages/terms.vue
 <script setup lang="ts">
+import { useSeoMeta } from '#imports'
 useSeoMeta({ title: 'Terms of Service' });
 </script>
 <template>

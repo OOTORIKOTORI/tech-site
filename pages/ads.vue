@@ -1,5 +1,6 @@
 // pages/ads.vue
 <script setup lang="ts">
+import { useSeoMeta } from '#imports'
 useSeoMeta({ title: 'Ads Policy' });
 </script>
 <template>

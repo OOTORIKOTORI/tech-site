@@ -1,3 +1,4 @@
+import 'dotenv/config'
 // scripts/gen-meta.mjs
 import { mkdirSync, writeFileSync, existsSync } from 'node:fs'
 import { join } from 'node:path'

@@ -22,6 +22,8 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useSeoMeta, clearError } from '#imports'
 const props = defineProps<{ error: { statusCode?: number; statusMessage?: string; message?: string } }>();
 const is404 = computed(() => props.error?.statusCode === 404);
 const title = computed(() => (is404.value ? '404 Not Found' : 'Something went wrong'));
