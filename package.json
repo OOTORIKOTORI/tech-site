@@ -10,8 +10,9 @@
     "typecheck": "nuxt typecheck",
     "lint": "eslint . --ext .js,.ts,.vue",
     "lint:fix": "eslint . --ext .js,.ts,.vue --fix",
-    "test": "vitest --run",
+    "test": "vitest",
     "test:watch": "vitest",
+    "test:run": "vitest --run",
     "postinstall": "nuxt prepare",
     "postbuild": "node ./scripts/gen-meta.mjs"
   },

@@ -42,6 +42,12 @@ export default defineNuxtConfig({
       '/sitemap.xml': { headers: { 'cache-control': 'public, max-age=3600' } },
       '/robots.txt': { headers: { 'cache-control': 'public, max-age=3600' } },
     },
+    prerender: {
+      // 内部APIは静的化しない
+      ignore: ['/__nuxt_content/**'],
+      // 念のため：取りこぼしがあってもビルド継続
+      failOnError: false,
+    },
   },
   hooks: {
     ready: () => {

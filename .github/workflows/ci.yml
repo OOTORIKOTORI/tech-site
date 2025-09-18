@@ -8,6 +8,9 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  NUXT_PUBLIC_SITE_URL: https://kotorilab.jp
+
 jobs:
   build:
     runs-on: ubuntu-latest
