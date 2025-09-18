@@ -1,8 +1,8 @@
-# Tech Tools & Notes （開発者向けユーティリティ＋技術メモ集）
+# KOTORI Lab — Tech Tools & Notes（開発者向けユーティリティ＋技術メモ集）
 
 フロント/バックエンドの日常作業で「毎回ググって再発明する」小さな処理を“手元で即確認・共有”できるようにする軽量ツール群（Cron/JWT など）と、実装や運用で詰まりやすいポイントを最小編集で整理した技術ブログ（短文ノート）をまとめたサイトです。収益モデルは広告掲載を想定しつつ、ローカルで完結する安全な検証 UI を重視しています。
 
-ブランド: KOTORI Lab / ドメイン: https://kotorilab.jp （公開 URL は切替後に本番へ更新予定）
+ブランド: KOTORI Lab / ドメイン: https://kotorilab.jp （現在本番稼働中）
 
 ---
 
@@ -149,7 +149,7 @@ npm run dev
 
 | 変数名 | 必須 | 用途 | 例 |
 |--------|------|------|----|
-| `NUXT_PUBLIC_SITE_URL` | Yes | OGP/canonical/robots/sitemap で利用するサイトのベース URL（末尾スラッシュ無し推奨） | `https://kotorilab.jp` / `https://your-project.vercel.app` |
+| `NUXT_PUBLIC_SITE_URL` | Yes | OGP/canonical/robots/sitemap で利用するサイトのベース URL（末尾スラッシュ無し推奨） | `https://kotorilab.jp` / `https://<project>.vercel.app` |
 
 本番デプロイ時は独自ドメインを設定し、その値を Vercel 等の環境変数に登録してください。未設定の場合は `http://localhost:3000` が使用され、OGP や canonical がローカル参照になるため検索エンジン向けには非推奨です。
 
@@ -200,6 +200,17 @@ bun run preview
 
 Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information。
 
+### Domain & Redirect Check
+
+```powershell
+# www → apex が 301 で遷移することを確認
+iwr -Uri 'http://www.kotorilab.jp' -Method Head -MaximumRedirection 0 | Select-Object StatusCode, StatusDescription, Headers
+
+# 本番 robots/sitemap を確認
+iwr -Uri 'https://kotorilab.jp/robots.txt'
+iwr -Uri 'https://kotorilab.jp/sitemap.xml'
+```
+
 **Post-build outputs**
 
 - `public/robots.txt`（`Sitemap: https://kotorilab.jp/sitemap.xml` を含む）
@@ -208,7 +219,7 @@ Check out the [deployment documentation](https://nuxt.com/docs/getting-started/d
 ## Deployment (Vercel)
 
 - Import プロジェクト（Root: `./`、Framework: Nuxt Preset）
-- Env: `NUXT_PUBLIC_SITE_URL`=本番 URL（現状: https://kotorilab.jp）
+- Env: `NUXT_PUBLIC_SITE_URL`=本番 URL（`https://kotorilab.jp`（本番） / `https://<project>.vercel.app`（プレビュー））
 - ドメイン接続: Vercel で Add Domain → お名前.com の DNS に CNAME/A 設定 → Ready → 環境変数の URL を本番に更新
 
 **Domain & DNS Quick Start**

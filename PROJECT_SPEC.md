@@ -82,7 +82,7 @@
 
 ## ⚙️ 主要設定
 
-- `nuxt.config.ts`: Nuxt.js の設定ファイル
+- `nuxt.config.ts`: Nuxt の設定ファイル
 - `tailwind.config.ts`: Tailwind CSS の設定ファイル
 - `scheduler.tickSeconds`: 10（自動再読込の間隔）
 - `scheduler.dowDomMode`: 'OR'|'AND'（省略時 'OR'）
@@ -169,6 +169,11 @@
   - A(@): **216.198.79.1**（Vercel 新 A）
   - CNAME(www): **<project-specific>.vercel-dns-XXX.com**（Vercel が表示する専用値）
 - TLS: Vercel 自動証明書（Let's Encrypt）
+
+##### 301 リダイレクト確認（手順例）
+
+- `www.kotorilab.jp` → `kotorilab.jp` が **301**（恒久的）であることを確認。
+- 例: PowerShell `iwr -Uri 'http://www.kotorilab.jp' -Method Head -MaximumRedirection 0` で `StatusCode=301` を確認。
 
 ### SEO/クローラ
 
