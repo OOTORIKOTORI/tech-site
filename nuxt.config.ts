@@ -61,17 +61,12 @@ export default defineNuxtConfig({
   },
   app: {
     head: {
-      title: 'Tech Tools & Notes',
-      titleTemplate: '%s - Tech Tools & Notes',
+      htmlAttrs: { lang: 'ja' },
+      title: 'KOTORI Lab — Tech Tools & Notes',
+      titleTemplate: '%s - KOTORI Lab — Tech Tools & Notes',
       meta: [
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
         { name: 'description', content: '便利ツールと実務ノウハウの技術サイト' },
-        { property: 'og:site_name', content: 'Tech Tools & Notes' },
-        { property: 'og:type', content: 'website' },
-        { property: 'og:title', content: 'Tech Tools & Notes' },
-        { property: 'og:description', content: '便利ツールと実務ノウハウの技術サイト' },
-        { property: 'og:image', content: '/og-default.png' },
-        { name: 'twitter:card', content: 'summary_large_image' },
       ],
       link: [{ rel: 'alternate', type: 'application/rss+xml', href: '/feed.xml', title: 'RSS' }],
     },

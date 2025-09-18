@@ -216,6 +216,46 @@ iwr -Uri 'https://kotorilab.jp/sitemap.xml'
 - `public/robots.txt`（`Sitemap: https://kotorilab.jp/sitemap.xml` を含む）
 - `public/sitemap.xml`（`/`, `/tools/cron-jst`, `/tools/jwt-decode` などの主要ルート）
 
+### OGP の仕様と上書き方法
+
+- 既定のメタは `utils/siteMeta.ts` と `app.vue` で一元適用（title/description/canonical/og:image）。
+- canonical / og:url / og:image は `NUXT_PUBLIC_SITE_URL` を基準に絶対 URL 化。
+- 個別ページでの上書き例（`pages/*.vue` 内）：
+
+```ts
+// script setup
+import { useSeoMeta } from '#imports'
+useSeoMeta({
+  title: 'ページ固有タイトル',
+  ogTitle: 'ページ固有タイトル',
+  description: 'ページ固有の説明',
+  ogDescription: 'ページ固有の説明',
+  ogImage: `https://kotorilab.jp/api/og/${encodeURIComponent('ページ固有タイトル')}.png`,
+})
+```
+
+- 動的 OGP: `GET /api/og/[slug].png`（Edge Runtime, `@vercel/og`）。`slug` をタイトルとして描画。
+- フォールバック: エラー時は `public/og-default.png` を利用。
+
+### Lighthouse（アクセシビリティ/SEO）
+
+- クイックチェック（デスクトップ、該当カテゴリのみ）:
+
+```bash
+pnpm lh:quick
+```
+
+- 合格基準（推奨）:
+
+  - Accessibility: 80 以上
+  - SEO: 80 以上
+
+- よくある赤項目の是正メモ:
+  - `<html lang="ja">` を設定（nuxt.config.ts の `app.head.htmlAttrs.lang`）
+  - 適切な `<meta name="description">` を設定（`app.head.meta` または `useSeoMeta`）
+  - `<link rel="canonical">` は `app.vue` で自動付与済み（`utils/siteMeta.ts` を参照）
+  - 画像 `alt` 欠落のチェック（Nuxt Content 記事やカードの `<img>` に `alt` 指定）
+
 ## Deployment (Vercel)
 
 - Import プロジェクト（Root: `./`、Framework: Nuxt Preset）
@@ -378,3 +418,9 @@ pnpm build
 
 - JWT: JWE は未対応（4~5 パートは即エラー）
 - 巨大 JWT はブラウザ表示パフォーマンス低下の可能性
+
+## Tools ヘルプの更新方法（md 編集）
+
+- ページ: `/tools/help`（Nuxt Content で配信）
+- ファイル: `content/tools/help.md`
+- 手順: 該当の Q&A を Markdown で追記/編集し、PR → マージで本番反映
