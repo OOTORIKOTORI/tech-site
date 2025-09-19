@@ -2,6 +2,7 @@
 import { ImageResponse } from '@vercel/og'
 import type { H3Event } from 'h3'
 import { defineEventHandler, getRouterParam } from 'h3'
+import { resolveSiteUrl } from '../../../utils/siteUrl'
 
 export const runtime = 'edge'
 
@@ -46,7 +47,7 @@ export default defineEventHandler(async (event: H3Event) => {
       { width: 1200, height: 630 }
     )
   } catch {
-    const siteUrl = (process.env.NUXT_PUBLIC_SITE_URL || 'http://localhost:3000').replace(/\/$/, '')
+    const siteUrl = resolveSiteUrl(event).replace(/\/$/, '')
     return Response.redirect(`${siteUrl}/og-default.png`, 302)
   }
 })

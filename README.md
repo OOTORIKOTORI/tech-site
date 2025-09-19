@@ -216,6 +216,12 @@ iwr -Uri 'https://kotorilab.jp/sitemap.xml'
 
 ※ Vercel のドメインリダイレクトは既定で 308 を返す場合があります。SEO 的には 301 と同等に扱われます。
 
+Preview health check:
+
+```bash
+curl -I https://<preview>.vercel.app/api/health
+```
+
 **Post-build outputs**
 
 - `public/robots.txt`（`Sitemap: https://kotorilab.jp/sitemap.xml` を含む）

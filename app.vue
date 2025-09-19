@@ -7,6 +7,7 @@
 <script setup lang="ts">
 import { useHead, useSeoMeta, computed } from '#imports'
 import { defaultTitle, defaultDescription, useCanonicalUrl, absoluteUrl, ogDefaultPath } from '@/utils/siteMeta'
+import { resolveSiteUrl } from '@/utils/siteUrl'
 
 const canonical = useCanonicalUrl()
 
@@ -16,7 +17,8 @@ useHead(() => ({
   ]
 }))
 
-const ogImage = computed(() => absoluteUrl(ogDefaultPath))
+const siteOrigin = resolveSiteUrl()
+const ogImage = computed(() => absoluteUrl(ogDefaultPath, siteOrigin))
 useSeoMeta({
   title: defaultTitle,
   description: defaultDescription,
