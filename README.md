@@ -222,6 +222,14 @@ Preview health check:
 curl -I https://<preview>.vercel.app/api/health
 ```
 
+#### Domain ↔ Environment Matrix
+
+- `kotorilab.jp` → Production（indexable）
+- `www.kotorilab.jp` → Permanent redirect to apex（301/308）
+- `tech-site-eight.vercel.app` → 現状は最新 Production を指す（ただし `.vercel.app` は noindex）
+- プレビュー検証は個別デプロイ URL（`project-git-branch-*.vercel.app`）推奨
+- noindex の条件: host が `*.vercel.app` のときのみ付与（環境に依存しない）
+
 **Post-build outputs**
 
 - `public/robots.txt`（`Sitemap: https://kotorilab.jp/sitemap.xml` を含む）
@@ -229,8 +237,9 @@ curl -I https://<preview>.vercel.app/api/health
 
 ### OGP の仕様と上書き方法
 
-- 既定のメタは `utils/siteMeta.ts` と `app.vue` で一元適用（title/description/canonical/og:image）。
-- canonical / og:url / og:image は `NUXT_PUBLIC_SITE_URL` を基準に絶対 URL 化。
+- 既定メタは `app.config.ts`（文言）と `utils/siteMeta.ts`（適用ロジック）で一元化。`app.vue` でサイト全体へ適用。
+- canonical / og:url / og:image は `resolveSiteUrl()` を基準に絶対 URL 化（`.vercel.app` プレビューでも安全）。
+- 既定 OGP 画像: `public/og-default.png`（1200x630）。
 - 個別ページでの上書き例（`pages/*.vue` 内）：
 
 ```ts
@@ -254,6 +263,13 @@ useSeoMeta({
 
 ```bash
 pnpm lh:quick
+```
+
+- サイレント実行（CI ログ汚しを抑制）:
+
+```bash
+pnpm lh:quick:desktop
+pnpm lh:quick:mobile
 ```
 
 - 合格基準（推奨）:

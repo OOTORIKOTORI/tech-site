@@ -1,12 +1,12 @@
+// @ts-nocheck
 /* eslint-disable import/no-extraneous-dependencies */
 import { ImageResponse } from '@vercel/og'
-import type { H3Event } from 'h3'
-import { defineEventHandler, getRouterParam } from 'h3'
+import { defineEventHandler, getRouterParam } from '#imports'
 import { resolveSiteUrl } from '../../../utils/siteUrl'
 
 export const runtime = 'edge'
 
-export default defineEventHandler(async (event: H3Event) => {
+export default defineEventHandler(async event => {
   const slug = getRouterParam(event, 'slug') || 'KOTORI Lab'
   const title = decodeURIComponent(slug).replace(/\s+/g, ' ').slice(0, 120)
 

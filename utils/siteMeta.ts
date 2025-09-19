@@ -1,16 +1,25 @@
-import { useRuntimeConfig, useRoute, useRequestURL, computed } from '#imports'
+import { useRoute, useRequestURL, computed, useAppConfig } from '#imports'
+import { resolveSiteUrl } from './siteUrl'
 
-export const defaultTitle = 'KOTORI Lab — Tech Tools & Notes'
-export const defaultDescription = '便利ツールと実務ノウハウの技術サイト'
+export function useDefaultTitle() {
+  const app = useAppConfig() as any
+  return app.site?.title || 'KOTORI Lab — Tech Tools & Notes'
+}
 
-export const ogDefaultPath = '/og-default.png'
+export function useDefaultDescription() {
+  const app = useAppConfig() as any
+  return app.site?.description || '便利ツールと実務ノウハウの技術サイト'
+}
+
+export function useOgDefaultPath() {
+  const app = useAppConfig() as any
+  return app.site?.ogDefaultPath || '/og-default.png'
+}
 
 export function useAbsoluteBase() {
-  const config = useRuntimeConfig()
-  const base = (config.public.siteUrl || '').replace(/\/$/, '')
   const reqUrl = useRequestURL()
-  const origin = reqUrl?.origin && reqUrl.origin !== 'null' ? reqUrl.origin : base
-  return origin
+  const fromReq = reqUrl?.origin && reqUrl.origin !== 'null' ? reqUrl.origin : ''
+  return fromReq || resolveSiteUrl()
 }
 
 export function useCanonicalUrl() {
@@ -22,7 +31,7 @@ export function useCanonicalUrl() {
 export function absoluteUrl(pathOrUrl: string, base?: string) {
   const origin = (base || useAbsoluteBase()).replace(/\/$/, '')
   try {
-    // If already absolute
+    // already absolute
     // eslint-disable-next-line no-new
     new URL(pathOrUrl)
     return pathOrUrl

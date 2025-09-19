@@ -6,7 +6,7 @@
 
 <script setup lang="ts">
 import { useHead, useSeoMeta, computed } from '#imports'
-import { defaultTitle, defaultDescription, useCanonicalUrl, absoluteUrl, ogDefaultPath } from '@/utils/siteMeta'
+import { useDefaultTitle, useDefaultDescription, useCanonicalUrl, absoluteUrl, useOgDefaultPath } from '@/utils/siteMeta'
 import { resolveSiteUrl } from '@/utils/siteUrl'
 
 const canonical = useCanonicalUrl()
@@ -18,14 +18,15 @@ useHead(() => ({
 }))
 
 const siteOrigin = resolveSiteUrl()
+const ogDefaultPath = useOgDefaultPath()
 const ogImage = computed(() => absoluteUrl(ogDefaultPath, siteOrigin))
 useSeoMeta({
-  title: defaultTitle,
-  description: defaultDescription,
-  ogSiteName: defaultTitle,
+  title: useDefaultTitle(),
+  description: useDefaultDescription(),
+  ogSiteName: useDefaultTitle(),
   ogType: 'website',
-  ogTitle: defaultTitle,
-  ogDescription: defaultDescription,
+  ogTitle: useDefaultTitle(),
+  ogDescription: useDefaultDescription(),
   ogUrl: () => canonical.value,
   ogImage: () => ogImage.value,
   twitterCard: 'summary_large_image',
