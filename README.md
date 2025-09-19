@@ -203,13 +203,15 @@ Check out the [deployment documentation](https://nuxt.com/docs/getting-started/d
 ### Domain & Redirect Check
 
 ```powershell
-# www → apex が 301 で遷移することを確認
+# www → apex が Permanent（301/308）で遷移することを確認
 iwr -Uri 'http://www.kotorilab.jp' -Method Head -MaximumRedirection 0 | Select-Object StatusCode, StatusDescription, Headers
 
 # 本番 robots/sitemap を確認
 iwr -Uri 'https://kotorilab.jp/robots.txt'
 iwr -Uri 'https://kotorilab.jp/sitemap.xml'
 ```
+
+※ Vercel のドメインリダイレクトは既定で 308 を返す場合があります。SEO 的には 301 と同等に扱われます。
 
 **Post-build outputs**
 
@@ -264,7 +266,7 @@ pnpm lh:quick
 
 **Domain & DNS Quick Start**
 
-- Add Domains in Vercel: `kotorilab.jp`（Connect to Production）, `www.kotorilab.jp`（Redirect to kotorilab.jp, 301）
+- Add Domains in Vercel: `kotorilab.jp`（Connect to Production）, `www.kotorilab.jp`（Redirect to kotorilab.jp, Permanent（301/308））
 - DNS at registrar:
   - A(@): **216.198.79.1**
   - CNAME(www): **<project-specific>.vercel-dns-XXX.com**

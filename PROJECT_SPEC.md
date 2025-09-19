@@ -158,22 +158,24 @@
 ### ドメイン
 
 - ルートドメイン: `kotorilab.jp`
-- 推奨設定: `www` → ルートへ 301 リダイレクト（Vercel Domain 設定）
+- 推奨設定: `www` → ルートへ Permanent（301/308）リダイレクト（Vercel Domain 設定）
 - TLS: Vercel 自動証明書
 
 #### 現状の公開・ドメイン構成（2025-09）
 
 - Primary: **kotorilab.jp**（Apex を本番に接続）
-- www: **www.kotorilab.jp → kotorilab.jp へ 301 リダイレクト**
+- www: **www.kotorilab.jp → kotorilab.jp へ Permanent（301/308）リダイレクト**
 - DNS（お名前.com 例）
   - A(@): **216.198.79.1**（Vercel 新 A）
   - CNAME(www): **<project-specific>.vercel-dns-XXX.com**（Vercel が表示する専用値）
 - TLS: Vercel 自動証明書（Let's Encrypt）
 
-##### 301 リダイレクト確認（手順例）
+##### Permanent リダイレクト確認（301/308）
 
-- `www.kotorilab.jp` → `kotorilab.jp` が **301**（恒久的）であることを確認。
-- 例: PowerShell `iwr -Uri 'http://www.kotorilab.jp' -Method Head -MaximumRedirection 0` で `StatusCode=301` を確認。
+- `www.kotorilab.jp` → `kotorilab.jp` が **301 または 308**（恒久的）であることを確認。
+- 例: PowerShell `iwr -Uri 'http://www.kotorilab.jp' -Method Head -MaximumRedirection 0` で `StatusCode` が 301 または 308 であることを確認。
+
+※ Vercel のドメインリダイレクトは既定で 308 を返す場合があります。SEO 的には 301 と同等に扱われます。
 
 ### SEO/クローラ
 
@@ -212,4 +214,5 @@
   - [ ] robots/sitemap の想定どおり挙動
   - [ ] 広告を有効化する場合はポリシー/ads.txt/同意導線の準備
   - [ ] www → ルートの 301 リダイレクトが効いている（Location を確認）
+  - [ ] www → ルートの Permanent（301/308）リダイレクトが効いている（Location を確認）
   - [ ] `robots.txt` / `sitemap.xml` の URL が `https://kotorilab.jp` ベースになっている
