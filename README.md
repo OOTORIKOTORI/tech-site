@@ -183,6 +183,7 @@ bun run build
 ```
 
 注意: Sitemap/robots のホストは `NUXT_PUBLIC_SITE_URL` と一致している必要があります。不一致の場合はビルド（postbuild の検証）で失敗します。
+本番環境では `Sitemap: https://kotorilab.jp/sitemap.xml` になります。ズレがある場合はビルドを失敗させます。
 
 Locally preview production build:
 

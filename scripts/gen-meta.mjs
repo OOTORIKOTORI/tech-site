@@ -4,16 +4,26 @@ import { mkdirSync, writeFileSync, existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 const CHECK_ONLY = process.argv.includes('--check-only')
-let BASE_URL =
-  (process.env.NUXT_PUBLIC_SITE_URL && process.env.NUXT_PUBLIC_SITE_URL.trim()) ||
-  'https://example.com'
-try {
-  // normalize to remove trailing slash for consistent output
-  const u = new URL(BASE_URL)
-  BASE_URL = `${u.origin}`
-} catch (e) {
-  // defer failure to checker which will exit(1)
+const urlFromEnv = process.env.NUXT_PUBLIC_SITE_URL && process.env.NUXT_PUBLIC_SITE_URL.trim()
+const vercelEnv = process.env.VERCEL_ENV // 'production' | 'preview' | 'development'
+const vercelUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined
+
+function resolveBaseUrl() {
+  let base
+  if (vercelEnv === 'production') {
+    base = urlFromEnv || 'https://kotorilab.jp'
+  } else {
+    base = vercelUrl || urlFromEnv || 'https://example.com'
+  }
+  try {
+    const u = new URL(base)
+    return u.origin
+  } catch {
+    return base
+  }
 }
+
+const BASE_URL = resolveBaseUrl()
 const ROUTES = ['/', '/tools/cron-jst', '/tools/jwt-decode']
 
 const outDir = 'public'
@@ -36,14 +46,13 @@ function generate() {
 }
 
 function checkHosts() {
-  let envHost
+  let expectedHost
   try {
-    const envUrl = process.env.NUXT_PUBLIC_SITE_URL
-    if (!envUrl) throw new Error('NUXT_PUBLIC_SITE_URL is not set')
-    envHost = new URL(envUrl).host
+    expectedHost = new URL(BASE_URL).host
   } catch (err) {
     console.error(
-      '[gen-meta] ERROR: Invalid or missing NUXT_PUBLIC_SITE_URL:',
+      '[gen-meta] ERROR: Invalid base URL:',
+      BASE_URL,
       err && err.message ? err.message : err
     )
     process.exit(1)
@@ -83,18 +92,18 @@ function checkHosts() {
   }
 
   const uniqueLocHosts = Array.from(locHosts)
-  const robotsOk = robotsHost === envHost
-  const sitemapOk = uniqueLocHosts.length > 0 && uniqueLocHosts.every(h => h === envHost)
+  const robotsOk = robotsHost === expectedHost
+  const sitemapOk = uniqueLocHosts.length > 0 && uniqueLocHosts.every(h => h === expectedHost)
 
   if (!robotsOk || !sitemapOk) {
     console.error('[gen-meta] ERROR: Host mismatch detected.')
-    console.error('  Expected envHost:', envHost)
+    console.error('  Expected base host:', expectedHost)
     console.error('  robots.txt Sitemap host:', robotsHost)
     console.error('  sitemap.xml <loc> hosts:', uniqueLocHosts.join(', '))
     process.exit(1)
   }
 
-  console.log('[gen-meta] OK: robots/sitemap host is', envHost)
+  console.log('[gen-meta] OK: robots/sitemap host is', expectedHost)
 }
 
 if (CHECK_ONLY) {
