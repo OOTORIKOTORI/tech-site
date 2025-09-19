@@ -14,7 +14,8 @@
     "test:watch": "vitest",
     "test:run": "vitest --run",
     "postinstall": "nuxt prepare",
-    "postbuild": "node ./scripts/gen-meta.mjs",
+    "postbuild": "node ./scripts/gen-meta.mjs && node ./scripts/gen-meta.mjs --check-only",
+    "check:meta": "node scripts/gen-meta.mjs --check-only",
     "lh:quick": "pnpm dlx lighthouse https://kotorilab.jp --only-categories=accessibility,seo --preset=desktop --view"
   },
   "dependencies": {
