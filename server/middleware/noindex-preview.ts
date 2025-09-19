@@ -3,7 +3,11 @@ import { defineEventHandler, setResponseHeader } from 'h3'
 
 export default defineEventHandler(event => {
   const req = event.node?.req
-  const rawHost = (req?.headers?.host ?? '').toString()
+  const rawHost = (
+    (req?.headers?.['x-forwarded-host'] as unknown) ||
+    req?.headers?.host ||
+    ''
+  ).toString()
   const host = rawHost.toLowerCase()
   const isPreview = host.endsWith('.vercel.app')
   if (isPreview) {

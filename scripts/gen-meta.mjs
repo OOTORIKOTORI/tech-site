@@ -96,14 +96,28 @@ function checkHosts() {
   const sitemapOk = uniqueLocHosts.length > 0 && uniqueLocHosts.every(h => h === expectedHost)
 
   if (!robotsOk || !sitemapOk) {
-    console.error('[gen-meta] ERROR: Host mismatch detected.')
-    console.error('  Expected base host:', expectedHost)
-    console.error('  robots.txt Sitemap host:', robotsHost)
-    console.error('  sitemap.xml <loc> hosts:', uniqueLocHosts.join(', '))
+    if (!robotsOk) {
+      console.error(
+        '[gen-meta] ERROR: expected host =',
+        expectedHost,
+        'but got =',
+        robotsHost,
+        '(robots.txt Sitemap)'
+      )
+    }
+    if (!sitemapOk) {
+      console.error(
+        '[gen-meta] ERROR: expected host =',
+        expectedHost,
+        'but got =',
+        uniqueLocHosts.join(', '),
+        '(sitemap.xml <loc>)'
+      )
+    }
     process.exit(1)
   }
 
-  console.log('[gen-meta] OK: robots/sitemap host is', expectedHost)
+  console.log('[gen-meta] OK: robots/sitemap host =', expectedHost)
 }
 
 if (CHECK_ONLY) {
