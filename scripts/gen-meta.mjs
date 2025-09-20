@@ -1,7 +1,7 @@
 import 'dotenv/config'
 // scripts/gen-meta.mjs
-import { mkdirSync, writeFileSync, existsSync, readFileSync } from 'node:fs'
-import { join } from 'node:path'
+import { mkdirSync, writeFileSync, existsSync, readFileSync, readdirSync } from 'node:fs'
+import { join, basename } from 'node:path'
 
 const CHECK_ONLY = process.argv.includes('--check-only')
 const urlFromEnv = process.env.NUXT_PUBLIC_SITE_URL && process.env.NUXT_PUBLIC_SITE_URL.trim()
@@ -26,15 +26,29 @@ function resolveBaseUrl() {
 const BASE_URL = resolveBaseUrl()
 const ROUTES = ['/', '/tools/cron-jst', '/tools/jwt-decode']
 
+function readBlogRoutes() {
+  const dir = 'content/blog'
+  if (!existsSync(dir)) return []
+  const entries = readdirSync(dir, { withFileTypes: true })
+  const slugs = entries
+    .filter(e => e.isFile() && e.name.endsWith('.md'))
+    .map(e => basename(e.name, '.md'))
+  return slugs.map(s => `/blog/${s}`)
+}
+
 const outDir = 'public'
 if (!existsSync(outDir)) mkdirSync(outDir, { recursive: true })
 
 function generate() {
   const now = new Date().toISOString()
-  const urls = ROUTES.map(p => {
-    const loc = `${BASE_URL}${p.replace(/\/+$/, '') || '/'}`
-    return `<url><loc>${loc}</loc><lastmod>${now}</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>`
-  }).join('')
+  const blog = readBlogRoutes()
+  const allRoutes = [...ROUTES, ...blog]
+  const urls = allRoutes
+    .map(p => {
+      const loc = `${BASE_URL}${p.replace(/\/+$/, '') || '/'}`
+      return `<url><loc>${loc}</loc><lastmod>${now}</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>`
+    })
+    .join('')
 
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls}</urlset>\n`
   writeFileSync(join(outDir, 'sitemap.xml'), sitemap, 'utf8')
