@@ -253,6 +253,129 @@
 				"--",
 				"--run"
 			]
+		},
+		{
+			"label": "Run target test",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"test",
+				"tests/pages/blog.slug.seo.test.ts",
+				"--",
+				"--run"
+			],
+			"group": "test"
+		},
+		{
+			"label": "Run target test",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"test",
+				"tests/pages/blog.slug.seo.test.ts",
+				"--",
+				"--run"
+			],
+			"group": "test"
+		},
+		{
+			"label": "Run target test",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"test",
+				"tests/pages/blog.slug.seo.test.ts",
+				"--",
+				"--run"
+			],
+			"group": "test"
+		},
+		{
+			"label": "Run target test",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"test",
+				"tests/pages/blog.slug.seo.test.ts",
+				"--",
+				"--run"
+			],
+			"group": "test"
+		},
+		{
+			"label": "Run target test",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"test",
+				"tests/pages/blog.slug.seo.test.ts",
+				"--",
+				"--run"
+			],
+			"group": "test"
+		},
+		{
+			"label": "Run target test",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"test",
+				"tests/pages/blog.slug.seo.test.ts",
+				"--",
+				"--run"
+			],
+			"group": "test"
+		},
+		{
+			"label": "Run target test",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"test",
+				"tests/pages/blog.slug.seo.test.ts",
+				"--",
+				"--run"
+			],
+			"group": "test"
+		},
+		{
+			"label": "Run updated sitemap tests",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"test",
+				"tests/scripts/gen-meta.sitemap.test.ts",
+				"--",
+				"--run"
+			],
+			"group": "test"
+		},
+		{
+			"label": "Run RSS test",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"test",
+				"tests/scripts/gen-rss.feed.test.ts",
+				"--",
+				"--run"
+			],
+			"group": "test"
+		},
+		{
+			"label": "Lint and Test",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"pnpm lint; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; pnpm test -- --run"
+			],
+			"isBackground": false,
+			"problemMatcher": [
+				"$eslint-stylish"
+			],
+			"group": "test"
 		}
 	]
 }

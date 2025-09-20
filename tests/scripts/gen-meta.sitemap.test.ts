@@ -25,6 +25,13 @@ describe('scripts/gen-meta.mjs sitemap', () => {
     expect(existsSync(sitemapPath)).toBe(true)
     const xml = readFileSync(sitemapPath, 'utf8')
     expect(xml).toContain('<loc>https://kotorilab.jp/blog/first-cron-tz</loc>')
+    const m = xml.match(
+      /<url>\s*<loc>https:\/\/kotorilab\.jp\/blog\/first-cron-tz<\/loc>[\s\S]*?<lastmod>([^<]+)<\/lastmod>[\s\S]*?<\/url>/
+    )
+    expect(m && typeof m[1] === 'string').toBeTruthy()
+    const lastmod = m && m[1] ? m[1] : ''
+    // ISO 8601 datetime check (rough)
+    expect(new Date(lastmod).toString()).not.toBe('Invalid Date')
   })
 
   it('check-only still passes host validation', () => {
