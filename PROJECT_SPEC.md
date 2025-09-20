@@ -9,7 +9,7 @@
 ### サイト概要
 
 本サイトは「便利ツール＋技術ブログ」の開発者向け情報サイトです。
-ツールは完全ローカルでの処理（ブラウザ完結）を重視し、記事は実務 SE 向けナレッジを中心に配信します。
+ツールはローカル完結（ブラウザ/Node 内）と安全性を重視し、記事は実務志向の短文ノートを配信します。
 公開ドメイン: https://kotorilab.jp
 
 ---
@@ -46,10 +46,13 @@
 
 ---
 
-### ナビゲーション
+### ナビゲーション / ページ
 
-- ヘッダ: Tools / Blog / About / Privacy / Terms / Ads（雛形ページ、順次整備）
-- フッタ: プライバシー/利用規約/広告/問い合わせ（雛形ページ、順次整備）
+- ヘッダ（計画）: Tools / Blog / Privacy / Terms / Ads（ヘッダナビは後日リリース予定で、現時点では未公開）
+- トップ `/`: ヒーロー＋ CTA（`/tools/cron-jst`, `/blog`）/ 最新 3 件を「Latest posts」で表示
+- ブログ `/blog`: タイトル/日付/説明/リンク（0 件時は "No posts yet"）
+- ブログ詳細 `/blog/[slug]`: 本文＋ SEO メタ（title/description/canonical/og:url）
+- ツール: `/tools/cron-jst`, `/tools/jwt-decode`
 
 ### 主要機能
 
@@ -62,7 +65,7 @@
 
 ### バージョン
 
-- v1.1
+- v1.1（現行）
 
 ## 🚀 クイックスタート
 
@@ -80,13 +83,15 @@
    pnpm dev
    ```
 
-## ⚙️ 主要設定
+## ⚙️ 主要設定 / 実装
 
-- `nuxt.config.ts`: Nuxt の設定ファイル
-- `tailwind.config.ts`: Tailwind CSS の設定ファイル
-- `scheduler.tickSeconds`: 10（自動再読込の間隔）
-- `scheduler.dowDomMode`: 'OR'|'AND'（省略時 'OR'）
-- **Auto-reload**: configVersion/settingsUpdatedAt 変化 → 次 tick で再読込、in-flight 継続
+- `nuxt.config.ts`: Nuxt 設定（`@nuxt/content`, `@nuxtjs/tailwindcss`）。`routeRules` で `/api/og/**` に `Cache-Control: no-store`。
+- `utils/siteUrl.ts` / `utils/siteMeta.ts`: 絶対 URL 化（canonical / og:url など）。
+- `server/middleware/noindex-preview.ts`: host が `*.vercel.app` の場合に `X-Robots-Tag: noindex, nofollow` を付与。
+- `scripts/gen-meta.mjs`: Postbuild で `public/robots.txt` / `public/sitemap.xml` / `public/feed.xml` を生成。`--check-only` でホスト一致を検証（生成物のドメインが `NUXT_PUBLIC_SITE_URL` と一致することを確認）。
+- `server/api/og/[slug].png.ts`: 既定は 302 で `/og-default.png` にフォールバック（no-store / X-OG-Fallback）。`ENABLE_DYNAMIC_OG=1` で軽量 PNG を動的生成（失敗時は即 302）。
+- Cron 仕様: `utils/cron.ts` に実装。`dowDomMode` と `'*'` の解釈（OR=unrestricted / AND=always-true）。
+- Auto-reload: `configVersion` / `settingsUpdatedAt` 変化 → 次 tick（10s）で再読込。
 
 ## 🔗 リンク
 
@@ -101,13 +106,12 @@
 
 ---
 
-## v1.1 仕様
+## v1.1 仕様（Cron/JWT 抜粋）
 
-- **DOM×DOW は dowDomMode ('OR'|'AND') で切替。'\*' は OR=unrestricted / AND=always-true。**
-- **'\*' の解釈**: OR=制限なし（片方が '\*' ならもう片方のみ判定）/ AND=常時 true と等価。
-- **値域**: `dow=0–6（0=Sun）, 7非対応`, **名前トークン未対応**。dom=1–31, mon=1–12。
-- **Auto-reload**: tick=10s、`configVersion`/`settingsUpdatedAt` 変化 →**次の tick**再読込、in-flight 継続。
-- **互換性**: `dowDomMode` 未指定時は OR 互換。
+- DOM×DOW は `dowDomMode`（'OR'|'AND'）で切替。`'*'` は OR=unrestricted / AND=always-true。
+- 値域: `dow=0–6（0=Sun）`（7 非対応）/ dom=1–31 / mon=1–12。名前トークンは大文字小文字を無視。
+- Auto-reload: tick=10s、`configVersion`/`settingsUpdatedAt` 変化で次 tick に再読込。
+- JWT/ES256: DER ↔ JOSE 相互変換 / Claims 境界 / alg/kid 異常系のテストが Green。
 
 ---
 
@@ -144,66 +148,58 @@
 
 ---
 
-## 🚢 デプロイ & ドメイン/SEO 方針
+## 🚢 公開ポリシー / ドメイン / SEO
 
-### ホスティング
+### 環境変数（必須）
 
-- 推奨: Vercel（Node 18+ / pnpm）。ビルドコマンド `pnpm build`、出力 `.output` / Nuxt 4 既定。
+- `NUXT_PUBLIC_SITE_URL`（Production 必須）: `https://kotorilab.jp`。canonical / og:url / robots / sitemap の基準。
 
-### 環境変数（重要）
+### ドメイン / リダイレクト
 
-- `NUXT_PUBLIC_SITE_URL`（必須/本番）: 例 `https://kotorilab.jp`（末尾スラッシュ無し）
-  - OGP/canonical/robots/sitemap の基準 URL。未設定だと既定 `http://localhost:3000` を使用。
+- ルート: `kotorilab.jp`（本番）。`www` → ルートは Permanent（301/308）で許容。
+- DNS 例（お名前.com）: A(@)=216.198.79.1 / CNAME(www)=Vercel 指定値。
 
-### ドメイン
-
-- ルートドメイン: `kotorilab.jp`
-- 推奨設定: `www` → ルートへ Permanent（301/308）リダイレクト（Vercel Domain 設定）
-- TLS: Vercel 自動証明書
-
-#### 現状の公開・ドメイン構成（2025-09）
-
-- Primary: **kotorilab.jp**（Apex を本番に接続）
-- www: **www.kotorilab.jp → kotorilab.jp へ Permanent（301/308）リダイレクト**
-- DNS（お名前.com 例）
-  - A(@): **216.198.79.1**（Vercel 新 A）
-  - CNAME(www): **<project-specific>.vercel-dns-XXX.com**（Vercel が表示する専用値）
-- TLS: Vercel 自動証明書（Let's Encrypt）
-
-##### Permanent リダイレクト確認（301/308）
-
-- `www.kotorilab.jp` → `kotorilab.jp` が **301 または 308**（恒久的）であることを確認。
-- PowerShell:
-  - `iwr -Uri 'http://www.kotorilab.jp' -Method Head -MaximumRedirection 0 | Select-Object StatusCode, Headers`
-- curl:
-  - `curl -sI http://www.kotorilab.jp | sed -n '1p; s/^Location: //p'`
-
-※ Vercel のドメインリダイレクトは既定で 308 を返す場合があります。SEO 的には 301 と同等に扱われます。
-
-### SEO/クローラ
-
-- `public/robots.txt` あり（既定 allow）。**プレビュー（`*.vercel.app`）は noindex**。
-  - 実装: `server/middleware/noindex-preview.ts` にて host ベースで `X-Robots-Tag: noindex, nofollow` を付与（環境変数に依存しない）。
-- **サイトマップ: 静的出力（public/sitemap.xml）**。Postbuild で `scripts/gen-meta.mjs` を実行。
-  - 生成後に `--check-only` で `Sitemap/loc` のホストが `NUXT_PUBLIC_SITE_URL` と一致するか検証。正常時は `[gen-meta] OK robots/sitemap host = ...` を出力し、不一致ならビルド失敗。
-  - Production の robots.txt は `Sitemap: https://kotorilab.jp/sitemap.xml`。
-
-### CI/CD（チェック順）
-
-1. Install: `pnpm install --frozen-lockfile`
-2. 型: `pnpm typecheck`
-3. テスト: `pnpm test -- --run`
-4. ビルド: `pnpm build`
-5. Postbuild 検証: `scripts/gen-meta.mjs --check-only`（package.json の postbuild に組込み）
-6. Smoke（OGP）: `pnpm run smoke:og`（GET で 200/302 を OK、リトライあり）
-7. LHCI: `treosh/lighthouse-ci-action` を main/push と週次で実行（desktop/mobile のアーティファクト保存、artifactName は衝突回避済み）
-
-#### Windows PowerShell 実行例
-
-PowerShell では `&&` の代わりに `;` でコマンドを連結してください。
+確認コマンド（PowerShell）:
 
 ```powershell
-pnpm build; node .\scripts\gen-meta.mjs --check-only
+iwr -Uri 'http://www.kotorilab.jp' -Method Head -MaximumRedirection 0 | Select-Object StatusCode, Headers
+iwr -Uri 'https://kotorilab.jp/robots.txt'
+iwr -Uri 'https://kotorilab.jp/sitemap.xml'
+```
+
+### プレビュー noindex
+
+- `*.vercel.app` は host ベースで `X-Robots-Tag: noindex, nofollow` を付与（middleware 実装）。
+
+### サイトマップ / RSS / 検証
+
+- Postbuild で `public/robots.txt` / `public/sitemap.xml` / `public/feed.xml` を生成。
+- `<lastmod>` はブログ記事の Frontmatter `updated`（または `date`）。
+- `--check-only` でホスト一致検証。OK ログ: `[gen-meta] OK robots/sitemap host = <host>`。
+
+## 🛠 CI/CD と品質ゲート
+
+順序（実行中の基準）:
+
+1. Install（frozen lockfile）
+2. Typecheck
+3. Lint
+4. Test（`--run`）
+5. Build
+6. Postbuild（`--check-only`）
+7. Smoke:OG（200/302 合格）
+8. LHCI
+
+Lighthouse budgets:
+
+- Desktop: perf ≥ 90 / a11y ≥ 90 / best‑practices ≥ 100 / SEO ≥ 100
+- Mobile: perf ≥ 85 / a11y ≥ 90 / best‑practices ≥ 100 / SEO ≥ 100
+- Workflow では desktop のみ `preset: desktop`。mobile は formFactor/env 指定（`preset: mobile` は未使用）。
+
+Windows PowerShell tips:
+
+```powershell
+pnpm typecheck; pnpm lint; pnpm test -- --run; pnpm build; node .\scripts\gen-meta.mjs --check-only
 ```
 
 ### ビルド後処理（sitemap/robots の静的生成）
@@ -211,42 +207,28 @@ pnpm build; node .\scripts\gen-meta.mjs --check-only
 - Postbuild で `scripts/gen-meta.mjs` を実行し、`public/sitemap.xml` と `public/robots.txt` を生成。
 - その後 `--check-only` でホスト一致を検証（正常時 `[gen-meta] OK ...`）。
 
-### 実装補足（安定化のための設定）
+### 実装補足
 
-- `content.config.ts`: 最小スキーマを定義（`defineCollection({ type: 'page', schema: z.object({}) })`）
-- `nuxt.config.ts`（Nitro）: 内部 API を静的化しないため `prerender.ignore = ['/__nuxt_content/**']`
-- `error.vue`: 404/500 共通の簡易ページを用意
-- 法務ページ: `/privacy`, `/terms`, `/ads` の雛形を配置
-- テスト: `test/jwt-es256.spec.ts` で ES256 の DER ↔ JOSE 変換のラウンドトリップを検証
-- API テスト: `/api/og/[slug].png` が常時 302 を返すことを Vitest + Supertest で検証（GET/HEAD, Location 絶対 URL, nuxt routeRules の no-store）
-- OGP: Node ランタイムの最小リダイレクト実装（302 → `/og-default.png`、`Cache-Control: no-store`, `X-OG-Fallback: 1`）。`nuxt.config.ts` の `routeRules` でも `/api/og/**` に no-store を付与。
+- `nuxt.config.ts` Nitro 設定: prerender.ignore で内部 API を静的化しない。
+- `error.vue`: 404/500 の簡易ページ。
+- テスト: `tests/api/og.spec.ts`（OGP 200/302 と no-store ヘッダ）/ `tests/scripts/gen-meta.sitemap.test.ts`（サイトマップとホスト検証）。
+- JWT: `test/jwt-es256.spec.ts` で ES256 の DER ↔ JOSE 変換。
 
-### リリース運用
+### リリース運用（直 push 前提）
 
-- `main` → Production、PR → Preview を Vercel で自動化
-- リリース前チェックリスト
-  - [ ] `NUXT_PUBLIC_SITE_URL` を本番環境に設定
-  - [ ] すべてのテスト green（JWT/cron）
-  - [ ] 主要ページの meta/OGP/リンク確認
-  - [ ] robots/sitemap の想定どおり挙動
-  - [ ] 広告を有効化する場合はポリシー/ads.txt/同意導線の準備
-  - [ ] www → ルートの 301 リダイレクトが効いている（Location を確認）
-  - [ ] www → ルートの Permanent（301/308）リダイレクトが効いている（Location を確認）
-  - [ ] `robots.txt` / `sitemap.xml` の URL が `https://kotorilab.jp` ベースになっている
+- Husky pre-push: `typecheck → lint → test → build → postbuild → smoke:og`。
+- タグ運用: `vX.Y.Z`。コミット → タグ → push の簡易リリース。Release ノートは基本不要（必要に応じて `gh` CLI）。
+- チェックリスト（抜粋）:
+  - `NUXT_PUBLIC_SITE_URL`=https://kotorilab.jp（Production）
+  - テスト green（cron/jwt/og/sitemap）
+  - 主要ページの canonical/OG を確認
+  - postbuild 検証ログ `[gen-meta] OK ...` を確認
+  - www → apex の Permanent リダイレクト確認
 
 ---
 
-## P2 予告
+## ブログ追加手順（運用）
 
-### ブログ
-
-- 週 1〜2 本を目安に、検索意図 → 実装例 → 落とし穴 → チェックリストの構成で追加。
-- 初号ブログは `content/blog/*.md` に Frontmatter を付与して追加し、`/blog` 一覧に表示。postbuild のサイトマップにも反映される。
-
-### JWT/ES256 テスト強化
-
-- 既存に加え、以下の観点を拡充予定:
-  - DER ↔ JOSE 変換の相互変換（境界長、leading zero）
-  - `exp`/`nbf`/`iat` の境界（=, <, >, leeway）
-  - `alg`/`kid` の異常系（none/不一致/未設定）
-  - 既知ベクタ（公開テストベクタ）での検証
+1. `content/blog/*.md` に Frontmatter（`title/description/date/tags/draft/canonical`）。
+2. 追加すると `/blog` 一覧へ自動反映。サイトマップ/RSS も postbuild で更新。
+3. 参考テンプレ（DOM×DOW の OR/AND と TZ の落とし穴）: `cron-or-and-jst.md`, `first-cron-tz.md`, `gha-cron-utc.md` など。

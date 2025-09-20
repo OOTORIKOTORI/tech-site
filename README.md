@@ -1,424 +1,167 @@
 # KOTORI Lab — Tech Tools & Notes（開発者向けユーティリティ＋技術メモ集）
 
-フロント/バックエンドの日常作業で「毎回ググって再発明する」小さな処理を“手元で即確認・共有”できるようにする軽量ツール群（Cron/JWT など）と、実装や運用で詰まりやすいポイントを最小編集で整理した技術ブログ（短文ノート）をまとめたサイトです。収益モデルは広告掲載を想定しつつ、ローカルで完結する安全な検証 UI を重視しています。
+フロント/バックエンドの“毎回ググる小ワーク”を手元で安全・素早く検証できる軽量ツール（Cron / JWT など）と、実装運用の落とし穴を最小編集でまとめた短文ブログを提供するサイトです。収益はディスプレイ広告を想定。ローカル完結と品質ゲートを重視しています。
 
-ブランド: KOTORI Lab / ドメイン: https://kotorilab.jp （現在本番稼働中）
-
----
-
-# Tools
-
-- Cron JST: `/tools/cron-jst`
-- JWT Tool: `/tools/jwt-decode`
-
-# Cron JST 次回実行予測ツール
-
-日本時間（JST）や UTC で crontab 形式のスケジュールから次回実行時刻を即座に予測できる Web ツールです。
-
-![Cron JST ツール画面](./assets/cron-jst-sample.png 'Cron JSTツール画面サンプル')
-
-<div align="center"><sub>※画像はサンプル。alt: Cron JSTツールの入力・プリセット・共有リンクUI・結果リストが表示された画面</sub></div>
-
-### 主な機能
-
-- crontab 形式（分 時 日 月 曜日）で次回実行時刻を JST/UTC 両方で表示
-- 共有リンク生成（現在の設定を URL 化しコピー）
-- プリセット（よく使う cron 式をワンクリック挿入）
-- CSV ダウンロード（表示中の全結果を CSV で保存）
-- 完全ローカル処理（入力はサーバー送信されません）
-- アクセシビリティ配慮（aria 属性・キーボード操作・コントラスト強化）
-- SEO 対応（title/meta/OGP/description 追加）
-
-### 使い方
-
-1. crontab 形式でスケジュールを入力（例: `*/5 9-18 * * 1-5`）
-2. 必要に応じてプリセットから選択
-3. 「今すぐチェック」で次回実行予定を表示
-4. 「共有リンクをコピー」で現在の設定を URL 化し、他者と共有可能
-5. 「CSV でダウンロード」で結果を CSV 保存
-
-#### 共有リンク例
-
-```
-https://kotorilab.jp/tools/cron-jst?expr=0+9+*+*+1&n=10&tz=Asia%2FTokyo&rel=now
-```
-
-この URL を開くと「毎週月曜 9 時、10 件、JST、基準は今」で即座に予測結果が表示されます。
-
-#### プリセット例
-
-- 平日 9-18 時に 5 分毎: `*/5 9-18 * * 1-5`
-- 毎日 0 時: `0 0 * * *`
-- 毎時 0 分: `0 * * * *`
-- 毎月 1 日 0 時: `0 0 1 * *`
-- 毎週日曜 12 時: `0 12 * * 0`
-- 毎週月曜 9 時: `0 9 * * 1`
-- 毎分: `* * * * *`
-
-#### アクセシビリティ・SEO
-
-- aria-label/role/aria-live 等でスクリーンリーダー対応
-- キーボード操作・フォーカスリング・コントラスト強化
-- title/meta/OGP/description で SEO 最適化
+ブランド: KOTORI Lab / 本番ドメイン: https://kotorilab.jp
 
 ---
 
-# Tech Site
+## 導線とページ構成（現状）
 
-Tech Site は「便利ツール＋技術ブログ」の開発者向け情報サイトです。主要セクションは Tools / Blog。収益モデルは広告（ディスプレイ/コンテンツ連動）を主軸としています。
+- トップ `/`:
+  - ヒーロー＋ CTA（`/tools/cron-jst`, `/blog`）。
+  - 「Latest posts」で最新 3 件を表示（Nuxt Content の `date` 降順）。
+- ブログ一覧 `/blog`:
+  - タイトル / 日付 / 説明 / リンクをカード表示。
+  - 投稿 0 件時は「No posts yet」を表示。
+- ブログ詳細 `/blog/[slug]`:
+  - 本文レンダリング＋ SEO メタ（title/description/canonical/og:url）。
+  - `canonical` は Frontmatter で指定可（未指定時は自動）。
+- 既存ツール:
+  - Cron JST 予測: `/tools/cron-jst`
+  - JWT Decode: `/tools/jwt-decode`
 
-## Features (v1.1)
+サイトマップ/フィード:
 
-- **DOM×DOW は dowDomMode ('OR'|'AND') で切替。'\*' は OR=unrestricted / AND=always-true。**
-- **'\*' Interpretation**: OR=unrestricted / AND=always-true
-- **DOW Range**: dow=0–6 (0=Sun); 7 unsupported, **name tokens unsupported**
-- **Auto-reload**: tick=10s, `configVersion`/`settingsUpdatedAt` change→**next tick** reload, in-flight continue
+- `scripts/gen-meta.mjs` により `public/sitemap.xml` と `public/robots.txt` を生成。
+- サイトマップにはブログ URL を含め、`<lastmod>` は Frontmatter の `updated`（なければ `date`）。
+- RSS は `public/feed.xml` を postbuild で生成（チャネル `/blog`、各 item は title/link/pubDate/description）。
 
-## Quick Start
+---
 
-1. Install dependencies (`pnpm install`)
-2. Set `dowDomMode` in config if needed (default is 'OR')
-3. Start server and use the cron tool
+## SEO / OGP / プレビュー方針
 
-### Configuration Examples
+- 絶対 URL 化: `canonical` と `og:url` は `NUXT_PUBLIC_SITE_URL` を基準に絶対 URL を生成（`utils/siteUrl.ts` / `utils/siteMeta.ts`）。
+- プレビュー noindex: ホストが `*.vercel.app` の場合はミドルウェアで `X-Robots-Tag: noindex, nofollow` を付与（環境変数に依存しない）。
+- OGP API（安定デフォルト）:
+  - `GET /api/og/[slug].png` は既定で 302 により `/og-default.png` へフォールバック。
+  - レスポンスヘッダ: `Cache-Control: no-store`, `X-OG-Fallback: 1`。
+  - `ENABLE_DYNAMIC_OG=1` で軽量 PNG を動的生成（試験的）。失敗時は即時 302 フォールバック。
+  - `scripts/smoke-og.mjs` は 200/302 を合格とするスモークテスト。
 
-**Default (OR mode):**
+---
 
-```json
-{
-  "scheduler": {
-    "dowDomMode": "OR"
-  }
-}
-```
+## CI/CD と品質ゲート
 
-**AND mode:**
+ジョブ順序（推奨・運用中）:
 
-```json
-{
-  "scheduler": {
-    "dowDomMode": "AND"
-  }
-}
-```
+1. install（frozen lockfile）→ 2) typecheck → 3) lint → 4) test → 5) build → 6) postbuild（`--check-only` 検証）→ 7) smoke:og → 8) LHCI。
 
-## Configuration
+Lighthouse 閾値（budgets）:
 
-- `dowDomMode`: 'OR'|'AND' (default 'OR')
-- dom: 1–31
-- mon: 1–12
-- dow: 0–6 (0=Sun, 7 unsupported)
+- desktop: perf ≥ 90 / a11y ≥ 90 / best‑practices ≥ 100 / SEO ≥ 100
+- mobile: perf ≥ 85 / a11y ≥ 90 / best‑practices ≥ 100 / SEO ≥ 100
+- ワークフロー上は desktop のみ `preset: desktop` を使用。mobile は `formFactor` / `screenEmulation` などで指定（`preset: mobile` は未使用）。
 
-## Spec
+Postbuild の検証:
 
-- See [PROJECT_SPEC.md](PROJECT_SPEC.md) for full details
+- `scripts/gen-meta.mjs --check-only` が robots/sitemap のホスト一致を検証。
+- 一致時ログ: `[gen-meta] OK robots/sitemap host = <host>`。不一致はビルド失敗。
 
-## CSV 仕様（ダウンロード）
+---
 
-- 文字コード: UTF-8（BOM 付き）
-- 列構成: `#,ISO,JST,UTC,relative`
-- 値にカンマやダブルクオートが含まれる場合は RFC 4180 に準拠してダブルクオートでエスケープ
+## 開発運用（直 push 前提）
 
-## Setup
+- Husky pre-push（順次実行）:
+  - `pnpm typecheck; pnpm lint; pnpm test -- --run; pnpm build; pnpm postbuild; pnpm run smoke:og`
+  - 既存の `husky.sh` シム行は削除済み。
+- タグ運用: `vX.Y.Z`。コミット → タグ付け → push で簡易リリース。リリースノートは基本不要（必要時は `gh` CLI で補助）。
+- Windows PowerShell では `;` で連結推奨。パッチ差分出力は `Out-File -Encoding utf8 -Width 4096` を推奨。
 
-Make sure to install dependencies:
-
-```bash
-# npm
-npm install
-
-# pnpm
-pnpm install
-
-# yarn
-yarn install
-
-# bun
-bun install
-```
-
-## Development Server
-
-Start the development server on `http://localhost:3000`:
-
-```bash
-# npm
-npm run dev
-
-# pnpm
-pnpm dev
-
-# yarn
-yarn dev
-
-# bun
-bun run dev
-```
-
-## Production
-
-Build the application for production:
-
-```bash
-# npm
-npm run build
-
-# pnpm
-pnpm build
-
-# yarn
-yarn build
-
-# bun
-bun run build
-```
-
-注意: Sitemap/robots のホストは `NUXT_PUBLIC_SITE_URL` と一致している必要があります。不一致の場合はビルド（postbuild の検証）で失敗します。
-本番環境では `Sitemap: https://kotorilab.jp/sitemap.xml` になります。ズレがある場合はビルドを失敗させます。
-
-Locally preview production build:
-
-```bash
-# npm
-npm run preview
-
-# pnpm
-pnpm preview
-
-# yarn
-yarn preview
-
-# bun
-bun run preview
-```
-
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information。
-
-### Domain & Redirect Check
+例（PowerShell）:
 
 ```powershell
-# www → apex が Permanent（301/308）で遷移することを確認
-iwr -Uri 'http://www.kotorilab.jp' -Method Head -MaximumRedirection 0 | Select-Object StatusCode, StatusDescription, Headers
-
-# 本番 robots/sitemap を確認
-iwr -Uri 'https://kotorilab.jp/robots.txt'
-iwr -Uri 'https://kotorilab.jp/sitemap.xml'
+git add -A; git diff --staged --no-color | Out-File -FilePath review.patch -Encoding utf8 -Width 4096
+pnpm typecheck; pnpm lint; pnpm test -- --run; pnpm build; pnpm postbuild; pnpm run smoke:og
 ```
+
+例（bash）:
 
 ```bash
-# curl での確認（-I = HEAD）: 301 または 308 を許容
-curl -sI http://www.kotorilab.jp | sed -n '1p; s/^Location: //p'
+git add -A && git diff --staged --no-color > review.patch
+pnpm typecheck && pnpm lint && pnpm test -- --run && pnpm build && pnpm postbuild && pnpm run smoke:og
 ```
 
-※ Vercel のドメインリダイレクトは既定で 308 を返す場合があります。SEO 的には 301 と同等に扱われます。
+---
 
-Preview health check:
+## ブログ追加の手順
 
-```bash
-curl -I https://<preview>.vercel.app/api/health
-```
+1. `content/blog/*.md` を追加し、Frontmatter を付与: `title`, `description`, `date`, `tags`, `draft`, `canonical`。
+2. 追加後は `/blog` 一覧・トップの「Latest posts」・サイトマップ・RSS に自動反映。
+3. 記事テンプレ／参考: DOM×DOW の OR/AND とタイムゾーンの落とし穴
+   - 例: `content/blog/cron-or-and-jst.md`, `content/blog/first-cron-tz.md`, `content/blog/gha-cron-utc.md`
 
-#### Domain ↔ Environment Matrix
+---
 
-- `kotorilab.jp` → Production（indexable）
-- `www.kotorilab.jp` → Permanent redirect to apex（301/308）
-- `tech-site-eight.vercel.app` → 現状は最新 Production を指す（ただし `.vercel.app` は noindex）
-- プレビュー検証は個別デプロイ URL（`project-git-branch-*.vercel.app`）推奨
-- noindex の条件: host が `*.vercel.app` のときのみ付与（環境に依存しない）
-  - 既定の本番参照は独自ドメイン（`kotorilab.jp`）。`.vercel.app` は検索から除外（noindex）し、動作確認専用。
+## 既知の仕様（Cron / JWT 抜粋）
 
-**Post-build outputs**
+- Cron: `dowDomMode` は `'OR'|'AND'`。`'*'` の解釈は OR=unrestricted / AND=always‑true。`dow` は 0–6（0=Sun、7 非対応）。
+- Auto-reload: `configVersion` / `settingsUpdatedAt` 変更時は次 tick（10s）で再読込（進行中は継続）。
+- JWT/ES256: DER ↔ JOSE 相互変換、Claims 境界、`alg`/`kid` の異常系テストが green。
 
-- `public/robots.txt`（`Sitemap: https://kotorilab.jp/sitemap.xml` を含む）
-- `public/sitemap.xml`（`/`, `/tools/cron-jst`, `/tools/jwt-decode` などの主要ルート）
-  - 生成後の検証は `postbuild` で自動実行（`--check-only`）。一致時は `[gen-meta] OK robots/sitemap host = kotorilab.jp` が出力されます。
+---
 
-### OGP の仕様と上書き方法
+## クイックチェック（運用）
 
-- 既定メタは `app.config.ts`（文言）と `utils/siteMeta.ts`（適用ロジック）で一元化。`app.vue` でサイト全体へ適用。
-- canonical / og:url / og:image は `resolveSiteUrl()` を基準に絶対 URL 化（`.vercel.app` プレビューでも安全）。
-- 既定 OGP 画像: `public/og-default.png`（1200x630）。
-- 個別ページでの上書き例（`pages/*.vue` 内）：
-
-```ts
-// script setup
-import { useSeoMeta } from '#imports'
-useSeoMeta({
-  title: 'ページ固有タイトル',
-  ogTitle: 'ページ固有タイトル',
-  description: 'ページ固有の説明',
-  ogDescription: 'ページ固有の説明',
-  ogImage: `https://kotorilab.jp/api/og/${encodeURIComponent('ページ固有タイトル')}.png`,
-})
-```
-
-- 現在の /api/og の方針（安定運用優先）:
-
-  - `GET /api/og/[slug].png` は常に 302 で `/og-default.png` にリダイレクトします（Node ランタイムの最小実装）。
-  - レスポンスヘッダに `Cache-Control: no-store` と `X-OG-Fallback: 1` を付与しています。
-  - これにより 500/410 を根絶し、クローラ/クライアントへの応答を単純化しています。
-  - `nuxt.config.ts` の `routeRules` で `/api/og/**` に `Cache-Control: no-store` を付与しています。
-
-- 将来計画（フラグで動的生成を再有効化）:
-  - `ENABLE_DYNAMIC_OG=1` のときのみ、`@vercel/og` を用いた動的生成を段階的に再有効化します。
-  - 既定はフラグ未設定（スタブ実装＝ 302 フォールバック）。
-  - 実装上の雛形は API ハンドラ内の TODO コメントに記載（動的 import / 例外時は 302 にフォールバック）。
-  - API ユニットテスト（Vitest + Supertest）で GET/HEAD が常に 302 を返すことを検証しています（`tests/api/og.spec.ts`）。
-
-### Lighthouse（アクセシビリティ/SEO）
-
-- クイックチェック（デスクトップ、該当カテゴリのみ）:
-
-```bash
-pnpm lh:quick
-```
-
-- サイレント実行（CI ログ汚しを抑制）:
-
-```bash
-pnpm lh:quick:desktop
-pnpm lh:quick:mobile
-```
-
-- 合格基準（推奨）:
-
-  - Accessibility: 80 以上
-  - SEO: 80 以上
-
-- よくある赤項目の是正メモ:
-  - `<html lang="ja">` を設定（nuxt.config.ts の `app.head.htmlAttrs.lang`）
-  - 適切な `<meta name="description">` を設定（`app.head.meta` または `useSeoMeta`）
-  - `<link rel="canonical">` は `app.vue` で自動付与済み（`utils/siteMeta.ts` を参照）
-  - 画像 `alt` 欠落のチェック（Nuxt Content 記事やカードの `<img>` に `alt` 指定）
-  - CI では `treosh/lighthouse-ci-action` を main/push と週次で実行し、desktop/mobile のレポートをアーティファクト保存（`artifactName` の一意化で衝突回避済み）。
-
-## Deployment (Vercel)
-
-- Import プロジェクト（Root: `./`、Framework: Nuxt Preset）
-- Env: `NUXT_PUBLIC_SITE_URL`=本番 URL（`https://kotorilab.jp`（本番） / `https://<project>.vercel.app`（プレビュー））
-
-  - Production: `NUXT_PUBLIC_SITE_URL=https://kotorilab.jp`（必須）
-  - Preview: `NUXT_PUBLIC_SITE_URL` にプレビュー URL を設定すると canonical/OG が整い推奨（必須ではない）
-  - 既定フォールバックは `http://localhost:3000`。`resolveSiteUrl()` は env/host から安全に絶対 URL を導出。
-
-- ドメイン接続: Vercel で Add Domain → お名前.com の DNS に CNAME/A 設定 → Ready → 環境変数の URL を本番に更新
-
-**Domain & DNS Quick Start**
-
-- Add Domains in Vercel: `kotorilab.jp`（Connect to Production）, `www.kotorilab.jp`（Redirect to kotorilab.jp, Permanent（301/308））
-- DNS at registrar:
-  - A(@): **216.198.79.1**
-  - CNAME(www): **<project-specific>.vercel-dns-XXX.com**
-- Set `NUXT_PUBLIC_SITE_URL=https://kotorilab.jp` (Production) and redeploy
-
-### Windows PowerShell tips
-
-- One-liner to build and then run sitemap/robots host check:
+- ローカルビルドとホスト検証（PowerShell）:
 
 ```powershell
 pnpm build; node .\scripts\gen-meta.mjs --check-only
 ```
 
-- Note: In Windows PowerShell, prefer `;` (or separate lines) instead of `&&` for chaining commands.
+- ドメイン/リダイレクト確認（PowerShell）:
 
-## 概要
+```powershell
+iwr -Uri 'http://www.kotorilab.jp' -Method Head -MaximumRedirection 0 | Select-Object StatusCode, StatusDescription, Headers
+iwr -Uri 'https://kotorilab.jp/robots.txt'
+iwr -Uri 'https://kotorilab.jp/sitemap.xml'
+```
 
-Tech Site は、開発者向けの Web ツール群を提供する Nuxt 4 ベースのアプリケーションです。Cron 予測ツールは v1.1 仕様に対応し、柔軟なスケジューリングと自動リロード機能を備えています。
+- 同（bash）:
 
-## JWT ツール (Beta)
+```bash
+curl -sI http://www.kotorilab.jp | sed -n '1p; s/^Location: //p'
+curl -s https://kotorilab.jp/robots.txt | sed -n '1,3p'
+curl -s https://kotorilab.jp/sitemap.xml | head -n 5
+```
 
-ブラウザのみで動作する JWT Decode / Verify ツールを搭載しています。
+---
 
-### 対応アルゴリズム
+## セットアップ / 開発
 
-- HS256 (HMAC-SHA256)
-- RS256 (RSA PKCS#1 v1.5 SHA-256)
-- ES256 (P-256 ECDSA, 署名フォーマット一部制限あり)
+依存関係のインストール:
 
-### 機能一覧
+```bash
+pnpm install
+```
 
-- Header / Payload の即時デコード（ローカル処理）
-- 主要 Claims (iss / sub / aud / exp / nbf / iat) のテーブル表示と相対期限表示
-- 署名検証 (任意): HS256 シークレット / RS256 / ES256 公開鍵 PEM
-- JWKS 取得 (ユーザー明示許可時のみ・既定 OFF・kid マッチ)
-- leeway 指定による exp / nbf / iat のゆらぎ許容
-- 折りたたみ表示, コピー/クリア, デモ JWT 挿入
-- 鍵のドラッグ&ドロップ / 貼り付け入力
+開発サーバー:
 
-### 制限事項
+```bash
+pnpm dev
+```
 
-- JWE (暗号化 JWT) 未対応 (4~5 パートは即エラー)
-- 巨大 JWT (Header+Payload 合計 > ~200KB) はブラウザ表示パフォーマンス低下の可能性
-- ES256: 署名フォーマット (DER vs JOSE compact) 差異補正は最小限
-- x5c / 証明書チェーン検証・revocation 未対応
+本番ビルド / プレビュー:
 
-### JWKS について
+```bash
+pnpm build
+pnpm preview
+```
 
-- デフォルトは取得無効 (外部通信なし)
-- チェックボックスを有効化すると指定 URL (例: `https://issuer/.well-known/jwks.json`) から `keys` を取得
-- kid 一致 RSA 公開鍵を自動選択し PEM を生成して検証
-- 失敗時は `ERR_JWKS_FETCH / ERR_JWKS_INVALID` 等のエラー表示
-- キャッシュはメモリ 5 分・「再取得」ボタンで強制更新
+注意: Production では `NUXT_PUBLIC_SITE_URL=https://kotorilab.jp` が必須。robots/sitemap のホスト不一致は postbuild 検証で失敗します。
 
-### 安全な使い方
+補足（yarn を使う場合）:
 
-1. 本番環境の長期有効アクセストークンは貼らない（テスト用または短期トークン推奨）
-2. HS256 シークレットは共有済みのテスト値のみに限定する（機密値をブラウザに貼らない）
-3. JWKS を有効化した場合でも 送信されるのは HTTP GET のみで JWT 本文は送信されないことを確認
-4. 出力結果のコピー前に秘匿クレーム（email や内部 ID）が含まれないか目視確認する
-5. 期限切れ表示は参考値であり、サーバー側検証ロジックが最終的な真実である点を理解する
-6. 署名検証に成功しても `aud` / `iss` の期待値確認を忘れない（ツールは任意指定がない限り単純比較のみ）
-7. デモ JWT は学習用途専用。実運用向けのセキュリティ評価には使用しない。
+```bash
+yarn install
+yarn dev
+yarn build
+yarn preview
+```
 
-### HS256 検証手順 (例)
+---
 
-1. JWT を貼り付け
-2. タブを Verify に切替
-3. 期待アルゴリズムで HS256 を選択
-4. シークレットを入力し「検証」をクリック
-5. 緑バッジ「検証成功」表示で署名/Claims が許容範囲内
+## 参考リンク
 
-### RS256 (JWKS) 検証手順 (例)
-
-1. JWT を貼り付け (header に kid が含まれていること)
-2. Verify タブで アルゴリズム RS256 を選択
-3. 「JWKS を取得して検証」を有効化し URL を指定
-4. 「取得」→ 鍵数バッジ確認 → 「検証」
-5. 成功時は kid 対応鍵で署名/Claims 検証
-
-### エラーコード概要 (抜粋)
-
-| Code                | 意味                    |
-| ------------------- | ----------------------- |
-| ERR_ALG_NONE        | alg=none 拒否           |
-| ERR_ALG_MISMATCH    | ヘッダ alg と期待不一致 |
-| ERR_SIGNATURE       | 署名不一致              |
-| ERR_EXPIRED         | exp 期限切れ            |
-| ERR_NOT_BEFORE      | nbf 未来未到達          |
-| ERR_IAT_FUTURE      | iat 未来時刻            |
-| ERR_JWE_UNSUPPORTED | 暗号化 JWT 未対応       |
-| ERR_JWKS_FETCH      | JWKS 取得失敗           |
-| ERR_JWKS_INVALID    | JWKS 構造不正           |
-
-## クイックスタート
-
-1. リポジトリをクローンし依存関係をインストール
-2. 設定ファイルで `dowDomMode`（'OR' または 'AND'）を指定（省略時は 'OR'）
-3. サーバー起動後、Cron 予測ツールを利用
-
-## 主要設定
-
-- `dowDomMode`: 'OR'|'AND'（省略時は 'OR'）
-- dom: 1–31
-- mon: 1–12
-- dow: 0–6（0=Sun、7 は未対応）
-
-## リンク
-
-- 詳細な仕様・リリースノートは [PROJECT_SPEC.md](PROJECT_SPEC.md) を参照
-
-## Blog（P2 予告）
-
-- 追加手順: `content/blog/*.md` に Frontmatter を付与して追加 → `/blog` 一覧に反映 → サイトマップも `postbuild` で含まれる
-- 記事構成: 検索意図 → 実装例 → 落とし穴 → チェックリスト（短文ノートを想定）
-- 初号エントリを順次追加予定（週 1〜2 本目安）
+- 仕様詳細は `PROJECT_SPEC.md` を参照
+- Nuxt デプロイ: https://nuxt.com/docs/getting-started/deployment
