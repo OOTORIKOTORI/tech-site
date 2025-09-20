@@ -29,6 +29,7 @@ jobs:
           urls: |
             https://kotorilab.jp
           uploadArtifacts: true
+          artifactName: lighthouse-results-${{ matrix.preset }}
           temporaryPublicStorage: true
           # Run LH with desired form factor via configPath or flags; using built-in presets
           # The action respects LHCI's formFactor/emulatedFormFactor via config when provided.

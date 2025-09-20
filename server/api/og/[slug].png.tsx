@@ -1,7 +1,7 @@
 // @ts-nocheck
 /* eslint-disable import/no-extraneous-dependencies */
 import { ImageResponse } from '@vercel/og'
-import { defineEventHandler, getRouterParam } from '#imports'
+import { defineEventHandler, getRouterParam, getMethod } from '#imports'
 import { resolveSiteUrl } from '../../../utils/siteUrl'
 
 export const runtime = 'edge'
@@ -11,6 +11,12 @@ export default defineEventHandler(async event => {
   const siteUrl = resolveSiteUrl(event).replace(/\/$/, '')
 
   const redirectDefault = () => Response.redirect(`${siteUrl}/og-default.png`, 302)
+
+  // HEAD は本文生成を行わず、デフォ画像へフォールバック
+  const method = (
+    typeof getMethod === 'function' ? getMethod(event) : event?.node?.req?.method || 'GET'
+  ).toUpperCase()
+  if (method === 'HEAD') return redirectDefault()
 
   let decoded = ''
   try {
