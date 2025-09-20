@@ -23,7 +23,9 @@
 
     <!-- Tabs -->
     <nav class="flex gap-2 border-b text-sm">
-      <button v-for="t in tabs" :key="t" :class="['px-4 py-2 -mb-px border-b-2', activeTab === t ? 'border-blue-600 text-blue-700 font-semibold' : 'border-transparent text-gray-500 hover:text-gray-700']" @click="activeTab = t">
+      <button v-for="t in tabs" :key="t"
+        :class="['px-4 py-2 -mb-px border-b-2', activeTab === t ? 'border-blue-600 text-blue-700 font-semibold' : 'border-transparent text-gray-500 hover:text-gray-700']"
+        @click="activeTab = t">
         {{ t }}
       </button>
     </nav>
@@ -33,11 +35,13 @@
       <div class="flex flex-col md:flex-row md:items-center gap-3">
         <div class="flex-1 space-y-1">
           <label for="jwt" class="block font-medium">JWT トークン</label>
-          <textarea id="jwt" v-model="token" rows="5" class="w-full border rounded p-2 font-mono text-xs md:text-sm" spellcheck="false" @dragover.prevent @drop.prevent="onDropToken" aria-label="JWTトークン入力"></textarea>
+          <textarea id="jwt" v-model="token" rows="5" class="w-full border rounded p-2 font-mono text-xs md:text-sm"
+            spellcheck="false" @dragover.prevent @drop.prevent="onDropToken" aria-label="JWTトークン入力"></textarea>
         </div>
         <div class="w-full md:w-64 space-y-1">
           <label for="sampleSelect" class="block font-medium">サンプル</label>
-          <select id="sampleSelect" v-model="sampleSelected" @change="applySample" class="w-full border rounded px-2 py-1 text-xs md:text-sm" aria-label="サンプルJWT選択">
+          <select id="sampleSelect" v-model="sampleSelected" @change="applySample"
+            class="w-full border rounded px-2 py-1 text-xs md:text-sm" aria-label="サンプルJWT選択">
             <option value="">(選択してください)</option>
             <option value="hs256">HS256: シンプル</option>
             <option value="hs256_expired">HS256: 期限切れ</option>
@@ -62,7 +66,8 @@
               {{ collapsed.header ? '展開' : '折りたたみ' }}
             </button>
           </header>
-          <pre v-show="!collapsed.header" class="text-[11px] md:text-xs p-3 overflow-auto"><code>{{ pretty(header) }}</code></pre>
+          <pre v-show="!collapsed.header"
+            class="text-[11px] md:text-xs p-3 overflow-auto"><code>{{ pretty(header) }}</code></pre>
         </div>
         <div class="rounded border bg-gray-50">
           <header class="flex items-center justify-between px-3 py-2 border-b">
@@ -71,7 +76,8 @@
               {{ collapsed.payload ? '展開' : '折りたたみ' }}
             </button>
           </header>
-          <pre v-show="!collapsed.payload" class="text-[11px] md:text-xs p-3 overflow-auto"><code>{{ pretty(payload) }}</code></pre>
+          <pre v-show="!collapsed.payload"
+            class="text-[11px] md:text-xs p-3 overflow-auto"><code>{{ pretty(payload) }}</code></pre>
         </div>
       </div>
 
@@ -83,8 +89,10 @@
               <th class="text-left pr-4 align-top">{{ c.key }}</th>
               <td class="font-mono break-all">{{ formatClaim(c.key, c.value) }}</td>
               <td v-if="c.key === 'exp'" class="text-xs text-gray-500 pl-2">{{ relativeExp(c.value as number) }}</td>
-              <td v-else-if="c.key === 'nbf'" class="text-xs text-gray-500 pl-2">{{ relativeGeneric(c.value as number) }}</td>
-              <td v-else-if="c.key === 'iat'" class="text-xs text-gray-500 pl-2">{{ relativeGeneric(c.value as number) }}</td>
+              <td v-else-if="c.key === 'nbf'" class="text-xs text-gray-500 pl-2">{{ relativeGeneric(c.value as number)
+                }}</td>
+              <td v-else-if="c.key === 'iat'" class="text-xs text-gray-500 pl-2">{{ relativeGeneric(c.value as number)
+                }}</td>
             </tr>
           </tbody>
         </table>
@@ -98,7 +106,8 @@
           <div class="space-y-4">
             <div>
               <label class="block font-medium text-sm mb-1">期待アルゴリズム</label>
-              <select v-model="verifyInput.expectedAlg" class="border rounded px-2 py-1 text-sm" aria-label="期待アルゴリズム選択">
+              <select v-model="verifyInput.expectedAlg" class="border rounded px-2 py-1 text-sm"
+                aria-label="期待アルゴリズム選択">
                 <option value="">(指定しない)</option>
                 <option value="HS256">HS256</option>
                 <option value="RS256">RS256</option>
@@ -107,12 +116,17 @@
             </div>
             <div v-if="verifyInput.expectedAlg === 'HS256'">
               <label for="verify-secret" class="block font-medium text-sm mb-1">共有シークレット</label>
-              <input id="verify-secret" v-model="verifyInput.key" type="text" aria-label="HS256シークレット入力" placeholder="例: secret" class="w-full border rounded px-2 py-1 text-xs md:text-sm font-mono" @dragover.prevent @drop.prevent="onDropKey" />
+              <input id="verify-secret" v-model="verifyInput.key" type="text" aria-label="HS256シークレット入力"
+                placeholder="例: secret" class="w-full border rounded px-2 py-1 text-xs md:text-sm font-mono"
+                @dragover.prevent @drop.prevent="onDropKey" />
               <p class="text-[11px] text-gray-500 mt-1 leading-snug">入力値は送信されません。短期利用の検証テストにのみ使用してください。</p>
             </div>
             <div v-else-if="verifyInput.expectedAlg === 'RS256'">
               <label for="verify-key" class="block font-medium text-sm mb-1">公開鍵(PEM)</label>
-              <textarea id="verify-key" v-model="verifyInput.key" rows="5" aria-label="RS256公開鍵入力" placeholder="-----BEGIN PUBLIC KEY-----\n...\n-----END PUBLIC KEY-----" class="w-full border rounded p-2 font-mono text-[11px] md:text-xs" @dragover.prevent @drop.prevent="onDropKey" />
+              <textarea id="verify-key" v-model="verifyInput.key" rows="5" aria-label="RS256公開鍵入力"
+                placeholder="-----BEGIN PUBLIC KEY-----\n...\n-----END PUBLIC KEY-----"
+                class="w-full border rounded p-2 font-mono text-[11px] md:text-xs" @dragover.prevent
+                @drop.prevent="onDropKey" />
               <p class="text-[11px] text-gray-500 mt-1 leading-snug">RS256 検証には SPKI 形式 PUBLIC KEY が必須です。</p>
             </div>
           </div>
@@ -136,8 +150,10 @@
             <input v-model="jwks.url" :disabled="!jwks.use" placeholder="https://issuer.example/.well-known/jwks.json"
               class="w-full border rounded px-2 py-1 text-xs" />
             <div class="flex gap-2">
-              <button class="btn-secondary" :disabled="!jwks.use || jwks.loading" @click="fetchJwksKeys(false)">取得</button>
-              <button class="btn-secondary" :disabled="!jwks.use || jwks.loading" @click="fetchJwksKeys(true)">再取得</button>
+              <button class="btn-secondary" :disabled="!jwks.use || jwks.loading"
+                @click="fetchJwksKeys(false)">取得</button>
+              <button class="btn-secondary" :disabled="!jwks.use || jwks.loading"
+                @click="fetchJwksKeys(true)">再取得</button>
               <span v-if="jwks.loading" class="text-xs text-gray-500 self-center">取得中...</span>
               <span v-else-if="jwks.error" class="text-xs text-red-600">{{ jwks.error }}</span>
               <span v-else-if="jwks.keys.length" class="text-xs text-green-700">{{ jwks.keys.length }}鍵</span>
@@ -145,8 +161,10 @@
             <p class="text-[11px] text-gray-500">送信されるのは JWKS 取得 HTTP リクエストのみ。トークン本文は送信しません。</p>
           </div>
           <div class="flex gap-2 flex-wrap items-center">
-            <button class="btn-primary inline-flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed" :disabled="verifyDisabled" @click="doVerify" aria-label="JWT検証ボタン">
-              <span v-if="verifying" class="animate-spin h-3 w-3 border-2 border-white border-t-transparent rounded-full"></span>
+            <button class="btn-primary inline-flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              :disabled="verifyDisabled" @click="doVerify" aria-label="JWT検証ボタン">
+              <span v-if="verifying"
+                class="animate-spin h-3 w-3 border-2 border-white border-t-transparent rounded-full"></span>
               <span>{{ verifying ? '検証中...' : '検証' }}</span>
             </button>
             <button class="btn-secondary" @click="resetVerify" aria-label="結果クリアボタン">結果クリア</button>
@@ -154,7 +172,8 @@
           </div>
         </div>
         <div class="space-y-4">
-          <div :class="['rounded border p-3 min-h-[160px] transition-colors',
+          <div
+            :class="['rounded border p-3 min-h-[160px] transition-colors',
               verifyState.valid === true ? 'bg-green-50 border-green-300' : verifyState.valid === false && verifyState.errors.length ? 'bg-red-50 border-red-300' : 'bg-white']">
             <h3 class="font-semibold text-sm mb-2 flex items-center gap-2">結果
               <span v-if="verifying" class="text-[10px] text-gray-500">(検証中)</span>
@@ -162,8 +181,10 @@
             <template v-if="sortedErrors.length">
               <div class="space-y-1">
                 <div v-for="e in sortedErrors" :key="e.code" class="text-xs flex gap-2">
-                  <span class="inline-block px-2 py-0.5 rounded bg-red-100 text-red-700 font-semibold">{{ e.code }}</span>
-                  <span class="text-gray-800">{{ e.message }}<span v-if="e.hint" class="text-gray-500"> ({{ e.hint }})</span></span>
+                  <span class="inline-block px-2 py-0.5 rounded bg-red-100 text-red-700 font-semibold">{{ e.code
+                    }}</span>
+                  <span class="text-gray-800">{{ e.message }}<span v-if="e.hint" class="text-gray-500"> ({{ e.hint
+                      }})</span></span>
                 </div>
               </div>
             </template>
@@ -177,14 +198,16 @@
           <div v-if="verifyState.valid === true && verifyState.header" class="rounded border p-3 bg-gray-50 space-y-2">
             <div class="flex items-center justify-between">
               <h3 class="font-semibold text-sm">Header</h3>
-              <button class="btn-secondary text-[10px] px-2 py-0.5" @click="copyHeader" aria-label="Headerコピー">コピー</button>
+              <button class="btn-secondary text-[10px] px-2 py-0.5" @click="copyHeader"
+                aria-label="Headerコピー">コピー</button>
             </div>
             <pre class="text-[11px] md:text-xs overflow-auto"><code>{{ pretty(verifyState.header) }}</code></pre>
           </div>
           <div v-if="verifyState.valid === true && verifyState.payload" class="rounded border p-3 bg-gray-50 space-y-2">
             <div class="flex items-center justify-between">
               <h3 class="font-semibold text-sm">Payload</h3>
-              <button class="btn-secondary text-[10px] px-2 py-0.5" @click="copyPayload" aria-label="Payloadコピー">コピー</button>
+              <button class="btn-secondary text-[10px] px-2 py-0.5" @click="copyPayload"
+                aria-label="Payloadコピー">コピー</button>
             </div>
             <pre class="text-[11px] md:text-xs overflow-auto"><code>{{ pretty(verifyState.payload) }}</code></pre>
           </div>
@@ -232,17 +255,17 @@ const header = computed<JwtHeader | null>(() => parseJsonPart<JwtHeader>(parts.v
 const payload = computed<JwtPayload | null>(() => parseJsonPart<JwtPayload>(parts.value[1]))
 function pretty(v: unknown) { return v ? JSON.stringify(v, null, 2) : '（有効なJWTを入力すると表示されます）' }
 
-  interface ClaimRow { key: string; label: string; value: string | number | boolean | null }
+interface ClaimRow { key: string; label: string; value: string | number | boolean | null }
 const baseClaims = computed<ClaimRow[]>(() => {
-    const p = payload.value || {}
-    const keys: Array<keyof JwtPayload> = ['iss', 'sub', 'aud', 'exp', 'nbf', 'iat']
-    return keys.map(k => ({
-      key: k as string,
-      label: k as string,
-      value: (p as Record<string, any>)[k] ?? null
-    }))
+  const p = payload.value || {}
+  const keys: Array<keyof JwtPayload> = ['iss', 'sub', 'aud', 'exp', 'nbf', 'iat']
+  return keys.map(k => ({
+    key: k as string,
+    label: k as string,
+    value: (p as Record<string, any>)[k] ?? null
+  }))
 })
-  const visibleClaims = computed<ClaimRow[]>(() => baseClaims.value.filter(c => c.value !== null))
+const visibleClaims = computed<ClaimRow[]>(() => baseClaims.value.filter(c => c.value !== null))
 function formatClaim(key: string, val: unknown) { if (['exp', 'nbf', 'iat'].includes(key) && typeof val === 'number') { return `${val} (${new Date(val * 1000).toISOString()})` } return typeof val === 'string' ? val : JSON.stringify(val) }
 function relativeGeneric(sec: number) { const diff = sec * 1000 - Date.now(); return diff >= 0 ? `あと${fmtDuration(diff)}` : `${fmtDuration(-diff)}前` }
 function relativeExp(sec: number) { const diff = sec * 1000 - Date.now(); return diff >= 0 ? `有効:あと${fmtDuration(diff)}` : `期限切れ:${fmtDuration(-diff)}経過` }

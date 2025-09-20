@@ -4,9 +4,10 @@
       <h1 class="text-2xl font-bold">Blog</h1>
       <p class="text-gray-600 text-sm">開発ノウハウやツール設計の考察メモ。</p>
     </header>
-  <ContentList v-slot="{ list }" path="/blog">
+    <ContentList v-slot="{ list }" path="/blog">
       <div class="grid gap-6">
-        <article v-for="doc in list" :key="doc._path" class="rounded border p-4 bg-white shadow-sm hover:shadow transition">
+        <article v-for="doc in list" :key="doc._path"
+          class="rounded border p-4 bg-white shadow-sm hover:shadow transition">
           <NuxtLink :to="doc._path" class="block group">
             <h2 class="font-semibold text-lg group-hover:text-blue-600">{{ doc.title }}</h2>
             <p class="text-[11px] text-gray-500 mt-0.5">{{ formatDate(doc.date) }}</p>
