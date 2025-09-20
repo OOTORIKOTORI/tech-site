@@ -62,12 +62,7 @@ export default defineNuxtConfig({
   app: {
     head: {
       htmlAttrs: { lang: 'ja' },
-      title: 'KOTORI Lab — Tech Tools & Notes',
-      titleTemplate: '%s - KOTORI Lab — Tech Tools & Notes',
-      meta: [
-        { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-        { name: 'description', content: '便利ツールと実務ノウハウの技術サイト' },
-      ],
+      meta: [{ name: 'viewport', content: 'width=device-width, initial-scale=1' }],
       link: [{ rel: 'alternate', type: 'application/rss+xml', href: '/feed.xml', title: 'RSS' }],
     },
   },
