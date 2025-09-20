@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeAll } from 'vitest'
+import { describe, it, expect, beforeAll } from 'vitest'
 
 // Stub minimal queryContent interface consumed by pages
 interface Doc {
@@ -11,20 +11,20 @@ interface Doc {
 // In our pages, we call globalThis.queryContent('/blog').where({ _path: '/blog/<slug>' }).findOne()
 // Provide a tiny chainable stub to return our fixture doc
 function makeQueryStub(fixtures: Doc[]) {
-  return function queryContent(basePath?: string) {
+  return function queryContent() {
     let list = fixtures
     const api = {
       where(cond: Record<string, string>) {
         if (cond && cond._path) list = list.filter(d => d._path === cond._path)
         return api
       },
-      sort(_: Record<string, 1 | -1>) {
+      sort() {
         return api
       },
-      only(_: string[]) {
+      only() {
         return api
       },
-      findSurround(path: string) {
+      findSurround() {
         return Promise.resolve([undefined, undefined])
       },
       async findOne() {
