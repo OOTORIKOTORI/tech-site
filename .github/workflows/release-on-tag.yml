@@ -1,0 +1,83 @@
+name: release-on-tag
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NUXT_PUBLIC_SITE_URL: https://kotorilab.jp
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup pnpm (respect packageManager)
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build
+
+      - name: Postbuild
+        run: pnpm postbuild
+
+      - name: Collect artifacts
+        run: |
+          mkdir -p artifacts
+          # sitemap.xml
+          if [ -f "public/sitemap.xml" ]; then
+            cp public/sitemap.xml artifacts/sitemap.xml
+          elif [ -f "docs/sitemap.xml" ]; then
+            cp docs/sitemap.xml artifacts/sitemap.xml
+          fi
+          # robots.txt
+          if [ -f "public/robots.txt" ]; then
+            cp public/robots.txt artifacts/robots.txt
+          elif [ -f "docs/robots.txt" ]; then
+            cp docs/robots.txt artifacts/robots.txt
+          fi
+          # feed.xml
+          if [ -f "public/feed.xml" ]; then
+            cp public/feed.xml artifacts/feed.xml
+          fi
+          # Lighthouse CI artifacts if exist
+          if ls ./*.report.[jt]son 1> /dev/null 2>&1; then
+            cp ./*.report.[jt]son artifacts/ || true
+          fi
+          if [ -d ".lighthouseci" ]; then
+            cp -r .lighthouseci artifacts/lighthouseci || true
+          fi
+
+      - name: Upload artifact bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: site-artifacts
+          path: artifacts
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            artifacts/**
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
