@@ -1,19 +1,23 @@
 import { useRoute, useRequestURL, computed, useAppConfig } from '#imports'
 import { resolveSiteUrl } from './siteUrl'
 
+type SiteConfig = { title?: string; description?: string; ogDefaultPath?: string }
+type AppConfig = { site?: SiteConfig }
+const useAppConfigTyped = useAppConfig as unknown as <T>() => T
+
 export function useDefaultTitle() {
-  const app = useAppConfig() as any
-  return app.site?.title || 'KOTORI Lab — Tech Tools & Notes'
+  const app = useAppConfigTyped<AppConfig>()
+  return app.site?.title ?? 'KOTORI Lab — Tech Tools & Notes'
 }
 
 export function useDefaultDescription() {
-  const app = useAppConfig() as any
-  return app.site?.description || '便利ツールと実務ノウハウの技術サイト'
+  const app = useAppConfigTyped<AppConfig>()
+  return app.site?.description ?? '便利ツールと実務ノウハウの技術サイト'
 }
 
 export function useOgDefaultPath() {
-  const app = useAppConfig() as any
-  return app.site?.ogDefaultPath || '/og-default.png'
+  const app = useAppConfigTyped<AppConfig>()
+  return app.site?.ogDefaultPath ?? '/og-default.png'
 }
 
 export function useAbsoluteBase() {

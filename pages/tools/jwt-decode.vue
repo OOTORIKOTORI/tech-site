@@ -2,7 +2,7 @@
   <div class="container mx-auto max-w-6xl py-8 px-4 space-y-6">
     <header class="space-y-2">
       <h1 class="text-2xl font-bold flex items-center gap-3">
-JWT ツール
+        JWT ツール
         <span v-if="verifyState.valid === true"
           class="inline-flex items-center text-xs font-semibold rounded bg-green-100 text-green-800 px-2 py-1">検証成功</span>
         <span v-else-if="verifyState.valid === false"
@@ -23,11 +23,9 @@ JWT ツール
 
     <!-- Tabs -->
     <nav class="flex gap-2 border-b text-sm">
-      <button v-for="t in tabs" :key="t" :class="['px-4 py-2 -mb-px border-b-2', activeTab === t ? 'border-blue-600 text-blue-700 font-semibold' : 'border-transparent text-gray-500 hover:text-gray-700']"
-        @click="activeTab = t">
-{{
-          t }}
-</button>
+      <button v-for="t in tabs" :key="t" :class="['px-4 py-2 -mb-px border-b-2', activeTab === t ? 'border-blue-600 text-blue-700 font-semibold' : 'border-transparent text-gray-500 hover:text-gray-700']" @click="activeTab = t">
+        {{ t }}
+      </button>
     </nav>
 
     <!-- Common Input -->
@@ -35,8 +33,7 @@ JWT ツール
       <div class="flex flex-col md:flex-row md:items-center gap-3">
         <div class="flex-1 space-y-1">
           <label for="jwt" class="block font-medium">JWT トークン</label>
-          <textarea id="jwt" v-model="token" rows="5" class="w-full border rounded p-2 font-mono text-xs md:text-sm"
-            spellcheck="false" @dragover.prevent @drop.prevent="onDropToken" aria-label="JWTトークン入力"></textarea>
+          <textarea id="jwt" v-model="token" rows="5" class="w-full border rounded p-2 font-mono text-xs md:text-sm" spellcheck="false" @dragover.prevent @drop.prevent="onDropToken" aria-label="JWTトークン入力"></textarea>
         </div>
         <div class="w-full md:w-64 space-y-1">
           <label for="sampleSelect" class="block font-medium">サンプル</label>
@@ -62,23 +59,19 @@ JWT ツール
           <header class="flex items-center justify-between px-3 py-2 border-b">
             <h2 class="font-semibold text-sm">Header</h2>
             <button class="text-xs text-blue-600 hover:underline" @click="collapsed.header = !collapsed.header">
-{{
-              collapsed.header ? '展開' : '折りたたみ' }}
-</button>
+              {{ collapsed.header ? '展開' : '折りたたみ' }}
+            </button>
           </header>
-          <pre v-show="!collapsed.header"
-            class="text-[11px] md:text-xs p-3 overflow-auto"><code>{{ pretty(header) }}</code></pre>
+          <pre v-show="!collapsed.header" class="text-[11px] md:text-xs p-3 overflow-auto"><code>{{ pretty(header) }}</code></pre>
         </div>
         <div class="rounded border bg-gray-50">
           <header class="flex items-center justify-between px-3 py-2 border-b">
             <h2 class="font-semibold text-sm">Payload</h2>
             <button class="text-xs text-blue-600 hover:underline" @click="collapsed.payload = !collapsed.payload">
-{{
-              collapsed.payload ? '展開' : '折りたたみ' }}
-</button>
+              {{ collapsed.payload ? '展開' : '折りたたみ' }}
+            </button>
           </header>
-          <pre v-show="!collapsed.payload"
-            class="text-[11px] md:text-xs p-3 overflow-auto"><code>{{ pretty(payload) }}</code></pre>
+          <pre v-show="!collapsed.payload" class="text-[11px] md:text-xs p-3 overflow-auto"><code>{{ pretty(payload) }}</code></pre>
         </div>
       </div>
 
@@ -90,14 +83,8 @@ JWT ツール
               <th class="text-left pr-4 align-top">{{ c.key }}</th>
               <td class="font-mono break-all">{{ formatClaim(c.key, c.value) }}</td>
               <td v-if="c.key === 'exp'" class="text-xs text-gray-500 pl-2">{{ relativeExp(c.value as number) }}</td>
-              <td v-else-if="c.key === 'nbf'" class="text-xs text-gray-500 pl-2">
-{{ relativeGeneric(c.value as number)
-                }}
-</td>
-              <td v-else-if="c.key === 'iat'" class="text-xs text-gray-500 pl-2">
-{{ relativeGeneric(c.value as number)
-                }}
-</td>
+              <td v-else-if="c.key === 'nbf'" class="text-xs text-gray-500 pl-2">{{ relativeGeneric(c.value as number) }}</td>
+              <td v-else-if="c.key === 'iat'" class="text-xs text-gray-500 pl-2">{{ relativeGeneric(c.value as number) }}</td>
             </tr>
           </tbody>
         </table>
@@ -120,14 +107,12 @@ JWT ツール
             </div>
             <div v-if="verifyInput.expectedAlg === 'HS256'">
               <label for="verify-secret" class="block font-medium text-sm mb-1">共有シークレット</label>
-              <input id="verify-secret" v-model="verifyInput.key" type="text" aria-label="HS256シークレット入力"
-                placeholder="例: secret" class="w-full border rounded px-2 py-1 text-xs md:text-sm font-mono" @dragover.prevent @drop.prevent="onDropKey" />
+              <input id="verify-secret" v-model="verifyInput.key" type="text" aria-label="HS256シークレット入力" placeholder="例: secret" class="w-full border rounded px-2 py-1 text-xs md:text-sm font-mono" @dragover.prevent @drop.prevent="onDropKey" />
               <p class="text-[11px] text-gray-500 mt-1 leading-snug">入力値は送信されません。短期利用の検証テストにのみ使用してください。</p>
             </div>
             <div v-else-if="verifyInput.expectedAlg === 'RS256'">
               <label for="verify-key" class="block font-medium text-sm mb-1">公開鍵(PEM)</label>
-              <textarea id="verify-key" v-model="verifyInput.key" rows="5" aria-label="RS256公開鍵入力"
-                placeholder="-----BEGIN PUBLIC KEY-----\n...\n-----END PUBLIC KEY-----" class="w-full border rounded p-2 font-mono text-[11px] md:text-xs" @dragover.prevent @drop.prevent="onDropKey" />
+              <textarea id="verify-key" v-model="verifyInput.key" rows="5" aria-label="RS256公開鍵入力" placeholder="-----BEGIN PUBLIC KEY-----\n...\n-----END PUBLIC KEY-----" class="w-full border rounded p-2 font-mono text-[11px] md:text-xs" @dragover.prevent @drop.prevent="onDropKey" />
               <p class="text-[11px] text-gray-500 mt-1 leading-snug">RS256 検証には SPKI 形式 PUBLIC KEY が必須です。</p>
             </div>
           </div>
@@ -151,14 +136,8 @@ JWT ツール
             <input v-model="jwks.url" :disabled="!jwks.use" placeholder="https://issuer.example/.well-known/jwks.json"
               class="w-full border rounded px-2 py-1 text-xs" />
             <div class="flex gap-2">
-              <button class="btn-secondary" :disabled="!jwks.use || jwks.loading"
-                @click="fetchJwksKeys(false)">
-取得
-</button>
-              <button class="btn-secondary" :disabled="!jwks.use || jwks.loading"
-                @click="fetchJwksKeys(true)">
-再取得
-</button>
+              <button class="btn-secondary" :disabled="!jwks.use || jwks.loading" @click="fetchJwksKeys(false)">取得</button>
+              <button class="btn-secondary" :disabled="!jwks.use || jwks.loading" @click="fetchJwksKeys(true)">再取得</button>
               <span v-if="jwks.loading" class="text-xs text-gray-500 self-center">取得中...</span>
               <span v-else-if="jwks.error" class="text-xs text-red-600">{{ jwks.error }}</span>
               <span v-else-if="jwks.keys.length" class="text-xs text-green-700">{{ jwks.keys.length }}鍵</span>
