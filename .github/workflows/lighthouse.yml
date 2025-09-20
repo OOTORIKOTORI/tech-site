@@ -1,0 +1,46 @@
+name: lighthouse
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '0 0 * * 0' # 09:00 JST (UTC+9)
+
+permissions:
+  contents: read
+
+concurrency:
+  group: lighthouse-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lighthouse (desktop)
+        run: pnpm dlx lighthouse https://kotorilab.jp --only-categories=accessibility,seo --preset=desktop --output html --output-path ./lh-report-desktop.html
+
+      - name: Lighthouse (mobile)
+        run: pnpm dlx lighthouse https://kotorilab.jp --only-categories=accessibility,seo --preset=mobile --output html --output-path ./lh-report-mobile.html
+
+      - name: Upload report artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-reports
+          path: |
+            lh-report-desktop.html
+            lh-report-mobile.html

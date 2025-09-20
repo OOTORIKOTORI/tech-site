@@ -37,3 +37,7 @@ jobs:
         run: pnpm build
       - name: Check sitemap/robots host
         run: pnpm run check:meta
+      - name: Smoke OGP endpoint
+        env:
+          NUXT_PUBLIC_SITE_URL: https://kotorilab.jp
+        run: pnpm run smoke:og

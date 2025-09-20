@@ -18,7 +18,8 @@
     "check:meta": "node scripts/gen-meta.mjs --check-only",
     "lh:quick": "pnpm dlx lighthouse https://kotorilab.jp --only-categories=accessibility,seo --preset=desktop --view",
     "lh:quick:desktop": "pnpm dlx lighthouse https://kotorilab.jp --only-categories=accessibility,seo --preset=desktop --quiet",
-    "lh:quick:mobile": "pnpm dlx lighthouse https://kotorilab.jp --only-categories=accessibility,seo --preset=mobile --quiet"
+    "lh:quick:mobile": "pnpm dlx lighthouse https://kotorilab.jp --only-categories=accessibility,seo --preset=mobile --quiet",
+    "smoke:og": "node scripts/smoke-og.mjs"
   },
   "dependencies": {
     "@nuxt/content": "3.6.3",
