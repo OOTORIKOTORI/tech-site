@@ -254,8 +254,15 @@ useSeoMeta({
 })
 ```
 
-- 動的 OGP: `GET /api/og/[slug].png`（Edge Runtime, `@vercel/og`）。`slug` をタイトルとして描画。
-- フォールバック: エラー時は `public/og-default.png` を利用。
+- 現在の /api/og の方針（安定運用優先）:
+  - `GET /api/og/[slug].png` は常に 302 で `/og-default.png` にリダイレクトします（Node ランタイムの最小実装）。
+  - レスポンスヘッダに `Cache-Control: no-store` と `X-OG-Fallback: 1` を付与しています。
+  - これにより 500/410 を根絶し、クローラ/クライアントへの応答を単純化しています。
+
+- 将来計画（フラグで動的生成を再有効化）:
+  - `ENABLE_DYNAMIC_OG=1` のときのみ、`@vercel/og` を用いた動的生成を段階的に再有効化します。
+  - 既定はフラグ未設定（スタブ実装＝302フォールバック）。
+  - 実装上の雛形は API ハンドラ内の TODO コメントに記載（動的 import / 例外時は 302 にフォールバック）。
 
 ### Lighthouse（アクセシビリティ/SEO）
 

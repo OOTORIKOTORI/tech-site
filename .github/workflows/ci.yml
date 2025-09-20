@@ -35,6 +35,8 @@ jobs:
       # optional:
       - name: Build
         run: pnpm build
+      - name: API tests
+        run: pnpm run test:api
       - name: Check sitemap/robots host
         run: pnpm run check:meta
       - name: Smoke OGP endpoint
