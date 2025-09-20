@@ -68,13 +68,13 @@ tech-site / 開発引き継ぎメモ
 ワークフロー要点:
 1) `actions/setup-node@v4`（**cache: pnpm を指定しない**）
 2) `pnpm/action-setup@v4`（version は package.json の packageManager に従う）
-3) `actions/cache` で pnpm store をキャッシュ  
+3) `actions/cache` で pnpm store をキャッシュ
    - `path: ~/setup-pnpm/node_modules/.bin/store/v10`（self-installer の実体に合わせる）
 4) `pnpm install --no-frozen-lockfile`
 5) ネイティブモジュール再ビルド: `better-sqlite3`（`prebuild-install || node-gyp rebuild --release` が postinstallで走る）
 6) `pnpm typecheck` → `pnpm test` → `pnpm -s exec eslint -v >/dev/null 2>&1 || echo 'skip'` → `pnpm lint`（必要に応じて） → `pnpm build`
 
-これで **pnpm が見つからない / pnpm の多重 version 指定** といった初期の落とし穴を解消。  
+これで **pnpm が見つからない / pnpm の多重 version 指定** といった初期の落とし穴を解消。
 （以前は `setup-node@v4 cache: pnpm` が pnpm を暗黙参照 → PATH 未解決でクラッシュしていた）
 
 ■ @nuxt/content 設定
@@ -135,10 +135,10 @@ pnpm build
 
 ■ 次の一手（別スレで開始したいタスク）
 -------------------------------------
-1) DOM×DOW の論理（OR/AND）を要件化 → どちらにせよ分岐実装とテストを追加  
-2) `nextRuns` のパフォーマンス改善（次候補分へのジャンプ、二分探索寄せ）  
-3) UI 微調整（アクセシビリティ: フォーム要素の aria, ラベル結合確認、レスポンシブ余白）  
-4) README に CI badge, 開発手順, コマンド一覧を追記  
+1) DOM×DOW の論理（OR/AND）を要件化 → どちらにせよ分岐実装とテストを追加
+2) `nextRuns` のパフォーマンス改善（次候補分へのジャンプ、二分探索寄せ）
+3) UI 微調整（アクセシビリティ: フォーム要素の aria, ラベル結合確認、レスポンシブ余白）
+4) README に CI badge, 開発手順, コマンド一覧を追記
 5) （将来）JST 以外の TZ 対応の拡張
 
 ■ Copilot 用プロンプト雛形
@@ -153,6 +153,15 @@ pnpm build
 - テスト: `pnpm test --run`
 - 開発: `pnpm dev`
 - ビルド: `pnpm build`
+
+■ Windows PowerShell での注意
+-----------------------------
+- コマンド連結は `&&` ではなく `;` を推奨。
+- 例（本番ビルド後に sitemap/robots のホストを検証）:
+
+```powershell
+pnpm build; node .\scripts\gen-meta.mjs --check-only
+```
 
 以上です。次スレは「DOM/DOW 仕様の確定 & 実装」から入るのがスムーズです。
 

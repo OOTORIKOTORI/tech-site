@@ -198,6 +198,14 @@
 6. Smoke（OGP）: `pnpm run smoke:og`（GET で 200/302 を OK、リトライあり）
 7. LHCI: `treosh/lighthouse-ci-action` を main/push と週次で実行（desktop/mobile のアーティファクト保存、artifactName は衝突回避済み）
 
+#### Windows PowerShell 実行例
+
+PowerShell では `&&` の代わりに `;` でコマンドを連結してください。
+
+```powershell
+pnpm build; node .\scripts\gen-meta.mjs --check-only
+```
+
 ### ビルド後処理（sitemap/robots の静的生成）
 
 - Postbuild で `scripts/gen-meta.mjs` を実行し、`public/sitemap.xml` と `public/robots.txt` を生成。

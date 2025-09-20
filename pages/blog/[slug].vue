@@ -38,7 +38,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { useRoute, useAsyncData, createError, useHead, computed } from '#imports'
+import { useRoute, useAsyncData, createError, useHead, useSeoMeta, computed } from '#imports'
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const queryContent: any = (globalThis as any).queryContent
 const route = useRoute()
@@ -65,9 +65,9 @@ const { data: surrounding } = await useAsyncData('blog-surround-' + slug, () => 
   const path = (doc.value as any)?._path
   return path
     ? queryContent('/blog')
-        .sort({ date: -1 })
-        .only(['title', '_path', 'date'])
-        .findSurround(path)
+      .sort({ date: -1 })
+      .only(['title', '_path', 'date'])
+      .findSurround(path)
     : Promise.resolve([])
 })
 
@@ -98,6 +98,19 @@ useHead(() => ({
     (doc.value as any)?.description ? { name: 'description', content: (doc.value as any).description } : {},
     (doc.value as any)?.description ? { property: 'og:description', content: (doc.value as any).description } : {},
     (doc.value as any)?.title ? { property: 'og:title', content: (doc.value as any).title } : {},
-  ].filter(Boolean) as any
+  ].filter(Boolean) as any,
+  link: (
+    (doc.value as any)?.canonical
+      ? [{ rel: 'canonical', href: (doc.value as any).canonical }]
+      : []
+  ) as any,
 }))
+const canonicalUrl = computed(() => (doc.value as any)?.canonical as string | undefined)
+useSeoMeta({
+  title: computed(() => (doc.value as any)?.title as string | undefined).value,
+  description: computed(() => (doc.value as any)?.description as string | undefined).value,
+  ogTitle: computed(() => (doc.value as any)?.title as string | undefined).value,
+  ogDescription: computed(() => (doc.value as any)?.description as string | undefined).value,
+  ogUrl: canonicalUrl.value,
+})
 </script>

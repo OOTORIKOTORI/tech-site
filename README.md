@@ -311,6 +311,16 @@ pnpm lh:quick:mobile
   - CNAME(www): **<project-specific>.vercel-dns-XXX.com**
 - Set `NUXT_PUBLIC_SITE_URL=https://kotorilab.jp` (Production) and redeploy
 
+### Windows PowerShell tips
+
+- One-liner to build and then run sitemap/robots host check:
+
+```powershell
+pnpm build; node .\scripts\gen-meta.mjs --check-only
+```
+
+- Note: In Windows PowerShell, prefer `;` (or separate lines) instead of `&&` for chaining commands.
+
 ## 概要
 
 Tech Site は、開発者向けの Web ツール群を提供する Nuxt 4 ベースのアプリケーションです。Cron 予測ツールは v1.1 仕様に対応し、柔軟なスケジューリングと自動リロード機能を備えています。

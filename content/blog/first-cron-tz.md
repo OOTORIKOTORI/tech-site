@@ -4,7 +4,7 @@ description: 'crontab の日付×曜日の論理（OR/AND 切替）と JST/UTC �
 date: '2025-09-20T00:00:00.000Z'
 tags: ['cron', 'timezone', 'JST', 'UTC', 'scheduler']
 draft: false
-canonical: 'https://kotorilab.jp/blog/cron-dom-dow-tz-pitfalls'
+canonical: 'https://kotorilab.jp/blog/first-cron-tz'
 ---
 
 ## なぜ DOM×DOW が「難しい」のか
