@@ -1,62 +1,50 @@
 // @ts-nocheck
 /* eslint-disable import/no-extraneous-dependencies */
-import { defineEventHandler, getRouterParam, getMethod } from '#imports'
-import { resolveSiteUrl } from '../../../utils/siteUrl'
+import { defineEventHandler, getMethod, getRequestURL } from '#imports'
 
+// runtime can be 'edge' or 'node'; keep 'edge' by default
 export const runtime = 'edge'
 
+// Minimal implementation: always redirect to default OGP
+// Note: Dynamic generation is disabled for stability. Re-enable behind a flag later if needed.
 export default defineEventHandler(async event => {
-  const raw = getRouterParam(event, 'slug') || ''
-  const siteUrl = resolveSiteUrl(event).replace(/\/$/, '')
-
-  const redirectDefault = () => {
-    const res = Response.redirect(`${siteUrl}/og-default.png`, 302)
-    res.headers.set('Cache-Control', 'no-store')
-    res.headers.set('X-OG-Fallback', '1')
-    return res
-  }
-
-  // HEAD は本文生成を行わず、デフォ画像へフォールバック
-  const method = (
-    typeof getMethod === 'function' ? getMethod(event) : event?.node?.req?.method || 'GET'
-  ).toUpperCase()
-  if (method === 'HEAD') return redirectDefault()
-
-  try {
-    // Import dynamically; throw-through on failure handled by catch
-    let ImageResponse
-    ;({ ImageResponse } = await import('@vercel/og'))
-
-    // Decode/validate slug minimally
-    const decoded = decodeURIComponent(raw || '')
-    const title = (decoded || 'OG').replace(/\s+/g, ' ').slice(0, 120)
-    if (!title.trim() || /[\u0000-\u001F\u007F]/.test(title)) throw new Error('invalid-title')
-
-    // Minimal JSX, no Node APIs
-    const img = new ImageResponse(
-      (
-        <div
-          style={{
-            width: '1200px',
-            height: '630px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            background: '#ffffff',
-            color: '#111827',
-            fontFamily: 'sans-serif',
-            fontSize: 64,
-            fontWeight: 800,
-          }}
-        >
-          {title}
-        </div>
-      ),
-      { width: 1200, height: 630 }
-    )
-    if (img && typeof img.headers?.set === 'function') img.headers.set('Cache-Control', 'no-store')
-    return img
-  } catch {
-    return redirectDefault()
-  }
+  const origin = getRequestURL(event).origin
+  const loc = `${origin}/og-default.png`
+  // Both GET and HEAD follow the same path
+  void getMethod(event) // accessed to mirror existing usage if needed; not strictly required
+  /*
+   * TODO(og): 将来的に動的OGP生成を再有効化する際は、
+   * process.env.ENABLE_DYNAMIC_OG === '1' のときのみ実行する。
+   * 以下は雛形（コメントアウトのまま保持）。
+   *
+   * if (process.env.ENABLE_DYNAMIC_OG === '1') {
+   *   try {
+   *     const { ImageResponse } = await import('@vercel/og')
+   *     const title = 'OG'
+   *     const img = new ImageResponse(
+   *       <div style={{
+   *         width: '1200px', height: '630px', display: 'flex',
+   *         alignItems: 'center', justifyContent: 'center',
+   *         background: '#ffffff', color: '#111827', fontFamily: 'sans-serif',
+   *         fontSize: 64, fontWeight: 800,
+   *       }}> {title} </div>,
+   *       { width: 1200, height: 630 }
+   *     )
+   *     if (img && typeof img.headers?.set === 'function') {
+   *       img.headers.set('Cache-Control', 'no-store')
+   *     }
+   *     return img
+   *   } catch {
+   *     // フォールバック: 下の 302 リダイレクトへ
+   *   }
+   * }
+   */
+  return new Response(null, {
+    status: 302,
+    headers: {
+      Location: loc,
+      'Cache-Control': 'no-store',
+      'X-OG-Fallback': '1',
+    },
+  })
 })
