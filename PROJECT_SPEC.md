@@ -173,28 +173,35 @@
 ##### Permanent リダイレクト確認（301/308）
 
 - `www.kotorilab.jp` → `kotorilab.jp` が **301 または 308**（恒久的）であることを確認。
-- 例: PowerShell `iwr -Uri 'http://www.kotorilab.jp' -Method Head -MaximumRedirection 0` で `StatusCode` が 301 または 308 であることを確認。
+- PowerShell:
+  - `iwr -Uri 'http://www.kotorilab.jp' -Method Head -MaximumRedirection 0 | Select-Object StatusCode, Headers`
+- curl:
+  - `curl -sI http://www.kotorilab.jp | sed -n '1p; s/^Location: //p'`
 
 ※ Vercel のドメインリダイレクトは既定で 308 を返す場合があります。SEO 的には 301 と同等に扱われます。
 
 ### SEO/クローラ
 
-- `public/robots.txt` あり（既定 allow）。**プレビュー環境（\*.vercel.app）は noindex ヘッダ**で抑止。
-  - 実装: `server/middleware/noindex-preview.ts` で `X-Robots-Tag: noindex, nofollow` を付与（host が `*.vercel.app` のとき）
-- **サイトマップ: 初期は静的出力（public/sitemap.xml）**。将来 `@nuxtjs/sitemap` 導入を検討。
+- `public/robots.txt` あり（既定 allow）。**プレビュー（`*.vercel.app`）は noindex**。
+  - 実装: `server/middleware/noindex-preview.ts` にて host ベースで `X-Robots-Tag: noindex, nofollow` を付与（環境変数に依存しない）。
+- **サイトマップ: 静的出力（public/sitemap.xml）**。Postbuild で `scripts/gen-meta.mjs` を実行。
+  - 生成後に `--check-only` で `Sitemap/loc` のホストが `NUXT_PUBLIC_SITE_URL` と一致するか検証。正常時は `[gen-meta] OK robots/sitemap host = ...` を出力し、不一致ならビルド失敗。
+  - Production の robots.txt は `Sitemap: https://kotorilab.jp/sitemap.xml`。
 
 ### CI/CD（チェック順）
 
-1. Install: `pnpm install`
+1. Install: `pnpm install --frozen-lockfile`
 2. 型: `pnpm typecheck`
 3. テスト: `pnpm test -- --run`
 4. ビルド: `pnpm build`
+5. Postbuild 検証: `scripts/gen-meta.mjs --check-only`（package.json の postbuild に組込み）
+6. Smoke（OGP）: `pnpm run smoke:og`（GET で 200/302 を OK、リトライあり）
+7. LHCI: `treosh/lighthouse-ci-action` を main/push と週次で実行（desktop/mobile のアーティファクト保存、artifactName は衝突回避済み）
 
 ### ビルド後処理（sitemap/robots の静的生成）
 
-- Postbuild で `scripts/gen-meta.mjs` を実行し、`public/sitemap.xml` と `public/robots.txt` を生成
-  - 参照環境変数: `NUXT_PUBLIC_SITE_URL`（`.env` または Vercel 環境変数）
-  - 実行方法例: `package.json` の `"postbuild": "node -r dotenv/config ./scripts/gen-meta.mjs"`
+- Postbuild で `scripts/gen-meta.mjs` を実行し、`public/sitemap.xml` と `public/robots.txt` を生成。
+- その後 `--check-only` でホスト一致を検証（正常時 `[gen-meta] OK ...`）。
 
 ### 実装補足（安定化のための設定）
 
@@ -203,6 +210,8 @@
 - `error.vue`: 404/500 共通の簡易ページを用意
 - 法務ページ: `/privacy`, `/terms`, `/ads` の雛形を配置
 - テスト: `test/jwt-es256.spec.ts` で ES256 の DER ↔ JOSE 変換のラウンドトリップを検証
+- API テスト: `/api/og/[slug].png` が常時 302 を返すことを Vitest + Supertest で検証（GET/HEAD, Location 絶対 URL, nuxt routeRules の no-store）
+- OGP: Node ランタイムの最小リダイレクト実装（302 → `/og-default.png`、`Cache-Control: no-store`, `X-OG-Fallback: 1`）。`nuxt.config.ts` の `routeRules` でも `/api/og/**` に no-store を付与。
 
 ### リリース運用
 
@@ -216,3 +225,20 @@
   - [ ] www → ルートの 301 リダイレクトが効いている（Location を確認）
   - [ ] www → ルートの Permanent（301/308）リダイレクトが効いている（Location を確認）
   - [ ] `robots.txt` / `sitemap.xml` の URL が `https://kotorilab.jp` ベースになっている
+
+---
+
+## P2 予告
+
+### ブログ
+
+- 週 1〜2 本を目安に、検索意図 → 実装例 → 落とし穴 → チェックリストの構成で追加。
+- 初号ブログは `content/blog/*.md` に Frontmatter を付与して追加し、`/blog` 一覧に表示。postbuild のサイトマップにも反映される。
+
+### JWT/ES256 テスト強化
+
+- 既存に加え、以下の観点を拡充予定:
+  - DER ↔ JOSE 変換の相互変換（境界長、leading zero）
+  - `exp`/`nbf`/`iat` の境界（=, <, >, leeway）
+  - `alg`/`kid` の異常系（none/不一致/未設定）
+  - 既知ベクタ（公開テストベクタ）での検証

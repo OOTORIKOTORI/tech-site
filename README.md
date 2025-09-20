@@ -145,15 +145,6 @@ Start the development server on `http://localhost:3000`:
 # npm
 npm run dev
 
-## 環境変数
-
-| 変数名 | 必須 | 用途 | 例 |
-|--------|------|------|----|
-| `NUXT_PUBLIC_SITE_URL` | Yes | OGP/canonical/robots/sitemap で利用するサイトのベース URL（末尾スラッシュ無し推奨） | `https://kotorilab.jp` / `https://<project>.vercel.app` |
-
-本番デプロイ時は独自ドメインを設定し、その値を Vercel 等の環境変数に登録してください。未設定の場合は `http://localhost:3000` が使用され、OGP や canonical がローカル参照になるため検索エンジン向けには非推奨です。
-
-
 # pnpm
 pnpm dev
 
@@ -214,6 +205,11 @@ iwr -Uri 'https://kotorilab.jp/robots.txt'
 iwr -Uri 'https://kotorilab.jp/sitemap.xml'
 ```
 
+```bash
+# curl での確認（-I = HEAD）: 301 または 308 を許容
+curl -sI http://www.kotorilab.jp | sed -n '1p; s/^Location: //p'
+```
+
 ※ Vercel のドメインリダイレクトは既定で 308 を返す場合があります。SEO 的には 301 と同等に扱われます。
 
 Preview health check:
@@ -229,11 +225,13 @@ curl -I https://<preview>.vercel.app/api/health
 - `tech-site-eight.vercel.app` → 現状は最新 Production を指す（ただし `.vercel.app` は noindex）
 - プレビュー検証は個別デプロイ URL（`project-git-branch-*.vercel.app`）推奨
 - noindex の条件: host が `*.vercel.app` のときのみ付与（環境に依存しない）
+  - 既定の本番参照は独自ドメイン（`kotorilab.jp`）。`.vercel.app` は検索から除外（noindex）し、動作確認専用。
 
 **Post-build outputs**
 
 - `public/robots.txt`（`Sitemap: https://kotorilab.jp/sitemap.xml` を含む）
 - `public/sitemap.xml`（`/`, `/tools/cron-jst`, `/tools/jwt-decode` などの主要ルート）
+  - 生成後の検証は `postbuild` で自動実行（`--check-only`）。一致時は `[gen-meta] OK robots/sitemap host = kotorilab.jp` が出力されます。
 
 ### OGP の仕様と上書き方法
 
@@ -259,11 +257,13 @@ useSeoMeta({
   - `GET /api/og/[slug].png` は常に 302 で `/og-default.png` にリダイレクトします（Node ランタイムの最小実装）。
   - レスポンスヘッダに `Cache-Control: no-store` と `X-OG-Fallback: 1` を付与しています。
   - これにより 500/410 を根絶し、クローラ/クライアントへの応答を単純化しています。
+  - `nuxt.config.ts` の `routeRules` で `/api/og/**` に `Cache-Control: no-store` を付与しています。
 
 - 将来計画（フラグで動的生成を再有効化）:
   - `ENABLE_DYNAMIC_OG=1` のときのみ、`@vercel/og` を用いた動的生成を段階的に再有効化します。
   - 既定はフラグ未設定（スタブ実装＝ 302 フォールバック）。
   - 実装上の雛形は API ハンドラ内の TODO コメントに記載（動的 import / 例外時は 302 にフォールバック）。
+  - API ユニットテスト（Vitest + Supertest）で GET/HEAD が常に 302 を返すことを検証しています（`tests/api/og.spec.ts`）。
 
 ### Lighthouse（アクセシビリティ/SEO）
 
@@ -290,11 +290,17 @@ pnpm lh:quick:mobile
   - 適切な `<meta name="description">` を設定（`app.head.meta` または `useSeoMeta`）
   - `<link rel="canonical">` は `app.vue` で自動付与済み（`utils/siteMeta.ts` を参照）
   - 画像 `alt` 欠落のチェック（Nuxt Content 記事やカードの `<img>` に `alt` 指定）
+  - CI では `treosh/lighthouse-ci-action` を main/push と週次で実行し、desktop/mobile のレポートをアーティファクト保存（`artifactName` の一意化で衝突回避済み）。
 
 ## Deployment (Vercel)
 
 - Import プロジェクト（Root: `./`、Framework: Nuxt Preset）
 - Env: `NUXT_PUBLIC_SITE_URL`=本番 URL（`https://kotorilab.jp`（本番） / `https://<project>.vercel.app`（プレビュー））
+
+  - Production: `NUXT_PUBLIC_SITE_URL=https://kotorilab.jp`（必須）
+  - Preview: `NUXT_PUBLIC_SITE_URL` にプレビュー URL を設定すると canonical/OG が整い推奨（必須ではない）
+  - 既定フォールバックは `http://localhost:3000`。`resolveSiteUrl()` は env/host から安全に絶対 URL を導出。
+
 - ドメイン接続: Vercel で Add Domain → お名前.com の DNS に CNAME/A 設定 → Ready → 環境変数の URL を本番に更新
 
 **Domain & DNS Quick Start**
@@ -401,61 +407,8 @@ Tech Site は、開発者向けの Web ツール群を提供する Nuxt 4 ベー
 
 - 詳細な仕様・リリースノートは [PROJECT_SPEC.md](PROJECT_SPEC.md) を参照
 
----
+## Blog（P2 予告）
 
-## ブランド概要（簡易）
-
-- 名称: Tech Site（開発者向けツール＋技術ノート）
-- トーン: 簡潔・直接的・実務志向（敬体）
-- 色: blue-600 / gray-900 / gray-600 を基調、成功=green、警告=amber、エラー=red
-- ロゴ: 当面はテキストロゴ、将来的に `public/logo.svg` を想定
-
-## デプロイ
-
-### 必須環境変数
-
-| 変数名                 | 必須 | 説明                                                              |
-| ---------------------- | ---- | ----------------------------------------------------------------- |
-| `NUXT_PUBLIC_SITE_URL` | Yes  | 本番ドメイン（末尾スラ無し）。OGP/canonical/robots/sitemap に使用 |
-
-### 手順（Vercel 推奨）
-
-1. Vercel で新規プロジェクト作成（GitHub 連携）
-2. 環境変数に `NUXT_PUBLIC_SITE_URL` を設定（Production）
-3. ビルドコマンド `pnpm build` / 開始コマンドは Nuxt 既定
-4. ドメインを割当（`kotorilab.jp`）。`www`→ ルートへ 301 を推奨
-
-### CI チェック順
-
-```bash
-pnpm install
-pnpm typecheck
-pnpm test -- --run
-pnpm build
-```
-
-- `pnpm test`（開発） or `pnpm test:run`（CI 相当）
-
-### SEO/公開前チェック
-
-- robots.txt: 本番のみインデックス許可、プレビューは noindex 推奨
-- サイトマップ: 初期は静的出力（public/sitemap.xml）。将来 @nuxtjs/sitemap に移行。
-- 主要ページの title/description/OGP 確認
-
-- プレビュー（`*.vercel.app`）は `X-Robots-Tag: noindex, nofollow` を送出
-
-### SEO / a11y
-
-- OGP/canonical/robots/sitemap の方針を整備（sitemap は初期は静的出力）
-- コントラスト/キーボード操作/aria/ラベルなど a11y を順次強化
-
-## Known limitations
-
-- JWT: JWE は未対応（4~5 パートは即エラー）
-- 巨大 JWT はブラウザ表示パフォーマンス低下の可能性
-
-## Tools ヘルプの更新方法（md 編集）
-
-- ページ: `/tools/help`（Nuxt Content で配信）
-- ファイル: `content/tools/help.md`
-- 手順: 該当の Q&A を Markdown で追記/編集し、PR → マージで本番反映
+- 追加手順: `content/blog/*.md` に Frontmatter を付与して追加 → `/blog` 一覧に反映 → サイトマップも `postbuild` で含まれる
+- 記事構成: 検索意図 → 実装例 → 落とし穴 → チェックリスト（短文ノートを想定）
+- 初号エントリを順次追加予定（週 1〜2 本目安）
