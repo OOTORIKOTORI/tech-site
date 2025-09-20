@@ -1,1 +1,2 @@
-export default () => new Response('Moved to TSX', { status: 410 })
+// Deactivated: use TSX handler instead
+export {}

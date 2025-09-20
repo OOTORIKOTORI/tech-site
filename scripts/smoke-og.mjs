@@ -16,14 +16,23 @@ async function tryOnce(attempt) {
     const res = await fetch(TARGET_URL, { method: 'GET', redirect: 'manual' })
     const status = res.status
     const loc = res.headers.get('location') || ''
+    const fallback = res.headers.get('x-og-fallback') || res.headers.get('X-OG-Fallback') || ''
     console.log(
-      `[smoke-og] attempt ${attempt}/${ATTEMPTS} status=${status}${loc ? ` location=${loc}` : ''}`
+      `[smoke-og] attempt ${attempt}/${ATTEMPTS} status=${status}` +
+        `${loc ? ` location=${loc}` : ''}` +
+        `${fallback ? ` x-og-fallback=${fallback}` : ''}`
     )
 
     if (status === 200 || status === 302) {
       console.log(`[smoke-og] OK: status=${status}`)
       return true
     }
+    // Non-OK status: try to read small snippet for diagnostics (ignore errors)
+    try {
+      const text = await res.text()
+      const snippet = (text || '').slice(0, 128).replace(/\s+/g, ' ')
+      console.log(`[smoke-og] body-snippet: ${snippet}`)
+    } catch {}
   } catch (e) {
     console.log(`[smoke-og] attempt ${attempt}/${ATTEMPTS} request error: ${(e && e.message) || e}`)
   }

@@ -10,7 +10,12 @@ export default defineEventHandler(async event => {
   const raw = getRouterParam(event, 'slug') || ''
   const siteUrl = resolveSiteUrl(event).replace(/\/$/, '')
 
-  const redirectDefault = () => Response.redirect(`${siteUrl}/og-default.png`, 302)
+  const redirectDefault = () => {
+    const res = Response.redirect(`${siteUrl}/og-default.png`, 302)
+    res.headers.set('Cache-Control', 'no-store')
+    res.headers.set('X-OG-Fallback', '1')
+    return res
+  }
 
   // HEAD は本文生成を行わず、デフォ画像へフォールバック
   const method = (
@@ -32,7 +37,7 @@ export default defineEventHandler(async event => {
 
   try {
     const fontSize = 64
-    return new ImageResponse(
+    const img = new ImageResponse(
       (
         <div
           style={{
@@ -66,6 +71,11 @@ export default defineEventHandler(async event => {
       ),
       { width: 1200, height: 630 }
     )
+    // Ensure no-store on successful generation as well
+    if (img && typeof img.headers?.set === 'function') {
+      img.headers.set('Cache-Control', 'no-store')
+    }
+    return img
   } catch {
     return redirectDefault()
   }

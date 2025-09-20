@@ -41,6 +41,7 @@ export default defineNuxtConfig({
       '/favicon.ico': { headers: { 'cache-control': 'public, max-age=86400' } },
       '/sitemap.xml': { headers: { 'cache-control': 'public, max-age=3600' } },
       '/robots.txt': { headers: { 'cache-control': 'public, max-age=3600' } },
+      '/api/og/**': { headers: { 'Cache-Control': 'no-store' } },
     },
     prerender: {
       // 内部APIは静的化しない
