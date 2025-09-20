@@ -4,7 +4,7 @@ import { createServer } from 'node:http'
 import { createApp, toNodeListener } from 'h3'
 
 let server: any
-let request: supertest.SuperTest<supertest.Test>
+let request: any
 
 async function startServer() {
   const app = createApp()
