@@ -22,28 +22,17 @@ export default defineEventHandler(async event => {
   ).toUpperCase()
   if (method === 'HEAD') return redirectDefault()
 
-  // Dynamically import ImageResponse to avoid startup crashes; fallback to redirect on failure
-  let ImageResponse
   try {
+    // Import dynamically; throw-through on failure handled by catch
+    let ImageResponse
     ;({ ImageResponse } = await import('@vercel/og'))
-  } catch {
-    return redirectDefault()
-  }
 
-  let decoded = ''
-  try {
-    decoded = decodeURIComponent(raw)
-  } catch {
-    return redirectDefault()
-  }
+    // Decode/validate slug minimally
+    const decoded = decodeURIComponent(raw || '')
+    const title = (decoded || 'OG').replace(/\s+/g, ' ').slice(0, 120)
+    if (!title.trim() || /[\u0000-\u001F\u007F]/.test(title)) throw new Error('invalid-title')
 
-  const title = (decoded || 'KOTORI Lab').replace(/\s+/g, ' ').slice(0, 120)
-  if (!title.trim() || /[\u0000-\u001F\u007F]/.test(title)) {
-    return redirectDefault()
-  }
-
-  try {
-    const fontSize = 64
+    // Minimal JSX, no Node APIs
     const img = new ImageResponse(
       (
         <div
@@ -51,37 +40,21 @@ export default defineEventHandler(async event => {
             width: '1200px',
             height: '630px',
             display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
             alignItems: 'center',
-            background: '#f3f4f6',
+            justifyContent: 'center',
+            background: '#ffffff',
             color: '#111827',
             fontFamily: 'sans-serif',
+            fontSize: 64,
+            fontWeight: 800,
           }}
         >
-          <div
-            style={{
-              fontSize: `${fontSize}px`,
-              fontWeight: 800,
-              letterSpacing: '-0.02em',
-              lineHeight: 1.2,
-              padding: '0 80px',
-              textAlign: 'center',
-            }}
-          >
-            {title}
-          </div>
-          <div style={{ marginTop: '20px', fontSize: '28px', color: '#4b5563' }}>
-            KOTORI Lab — Tech Tools & Notes
-          </div>
+          {title}
         </div>
       ),
       { width: 1200, height: 630 }
     )
-    // Ensure no-store on successful generation as well
-    if (img && typeof img.headers?.set === 'function') {
-      img.headers.set('Cache-Control', 'no-store')
-    }
+    if (img && typeof img.headers?.set === 'function') img.headers.set('Cache-Control', 'no-store')
     return img
   } catch {
     return redirectDefault()
