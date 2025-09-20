@@ -1,8 +1,9 @@
-import { defineEventHandler, getRequestURL, setHeader, sendRedirect } from '#imports'
+import { defineEventHandler, getRequestURL, setHeader, sendRedirect } from 'h3'
+import type { H3Event } from 'h3'
 
 export const runtime = 'node'
 
-export default defineEventHandler(event => {
+export default defineEventHandler((event: H3Event) => {
   const origin = getRequestURL(event).origin
   const loc = `${origin}/og-default.png`
   setHeader(event, 'Cache-Control', 'no-store')
