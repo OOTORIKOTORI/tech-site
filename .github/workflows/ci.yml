@@ -41,3 +41,5 @@ jobs:
         env:
           NUXT_PUBLIC_SITE_URL: https://kotorilab.jp
         run: pnpm run smoke:og
+      - name: Smoke OG (GET with retry)
+        run: SMOKE_URL=https://kotorilab.jp pnpm run smoke:og
