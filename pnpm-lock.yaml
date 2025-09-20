@@ -68,6 +68,9 @@ importers:
       eslint-plugin-vue:
         specifier: ^9.28.0
         version: 9.28.0(eslint@8.57.0)
+      h3:
+        specifier: ^1.15.4
+        version: 1.15.4
       jsdom:
         specifier: ^27.0.0
         version: 27.0.0(postcss@8.5.6)
