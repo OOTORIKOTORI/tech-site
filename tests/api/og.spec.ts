@@ -1,10 +1,10 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest'
-import supertest from 'supertest'
+import request from 'supertest'
 import { createServer } from 'node:http'
 import { createApp, toNodeListener } from 'h3'
 
 let server: any
-let request: any
+let agent: any
 
 async function startServer() {
   const app = createApp()
@@ -19,7 +19,7 @@ async function startServer() {
   await new Promise<void>(resolve => server.listen(0, resolve))
   const address = server.address()
   const port = typeof address === 'object' && address ? (address as any).port : 0
-  request = supertest(`http://127.0.0.1:${port}`)
+  agent = request(`http://127.0.0.1:${port}`)
 }
 
 async function stopServer() {
@@ -38,7 +38,7 @@ describe('OGP redirect API', () => {
   })
 
   it('GET /api/og/hello.png returns 302 to /og-default.png (absolute)', async () => {
-    const res = await request.get('/api/og/hello.png').redirects(0)
+    const res = await agent.get('/api/og/hello.png').redirects(0)
     expect(res.status).toBe(302)
     const loc = res.header['location'] as string
     expect(loc).toMatch(/^https?:\/\//)
@@ -46,7 +46,7 @@ describe('OGP redirect API', () => {
   })
 
   it('HEAD /api/og/hello.png returns 302', async () => {
-    const res = await request.head('/api/og/hello.png').redirects(0)
+    const res = await agent.head('/api/og/hello.png').redirects(0)
     expect(res.status).toBe(302)
   })
 })
