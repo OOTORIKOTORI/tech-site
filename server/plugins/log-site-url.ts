@@ -5,7 +5,9 @@ export default function () {
     const url = resolveSiteUrl()
     // One-time info log for SSR boot
     // eslint-disable-next-line no-console
-    console.info('[url]', process.env.VERCEL_ENV, url)
+    if (process.env.NODE_ENV !== 'production') {
+      console.info('[url]', process.env.VERCEL_ENV, url)
+    }
   } catch {
     // ignore
   }

@@ -42,7 +42,7 @@ function generate() {
   const robots = `User-agent: *\nAllow: /\nSitemap: ${BASE_URL}/sitemap.xml\n`
   writeFileSync(join(outDir, 'robots.txt'), robots, 'utf8')
 
-  console.log('[gen-meta] Wrote public/sitemap.xml and public/robots.txt for', BASE_URL)
+  // success logging is only emitted at the end in checkHosts()
 }
 
 function checkHosts() {
@@ -117,7 +117,7 @@ function checkHosts() {
     process.exit(1)
   }
 
-  console.log('[gen-meta] OK: robots/sitemap host =', expectedHost)
+  console.log('[gen-meta] OK robots/sitemap host =', expectedHost)
 }
 
 if (CHECK_ONLY) {

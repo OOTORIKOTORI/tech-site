@@ -36,12 +36,12 @@
         <div class="flex-1 space-y-1">
           <label for="jwt" class="block font-medium">JWT トークン</label>
           <textarea id="jwt" v-model="token" rows="5" class="w-full border rounded p-2 font-mono text-xs md:text-sm"
-            spellcheck="false" @dragover.prevent @drop.prevent="onDropToken" aria-label="JWTトークン入力"></textarea>
+            spellcheck="false" aria-label="JWTトークン入力" @dragover.prevent @drop.prevent="onDropToken"></textarea>
         </div>
         <div class="w-full md:w-64 space-y-1">
           <label for="sampleSelect" class="block font-medium">サンプル</label>
-          <select id="sampleSelect" v-model="sampleSelected" @change="applySample"
-            class="w-full border rounded px-2 py-1 text-xs md:text-sm" aria-label="サンプルJWT選択">
+          <select id="sampleSelect" v-model="sampleSelected" class="w-full border rounded px-2 py-1 text-xs md:text-sm"
+            aria-label="サンプルJWT選択" @change="applySample">
             <option value="">(選択してください)</option>
             <option value="hs256">HS256: シンプル</option>
             <option value="hs256_expired">HS256: 期限切れ</option>
@@ -89,10 +89,14 @@
               <th class="text-left pr-4 align-top">{{ c.key }}</th>
               <td class="font-mono break-all">{{ formatClaim(c.key, c.value) }}</td>
               <td v-if="c.key === 'exp'" class="text-xs text-gray-500 pl-2">{{ relativeExp(c.value as number) }}</td>
-              <td v-else-if="c.key === 'nbf'" class="text-xs text-gray-500 pl-2">{{ relativeGeneric(c.value as number)
-                }}</td>
-              <td v-else-if="c.key === 'iat'" class="text-xs text-gray-500 pl-2">{{ relativeGeneric(c.value as number)
-                }}</td>
+              <td v-else-if="c.key === 'nbf'" class="text-xs text-gray-500 pl-2">
+{{ relativeGeneric(c.value as number)
+                }}
+</td>
+              <td v-else-if="c.key === 'iat'" class="text-xs text-gray-500 pl-2">
+{{ relativeGeneric(c.value as number)
+                }}
+</td>
             </tr>
           </tbody>
         </table>
@@ -151,9 +155,13 @@
               class="w-full border rounded px-2 py-1 text-xs" />
             <div class="flex gap-2">
               <button class="btn-secondary" :disabled="!jwks.use || jwks.loading"
-                @click="fetchJwksKeys(false)">取得</button>
+                @click="fetchJwksKeys(false)">
+取得
+</button>
               <button class="btn-secondary" :disabled="!jwks.use || jwks.loading"
-                @click="fetchJwksKeys(true)">再取得</button>
+                @click="fetchJwksKeys(true)">
+再取得
+</button>
               <span v-if="jwks.loading" class="text-xs text-gray-500 self-center">取得中...</span>
               <span v-else-if="jwks.error" class="text-xs text-red-600">{{ jwks.error }}</span>
               <span v-else-if="jwks.keys.length" class="text-xs text-green-700">{{ jwks.keys.length }}鍵</span>
@@ -162,20 +170,21 @@
           </div>
           <div class="flex gap-2 flex-wrap items-center">
             <button class="btn-primary inline-flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-              :disabled="verifyDisabled" @click="doVerify" aria-label="JWT検証ボタン">
+              :disabled="verifyDisabled" aria-label="JWT検証ボタン" @click="doVerify">
               <span v-if="verifying"
                 class="animate-spin h-3 w-3 border-2 border-white border-t-transparent rounded-full"></span>
               <span>{{ verifying ? '検証中...' : '検証' }}</span>
             </button>
-            <button class="btn-secondary" @click="resetVerify" aria-label="結果クリアボタン">結果クリア</button>
-            <button class="btn-secondary" @click="injectDemo" aria-label="デモJWT挿入ボタン">デモJWT</button>
+            <button class="btn-secondary" aria-label="結果クリアボタン" @click="resetVerify">結果クリア</button>
+            <button class="btn-secondary" aria-label="デモJWT挿入ボタン" @click="injectDemo">デモJWT</button>
           </div>
         </div>
         <div class="space-y-4">
           <div
             :class="['rounded border p-3 min-h-[160px] transition-colors',
               verifyState.valid === true ? 'bg-green-50 border-green-300' : verifyState.valid === false && verifyState.errors.length ? 'bg-red-50 border-red-300' : 'bg-white']">
-            <h3 class="font-semibold text-sm mb-2 flex items-center gap-2">結果
+            <h3 class="font-semibold text-sm mb-2 flex items-center gap-2">
+結果
               <span v-if="verifying" class="text-[10px] text-gray-500">(検証中)</span>
             </h3>
             <template v-if="sortedErrors.length">
@@ -198,16 +207,20 @@
           <div v-if="verifyState.valid === true && verifyState.header" class="rounded border p-3 bg-gray-50 space-y-2">
             <div class="flex items-center justify-between">
               <h3 class="font-semibold text-sm">Header</h3>
-              <button class="btn-secondary text-[10px] px-2 py-0.5" @click="copyHeader"
-                aria-label="Headerコピー">コピー</button>
+              <button class="btn-secondary text-[10px] px-2 py-0.5" aria-label="Headerコピー"
+                @click="copyHeader">
+コピー
+</button>
             </div>
             <pre class="text-[11px] md:text-xs overflow-auto"><code>{{ pretty(verifyState.header) }}</code></pre>
           </div>
           <div v-if="verifyState.valid === true && verifyState.payload" class="rounded border p-3 bg-gray-50 space-y-2">
             <div class="flex items-center justify-between">
               <h3 class="font-semibold text-sm">Payload</h3>
-              <button class="btn-secondary text-[10px] px-2 py-0.5" @click="copyPayload"
-                aria-label="Payloadコピー">コピー</button>
+              <button class="btn-secondary text-[10px] px-2 py-0.5" aria-label="Payloadコピー"
+                @click="copyPayload">
+コピー
+</button>
             </div>
             <pre class="text-[11px] md:text-xs overflow-auto"><code>{{ pretty(verifyState.payload) }}</code></pre>
           </div>

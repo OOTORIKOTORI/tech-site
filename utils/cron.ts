@@ -161,7 +161,8 @@ export function parseCron(expr: string, opts?: { dowDomMode?: 'OR' | 'AND' }): C
     console.info &&
     typeof process !== 'undefined' &&
     process.env &&
-    process.env.NODE_ENV !== 'test'
+    process.env.NODE_ENV !== 'test' &&
+    process.env.NODE_ENV !== 'production'
   ) {
     console.info(`[cron] dowDomMode: ${mode}`)
   }

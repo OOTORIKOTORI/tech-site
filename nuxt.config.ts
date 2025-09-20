@@ -52,7 +52,11 @@ export default defineNuxtConfig({
   },
   hooks: {
     ready: () => {
-      if (!process.env.NUXT_PUBLIC_SITE_URL && process.env.NODE_ENV !== 'test') {
+      if (
+        !process.env.NUXT_PUBLIC_SITE_URL &&
+        process.env.NODE_ENV !== 'test' &&
+        process.env.NODE_ENV !== 'production'
+      ) {
         // eslint-disable-next-line no-console
         console.warn(
           '[nuxt] NUXT_PUBLIC_SITE_URL 未設定のためデフォルト http://localhost:3000 を使用します'
