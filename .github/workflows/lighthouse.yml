@@ -23,18 +23,28 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Audit kotorilab.jp (${{ matrix.preset }})
+      - name: Audit kotorilab.jp (desktop)
+        if: ${{ matrix.preset == 'desktop' }}
         uses: treosh/lighthouse-ci-action@v11
         with:
           urls: |
             https://kotorilab.jp
-          configPath: .lighthouserc.${{ matrix.preset }}.json
+          configPath: .lighthouserc.desktop.json
           uploadArtifacts: true
-          artifactName: lighthouse-results-${{ matrix.preset }}
+          artifactName: lighthouse-results-desktop
           temporaryPublicStorage: true
-          # Run LH with desired form factor via configPath or flags; using built-in presets
-          # The action respects LHCI's formFactor/emulatedFormFactor via config when provided.
-          # Here, we hint via extraHeaders to label; artifact names will include preset.
+          runs: 1
+
+      - name: Audit kotorilab.jp (mobile)
+        if: ${{ matrix.preset == 'mobile' }}
+        uses: treosh/lighthouse-ci-action@v11
+        with:
+          urls: |
+            https://kotorilab.jp
+          configPath: .lighthouserc.mobile.json
+          uploadArtifacts: true
+          artifactName: lighthouse-results-mobile
+          temporaryPublicStorage: true
           runs: 1
         env:
-          LHCI_EMULATE_FORM_FACTOR: ${{ matrix.preset }}
+          LHCI_EMULATE_FORM_FACTOR: mobile
