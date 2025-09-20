@@ -1,6 +1,5 @@
 // @ts-nocheck
 /* eslint-disable import/no-extraneous-dependencies */
-import { ImageResponse } from '@vercel/og'
 import { defineEventHandler, getRouterParam, getMethod } from '#imports'
 import { resolveSiteUrl } from '../../../utils/siteUrl'
 
@@ -22,6 +21,14 @@ export default defineEventHandler(async event => {
     typeof getMethod === 'function' ? getMethod(event) : event?.node?.req?.method || 'GET'
   ).toUpperCase()
   if (method === 'HEAD') return redirectDefault()
+
+  // Dynamically import ImageResponse to avoid startup crashes; fallback to redirect on failure
+  let ImageResponse
+  try {
+    ;({ ImageResponse } = await import('@vercel/og'))
+  } catch {
+    return redirectDefault()
+  }
 
   let decoded = ''
   try {
