@@ -7,8 +7,22 @@ import { resolveSiteUrl } from '../../../utils/siteUrl'
 export const runtime = 'edge'
 
 export default defineEventHandler(async event => {
-  const slug = getRouterParam(event, 'slug') || 'KOTORI Lab'
-  const title = decodeURIComponent(slug).replace(/\s+/g, ' ').slice(0, 120)
+  const raw = getRouterParam(event, 'slug') || ''
+  const siteUrl = resolveSiteUrl(event).replace(/\/$/, '')
+
+  const redirectDefault = () => Response.redirect(`${siteUrl}/og-default.png`, 302)
+
+  let decoded = ''
+  try {
+    decoded = decodeURIComponent(raw)
+  } catch {
+    return redirectDefault()
+  }
+
+  const title = (decoded || 'KOTORI Lab').replace(/\s+/g, ' ').slice(0, 120)
+  if (!title.trim() || /[\u0000-\u001F\u007F]/.test(title)) {
+    return redirectDefault()
+  }
 
   try {
     const fontSize = 64
@@ -47,7 +61,6 @@ export default defineEventHandler(async event => {
       { width: 1200, height: 630 }
     )
   } catch {
-    const siteUrl = resolveSiteUrl(event).replace(/\/$/, '')
-    return Response.redirect(`${siteUrl}/og-default.png`, 302)
+    return redirectDefault()
   }
 })

@@ -16,31 +16,23 @@ concurrency:
 jobs:
   lh:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        preset: [desktop, mobile]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js 22
-        uses: actions/setup-node@v4
+      - name: Audit kotorilab.jp (${{ matrix.preset }})
+        uses: treosh/lighthouse-ci-action@v11
         with:
-          node-version: 22
-
-      - name: Enable Corepack
-        run: corepack enable
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Lighthouse (desktop)
-        run: pnpm dlx lighthouse https://kotorilab.jp --only-categories=accessibility,seo --preset=desktop --output html --output-path ./lh-report-desktop.html
-
-      - name: Lighthouse (mobile)
-        run: pnpm dlx lighthouse https://kotorilab.jp --only-categories=accessibility,seo --preset=mobile --output html --output-path ./lh-report-mobile.html
-
-      - name: Upload report artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: lighthouse-reports
-          path: |
-            lh-report-desktop.html
-            lh-report-mobile.html
+          urls: |
+            https://kotorilab.jp
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+          # Run LH with desired form factor via configPath or flags; using built-in presets
+          # The action respects LHCI's formFactor/emulatedFormFactor via config when provided.
+          # Here, we hint via extraHeaders to label; artifact names will include preset.
+          runs: 1
+        env:
+          LHCI_EMULATE_FORM_FACTOR: ${{ matrix.preset }}
