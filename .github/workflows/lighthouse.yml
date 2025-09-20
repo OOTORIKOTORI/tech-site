@@ -28,6 +28,7 @@ jobs:
         with:
           urls: |
             https://kotorilab.jp
+          configPath: .lighthouserc.${{ matrix.preset }}.json
           uploadArtifacts: true
           artifactName: lighthouse-results-${{ matrix.preset }}
           temporaryPublicStorage: true

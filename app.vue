@@ -13,7 +13,8 @@ const canonical = useCanonicalUrl()
 
 useHead(() => ({
   link: [
-    { rel: 'canonical', href: canonical.value }
+    { rel: 'canonical', href: canonical.value },
+    { rel: 'alternate', type: 'application/rss+xml', href: '/feed.xml', title: 'Kotorilab Blog' }
   ]
 }))
 

@@ -68,7 +68,7 @@ export default defineNuxtConfig({
     head: {
       htmlAttrs: { lang: 'ja' },
       meta: [{ name: 'viewport', content: 'width=device-width, initial-scale=1' }],
-      link: [{ rel: 'alternate', type: 'application/rss+xml', href: '/feed.xml', title: 'RSS' }],
+      link: [],
     },
   },
 })

@@ -376,6 +376,26 @@
 				"$eslint-stylish"
 			],
 			"group": "test"
+		},
+		{
+			"label": "Typecheck",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"typecheck"
+			]
+		},
+		{
+			"label": "Run OG API test",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"test",
+				"tests/api/og.spec.ts",
+				"--",
+				"--run"
+			],
+			"group": "test"
 		}
 	]
 }
