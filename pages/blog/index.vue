@@ -14,7 +14,9 @@
                 <NuxtLink :to="p._path" style="text-decoration: none; color: inherit;">{{ p.title }}</NuxtLink>
               </h2>
               <p style="margin:.25rem 0 0; color:#6b7280; font-size:.75rem;"
-                :aria-label="'Published on ' + formatDate(p.date)">{{ formatDate(p.date) }}</p>
+                :aria-label="'Published on ' + formatDate(p.date)">
+{{ formatDate(p.date) }}
+</p>
               <p v-if="p.description" style="margin:.5rem 0 0; color:#374151; font-size:.9rem;">{{ p.description }}</p>
             </article>
           </li>
@@ -23,7 +25,6 @@
       <p v-else role="status" style="color:#555;">No posts yet</p>
     </section>
   </main>
-
 </template>
 <script setup lang="ts">
 import { useAsyncData, useSeoMeta, useHead } from '#imports'

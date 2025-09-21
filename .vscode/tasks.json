@@ -411,6 +411,26 @@
 				"$eslint-stylish"
 			],
 			"group": "test"
+		},
+		{
+			"label": "Typecheck and lint/test/build/smoke",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"pnpm typecheck; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; pnpm lint -- --fix; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; pnpm test -- --run; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; pnpm build; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; pnpm postbuild; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; pnpm run smoke:og"
+			]
+		},
+		{
+			"label": "Postbuild and smoke",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"pnpm postbuild; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; pnpm run smoke:og"
+			]
 		}
 	]
 }
