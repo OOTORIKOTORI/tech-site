@@ -29,6 +29,8 @@ beforeEach(() => {
   globalThis.useRequestURL = () => ({ origin: 'http://localhost:3000' })
   // @ts-expect-error test shim
   globalThis.useRoute = () => ({ fullPath: '/' })
+  // @ts-expect-error test shim
+  globalThis.useRuntimeConfig = () => ({ public: { siteOrigin: 'https://migakiexplorer.jp', siteName: '磨きエクスプローラー' } })
 })
 
 describe('app.vue JSON-LD', () => {

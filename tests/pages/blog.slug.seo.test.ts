@@ -69,6 +69,8 @@ describe('pages/blog/[slug].vue SEO', () => {
       findOne: () => makeDoc(),
       findSurround: () => [null, null],
     })
+    // @ts-expect-error test shim
+    globalThis.useRuntimeConfig = () => ({ public: { siteOrigin: 'https://migakiexplorer.jp', siteName: '磨きエクスプローラー' } })
   })
 
   it('passes canonical from frontmatter into useSeoMeta', async () => {

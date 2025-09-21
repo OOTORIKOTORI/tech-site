@@ -13,6 +13,8 @@ export const useSeoMeta: AnyFn = (...args) => g.useSeoMeta?.(...args)
 export const computed: AnyFn = (...args) => g.computed?.(...args)
 export const useAppConfig: AnyFn = (...args) => g.useAppConfig?.(...args)
 export const useRequestURL: AnyFn = (...args) => g.useRequestURL?.(...args)
+export const useRuntimeConfig: AnyFn = () => (g.useRuntimeConfig ? g.useRuntimeConfig() : { public: {} })
+export const useServerHead: AnyFn = (...args) => (g.useServerHead ? g.useServerHead(...args) : g.useHead?.(...args))
 
 // Expose queryContent via global to match page's access
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

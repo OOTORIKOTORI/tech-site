@@ -11,6 +11,8 @@ describe('pages/privacy.vue', () => {
     globalThis.useRequestURL = () => ({ origin: 'https://kotorilab.jp' })
     // @ts-expect-error test stub
     globalThis.useRoute = () => ({ fullPath: '/privacy' })
+    // @ts-expect-error test stub
+    globalThis.useRuntimeConfig = () => ({ public: { siteOrigin: 'https://migakiexplorer.jp', siteName: '磨きエクスプローラー' } })
   })
 
   it('renders h1 and partial body text', async () => {

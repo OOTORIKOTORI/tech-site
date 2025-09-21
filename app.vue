@@ -29,9 +29,7 @@ useSeoMeta({
 })
 
 // JSON-LD: WebSite and Organization (SSR-safe with fallback)
-type HeadInput = Parameters<typeof useHead>[0]
-const setHead: (input: HeadInput) => void =
-  (typeof useServerHead === 'function' ? useServerHead : useHead)
+const setHead = (typeof useServerHead === 'function' ? useServerHead : useHead)
 
 const org = {
   '@context': 'https://schema.org',

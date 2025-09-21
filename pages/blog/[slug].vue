@@ -113,9 +113,7 @@ function toAbsoluteImageUrl(img: unknown): string | undefined {
   return undefined
 }
 
-type HeadInput = Parameters<typeof useHead>[0]
-const setHead: (input: HeadInput) => void =
-  (typeof useServerHead === 'function' ? useServerHead : useHead)
+const setHead = (typeof useServerHead === 'function' ? useServerHead : useHead)
 
 const imageAbs = toAbsoluteImageUrl(doc.image)
 const postLd = {
