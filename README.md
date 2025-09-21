@@ -66,6 +66,7 @@ Postbuild の検証:
   - `pnpm typecheck; pnpm lint; pnpm test -- --run; pnpm build; pnpm postbuild; pnpm run smoke:og`
   - 既存の `husky.sh` シム行は削除済み。
 - タグ運用: `vX.Y.Z`。コミット → タグ付け → push で簡易リリース。リリースノートは基本不要（必要時は `gh` CLI で補助）。
+  - Windows: `pnpm run tag:patch` 等が使えます。Mac/Linux は `pwsh` が無い場合、`./scripts/bump-tag.ps1 patch` を直接実行してください。
 - Windows PowerShell では `;` で連結推奨。パッチ差分出力は `Out-File -Encoding utf8 -Width 4096` を推奨。
 
 例（PowerShell）:
