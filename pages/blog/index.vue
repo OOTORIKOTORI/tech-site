@@ -9,14 +9,12 @@
         <ul style="list-style: none; padding: 0; margin: 0; display: grid; gap: 1rem;">
           <li v-for="p in posts" :key="p._path"
             style="border:1px solid #e5e7eb; border-radius:.5rem; padding:1rem; background:#fff;">
-            <article>
-              <h2 style="margin:0; font-size: 1.125rem;">
-                <NuxtLink :to="p._path" style="text-decoration: none; color: inherit;">{{ p.title }}</NuxtLink>
+            <article :aria-labelledby="'post-' + p.slug">
+              <h2 :id="'post-' + p.slug" style="margin:0; font-size: 1.125rem;">
+                <NuxtLink :to="p._path" :aria-label="`${p.title ?? 'Post'} の詳細へ`"
+                  style="text-decoration: none; color: inherit;">{{ p.title }}</NuxtLink>
               </h2>
-              <p style="margin:.25rem 0 0; color:#6b7280; font-size:.75rem;"
-                :aria-label="'Published on ' + formatDate(p.date)">
-{{ formatDate(p.date) }}
-</p>
+              <p style="margin:.25rem 0 0; color:#6b7280; font-size:.75rem;">{{ formatDate(p.date) }}</p>
               <p v-if="p.description" style="margin:.5rem 0 0; color:#374151; font-size:.9rem;">{{ p.description }}</p>
             </article>
           </li>
@@ -25,52 +23,19 @@
       <p v-else role="status" style="color:#555;">No posts yet</p>
     </section>
   </main>
+
 </template>
 <script setup lang="ts">
 import { useAsyncData, useSeoMeta, useHead } from '#imports'
+import { fetchPosts, formatDate, type PostListItem } from '~/composables/usePosts'
 
-interface BlogListItem {
-  _path: string
-  title?: string
-  description?: string
-  date?: string
-}
+const { data } = await useAsyncData('blog-list', () => fetchPosts())
+const posts = (data.value ?? []) as PostListItem[]
 
-interface QueryChain<T> {
-  where(cond: Record<string, unknown>): QueryChain<T>
-  sort(sorter: Record<string, 1 | -1>): QueryChain<T>
-  only(keys: string[]): QueryChain<T>
-  find(): Promise<T[]>
-}
-
-type QueryContentFn = (path?: string) => QueryChain<BlogListItem>
-
-const qc = (globalThis as unknown as { queryContent?: QueryContentFn }).queryContent
-
-const { data } = await useAsyncData('blog-list', async () => {
-  if (!qc) return [] as BlogListItem[]
-  const list = await qc('/blog')
-    .sort({ date: -1 })
-    .only(['_path', 'title', 'description', 'date'])
-    .find()
-  return Array.isArray(list) ? list : ([] as BlogListItem[])
-})
-
-const posts = data.value ?? ([] as BlogListItem[])
-
-function pad(n: number): string { return n < 10 ? '0' + n : String(n) }
-function formatDate(d?: string): string {
-  if (!d) return ''
-  const dt = new Date(d)
-  if (Number.isNaN(dt.getTime())) return ''
-  return `${dt.getFullYear()}-${pad(dt.getMonth() + 1)}-${pad(dt.getDate())}`
-}
-
-useHead({
-  link: [{ rel: 'canonical', href: 'https://kotorilab.jp/blog' }],
-})
+useHead({ link: [{ rel: 'canonical', href: 'https://kotorilab.jp/blog' }] })
 useSeoMeta({
   title: 'Blog | Kotorilab',
+  description: 'KOTORI Lab のブログ一覧。開発の気づきや設計メモを短くまとめています。',
   ogTitle: 'Blog | Kotorilab',
   ogUrl: 'https://kotorilab.jp/blog',
 })

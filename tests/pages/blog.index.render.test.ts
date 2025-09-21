@@ -83,6 +83,8 @@ describe('pages/blog/index.vue listing', () => {
 
     const links = wrapper.findAll('a[href="/blog/first-cron-tz"]')
     expect(links.length).toBeGreaterThanOrEqual(1)
+    // Check date format is YYYY-MM-DD
+    expect(wrapper.text()).toContain('2025-09-20')
   })
 
   it('shows "No posts yet" when list is empty', async () => {
