@@ -45,6 +45,6 @@ jobs:
           uploadArtifacts: true
           artifactName: lighthouse-results-mobile
           temporaryPublicStorage: true
-          runs: 1
+          runs: 3
         env:
           LHCI_EMULATE_FORM_FACTOR: mobile
