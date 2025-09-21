@@ -7,7 +7,15 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     globals: true,
-    setupFiles: ['tests/setup/global-stubs.ts'],
+    setupFiles: ['tests/setup/global-stubs.ts', 'tests/setup/console-warn-filter.ts'],
+    onConsoleLog(log, type) {
+      if (
+        (type === 'stdout' || type === 'stderr') &&
+        /<Suspense>\s+is an experimental feature/i.test(log)
+      ) {
+        return false
+      }
+    },
   },
   resolve: {
     alias: {

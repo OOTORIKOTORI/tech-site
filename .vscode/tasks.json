@@ -450,6 +450,21 @@
 				"$eslint-stylish"
 			],
 			"group": "test"
+		},
+		{
+			"label": "Typecheck, Lint, Test (once)",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"-s",
+				"typecheck",
+				";",
+				"pnpm -s lint",
+				";",
+				"pnpm -s test",
+				"--",
+				"--run"
+			]
 		}
 	]
 }

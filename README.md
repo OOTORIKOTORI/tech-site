@@ -160,6 +160,8 @@ yarn build
 yarn preview
 ```
 
+ローカル検証は `pnpm run ci:local`
+
 ---
 
 ## 参考リンク
