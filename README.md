@@ -12,7 +12,7 @@
   - ヒーロー＋ CTA（`/tools/cron-jst`, `/blog`）。
   - 「Latest posts」で最新 3 件を表示（Nuxt Content の `date` 降順）。
 - ブログ一覧 `/blog`:
-  - タイトル / 日付 / 説明 / リンクをカード表示。
+  - タイトル / 日付（YYYY-MM-DD） / 説明 / リンクをカード表示。カードに a11y ラベル付与。
   - 投稿 0 件時は「No posts yet」を表示。
 - ブログ詳細 `/blog/[slug]`:
   - 本文レンダリング＋ SEO メタ（title/description/canonical/og:url）。
@@ -20,6 +20,10 @@
 - 既存ツール:
   - Cron JST 予測: `/tools/cron-jst`
   - JWT Decode: `/tools/jwt-decode`
+
+ToDo（ナビゲーション）:
+
+- 最小ナビ（Home/Tools/Blog）＋ Skip リンク（メインへ移動）
 
 サイトマップ/フィード:
 
@@ -31,7 +35,8 @@
 
 ## SEO / OGP / プレビュー方針
 
-- 絶対 URL 化: `canonical` と `og:url` は `NUXT_PUBLIC_SITE_ORIGIN`（互換で `NUXT_PUBLIC_SITE_URL` も可）を基準に絶対 URL を生成（`utils/siteUrl.ts` / `utils/siteMeta.ts`）。
+- 絶対 URL 化: `canonical` と `og:url` は `NUXT_PUBLIC_SITE_ORIGIN` を基準に絶対 URL を生成（`utils/siteUrl.ts` / `utils/siteMeta.ts`）。
+- 互換変数: `NUXT_PUBLIC_SITE_URL` は互換の補助（将来削除予定）。
 - プレビュー noindex: ホストが `*.vercel.app` の場合はミドルウェアで `X-Robots-Tag: noindex, nofollow` を付与（環境変数に依存しない）。
 - OGP API（安定デフォルト）:
   - `GET /api/og/[slug].png` は既定で 302 により `/og-default.png` へフォールバック。
@@ -58,6 +63,18 @@ Postbuild の検証:
 - `scripts/gen-meta.mjs --check-only` が robots/sitemap のホスト一致を検証。
 - 一致時ログ: `[gen-meta] OK robots/sitemap host = <host>`。不一致はビルド失敗。
 
+Workflow 上での meta check 用 ENV 注入（例）:
+
+```yaml
+- name: Meta host check
+  run: node ./scripts/gen-meta.mjs --check-only
+  env:
+    NUXT_PUBLIC_SITE_ORIGIN: https://migakiexplorer.jp
+    NUXT_PUBLIC_SITE_URL: ''
+```
+
+代替: 値は GitHub Actions の Variables/Secrets から参照してもよい（例: `${{ vars.SITE_ORIGIN }}`）。
+
 ---
 
 ## 開発運用（直 push 前提）
@@ -68,6 +85,8 @@ Postbuild の検証:
 - タグ運用: `vX.Y.Z`。コミット → タグ付け → push で簡易リリース。リリースノートは基本不要（必要時は `gh` CLI で補助）。
   - Windows: `pnpm run tag:patch` 等が使えます。Mac/Linux は `pwsh` が無い場合、`./scripts/bump-tag.ps1 patch` を直接実行してください。
 - Windows PowerShell では `;` で連結推奨。パッチ差分出力は `Out-File -Encoding utf8 -Width 4096` を推奨。
+
+チェック（抜粋）: 法務ページ（`/privacy`, `/terms`, `/ads`）の雛形とフッタ導線の有無を確認。
 
 例（PowerShell）:
 
@@ -150,6 +169,20 @@ pnpm preview
 ```
 
 注意: Production では `NUXT_PUBLIC_SITE_ORIGIN=https://migakiexplorer.jp` が必須。robots/sitemap のホスト不一致は postbuild 検証で失敗します。
+
+Nuxt グローバルスタブ指針:
+
+- プラグインやグローバル依存の安定化は app レベルのモック（`tests/setup/global-stubs.ts` 等）＋ `__mocks__` ディレクトリを用いて管理。コンポーネント単位のスタブは必要最小に留める。
+
+構造化データ（将来）:
+
+- Organization.logo を追加予定。`public/logo.svg` に配置し、Google のロゴ要件（最小サイズ・縦横比）を満たすこと。
+
+タグの最新取得（SemVer 運用）:
+
+```powershell
+git describe --tags --abbrev=0
+```
 
 補足（yarn を使う場合）:
 

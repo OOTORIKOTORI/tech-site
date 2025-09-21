@@ -37,8 +37,11 @@ jobs:
         run: pnpm build
       - name: API tests
         run: pnpm run test:api
-      - name: Check sitemap/robots host
-        run: pnpm run check:meta
+      - name: Meta host check
+        run: node ./scripts/gen-meta.mjs --check-only
+        env:
+          NUXT_PUBLIC_SITE_ORIGIN: https://migakiexplorer.jp
+          NUXT_PUBLIC_SITE_URL: ''
       - name: Smoke OGP endpoint
         env:
           NUXT_PUBLIC_SITE_URL: https://kotorilab.jp
