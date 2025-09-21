@@ -33,7 +33,7 @@ jobs:
           uploadArtifacts: true
           artifactName: lighthouse-results-desktop
           temporaryPublicStorage: true
-          runs: 1
+          runs: 3
 
       - name: Audit kotorilab.jp (mobile)
         if: ${{ matrix.preset == 'mobile' }}

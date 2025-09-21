@@ -25,3 +25,6 @@ logs
 !.env.example
 memo.txt
 review.patch
+
+# Lighthouse CI artifacts
+.lighthouseci/
