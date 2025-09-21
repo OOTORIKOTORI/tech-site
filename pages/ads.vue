@@ -29,5 +29,4 @@ const updatedAt = new Date().toISOString()
       <p>最終更新日: <time :datetime="updatedAt">{{ updatedAt }}</time></p>
     </article>
   </main>
-
 </template>
