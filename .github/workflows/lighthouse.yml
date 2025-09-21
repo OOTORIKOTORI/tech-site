@@ -23,6 +23,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Warm up homepage
+        if: ${{ matrix.preset == 'desktop' }}
+        run: |
+          curl -sS https://kotorilab.jp/ -o /dev/null -w "HTTP %{http_code}\n"
+          sleep 2
+
       - name: Audit kotorilab.jp (desktop)
         if: ${{ matrix.preset == 'desktop' }}
         uses: treosh/lighthouse-ci-action@v11
@@ -34,6 +40,12 @@ jobs:
           artifactName: lighthouse-results-desktop
           temporaryPublicStorage: true
           runs: 3
+
+      - name: Warm up homepage
+        if: ${{ matrix.preset == 'mobile' }}
+        run: |
+          curl -sS https://kotorilab.jp/ -o /dev/null -w "HTTP %{http_code}\n"
+          sleep 2
 
       - name: Audit kotorilab.jp (mobile)
         if: ${{ matrix.preset == 'mobile' }}
