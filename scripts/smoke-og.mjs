@@ -1,10 +1,10 @@
 // Simple smoke check for dynamic OGP endpoint
 // Method: GET; Accept 200 or 302
-// Base URL: process.env.SMOKE_URL || 'https://kotorilab.jp'
+// Origin: process.env.NUXT_PUBLIC_SITE_ORIGIN || 'https://migakiexplorer.jp'
 // Retry: up to 6 retries (7 attempts total) every 30s
 
-const BASE_URL = process.env.SMOKE_URL || 'https://kotorilab.jp'
-const TARGET_URL = new URL('/api/og/hello.png', BASE_URL).toString()
+const ORIGIN = process.env.NUXT_PUBLIC_SITE_ORIGIN || 'https://migakiexplorer.jp'
+const TARGET_URL = `${ORIGIN}/api/og/hello.png`
 const MAX_RETRIES = 6
 const ATTEMPTS = MAX_RETRIES + 1
 const INTERVAL_MS = 30_000
@@ -40,6 +40,7 @@ async function tryOnce(attempt) {
 }
 
 async function main() {
+  console.log(`[smoke-og] target=${TARGET_URL} origin=${ORIGIN}`)
   for (let i = 1; i <= ATTEMPTS; i++) {
     const ok = await tryOnce(i)
     if (ok) return

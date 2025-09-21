@@ -160,11 +160,14 @@ function generate() {
 function checkHosts() {
   let expectedHost
   try {
-    expectedHost = new URL(BASE_URL).host
+    const expectedOrigin = new URL(
+      (process.env.NUXT_PUBLIC_SITE_ORIGIN || 'https://migakiexplorer.jp').trim()
+    ).origin
+    expectedHost = new URL(expectedOrigin).host
   } catch (err) {
     console.error(
-      '[gen-meta] ERROR: Invalid base URL:',
-      BASE_URL,
+      '[gen-meta] ERROR: Invalid expected origin from env NUXT_PUBLIC_SITE_ORIGIN:',
+      process.env.NUXT_PUBLIC_SITE_ORIGIN,
       err && err.message ? err.message : err
     )
     process.exit(1)
