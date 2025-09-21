@@ -55,6 +55,9 @@
 - ツール: `/tools/cron-jst`, `/tools/jwt-decode`
 - ToDo: 最小ナビ（Home/Tools/Blog）＋ Skip リンク（キーボード最短移動）
 
+- **最小ナビ（Home / Tools / Blog）** をヘッダに配置し、**「メインへスキップ」Skip リンク** を実装する（a11y）。
+- ブログ一覧 `/blog`: **日付フォーマットは `YYYY-MM-DD` 固定**。各カードに **a11y ラベル**（例: `aria-label="Open post: <title>"`）を付与。
+
 ### 主要機能
 
 - **JWT Decoder**: JSON Web Token のデコードツール（パス: `/tools/jwt-decode`）
@@ -210,6 +213,11 @@ pnpm typecheck; pnpm lint; pnpm test -- --run; pnpm build; node .\scripts\gen-me
 - JWT: `test/jwt-es256.spec.ts` で ES256 の DER ↔ JOSE 変換。
 - Nuxt グローバルスタブ: プラグイン/グローバル依存の安定化は app レベルのモック（`tests/setup/global-stubs.ts` 等）＋ `__mocks__` ディレクトリ運用で行う。テストは app-level mock を優先し、個別コンポーネントは必要最小のスタブに留める。
 
+### テストノイズ低減（Nuxt グローバルスタブ）
+
+- `__mocks__/` や app-level の provide/inject を活用し、**外部依存のスタブ化**を標準化する。
+  - 例: analytics/ads の no-op 実装、日時/乱数の固定化、`vi.stubGlobal` によるテスト安定化。
+
 ### リリース運用（直 push 前提）
 
 - Husky pre-push: `typecheck → lint → test → build → postbuild → smoke:og`。
@@ -226,6 +234,8 @@ pnpm typecheck; pnpm lint; pnpm test -- --run; pnpm build; node .\scripts\gen-me
 ### 構造化データ（将来）
 
 - Organization.logo を追加予定。`public/logo.svg` に配置し、Google のロゴ要件（幅 × 高さの最小サイズ・縦横比）を満たすこと。
+
+- **Organization.logo** の将来追加: `public/logo.svg` を配置し、検索エンジン推奨の最小寸法/アスペクト比を満たすこと（導入時に README 側にも反映）。
 
 ---
 

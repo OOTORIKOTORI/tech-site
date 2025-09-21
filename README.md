@@ -75,6 +75,26 @@ Workflow 上での meta check 用 ENV 注入（例）:
 
 代替: 値は GitHub Actions の Variables/Secrets から参照してもよい（例: `${{ vars.SITE_ORIGIN }}`）。
 
+> Meta host check（postbuild --check-only）での ENV 注入例
+> ※ 実際の Workflow は既に設定済み。下記は **README 上の参照例** です（YAML 自体は変更不要）。
+
+```yaml
+- name: Meta host check
+  run: node ./scripts/gen-meta.mjs --check-only
+  env:
+    NUXT_PUBLIC_SITE_ORIGIN: https://migakiexplorer.jp
+    NUXT_PUBLIC_SITE_URL: ''
+```
+
+---
+
+## 実装 TODO（短期）
+
+- ヘッダに **最小ナビ（Home/Tools/Blog）** と **Skip リンク** を追加
+- ブログ一覧カード: **日付 `YYYY-MM-DD`** / **a11y ラベル** を明記・適用
+- フッタに **/privacy /terms /ads** への導線
+- **Nuxt グローバルスタブ** 運用（`__mocks__/` 等）を導入してテストノイズを低減
+
 ---
 
 ## 開発運用（直 push 前提）
@@ -146,6 +166,20 @@ curl -s https://migakiexplorer.jp/sitemap.xml | head -n 5
 ```
 
 ---
+
+### ローカルでの ORIGIN 明示（混乱回避）
+
+- PowerShell（一時適用）:
+
+  ```powershell
+  $env:NUXT_PUBLIC_SITE_ORIGIN='https://migakiexplorer.jp'; pnpm postbuild
+  ```
+
+- `.env.local`（恒久）:
+
+  ```
+  NUXT_PUBLIC_SITE_ORIGIN=https://migakiexplorer.jp
+  ```
 
 ## セットアップ / 開発
 
