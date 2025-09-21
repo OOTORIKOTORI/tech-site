@@ -3,7 +3,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { defineComponent, h, Suspense, nextTick } from 'vue'
 
-const expectedCanonical = 'https://kotorilab.jp/blog/example'
+const expectedCanonical = 'https://migakiexplorer.jp/blog/example'
 const expectedTitle = 'Example Post'
 
 function makeDoc() {

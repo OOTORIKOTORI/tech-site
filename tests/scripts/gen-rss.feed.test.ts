@@ -7,7 +7,7 @@ const feedPath = 'public/feed.xml'
 
 function runNode(args: string[]) {
   const res = spawnSync(process.execPath, args, {
-    env: { ...process.env, NUXT_PUBLIC_SITE_URL: 'https://kotorilab.jp' },
+    env: { ...process.env, NUXT_PUBLIC_SITE_ORIGIN: 'https://migakiexplorer.jp' },
     encoding: 'utf8',
   })
   if (res.status !== 0) {
@@ -23,11 +23,11 @@ describe('RSS feed generation', () => {
   it('writes /public/feed.xml and contains first post', () => {
     expect(existsSync(feedPath)).toBe(true)
     const xml = readFileSync(feedPath, 'utf8')
-    expect(xml).toContain('<title>Kotorilab Blog</title>')
-    expect(xml).toContain('<link>https://kotorilab.jp/blog</link>')
+    expect(xml).toContain('<title>磨きエクスプローラー Blog</title>')
+    expect(xml).toContain('<link>https://migakiexplorer.jp/blog</link>')
     // first-cron-tz title existence
     expect(xml).toMatch(
-      /<item>[^]*<title>[^<]*Cron[^<]*<\/title>[^]*<link>https:\/\/kotorilab\.jp\/blog\/first-cron-tz<\/link>/
+      /<item>[^]*<title>[^<]*Cron[^<]*<\/title>[^]*<link>https:\/\/migakiexplorer\.jp\/blog\/first-cron-tz<\/link>/
     )
   })
 })

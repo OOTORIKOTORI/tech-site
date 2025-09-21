@@ -4,14 +4,18 @@ import { mkdirSync, writeFileSync, existsSync, readFileSync, readdirSync } from 
 import { join, basename } from 'node:path'
 
 const CHECK_ONLY = process.argv.includes('--check-only')
-const urlFromEnv = process.env.NUXT_PUBLIC_SITE_URL && process.env.NUXT_PUBLIC_SITE_URL.trim()
+const urlFromEnv = (
+  process.env.NUXT_PUBLIC_SITE_ORIGIN ||
+  process.env.NUXT_PUBLIC_SITE_URL ||
+  ''
+).trim()
 const vercelEnv = process.env.VERCEL_ENV // 'production' | 'preview' | 'development'
 const vercelUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined
 
 function resolveBaseUrl() {
   let base
   if (vercelEnv === 'production') {
-    base = urlFromEnv || 'https://kotorilab.jp'
+    base = urlFromEnv || 'https://migakiexplorer.jp'
   } else {
     base = vercelUrl || urlFromEnv || 'https://example.com'
   }
@@ -133,9 +137,9 @@ function generate() {
   writeFileSync(join(outDir, 'robots.txt'), robots, 'utf8')
 
   // Generate RSS feed for blog posts
-  const channelTitle = 'Kotorilab Blog'
+  const channelTitle = '磨きエクスプローラー Blog'
   const channelLink = `${BASE_URL}/blog`
-  const channelDesc = 'Kotorilab Blog RSS'
+  const channelDesc = '磨きエクスプローラー Blog RSS'
   const items = blogMeta
     .map(({ slug, title, description, pubIso }) => {
       const link = `${BASE_URL}/blog/${slug}`

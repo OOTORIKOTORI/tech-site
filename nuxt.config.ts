@@ -26,7 +26,14 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     public: {
-      siteUrl: process.env.NUXT_PUBLIC_SITE_URL || 'http://localhost:3000',
+      // 新しい統一キー（既定は本番ドメイン）
+      siteOrigin: process.env.NUXT_PUBLIC_SITE_ORIGIN || 'https://migakiexplorer.jp',
+      siteName: process.env.NUXT_PUBLIC_SITE_NAME || '磨きエクスプローラー',
+      // 互換キー（古い参照が残っていても落ちないように保持）
+      siteUrl:
+        process.env.NUXT_PUBLIC_SITE_URL ||
+        process.env.NUXT_PUBLIC_SITE_ORIGIN ||
+        'http://localhost:3000',
     },
   },
   sitemap: {
@@ -53,13 +60,13 @@ export default defineNuxtConfig({
   hooks: {
     ready: () => {
       if (
-        !process.env.NUXT_PUBLIC_SITE_URL &&
+        !process.env.NUXT_PUBLIC_SITE_ORIGIN &&
         process.env.NODE_ENV !== 'test' &&
         process.env.NODE_ENV !== 'production'
       ) {
         // eslint-disable-next-line no-console
         console.warn(
-          '[nuxt] NUXT_PUBLIC_SITE_URL 未設定のためデフォルト http://localhost:3000 を使用します'
+          '[nuxt] NUXT_PUBLIC_SITE_ORIGIN 未設定のためデフォルト https://migakiexplorer.jp を使用します'
         )
       }
     },

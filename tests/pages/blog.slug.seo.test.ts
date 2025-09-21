@@ -33,7 +33,7 @@ function useHead(): void {
 }
 
 // Canonical expected value from frontmatter
-const expectedCanonical = 'https://kotorilab.jp/blog/first-cron-tz'
+const expectedCanonical = 'https://migakiexplorer.jp/blog/first-cron-tz'
 
 // Stubs shared across tests
 let seoSpy: ReturnType<typeof vi.fn>

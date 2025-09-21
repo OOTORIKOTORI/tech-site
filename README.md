@@ -1,8 +1,8 @@
-# KOTORI Lab — Tech Tools & Notes（開発者向けユーティリティ＋技術メモ集）
+# 磨きエクスプローラー — Tech Tools & Notes（開発者向けユーティリティ＋技術メモ集）
 
 フロント/バックエンドの“毎回ググる小ワーク”を手元で安全・素早く検証できる軽量ツール（Cron / JWT など）と、実装運用の落とし穴を最小編集でまとめた短文ブログを提供するサイトです。収益はディスプレイ広告を想定。ローカル完結と品質ゲートを重視しています。
 
-ブランド: KOTORI Lab / 本番ドメイン: https://kotorilab.jp
+ブランド: 磨きエクスプローラー（Migaki Explorer） / 本番ドメイン: https://migakiexplorer.jp
 
 ---
 
@@ -31,7 +31,7 @@
 
 ## SEO / OGP / プレビュー方針
 
-- 絶対 URL 化: `canonical` と `og:url` は `NUXT_PUBLIC_SITE_URL` を基準に絶対 URL を生成（`utils/siteUrl.ts` / `utils/siteMeta.ts`）。
+- 絶対 URL 化: `canonical` と `og:url` は `NUXT_PUBLIC_SITE_ORIGIN`（互換で `NUXT_PUBLIC_SITE_URL` も可）を基準に絶対 URL を生成（`utils/siteUrl.ts` / `utils/siteMeta.ts`）。
 - プレビュー noindex: ホストが `*.vercel.app` の場合はミドルウェアで `X-Robots-Tag: noindex, nofollow` を付与（環境変数に依存しない）。
 - OGP API（安定デフォルト）:
   - `GET /api/og/[slug].png` は既定で 302 により `/og-default.png` へフォールバック。
@@ -113,17 +113,17 @@ pnpm build; node .\scripts\gen-meta.mjs --check-only
 - ドメイン/リダイレクト確認（PowerShell）:
 
 ```powershell
-iwr -Uri 'http://www.kotorilab.jp' -Method Head -MaximumRedirection 0 | Select-Object StatusCode, StatusDescription, Headers
-iwr -Uri 'https://kotorilab.jp/robots.txt'
-iwr -Uri 'https://kotorilab.jp/sitemap.xml'
+iwr -Uri 'http://www.migakiexplorer.jp' -Method Head -MaximumRedirection 0 | Select-Object StatusCode, StatusDescription, Headers
+iwr -Uri 'https://migakiexplorer.jp/robots.txt'
+iwr -Uri 'https://migakiexplorer.jp/sitemap.xml'
 ```
 
 - 同（bash）:
 
 ```bash
-curl -sI http://www.kotorilab.jp | sed -n '1p; s/^Location: //p'
-curl -s https://kotorilab.jp/robots.txt | sed -n '1,3p'
-curl -s https://kotorilab.jp/sitemap.xml | head -n 5
+curl -sI http://www.migakiexplorer.jp | sed -n '1p; s/^Location: //p'
+curl -s https://migakiexplorer.jp/robots.txt | sed -n '1,3p'
+curl -s https://migakiexplorer.jp/sitemap.xml | head -n 5
 ```
 
 ---
@@ -149,7 +149,7 @@ pnpm build
 pnpm preview
 ```
 
-注意: Production では `NUXT_PUBLIC_SITE_URL=https://kotorilab.jp` が必須。robots/sitemap のホスト不一致は postbuild 検証で失敗します。
+注意: Production では `NUXT_PUBLIC_SITE_ORIGIN=https://migakiexplorer.jp` が必須。robots/sitemap のホスト不一致は postbuild 検証で失敗します。
 
 補足（yarn を使う場合）:
 

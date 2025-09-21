@@ -1,4 +1,4 @@
-import { useRoute, useRequestURL, computed, useAppConfig } from '#imports'
+import { useRoute, useRequestURL, computed, useAppConfig, useRuntimeConfig } from '#imports'
 import { resolveSiteUrl } from './siteUrl'
 
 type SiteConfig = { title?: string; description?: string; ogDefaultPath?: string }
@@ -7,7 +7,7 @@ const useAppConfigTyped = useAppConfig as unknown as <T>() => T
 
 export function useDefaultTitle() {
   const app = useAppConfigTyped<AppConfig>()
-  return app.site?.title ?? 'KOTORI Lab — Tech Tools & Notes'
+  return app.site?.title ?? '磨きエクスプローラー — Tech Tools & Notes'
 }
 
 export function useDefaultDescription() {
@@ -22,8 +22,11 @@ export function useOgDefaultPath() {
 
 export function useAbsoluteBase() {
   const reqUrl = useRequestURL()
+  type PublicConfig = { siteOrigin?: string; siteUrl?: string }
+  const { public: pub } = useRuntimeConfig() as { public: PublicConfig }
   const fromReq = reqUrl?.origin && reqUrl.origin !== 'null' ? reqUrl.origin : ''
-  return fromReq || resolveSiteUrl()
+  const fromCfg = pub?.siteOrigin || pub?.siteUrl || ''
+  return fromReq || String(fromCfg) || resolveSiteUrl()
 }
 
 export function useCanonicalUrl() {

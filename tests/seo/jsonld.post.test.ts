@@ -15,7 +15,7 @@ function makeDoc() {
     description: 'Desc',
     date: '2025-09-20T00:00:00.000Z',
     updated: '2025-09-21T00:00:00.000Z',
-    canonical: 'https://kotorilab.jp/blog/first-cron-tz',
+    canonical: 'https://migakiexplorer.jp/blog/first-cron-tz',
     body: { children: [] },
   }
 }

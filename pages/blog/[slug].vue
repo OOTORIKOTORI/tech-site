@@ -13,8 +13,7 @@
   </main>
 </template>
 <script setup lang="ts">
-import { useRoute, useAsyncData, createError, useHead, useSeoMeta, useServerHead } from '#imports'
-import { resolveSiteUrl } from '@/utils/siteUrl'
+import { useRoute, useAsyncData, createError, useHead, useSeoMeta, useServerHead, useRuntimeConfig } from '#imports'
 
 interface BlogDoc {
   _path: string
@@ -84,7 +83,9 @@ useSeoMeta({
 })
 
 // JSON-LD: BlogPosting (SSR)
-const siteOrigin = resolveSiteUrl()
+type PublicConfig = { siteOrigin?: string; siteUrl?: string; siteName?: string }
+const { public: pub } = useRuntimeConfig() as { public: PublicConfig }
+const siteOrigin: string = String(pub?.siteOrigin || pub?.siteUrl || 'http://localhost:3000').replace(/\/$/, '')
 const routePath = route.path || doc._path || '/'
 
 function toAbsoluteImageUrl(img: unknown): string | undefined {
@@ -124,8 +125,8 @@ const postLd = {
   description: doc.description || '',
   datePublished: doc.date || '',
   dateModified: doc.updated || doc.date || '',
-  author: { '@type': 'Person', name: 'KOTORI Lab' },
-  mainEntityOfPage: { '@type': 'WebPage', '@id': siteOrigin.replace(/\/$/, '') + routePath },
+  author: { '@type': 'Person', name: String(pub?.siteName || '磨きエクスプローラー') },
+  mainEntityOfPage: { '@type': 'WebPage', '@id': siteOrigin + routePath },
   ...(imageAbs ? { image: [imageAbs] } : {}),
 }
 setHead(() => ({

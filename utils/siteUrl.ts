@@ -5,12 +5,16 @@ export type ResolveBy = 'env' | 'vercel' | 'request' | 'default'
 
 export function resolveSiteUrlInfo(event?: H3Event): { url: string; by: ResolveBy } {
   const ve = process.env.VERCEL_ENV
-  const envUrl = (process.env.NUXT_PUBLIC_SITE_URL || '').trim()
+  const envUrl = (
+    process.env.NUXT_PUBLIC_SITE_ORIGIN ||
+    process.env.NUXT_PUBLIC_SITE_URL ||
+    ''
+  ).trim()
   const vercelUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : ''
 
   if (ve === 'production') {
     if (envUrl) return { url: envUrl, by: 'env' }
-    return { url: 'https://kotorilab.jp', by: 'default' }
+    return { url: 'https://migakiexplorer.jp', by: 'default' }
   }
 
   if (event) {

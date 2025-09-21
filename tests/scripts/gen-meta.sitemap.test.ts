@@ -7,7 +7,7 @@ const sitemapPath = 'public/sitemap.xml'
 
 function runNode(args: string[]) {
   const res = spawnSync(process.execPath, args, {
-    env: { ...process.env, NUXT_PUBLIC_SITE_URL: 'https://kotorilab.jp' },
+    env: { ...process.env, NUXT_PUBLIC_SITE_ORIGIN: 'https://migakiexplorer.jp' },
     encoding: 'utf8',
   })
   if (res.status !== 0) {
@@ -24,9 +24,9 @@ describe('scripts/gen-meta.mjs sitemap', () => {
   it('includes blog first-cron-tz route when content exists', () => {
     expect(existsSync(sitemapPath)).toBe(true)
     const xml = readFileSync(sitemapPath, 'utf8')
-    expect(xml).toContain('<loc>https://kotorilab.jp/blog/first-cron-tz</loc>')
+    expect(xml).toContain('<loc>https://migakiexplorer.jp/blog/first-cron-tz</loc>')
     const m = xml.match(
-      /<url>\s*<loc>https:\/\/kotorilab\.jp\/blog\/first-cron-tz<\/loc>[\s\S]*?<lastmod>([^<]+)<\/lastmod>[\s\S]*?<\/url>/
+      /<url>\s*<loc>https:\/\/migakiexplorer\.jp\/blog\/first-cron-tz<\/loc>[\s\S]*?<lastmod>([^<]+)<\/lastmod>[\s\S]*?<\/url>/
     )
     expect(m && typeof m[1] === 'string').toBeTruthy()
     const lastmod = m && m[1] ? m[1] : ''
@@ -37,10 +37,10 @@ describe('scripts/gen-meta.mjs sitemap', () => {
   it('check-only still passes host validation', () => {
     // --check-only は生成済みのファイルに対して検証のみ行う
     const res = spawnSync(process.execPath, [script, '--check-only'], {
-      env: { ...process.env, NUXT_PUBLIC_SITE_URL: 'https://kotorilab.jp' },
+      env: { ...process.env, NUXT_PUBLIC_SITE_ORIGIN: 'https://migakiexplorer.jp' },
       encoding: 'utf8',
     })
     expect(res.status).toBe(0)
-    expect(res.stdout).toMatch(/\[gen-meta] OK robots\/sitemap host = kotorilab.jp/)
+    expect(res.stdout).toMatch(/\[gen-meta] OK robots\/sitemap host = migakiexplorer.jp/)
   })
 })
