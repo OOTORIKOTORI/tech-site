@@ -431,6 +431,16 @@
 				"-Command",
 				"pnpm postbuild; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; pnpm run smoke:og"
 			]
+		},
+		{
+			"label": "Typecheck and lint",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"pnpm typecheck; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; pnpm lint -- --fix"
+			]
 		}
 	]
 }

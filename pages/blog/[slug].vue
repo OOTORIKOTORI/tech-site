@@ -13,13 +13,16 @@
   </main>
 </template>
 <script setup lang="ts">
-import { useRoute, useAsyncData, createError, useHead, useSeoMeta } from '#imports'
+import { useRoute, useAsyncData, createError, useHead, useSeoMeta, useServerHead } from '#imports'
+import { resolveSiteUrl } from '@/utils/siteUrl'
 
 interface BlogDoc {
   _path: string
   title?: string
   description?: string
   date?: string
+  updated?: string
+  image?: string | { src?: string } | Array<string | { src?: string }>
   canonical?: string
   // eslint-disable-next-line @typescript-eslint/ban-types
   body?: object
@@ -79,4 +82,55 @@ useSeoMeta({
   ogDescription: description,
   ogUrl: canonical,
 })
+
+// JSON-LD: BlogPosting (SSR)
+const siteOrigin = resolveSiteUrl()
+const routePath = route.path || doc._path || '/'
+
+function toAbsoluteImageUrl(img: unknown): string | undefined {
+  if (!img) return undefined
+  const origin = siteOrigin.replace(/\/$/, '')
+  const push = (p?: string) => {
+    if (!p) return undefined
+    try {
+      new URL(p)
+      return p
+    } catch {
+      return `${origin}${p.startsWith('/') ? '' : '/'}${p}`
+    }
+  }
+  if (typeof img === 'string') return push(img)
+  if (Array.isArray(img)) {
+    for (const it of img) {
+      const v = typeof it === 'string' ? it : (it && typeof it === 'object' ? (it as { src?: string }).src : undefined)
+      const abs = push(v)
+      if (abs) return abs
+    }
+    return undefined
+  }
+  if (typeof img === 'object' && img) return push((img as { src?: string }).src)
+  return undefined
+}
+
+type HeadInput = Parameters<typeof useHead>[0]
+const setHead: (input: HeadInput) => void =
+  (typeof useServerHead === 'function' ? useServerHead : useHead)
+
+const imageAbs = toAbsoluteImageUrl(doc.image)
+const postLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  headline: doc.title || '',
+  description: doc.description || '',
+  datePublished: doc.date || '',
+  dateModified: doc.updated || doc.date || '',
+  author: { '@type': 'Person', name: 'KOTORI Lab' },
+  mainEntityOfPage: { '@type': 'WebPage', '@id': siteOrigin.replace(/\/$/, '') + routePath },
+  ...(imageAbs ? { image: [imageAbs] } : {}),
+}
+setHead(() => ({
+  script: [
+    { type: 'application/ld+json', children: JSON.stringify(postLd) }
+  ]
+}))
 </script>
