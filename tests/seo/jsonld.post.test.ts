@@ -1,3 +1,4 @@
+/* eslint-disable vue/one-component-per-file, vue/require-default-prop */
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { defineComponent, h, Suspense, nextTick } from 'vue'
 import { mount } from '@vue/test-utils'
@@ -37,15 +38,23 @@ beforeEach(() => {
   // @ts-expect-error test shim
   globalThis.useAsyncData = (_k: string, fn: () => any) => ({ data: { value: fn() } })
   // @ts-expect-error test shim
-  globalThis.createError = (err: any) => { throw err }
+  globalThis.createError = (err: any) => {
+    throw err
+  }
   // @ts-expect-error test shim
   globalThis.useSeoMeta = () => {}
   // expose queryContent on global
   // @ts-expect-error test shim
   globalThis.queryContent = () => ({
-    where() { return this },
-    sort() { return this },
-    only() { return this },
+    where() {
+      return this
+    },
+    sort() {
+      return this
+    },
+    only() {
+      return this
+    },
     findOne: () => makeDoc(),
     findSurround: () => [null, null],
   })
@@ -69,7 +78,10 @@ describe('pages/blog/[slug].vue JSON-LD', () => {
         stubs: {
           NuxtLink: defineComponent({
             props: { to: { type: String, required: false } },
-            setup: (p, { slots }) => () => h('a', { href: (p as any).to }, slots.default?.()),
+            setup:
+              (p, { slots }) =>
+              () =>
+                h('a', { href: (p as any).to }, slots.default?.()),
           }),
           ContentRenderer: defineComponent({
             props: { value: { type: Object, required: false } },
@@ -80,7 +92,9 @@ describe('pages/blog/[slug].vue JSON-LD', () => {
     })
 
     // Let async setup resolve
-    await Promise.resolve(); await nextTick(); await new Promise(r => setTimeout(r, 0))
+    await Promise.resolve()
+    await nextTick()
+    await new Promise(r => setTimeout(r, 0))
 
     const scripts = headCalls.flatMap((h: any) => h?.script ?? [])
     const ld = scripts.find((s: any) => s?.type === 'application/ld+json')

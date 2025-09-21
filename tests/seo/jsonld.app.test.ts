@@ -45,7 +45,9 @@ describe('app.vue JSON-LD', () => {
     mount(Wrapper as any)
 
     // allow async microtasks and Suspense resolve
-    await Promise.resolve(); await nextTick(); await new Promise(r => setTimeout(r, 0))
+    await Promise.resolve()
+    await nextTick()
+    await new Promise(r => setTimeout(r, 0))
 
     const scripts = headCalls.flatMap((h: any) => h?.script ?? [])
     const ld = scripts.find((s: any) => s?.type === 'application/ld+json')
