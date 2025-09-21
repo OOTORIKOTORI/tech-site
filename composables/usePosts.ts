@@ -9,16 +9,14 @@ export interface PostListItem {
 interface QueryChain<T> {
   where?(cond: Record<string, unknown>): QueryChain<T>
   sort(sorter: Record<string, 1 | -1>): QueryChain<T>
-  only(keys: string[]): QueryChain<T>
+  only<K extends keyof T & string>(keys: K[]): QueryChain<Pick<T, K>>
   limit?(n: number): QueryChain<T>
   find(): Promise<T[]>
 }
 
 type QueryContentFn = (path?: string) => QueryChain<Omit<PostListItem, 'slug'>>
 
-function pad(n: number): string {
-  return n < 10 ? '0' + n : String(n)
-}
+function pad(n: number): string { return n < 10 ? '0' + n : String(n) }
 
 // Stable YYYY-MM-DD regardless of host timezone
 export function formatDate(d?: string): string {
@@ -31,19 +29,17 @@ export function formatDate(d?: string): string {
   return `${dt.getUTCFullYear()}-${pad(dt.getUTCMonth() + 1)}-${pad(dt.getUTCDate())}`
 }
 
-function deriveSlugFromPath(path: string): string {
+function slugFromPath(path: string): string {
   const seg = path.split('/').filter(Boolean)
   return seg[seg.length - 1] || path.replaceAll('/', '-')
 }
 
 export async function fetchPosts(options: { limit?: number } = {}): Promise<PostListItem[]> {
-  const qc = (globalThis as unknown as { queryContent?: QueryContentFn }).queryContent
+  const qc: QueryContentFn | undefined = (globalThis as { queryContent?: QueryContentFn }).queryContent
   if (!qc) return []
   let chain = qc('/blog').sort({ date: -1 }).only(['_path', 'title', 'description', 'date'])
-  if (options.limit && typeof (chain as any).limit === 'function') {
-    chain = (chain as any).limit(options.limit)
-  }
+  if (options.limit && chain.limit) chain = chain.limit(options.limit)
   const list = await chain.find()
   if (!Array.isArray(list)) return []
-  return list.map(p => ({ ...p, slug: deriveSlugFromPath(p._path) }))
+  return list.map(p => ({ ...p, slug: slugFromPath(p._path) }))
 }
