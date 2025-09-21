@@ -44,7 +44,9 @@ beforeEach(() => {
   // @ts-expect-error test shim
   globalThis.useSeoMeta = () => {}
   // @ts-expect-error test shim
-  globalThis.useRuntimeConfig = () => ({ public: { siteOrigin: 'https://migakiexplorer.jp', siteName: '磨きエクスプローラー' } })
+  globalThis.useRuntimeConfig = () => ({
+    public: { siteOrigin: 'https://migakiexplorer.jp', siteName: '磨きエクスプローラー' },
+  })
   // expose queryContent on global
   // @ts-expect-error test shim
   globalThis.queryContent = () => ({

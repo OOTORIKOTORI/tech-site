@@ -12,7 +12,9 @@ describe('pages/terms.vue', () => {
     // @ts-expect-error test stub
     globalThis.useRoute = () => ({ fullPath: '/terms' })
     // @ts-expect-error test stub
-    globalThis.useRuntimeConfig = () => ({ public: { siteOrigin: 'https://migakiexplorer.jp', siteName: '磨きエクスプローラー' } })
+    globalThis.useRuntimeConfig = () => ({
+      public: { siteOrigin: 'https://migakiexplorer.jp', siteName: '磨きエクスプローラー' },
+    })
   })
 
   it('renders h1 and partial body text', async () => {

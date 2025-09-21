@@ -56,7 +56,9 @@ describe('pages/blog/[slug].vue render + SEO', () => {
       },
     })
     // @ts-expect-error test stub
-    globalThis.useRuntimeConfig = () => ({ public: { siteOrigin: 'https://migakiexplorer.jp', siteName: '磨きエクスプローラー' } })
+    globalThis.useRuntimeConfig = () => ({
+      public: { siteOrigin: 'https://migakiexplorer.jp', siteName: '磨きエクスプローラー' },
+    })
   })
 
   it('calls useSeoMeta with title and canonical from frontmatter', async () => {

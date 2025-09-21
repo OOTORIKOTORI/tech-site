@@ -30,7 +30,9 @@ beforeEach(() => {
   // @ts-expect-error test shim
   globalThis.useRoute = () => ({ fullPath: '/' })
   // @ts-expect-error test shim
-  globalThis.useRuntimeConfig = () => ({ public: { siteOrigin: 'https://migakiexplorer.jp', siteName: '磨きエクスプローラー' } })
+  globalThis.useRuntimeConfig = () => ({
+    public: { siteOrigin: 'https://migakiexplorer.jp', siteName: '磨きエクスプローラー' },
+  })
 })
 
 describe('app.vue JSON-LD', () => {
