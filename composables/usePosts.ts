@@ -16,7 +16,9 @@ interface QueryChain<T> {
 
 type QueryContentFn = (path?: string) => QueryChain<Omit<PostListItem, 'slug'>>
 
-function pad(n: number): string { return n < 10 ? '0' + n : String(n) }
+function pad(n: number): string {
+  return n < 10 ? '0' + n : String(n)
+}
 
 // Stable YYYY-MM-DD regardless of host timezone
 export function formatDate(d?: string): string {
@@ -35,7 +37,8 @@ function slugFromPath(path: string): string {
 }
 
 export async function fetchPosts(options: { limit?: number } = {}): Promise<PostListItem[]> {
-  const qc: QueryContentFn | undefined = (globalThis as { queryContent?: QueryContentFn }).queryContent
+  const qc: QueryContentFn | undefined = (globalThis as { queryContent?: QueryContentFn })
+    .queryContent
   if (!qc) return []
   let chain = qc('/blog').sort({ date: -1 }).only(['_path', 'title', 'description', 'date'])
   if (options.limit && chain.limit) chain = chain.limit(options.limit)

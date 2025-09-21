@@ -11,7 +11,8 @@
             style="border:1px solid #e5e7eb; border-radius:.5rem; padding:1rem; background:#fff;">
             <article :aria-labelledby="'post-' + p.slug">
               <h2 :id="'post-' + p.slug" style="margin:0; font-size: 1.125rem;">
-                <NuxtLink :to="p._path" :aria-label="`${p.title ?? 'Post'} の詳細へ`" style="text-decoration: none; color: inherit;">
+                <NuxtLink :to="p._path" :aria-label="`${p.title ?? 'Post'} の詳細へ`"
+                  style="text-decoration: none; color: inherit;">
                   {{ p.title }}
                 </NuxtLink>
               </h2>
