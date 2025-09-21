@@ -9,15 +9,18 @@
     <nav aria-label="Primary" class="mx-auto max-w-6xl px-4">
       <ul class="flex items-center gap-6 py-3 text-gray-700">
         <li>
-          <NuxtLink to="/" :aria-current="isHome ? 'page' : undefined" class="text-blue-600 hover:underline">Home
+          <NuxtLink to="/" :aria-current="isHome ? 'page' : undefined" class="text-blue-600 hover:underline">
+            Home
           </NuxtLink>
         </li>
         <li>
-          <NuxtLink to="/tools" :aria-current="isTools ? 'page' : undefined" class="text-blue-600 hover:underline">Tools
+          <NuxtLink to="/tools" :aria-current="isTools ? 'page' : undefined" class="text-blue-600 hover:underline">
+            Tools
           </NuxtLink>
         </li>
         <li>
-          <NuxtLink to="/blog" :aria-current="isBlog ? 'page' : undefined" class="text-blue-600 hover:underline">Blog
+          <NuxtLink to="/blog" :aria-current="isBlog ? 'page' : undefined" class="text-blue-600 hover:underline">
+            Blog
           </NuxtLink>
         </li>
       </ul>
