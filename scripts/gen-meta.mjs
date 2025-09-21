@@ -4,30 +4,22 @@ import { mkdirSync, writeFileSync, existsSync, readFileSync, readdirSync } from 
 import { join, basename } from 'node:path'
 
 const CHECK_ONLY = process.argv.includes('--check-only')
-const urlFromEnv = (
+
+// Unified ORIGIN resolution (env-first, then fallback)
+const ORIGIN = (
   process.env.NUXT_PUBLIC_SITE_ORIGIN ||
   process.env.NUXT_PUBLIC_SITE_URL ||
-  ''
+  'https://migakiexplorer.jp'
 ).trim()
-const vercelEnv = process.env.VERCEL_ENV // 'production' | 'preview' | 'development'
-const vercelUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined
-
-function resolveBaseUrl() {
-  let base
-  if (vercelEnv === 'production') {
-    base = urlFromEnv || 'https://migakiexplorer.jp'
-  } else {
-    base = vercelUrl || urlFromEnv || 'https://example.com'
-  }
-  try {
-    const u = new URL(base)
-    return u.origin
-  } catch {
-    return base
-  }
+let ORIGIN_URL
+try {
+  ORIGIN_URL = new URL(ORIGIN)
+} catch (err) {
+  console.error('[gen-meta] ERROR: Invalid ORIGIN:', ORIGIN, err && err.message ? err.message : err)
+  process.exit(1)
 }
-
-const BASE_URL = resolveBaseUrl()
+const HOST = ORIGIN_URL.host
+console.log('[gen-meta] origin=%s host=%s', ORIGIN_URL.href, HOST)
 const ROUTES = ['/', '/tools/cron-jst', '/tools/jwt-decode']
 
 function readBlogRoutes() {
@@ -120,7 +112,8 @@ function generate() {
   const allRoutes = [...ROUTES, ...blog]
   const urls = allRoutes
     .map(p => {
-      const loc = `${BASE_URL}${p.replace(/\/+$/, '') || '/'}`
+      const base = ORIGIN_URL.href.replace(/\/$/, '')
+      const loc = `${base}${p}`
       let lastmod = now
       if (p.startsWith('/blog/')) {
         const slug = p.slice('/blog/'.length)
@@ -133,16 +126,19 @@ function generate() {
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls}</urlset>\n`
   writeFileSync(join(outDir, 'sitemap.xml'), sitemap, 'utf8')
 
-  const robots = `User-agent: *\nAllow: /\nSitemap: ${BASE_URL}/sitemap.xml\n`
+  const robots = `User-agent: *\nAllow: /\nSitemap: ${ORIGIN_URL.href.replace(
+    /\/$/,
+    ''
+  )}/sitemap.xml\n`
   writeFileSync(join(outDir, 'robots.txt'), robots, 'utf8')
 
   // Generate RSS feed for blog posts
   const channelTitle = '磨きエクスプローラー Blog'
-  const channelLink = `${BASE_URL}/blog`
+  const channelLink = `${ORIGIN_URL.href.replace(/\/$/, '')}/blog`
   const channelDesc = '磨きエクスプローラー Blog RSS'
   const items = blogMeta
     .map(({ slug, title, description, pubIso }) => {
-      const link = `${BASE_URL}/blog/${slug}`
+      const link = `${ORIGIN_URL.href.replace(/\/$/, '')}/blog/${slug}`
       const pubDate = new Date(pubIso).toUTCString()
       return `\n    <item><title>${xmlEscape(
         title
@@ -158,20 +154,7 @@ function generate() {
 }
 
 function checkHosts() {
-  let expectedHost
-  try {
-    const expectedOrigin = new URL(
-      (process.env.NUXT_PUBLIC_SITE_ORIGIN || 'https://migakiexplorer.jp').trim()
-    ).origin
-    expectedHost = new URL(expectedOrigin).host
-  } catch (err) {
-    console.error(
-      '[gen-meta] ERROR: Invalid expected origin from env NUXT_PUBLIC_SITE_ORIGIN:',
-      process.env.NUXT_PUBLIC_SITE_ORIGIN,
-      err && err.message ? err.message : err
-    )
-    process.exit(1)
-  }
+  const expectedHost = HOST
 
   const robotsPath = join(outDir, 'robots.txt')
   const sitemapPath = join(outDir, 'sitemap.xml')
@@ -232,7 +215,7 @@ function checkHosts() {
     process.exit(1)
   }
 
-  console.log('[gen-meta] OK robots/sitemap host =', expectedHost)
+  console.log(`[gen-meta] OK robots/sitemap host = ${expectedHost}`)
 }
 
 if (CHECK_ONLY) {

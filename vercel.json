@@ -3,7 +3,7 @@
     {
       "source": "/(.*)",
       "has": [{ "type": "host", "value": "www.kotorilab.jp" }],
-      "destination": "https://kotorilab.jp/$1",
+      "destination": "https://migakiexplorer.jp/$1",
       "permanent": true
     }
   ]
