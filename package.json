@@ -21,6 +21,7 @@
     "lh:quick:desktop": "pnpm dlx lighthouse https://kotorilab.jp --only-categories=accessibility,seo --preset=desktop --quiet",
     "lh:quick:mobile": "pnpm dlx lighthouse https://kotorilab.jp --only-categories=accessibility,seo --preset=mobile --quiet",
     "smoke:og": "node scripts/smoke-og.mjs",
+    "ci:local": "powershell -ExecutionPolicy Bypass -File ./scripts/ci-local.ps1",
     "test:api": "vitest run",
     "tag:auto": "powershell -ExecutionPolicy Bypass -File ./scripts/bump-tag.ps1 auto",
     "tag:patch": "powershell -ExecutionPolicy Bypass -File ./scripts/bump-tag.ps1 patch",

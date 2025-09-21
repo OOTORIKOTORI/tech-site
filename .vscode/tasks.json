@@ -365,11 +365,10 @@
 		{
 			"label": "Lint and Test",
 			"type": "shell",
-			"command": "powershell",
+			"command": "pnpm",
 			"args": [
-				"-NoProfile",
-				"-Command",
-				"pnpm lint; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; pnpm test -- --run"
+				"run",
+				"ci:local"
 			],
 			"isBackground": false,
 			"problemMatcher": [
@@ -400,11 +399,10 @@
 		{
 			"label": "Typecheck and test",
 			"type": "shell",
-			"command": "powershell",
+			"command": "pnpm",
 			"args": [
-				"-NoProfile",
-				"-Command",
-				"pnpm typecheck; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; pnpm test -- --run"
+				"run",
+				"ci:local"
 			],
 			"isBackground": false,
 			"problemMatcher": [
@@ -415,32 +413,43 @@
 		{
 			"label": "Typecheck and lint/test/build/smoke",
 			"type": "shell",
-			"command": "powershell",
+			"command": "pnpm",
 			"args": [
-				"-NoProfile",
-				"-Command",
-				"pnpm typecheck; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; pnpm lint -- --fix; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; pnpm test -- --run; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; pnpm build; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; pnpm postbuild; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; pnpm run smoke:og"
+				"run",
+				"ci:local"
 			]
 		},
 		{
 			"label": "Postbuild and smoke",
 			"type": "shell",
-			"command": "powershell",
+			"command": "pnpm",
 			"args": [
-				"-NoProfile",
-				"-Command",
-				"pnpm postbuild; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; pnpm run smoke:og"
+				"run",
+				"ci:local"
 			]
 		},
 		{
 			"label": "Typecheck and lint",
 			"type": "shell",
-			"command": "powershell",
+			"command": "pnpm",
 			"args": [
-				"-NoProfile",
-				"-Command",
-				"pnpm typecheck; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; pnpm lint -- --fix"
+				"run",
+				"ci:local"
 			]
+		},
+		{
+			"label": "Run ci:local once",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"run",
+				"ci:local"
+			],
+			"isBackground": false,
+			"problemMatcher": [
+				"$eslint-stylish"
+			],
+			"group": "test"
 		}
 	]
 }
