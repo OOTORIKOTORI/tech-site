@@ -150,6 +150,6 @@ setHead(() => ({
 useBreadcrumbJsonLd([
   { name: 'Home', url: siteUrl('/') },
   { name: 'Blog', url: siteUrl('/blog') },
-  { name: title, url: siteUrl((route as any).fullPath || route.path) },
+  { name: title, url: siteUrl(route.fullPath || route.path) },
 ])
 </script>
