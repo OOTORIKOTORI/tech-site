@@ -14,6 +14,8 @@
 </template>
 <script setup lang="ts">
 import { useRoute, useAsyncData, createError, useHead, useSeoMeta, useServerHead, useRuntimeConfig } from '#imports'
+import { useBreadcrumbJsonLd } from '@/composables/useBreadcrumbJsonLd'
+import { siteUrl } from '@/utils/siteUrl'
 
 interface BlogDoc {
   _path: string
@@ -143,4 +145,11 @@ setHead(() => ({
     { type: 'application/ld+json', children: JSON.stringify(postLd) }
   ]
 }))
+
+// BreadcrumbList JSON-LD
+useBreadcrumbJsonLd([
+  { name: 'Home', url: siteUrl('/') },
+  { name: 'Blog', url: siteUrl('/blog') },
+  { name: title, url: siteUrl((route as any).fullPath || route.path) },
+])
 </script>

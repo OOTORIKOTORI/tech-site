@@ -235,6 +235,50 @@ pnpm typecheck; pnpm lint; pnpm test -- --run; pnpm build; node .\scripts\gen-me
 - **Organization.logo** は `/logo.png`（512x512）を絶対 URL で出力済み。将来は `logo.svg` 検討。
 - **BlogPosting.publisher.logo** も出力済み（`Organization` を publisher として付与）。
 
+#### BreadcrumbList JSON-LD（実装）
+
+- /blog: Home > Blog
+- /blog/[slug]: Home > Blog > 記事タイトル
+- 生成例:
+
+```json
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://migakiexplorer.jp/" },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Blog",
+      "item": "https://migakiexplorer.jp/blog"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Sample Title",
+      "item": "https://migakiexplorer.jp/blog/sample"
+    }
+  ]
+}
+```
+
+実装: `composables/useBreadcrumbJsonLd.ts`（`buildBreadcrumbJsonLd` / `useBreadcrumbJsonLd`）。`utils/siteUrl.ts` の `siteUrl()` で絶対 URL 化。
+
+#### a11y / スタイル（focus-visible のフォーカスリング統一）
+
+- Tailwind ユーティリティ `.focus-ring` を定義（outline 無し / `focus-visible:ring-2` / `ring-offset-2` / `ring-blue-600`）。
+- ヘッダナビやカード主要リンク（a / NuxtLink）に `.focus-ring` を付与して視認性を統一。
+- 既存の outline / ring が重複する場合は競合しないよう整理。
+
+#### OGP API（最小ロギング・任意）
+
+- 既定挙動は不変（`ENABLE_DYNAMIC_OG=1` で動的生成、デフォルトは 302 フォールバック / no-store）。
+- `LOG_OG=1` を設定した場合のみ:
+  - 成功（200）時: `console.info('[og:ok]', { slug, bytes })`
+  - 失敗（302 フォールバック直前）: `console.warn('[og:fallback]', { slug, ua, err })`
+- 本番はデフォルトで無効（静粛運用）。
+
 ---
 
 ## ブログ追加手順（運用）

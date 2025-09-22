@@ -30,9 +30,9 @@
 
 サイトマップ/フィード:
 
-- `scripts/gen-meta.mjs` により `public/sitemap.xml` と `public/robots.txt` を生成。
+- `scripts/gen-meta.mjs` により `public/robots.txt` / `public/sitemap.xml` / `public/feed.xml` を生成。
 - サイトマップにはブログ URL を含め、`<lastmod>` は Frontmatter の `updated`（なければ `date`）。
-- RSS は `public/feed.xml` を postbuild で生成（チャネル `/blog`、各 item は title/link/pubDate/description）。
+- RSS は postbuild で生成（チャネル `/blog`、各 item は title/link/pubDate/description）。
 
 ---
 
@@ -46,6 +46,9 @@
   - レスポンスヘッダ: `Cache-Control: no-store`, `X-OG-Fallback: 1`。
   - `ENABLE_DYNAMIC_OG=1` で軽量 PNG を動的生成（試験的）。失敗時は即時 302 フォールバック。
   - `scripts/smoke-og.mjs` は 200/302 を合格とするスモークテスト。
+  - 任意ログ: `LOG_OG=1` で最小ロギング（成功時 `[og:ok]`、失敗フォールバック時 `[og:fallback]`）。
+
+補足: 構造化データに BreadcrumbList JSON-LD を実装済み（/blog と /blog/[slug]）。詳細は `PROJECT_SPEC.md` を参照。
 
 ---
 
@@ -63,22 +66,7 @@ Lighthouse 閾値（budgets）:
 
 テスト基盤: Vitest は `clearMocks: true` と `environmentOptions.jsdom.url=https://migakiexplorer.jp` を既定化し、`tests/setup/global-stubs.ts` を常時読み込み。
 
-Postbuild の検証:
-
-- `scripts/gen-meta.mjs --check-only` が robots/sitemap のホスト一致を検証。
-- 一致時ログ: `[gen-meta] OK robots/sitemap host = <host>`。不一致はビルド失敗。
-
-Workflow 上での meta check 用 ENV 注入（例）:
-
-```yaml
-- name: Meta host check
-  run: node ./scripts/gen-meta.mjs --check-only
-  env:
-    NUXT_PUBLIC_SITE_ORIGIN: https://migakiexplorer.jp
-    NUXT_PUBLIC_SITE_URL: ''
-```
-
-代替: 値は GitHub Actions の Variables/Secrets から参照してもよい（例: `${{ vars.SITE_ORIGIN }}`）。
+Postbuild の検証は `scripts/gen-meta.mjs --check-only` で robots.txt / sitemap.xml / feed.xml のホスト一致を確認（OK ログ: `[gen-meta] OK ...`）。Workflow の ENV 注入サンプルなどの完全版は `PROJECT_SPEC.md` を参照。
 
 ---
 
@@ -103,6 +91,7 @@ Workflow 上での meta check 用 ENV 注入（例）:
 - Windows PowerShell では `;` で連結推奨。パッチ差分出力は `Out-File -Encoding utf8 -Width 4096` を推奨。
 
 チェック（抜粋）: 法務ページ（`/privacy`, `/terms`, `/ads`）の雛形とフッタ導線の有無を確認。
+ヘッダナビや主要カードリンクの `focus-visible` は `.focus-ring` ユーティリティで統一。
 
 例（PowerShell）:
 
@@ -208,6 +197,7 @@ Nuxt グローバルスタブ指針:
 
 - Organization.logo は `/logo.png`（512x512）を**絶対 URL**で出力。将来は `logo.svg` への差し替え検討。
 - BlogPosting の `publisher.logo` も出力済み（`Organization` を `publisher` として付与）。
+- BreadcrumbList JSON-LD を /blog および /blog/[slug] に出力（詳細は `PROJECT_SPEC.md`）。
 
 タグの最新取得（SemVer 運用）:
 

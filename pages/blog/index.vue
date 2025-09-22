@@ -10,7 +10,7 @@
         <ul role="list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
           style="list-style: none; padding: 0; margin: 0;">
           <li v-for="p in posts" :key="p._path" role="listitem">
-            <NuxtLink :to="p._path" :aria-label="`${p.title ?? 'Post'} の詳細へ`" class="block h-full">
+            <NuxtLink :to="p._path" :aria-label="`${p.title ?? 'Post'} の詳細へ`" class="block h-full focus-ring">
               <article :aria-labelledby="'post-' + p.slug"
                 class="h-full rounded-lg border border-gray-200 bg-white p-4 shadow-sm hover:shadow transition-shadow">
                 <header>
@@ -31,6 +31,8 @@
 import { useAsyncData, useSeoMeta, useHead } from '#imports'
 import { fetchPosts, type PostListItem } from '~/composables/usePosts'
 import { formatDateIso } from '@/utils/date'
+import { useBreadcrumbJsonLd } from '@/composables/useBreadcrumbJsonLd'
+import { siteUrl } from '@/utils/siteUrl'
 
 const { data } = await useAsyncData('blog-list', () => fetchPosts())
 const posts = (data.value ?? []) as PostListItem[]
@@ -42,4 +44,9 @@ useSeoMeta({
   ogTitle: 'Blog | Kotorilab',
   ogUrl: 'https://kotorilab.jp/blog',
 })
+
+useBreadcrumbJsonLd([
+  { name: 'Home', url: siteUrl('/') },
+  { name: 'Blog', url: siteUrl('/blog') },
+])
 </script>

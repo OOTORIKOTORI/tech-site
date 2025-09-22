@@ -34,3 +34,21 @@ export function resolveSiteUrlInfo(event?: H3Event): { url: string; by: ResolveB
 export function resolveSiteUrl(event?: H3Event): string {
   return resolveSiteUrlInfo(event).url
 }
+
+// Build absolute URL from a path or URL string.
+// If `pathOrUrl` is already absolute, it is returned as-is.
+// Otherwise, it is joined to the resolved site origin.
+export function siteUrl(pathOrUrl?: string | null, event?: H3Event): string {
+  const origin = resolveSiteUrl(event).replace(/\/$/, '')
+  const input = (pathOrUrl ?? '').toString()
+  try {
+    // already absolute
+    // eslint-disable-next-line no-new
+    if (input) new URL(input)
+    if (input) return input
+  } catch {
+    // fallthrough to join with origin
+  }
+  const p = input && input.trim().length ? (input.startsWith('/') ? input : `/${input}`) : '/'
+  return `${origin}${p}`
+}

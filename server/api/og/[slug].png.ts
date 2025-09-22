@@ -97,6 +97,7 @@ function redirectFallback(event: H3Event) {
 
 export default defineEventHandler(async (event: H3Event) => {
   const enabled = (process.env.ENABLE_DYNAMIC_OG || '').toLowerCase() === '1'
+  const logOn = (process.env.LOG_OG || '').toLowerCase() === '1'
   // Always ensure no-store
   setHeader(event, 'Cache-Control', 'no-store')
 
@@ -114,8 +115,26 @@ export default defineEventHandler(async (event: H3Event) => {
     const png = generatePng(slug)
     setHeader(event, 'Content-Type', 'image/png')
     setHeader(event, 'X-OG-Fallback', '0')
+    if (logOn) {
+      try {
+        console.info('[og:ok]', { slug, bytes: png.length })
+      } catch {
+        // ignore
+      }
+    }
     return send(event, png)
-  } catch {
+  } catch (err: any) {
+    if (enabled && logOn) {
+      try {
+        const req = (event as any).node?.req
+        const ua = String((req && req.headers ? req.headers['user-agent'] : '') || '').slice(0, 120)
+        const url = getRequestURL(event)
+        const slug = (url.pathname.split('/').pop() || 'og').replace(/\.png$/i, '')
+        console.warn('[og:fallback]', { slug, ua, err: String(err) })
+      } catch {
+        // ignore
+      }
+    }
     return redirectFallback(event)
   }
 })
