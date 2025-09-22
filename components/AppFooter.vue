@@ -1,10 +1,10 @@
 <template>
-  <footer aria-label="Site footer" class="border-t">
+  <footer aria-label="Footer" class="border-t">
     <div class="mx-auto max-w-6xl px-4 py-10 text-sm text-gray-500">
       <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
         <span>© KOTORI Lab</span>
         <span class="text-gray-400">|</span>
-        <nav class="flex items-center gap-3" aria-label="Legal links">
+        <nav class="flex items-center gap-3" aria-label="Legal">
           <NuxtLink to="/privacy" class="hover:underline">Privacy</NuxtLink>
           <span class="text-gray-400">/</span>
           <NuxtLink to="/terms" class="hover:underline">Terms</NuxtLink>

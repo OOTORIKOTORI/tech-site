@@ -21,7 +21,7 @@ describe('components/AppFooter.vue', () => {
       },
     })
 
-    expect(wrapper.find('footer[aria-label="Site footer"]').exists()).toBe(true)
+    expect(wrapper.find('footer[aria-label="Footer"]').exists()).toBe(true)
     expect(wrapper.find('a[href="/privacy"]').exists()).toBe(true)
     expect(wrapper.find('a[href="/terms"]').exists()).toBe(true)
     expect(wrapper.find('a[href="/ads"]').exists()).toBe(true)

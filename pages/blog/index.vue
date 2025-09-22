@@ -1,5 +1,6 @@
 <template>
-  <main class="container" style="max-width: 48rem; margin: 0 auto; padding: 2rem 1rem;">
+  <!-- replaced outer <main> with <div> to avoid duplicate main with layout -->
+  <div class="container" style="max-width: 48rem; margin: 0 auto; padding: 2rem 1rem;">
     <header>
       <h1 style="font-size: 1.5rem; font-weight: 700;">Blog</h1>
       <p style="color:#555; font-size: .9rem;">開発ノウハウやツール設計の考察メモ。</p>
@@ -24,7 +25,7 @@
       </template>
       <p v-else role="status" style="color:#555;">No posts yet</p>
     </section>
-  </main>
+  </div>
 </template>
 <script setup lang="ts">
 import { useAsyncData, useSeoMeta, useHead } from '#imports'
