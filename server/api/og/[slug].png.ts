@@ -117,20 +117,28 @@ export default defineEventHandler(async (event: H3Event) => {
     setHeader(event, 'X-OG-Fallback', '0')
     if (logOn) {
       try {
-        console.info('[og:ok]', { slug, bytes: png.length })
+        let bytes = 0
+        if (typeof (png as unknown) === 'string')
+          bytes = Buffer.byteLength(png as unknown as string)
+        else if (png instanceof Uint8Array) bytes = png.byteLength
+        else if (png && typeof (png as { length?: number }).length === 'number')
+          bytes = (png as { length: number }).length
+        console.info('[og:ok]', { slug, bytes })
       } catch {
         // ignore
       }
     }
     return send(event, png)
-  } catch (err: any) {
+  } catch (err: unknown) {
     if (enabled && logOn) {
       try {
-        const req = (event as any).node?.req
-        const ua = String((req && req.headers ? req.headers['user-agent'] : '') || '').slice(0, 120)
+        const errMsg = err instanceof Error ? err.message : String(err)
+        const uaHeader = event.node?.req?.headers?.['user-agent']
+        const ua = Array.isArray(uaHeader) ? uaHeader[0] : uaHeader ?? ''
+        const uaShort = ua.slice(0, 120)
         const url = getRequestURL(event)
-        const slug = (url.pathname.split('/').pop() || 'og').replace(/\.png$/i, '')
-        console.warn('[og:fallback]', { slug, ua, err: String(err) })
+        const slugFromPath = (url.pathname.split('/').pop() || 'og').replace(/\.png$/i, '')
+        console.warn('[og:fallback]', { slug: slugFromPath, ua: uaShort, err: errMsg })
       } catch {
         // ignore
       }
