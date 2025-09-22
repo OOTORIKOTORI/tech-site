@@ -51,7 +51,7 @@ describe('pages/blog/index.vue listing', () => {
     globalThis.useSeoMeta = () => undefined
   })
 
-  it('renders at least one link to /blog/first-cron-tz when a post exists', async () => {
+  it('renders list role and cards with link and date', async () => {
     const fixtures: Doc[] = [
       {
         _path: '/blog/first-cron-tz',
@@ -82,10 +82,15 @@ describe('pages/blog/index.vue listing', () => {
     // Let suspense resolve
     await new Promise(r => setTimeout(r, 0))
 
-    const links = wrapper.findAll('a[href="/blog/first-cron-tz"]')
-    expect(links.length).toBeGreaterThanOrEqual(1)
+    const list = wrapper.find('ul[role="list"]')
+    expect(list.exists()).toBe(true)
+    const items = wrapper.findAll('li[role="listitem"]')
+    expect(items.length).toBeGreaterThanOrEqual(1)
+    const first = items[0]!
+    const a = first.find('a[href="/blog/first-cron-tz"]')
+    expect(a.exists()).toBe(true)
     // Check date format is YYYY-MM-DD
-    expect(wrapper.text()).toContain('2025-09-20')
+    expect(first.text()).toContain('2025-09-20')
   })
 
   it('shows "No posts yet" when list is empty', async () => {

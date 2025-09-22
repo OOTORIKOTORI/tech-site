@@ -7,19 +7,19 @@
     </header>
     <section aria-live="polite" style="margin-top: 1.5rem;">
       <template v-if="posts && posts.length">
-        <ul style="list-style: none; padding: 0; margin: 0; display: grid; gap: 1rem;">
-          <li v-for="p in posts" :key="p._path"
-            style="border:1px solid #e5e7eb; border-radius:.5rem; padding:1rem; background:#fff;">
-            <article :aria-labelledby="'post-' + p.slug">
-              <h2 :id="'post-' + p.slug" style="margin:0; font-size: 1.125rem;">
-                <NuxtLink :to="p._path" :aria-label="`${p.title ?? 'Post'} の詳細へ`"
-                  style="text-decoration: none; color: inherit;">
-                  {{ p.title }}
-                </NuxtLink>
-              </h2>
-              <p style="margin:.25rem 0 0; color:#6b7280; font-size:.75rem;">{{ formatDateIso(p.date) }}</p>
-              <p v-if="p.description" style="margin:.5rem 0 0; color:#374151; font-size:.9rem;">{{ p.description }}</p>
-            </article>
+        <ul role="list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+          style="list-style: none; padding: 0; margin: 0;">
+          <li v-for="p in posts" :key="p._path" role="listitem">
+            <NuxtLink :to="p._path" :aria-label="`${p.title ?? 'Post'} の詳細へ`" class="block h-full">
+              <article :aria-labelledby="'post-' + p.slug"
+                class="h-full rounded-lg border border-gray-200 bg-white p-4 shadow-sm hover:shadow transition-shadow">
+                <header>
+                  <h2 :id="'post-' + p.slug" class="m-0 text-lg font-semibold">{{ p.title }}</h2>
+                  <p class="mt-1 text-xs text-gray-500">{{ formatDateIso(p.date) }}</p>
+                </header>
+                <p v-if="p.description" class="mt-2 text-sm text-gray-700">{{ p.description }}</p>
+              </article>
+            </NuxtLink>
           </li>
         </ul>
       </template>

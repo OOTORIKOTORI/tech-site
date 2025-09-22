@@ -59,5 +59,6 @@ describe('app.vue JSON-LD', () => {
     const obj = JSON.parse(ld.children)
     expect(obj['@context']).toBe('https://schema.org')
     expect(obj['@type']).toBe('Organization')
+    expect(obj.logo).toBe('https://migakiexplorer.jp/logo.png')
   })
 })

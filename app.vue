@@ -37,7 +37,7 @@ const org = {
   name: siteName,
   alternateName: ['Migaki Explorer', 'みがきエクスプローラー'],
   url: siteOrigin,
-  logo: '/og-default.png'
+  logo: `${siteOrigin}/logo.png`
 }
 const webSite = {
   '@context': 'https://schema.org',
