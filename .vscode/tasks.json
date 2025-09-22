@@ -480,6 +480,19 @@
 				"--",
 				"--run"
 			]
+		},
+		{
+			"label": "Run only new tests",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"test",
+				"tests/app.header.nav.test.ts",
+				"tests/pages/blog.index.date-format.test.ts",
+				"--",
+				"--run"
+			],
+			"group": "test"
 		}
 	]
 }

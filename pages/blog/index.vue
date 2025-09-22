@@ -16,7 +16,7 @@
                   {{ p.title }}
                 </NuxtLink>
               </h2>
-              <p style="margin:.25rem 0 0; color:#6b7280; font-size:.75rem;">{{ formatDate(p.date) }}</p>
+              <p style="margin:.25rem 0 0; color:#6b7280; font-size:.75rem;">{{ formatDateIso(p.date) }}</p>
               <p v-if="p.description" style="margin:.5rem 0 0; color:#374151; font-size:.9rem;">{{ p.description }}</p>
             </article>
           </li>
@@ -28,7 +28,8 @@
 </template>
 <script setup lang="ts">
 import { useAsyncData, useSeoMeta, useHead } from '#imports'
-import { fetchPosts, formatDate, type PostListItem } from '~/composables/usePosts'
+import { fetchPosts, type PostListItem } from '~/composables/usePosts'
+import { formatDateIso } from '@/utils/date'
 
 const { data } = await useAsyncData('blog-list', () => fetchPosts())
 const posts = (data.value ?? []) as PostListItem[]
