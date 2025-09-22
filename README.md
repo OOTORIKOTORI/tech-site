@@ -18,12 +18,15 @@
   - 本文レンダリング＋ SEO メタ（title/description/canonical/og:url）。
   - `canonical` は Frontmatter で指定可（未指定時は自動）。
 - 既存ツール:
+
   - Cron JST 予測: `/tools/cron-jst`
   - JWT Decode: `/tools/jwt-decode`
 
-ToDo（ナビゲーション）:
+- フッタ: `/privacy`, `/terms`, `/ads` への導線を設置。
 
-- 最小ナビ（Home/Tools/Blog）＋ Skip リンク（メインへ移動）
+ナビゲーション:
+
+- ヘッダは **Home / Tools / Blog**。**「メインへスキップ」**リンクを設置。
 
 サイトマップ/フィード:
 
@@ -58,6 +61,8 @@ Lighthouse 閾値（budgets）:
 - mobile: perf ≥ 85 / a11y ≥ 90 / best‑practices ≥ 100 / SEO ≥ 100
 - ワークフロー上は desktop のみ `preset: desktop` を使用。mobile は `formFactor` / `screenEmulation` などで指定（`preset: mobile` は未使用）。
 
+テスト基盤: Vitest は `clearMocks: true` と `environmentOptions.jsdom.url=https://migakiexplorer.jp` を既定化し、`tests/setup/global-stubs.ts` を常時読み込み。
+
 Postbuild の検証:
 
 - `scripts/gen-meta.mjs --check-only` が robots/sitemap のホスト一致を検証。
@@ -75,25 +80,16 @@ Workflow 上での meta check 用 ENV 注入（例）:
 
 代替: 値は GitHub Actions の Variables/Secrets から参照してもよい（例: `${{ vars.SITE_ORIGIN }}`）。
 
-> Meta host check（postbuild --check-only）での ENV 注入例
-> ※ 実際の Workflow は既に設定済み。下記は **README 上の参照例** です（YAML 自体は変更不要）。
-
-```yaml
-- name: Meta host check
-  run: node ./scripts/gen-meta.mjs --check-only
-  env:
-    NUXT_PUBLIC_SITE_ORIGIN: https://migakiexplorer.jp
-    NUXT_PUBLIC_SITE_URL: ''
-```
-
 ---
 
 ## 実装 TODO（短期）
 
-- ヘッダに **最小ナビ（Home/Tools/Blog）** と **Skip リンク** を追加
-- ブログ一覧カード: **日付 `YYYY-MM-DD`** / **a11y ラベル** を明記・適用
-- フッタに **/privacy /terms /ads** への導線
-- **Nuxt グローバルスタブ** 運用（`__mocks__/` 等）を導入してテストノイズを低減
+（実装済み）ヘッダに **最小ナビ（Home/Tools/Blog）** と **Skip リンク**
+（実装済み）ブログ一覧カード: **日付 `YYYY-MM-DD`** / **a11y ラベル**
+（実装済み）フッタに **/privacy /terms /ads** への導線
+（実装済み）**Nuxt グローバルスタブ** 運用（`__mocks__/` 等）
+
+→ 上記は「導線とページ構成（現状）」等の現状仕様各節に反映済み。
 
 ---
 
@@ -208,9 +204,10 @@ Nuxt グローバルスタブ指針:
 
 - プラグインやグローバル依存の安定化は app レベルのモック（`tests/setup/global-stubs.ts` 等）＋ `__mocks__` ディレクトリを用いて管理。コンポーネント単位のスタブは必要最小に留める。
 
-構造化データ（将来）:
+構造化データ（実装）:
 
-- Organization.logo を追加予定。`public/logo.svg` に配置し、Google のロゴ要件（最小サイズ・縦横比）を満たすこと。
+- Organization.logo は `/logo.png`（512x512）を**絶対 URL**で出力。将来は `logo.svg` への差し替え検討。
+- BlogPosting の `publisher.logo` も出力済み（`Organization` を `publisher` として付与）。
 
 タグの最新取得（SemVer 運用）:
 

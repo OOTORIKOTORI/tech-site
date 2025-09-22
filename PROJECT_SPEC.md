@@ -35,7 +35,7 @@
 - 解析: ページビュー/コンバージョン（広告クリック）収集の方針（匿名集計）。
 
 - Vercel での CD（自動デプロイ）を採用し、`NUXT_PUBLIC_SITE_ORIGIN` は本番独自ドメインを必須（例: https://migakiexplorer.jp）。
-- robots.txt / sitemap.xml は初期は静的出力。
+- robots.txt / sitemap.xml / feed.xml は postbuild（`scripts/gen-meta.mjs`）で生成し、`--check-only` でホスト一致を検証。
 
 ---
 
@@ -48,15 +48,14 @@
 
 ### ナビゲーション / ページ
 
-- ヘッダ（計画）: Tools / Blog / Privacy / Terms / Ads（ヘッダナビは後日リリース予定で、現時点では未公開）
+- ヘッダ: **Home / Tools / Blog**（現状）。
+- フッタ: **法務導線（/privacy, /terms, /ads）** を配置。
 - トップ `/`: ヒーロー＋ CTA（`/tools/cron-jst`, `/blog`）/ 最新 3 件を「Latest posts」で表示
 - ブログ `/blog`: タイトル/日付（YYYY-MM-DD）/説明/リンク（0 件時は "No posts yet"）。カードに a11y ラベル付与。
 - ブログ詳細 `/blog/[slug]`: 本文＋ SEO メタ（title/description/canonical/og:url）
 - ツール: `/tools/cron-jst`, `/tools/jwt-decode`
-- ToDo: 最小ナビ（Home/Tools/Blog）＋ Skip リンク（キーボード最短移動）
 
-- **最小ナビ（Home / Tools / Blog）** をヘッダに配置し、**「メインへスキップ」Skip リンク** を実装する（a11y）。
-- ブログ一覧 `/blog`: **日付フォーマットは `YYYY-MM-DD` 固定**。各カードに **a11y ラベル**（例: `aria-label="Open post: <title>"`）を付与。
+- （実装済み）ヘッダ最小ナビ＋ Skip リンク。ブログ一覧カードは日付 `YYYY-MM-DD` と a11y ラベルを付与。
 
 ### 主要機能
 
@@ -123,7 +122,7 @@
   - 成功: `green-600` / 警告: `amber-600` / エラー: `red-600`
 - タイポグラフィ: デフォルト（システム UI）/ 等幅領域に `font-mono`
 - ロゴ: 文字ロゴ（当面）。将来的に SVG ロゴを `public/logo.svg` に配置予定（未実装）
-- アセット: `public/favicon.ico` 既存。OGP 既定画像は今後 `public/og-default.png` を想定（未配置）
+- アセット: `public/favicon.ico` 既存。OGP 既定画像は既存の `/og-default.png` を使用。
 
 備考: 実装と乖離しないよう、配色/コンポーネントは Tailwind ユーティリティを優先して統一。
 
@@ -231,11 +230,10 @@ pnpm typecheck; pnpm lint; pnpm test -- --run; pnpm build; node .\scripts\gen-me
   - 最新タグの確認: `git describe --tags --abbrev=0`
   - 法務ページ（`/privacy`, `/terms`, `/ads`）の雛形とフッタ導線の有無を確認
 
-### 構造化データ（将来）
+### 構造化データ（実装）
 
-- Organization.logo を追加予定。`public/logo.svg` に配置し、Google のロゴ要件（幅 × 高さの最小サイズ・縦横比）を満たすこと。
-
-- **Organization.logo** の将来追加: `public/logo.svg` を配置し、検索エンジン推奨の最小寸法/アスペクト比を満たすこと（導入時に README 側にも反映）。
+- **Organization.logo** は `/logo.png`（512x512）を絶対 URL で出力済み。将来は `logo.svg` 検討。
+- **BlogPosting.publisher.logo** も出力済み（`Organization` を publisher として付与）。
 
 ---
 
