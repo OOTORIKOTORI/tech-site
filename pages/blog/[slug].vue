@@ -125,6 +125,17 @@ const postLd = {
   dateModified: doc.updated || doc.date || '',
   author: { '@type': 'Person', name: String(pub?.siteName || '磨きエクスプローラー') },
   mainEntityOfPage: { '@type': 'WebPage', '@id': siteOrigin + routePath },
+  publisher: {
+    '@type': 'Organization',
+    name: 'Migaki Explorer',
+    url: siteOrigin,
+    logo: {
+      '@type': 'ImageObject',
+      url: siteOrigin + '/logo.png',
+      width: 512,
+      height: 512
+    }
+  },
   ...(imageAbs ? { image: [imageAbs] } : {}),
 }
 setHead(() => ({

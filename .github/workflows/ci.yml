@@ -9,7 +9,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  NUXT_PUBLIC_SITE_URL: https://kotorilab.jp
+  NUXT_PUBLIC_SITE_URL: ''
 
 jobs:
   build:
@@ -37,6 +37,12 @@ jobs:
         run: pnpm build
       - name: API tests
         run: pnpm run test:api
+      - name: Echo origin
+        run: echo "META_CHECK_ORIGIN=$NUXT_PUBLIC_SITE_ORIGIN"
+        shell: bash
+        env:
+          NUXT_PUBLIC_SITE_ORIGIN: https://migakiexplorer.jp
+          NUXT_PUBLIC_SITE_URL: ''
       - name: Meta host check
         run: node ./scripts/gen-meta.mjs --check-only
         env:
@@ -44,7 +50,7 @@ jobs:
           NUXT_PUBLIC_SITE_URL: ''
       - name: Smoke OGP endpoint
         env:
-          NUXT_PUBLIC_SITE_URL: https://kotorilab.jp
+          NUXT_PUBLIC_SITE_URL: ''
         run: pnpm run smoke:og
       - name: Smoke OG (GET with retry)
         run: SMOKE_URL=https://kotorilab.jp pnpm run smoke:og
