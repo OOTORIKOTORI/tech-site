@@ -6,6 +6,10 @@ export default defineConfig({
   plugins: [vue()],
   test: {
     environment: 'jsdom',
+    clearMocks: true,
+    environmentOptions: {
+      jsdom: { url: 'https://migakiexplorer.jp' },
+    },
     globals: true,
     setupFiles: ['tests/setup/global-stubs.ts', 'tests/setup/console-warn-filter.ts'],
     onConsoleLog(log, type) {
