@@ -5,11 +5,11 @@
         <span>© {{ display }}</span>
         <span class="text-gray-400">|</span>
         <nav class="flex items-center gap-3" aria-label="Legal">
-          <NuxtLink to="/privacy" class="hover:underline">プライバシー</NuxtLink>
+          <NuxtLink to="/privacy" class="hover:underline focus-ring">プライバシー</NuxtLink>
           <span class="text-gray-400">/</span>
-          <NuxtLink to="/terms" class="hover:underline">利用規約</NuxtLink>
+          <NuxtLink to="/terms" class="hover:underline focus-ring">利用規約</NuxtLink>
           <span class="text-gray-400">/</span>
-          <NuxtLink to="/ads" class="hover:underline">広告</NuxtLink>
+          <NuxtLink to="/ads" class="hover:underline focus-ring">広告</NuxtLink>
         </nav>
         <span v-if="appVersion" class="ml-auto text-gray-400" aria-label="App version">v{{ appVersion }}</span>
       </div>

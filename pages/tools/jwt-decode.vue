@@ -24,7 +24,7 @@
     <!-- Tabs -->
     <nav class="flex gap-2 border-b text-sm">
       <button v-for="t in tabs" :key="t"
-        :class="['px-4 py-2 -mb-px border-b-2', activeTab === t ? 'border-blue-600 text-blue-700 font-semibold' : 'border-transparent text-gray-500 hover:text-gray-700']"
+        :class="['px-4 py-2 -mb-px border-b-2 focus-ring', activeTab === t ? 'border-blue-600 text-blue-700 font-semibold' : 'border-transparent text-gray-500 hover:text-gray-700']"
         @click="activeTab = t">
         {{ t }}
       </button>
@@ -51,8 +51,8 @@
         </div>
       </div>
       <div class="flex flex-wrap gap-2">
-        <button class="btn-secondary" @click="onClear">クリア</button>
-        <button class="btn-secondary" :disabled="!token" @click="copyToken">コピー</button>
+        <button class="btn-secondary focus-ring" @click="onClear">クリア</button>
+        <button class="btn-secondary focus-ring" :disabled="!token" @click="copyToken">コピー</button>
       </div>
     </section>
 
@@ -62,7 +62,8 @@
         <div class="rounded border bg-gray-50">
           <header class="flex items-center justify-between px-3 py-2 border-b">
             <h2 class="font-semibold text-sm">Header</h2>
-            <button class="text-xs text-blue-600 hover:underline" @click="collapsed.header = !collapsed.header">
+            <button class="text-xs text-blue-600 hover:underline focus-ring"
+              @click="collapsed.header = !collapsed.header">
               {{ collapsed.header ? '展開' : '折りたたみ' }}
             </button>
           </header>
@@ -72,7 +73,8 @@
         <div class="rounded border bg-gray-50">
           <header class="flex items-center justify-between px-3 py-2 border-b">
             <h2 class="font-semibold text-sm">Payload</h2>
-            <button class="text-xs text-blue-600 hover:underline" @click="collapsed.payload = !collapsed.payload">
+            <button class="text-xs text-blue-600 hover:underline focus-ring"
+              @click="collapsed.payload = !collapsed.payload">
               {{ collapsed.payload ? '展開' : '折りたたみ' }}
             </button>
           </header>
@@ -90,13 +92,13 @@
               <td class="font-mono break-all">{{ formatClaim(c.key, c.value) }}</td>
               <td v-if="c.key === 'exp'" class="text-xs text-gray-500 pl-2">{{ relativeExp(c.value as number) }}</td>
               <td v-else-if="c.key === 'nbf'" class="text-xs text-gray-500 pl-2">
-{{ relativeGeneric(c.value as number)
+                {{ relativeGeneric(c.value as number)
                 }}
-</td>
+              </td>
               <td v-else-if="c.key === 'iat'" class="text-xs text-gray-500 pl-2">
-{{ relativeGeneric(c.value as number)
+                {{ relativeGeneric(c.value as number)
                 }}
-</td>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -154,14 +156,14 @@
             <input v-model="jwks.url" :disabled="!jwks.use" placeholder="https://issuer.example/.well-known/jwks.json"
               class="w-full border rounded px-2 py-1 text-xs" />
             <div class="flex gap-2">
-              <button class="btn-secondary" :disabled="!jwks.use || jwks.loading"
+              <button class="btn-secondary focus-ring" :disabled="!jwks.use || jwks.loading"
                 @click="fetchJwksKeys(false)">
-取得
-</button>
-              <button class="btn-secondary" :disabled="!jwks.use || jwks.loading"
+                取得
+              </button>
+              <button class="btn-secondary focus-ring" :disabled="!jwks.use || jwks.loading"
                 @click="fetchJwksKeys(true)">
-再取得
-</button>
+                再取得
+              </button>
               <span v-if="jwks.loading" class="text-xs text-gray-500 self-center">取得中...</span>
               <span v-else-if="jwks.error" class="text-xs text-red-600">{{ jwks.error }}</span>
               <span v-else-if="jwks.keys.length" class="text-xs text-green-700">{{ jwks.keys.length }}鍵</span>
@@ -169,14 +171,15 @@
             <p class="text-[11px] text-gray-500">送信されるのは JWKS 取得 HTTP リクエストのみ。トークン本文は送信しません。</p>
           </div>
           <div class="flex gap-2 flex-wrap items-center">
-            <button class="btn-primary inline-flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            <button
+              class="btn-primary inline-flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed focus-ring"
               :disabled="verifyDisabled" aria-label="JWT検証ボタン" @click="doVerify">
               <span v-if="verifying"
                 class="animate-spin h-3 w-3 border-2 border-white border-t-transparent rounded-full"></span>
               <span>{{ verifying ? '検証中...' : '検証' }}</span>
             </button>
-            <button class="btn-secondary" aria-label="結果クリアボタン" @click="resetVerify">結果クリア</button>
-            <button class="btn-secondary" aria-label="デモJWT挿入ボタン" @click="injectDemo">デモJWT</button>
+            <button class="btn-secondary focus-ring" aria-label="結果クリアボタン" @click="resetVerify">結果クリア</button>
+            <button class="btn-secondary focus-ring" aria-label="デモJWT挿入ボタン" @click="injectDemo">デモJWT</button>
           </div>
         </div>
         <div class="space-y-4">
@@ -184,16 +187,16 @@
             :class="['rounded border p-3 min-h-[160px] transition-colors',
               verifyState.valid === true ? 'bg-green-50 border-green-300' : verifyState.valid === false && verifyState.errors.length ? 'bg-red-50 border-red-300' : 'bg-white']">
             <h3 class="font-semibold text-sm mb-2 flex items-center gap-2">
-結果
+              結果
               <span v-if="verifying" class="text-[10px] text-gray-500">(検証中)</span>
             </h3>
             <template v-if="sortedErrors.length">
               <div class="space-y-1">
                 <div v-for="e in sortedErrors" :key="e.code" class="text-xs flex gap-2">
                   <span class="inline-block px-2 py-0.5 rounded bg-red-100 text-red-700 font-semibold">{{ e.code
-                    }}</span>
+                  }}</span>
                   <span class="text-gray-800">{{ e.message }}<span v-if="e.hint" class="text-gray-500"> ({{ e.hint
-                      }})</span></span>
+                  }})</span></span>
                 </div>
               </div>
             </template>
@@ -207,20 +210,20 @@
           <div v-if="verifyState.valid === true && verifyState.header" class="rounded border p-3 bg-gray-50 space-y-2">
             <div class="flex items-center justify-between">
               <h3 class="font-semibold text-sm">Header</h3>
-              <button class="btn-secondary text-[10px] px-2 py-0.5" aria-label="Headerコピー"
+              <button class="btn-secondary text-[10px] px-2 py-0.5 focus-ring" aria-label="Headerコピー"
                 @click="copyHeader">
-コピー
-</button>
+                コピー
+              </button>
             </div>
             <pre class="text-[11px] md:text-xs overflow-auto"><code>{{ pretty(verifyState.header) }}</code></pre>
           </div>
           <div v-if="verifyState.valid === true && verifyState.payload" class="rounded border p-3 bg-gray-50 space-y-2">
             <div class="flex items-center justify-between">
               <h3 class="font-semibold text-sm">Payload</h3>
-              <button class="btn-secondary text-[10px] px-2 py-0.5" aria-label="Payloadコピー"
+              <button class="btn-secondary text-[10px] px-2 py-0.5 focus-ring" aria-label="Payloadコピー"
                 @click="copyPayload">
-コピー
-</button>
+                コピー
+              </button>
             </div>
             <pre class="text-[11px] md:text-xs overflow-auto"><code>{{ pretty(verifyState.payload) }}</code></pre>
           </div>

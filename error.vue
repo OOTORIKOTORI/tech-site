@@ -10,12 +10,12 @@
         <code>{{ props.error?.statusCode }} {{ props.error?.statusMessage || props.error?.message }}</code>
       </div>
       <div class="pt-2">
-        <button class="px-4 py-2 rounded-2xl shadow border" @click="goHome">Home に戻る</button>
+        <button class="px-4 py-2 rounded-2xl shadow border focus-ring" @click="goHome">Home に戻る</button>
       </div>
       <footer class="pt-6 text-xs opacity-60">
-        <NuxtLink to="/privacy" class="underline mr-3">Privacy</NuxtLink>
-        <NuxtLink to="/terms" class="underline mr-3">Terms</NuxtLink>
-        <NuxtLink to="/ads" class="underline">Ads</NuxtLink>
+        <NuxtLink to="/privacy" class="underline mr-3 focus-ring">Privacy</NuxtLink>
+        <NuxtLink to="/terms" class="underline mr-3 focus-ring">Terms</NuxtLink>
+        <NuxtLink to="/ads" class="underline focus-ring">Ads</NuxtLink>
       </footer>
     </div>
   </div>

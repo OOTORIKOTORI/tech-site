@@ -97,11 +97,25 @@ function redirectFallback(event: H3Event) {
 
 export default defineEventHandler(async (event: H3Event) => {
   const enabled = (process.env.ENABLE_DYNAMIC_OG || '').toLowerCase() === '1'
-  const logOn = (process.env.LOG_OG || '').toLowerCase() === '1'
+  // LOG_OG_FALLBACK=0 なら出力しない。それ以外（未設定含む）は出力する
+  const shouldLogFallback = (process.env.LOG_OG_FALLBACK || '') !== '0'
   // Always ensure no-store
   setHeader(event, 'Cache-Control', 'no-store')
+  const urlTop = getRequestURL(event)
+  const slugTop = (urlTop.pathname.split('/').pop() || 'og').replace(/\.png$/i, '')
+
+  const logFallback = (cause: string) => {
+    if (!shouldLogFallback) return
+    try {
+      const payload = { evt: 'og_fallback', slug: slugTop, cause, dt: new Date().toISOString() }
+      console.info('[og:fallback]', payload)
+    } catch {
+      // ignore logging failures
+    }
+  }
 
   if (!enabled) {
+    logFallback('disabled')
     return redirectFallback(event)
   }
 
@@ -115,34 +129,10 @@ export default defineEventHandler(async (event: H3Event) => {
     const png = generatePng(slug)
     setHeader(event, 'Content-Type', 'image/png')
     setHeader(event, 'X-OG-Fallback', '0')
-    if (logOn) {
-      try {
-        let bytes = 0
-        if (typeof (png as unknown) === 'string')
-          bytes = Buffer.byteLength(png as unknown as string)
-        else if (png instanceof Uint8Array) bytes = png.byteLength
-        else if (png && typeof (png as { length?: number }).length === 'number')
-          bytes = (png as { length: number }).length
-        console.info('[og:ok]', { slug, bytes })
-      } catch {
-        // ignore
-      }
-    }
     return send(event, png)
   } catch (err: unknown) {
-    if (enabled && logOn) {
-      try {
-        const errMsg = err instanceof Error ? err.message : String(err)
-        const uaHeader = event.node?.req?.headers?.['user-agent']
-        const ua = Array.isArray(uaHeader) ? uaHeader[0] : uaHeader ?? ''
-        const uaShort = ua.slice(0, 120)
-        const url = getRequestURL(event)
-        const slugFromPath = (url.pathname.split('/').pop() || 'og').replace(/\.png$/i, '')
-        console.warn('[og:fallback]', { slug: slugFromPath, ua: uaShort, err: errMsg })
-      } catch {
-        // ignore
-      }
-    }
+    const errMsg = err instanceof Error ? err.message : String(err)
+    logFallback(errMsg || 'unknown')
     return redirectFallback(event)
   }
 })

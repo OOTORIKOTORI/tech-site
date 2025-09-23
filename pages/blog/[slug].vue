@@ -1,7 +1,7 @@
 <template>
   <main class="container" style="max-width: 48rem; margin: 0 auto; padding: 2rem 1rem;">
     <p>
-      <NuxtLink to="/blog">← Back to Blog</NuxtLink>
+      <NuxtLink to="/blog" class="focus-ring">← Back to Blog</NuxtLink>
     </p>
     <article v-if="doc">
       <header>
