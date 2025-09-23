@@ -122,16 +122,16 @@ import { useHead } from '#imports'
 const SITE_URL = (process.env.NUXT_PUBLIC_SITE_URL || 'https://tech-site-docs.com').replace(/\/$/, '')
 
 useHead({
-  title: 'Cron JST 次回実行予測 | Tech Site',
+  title: 'Cron JST 次回実行予測',
   meta: [
     { name: 'description', content: 'crontab形式のスケジュールから日本時間・UTCで次回実行時刻を予測。共有リンク・プリセット・CSVダウンロード対応。全処理ローカル。' },
-    { property: 'og:title', content: 'Cron JST 次回実行予測 | Tech Site' },
+    { property: 'og:title', content: 'Cron JST 次回実行予測' },
     { property: 'og:description', content: 'crontab形式のスケジュールから日本時間・UTCで次回実行時刻を予測。共有リンク・プリセット・CSVダウンロード対応。全処理ローカル。' },
     { property: 'og:type', content: 'website' },
     { property: 'og:url', content: SITE_URL + '/tools/cron-jst' },
     { property: 'og:image', content: SITE_URL + '/favicon.ico' },
     { name: 'twitter:card', content: 'summary' },
-    { name: 'twitter:title', content: 'Cron JST 次回実行予測 | Tech Site' },
+    { name: 'twitter:title', content: 'Cron JST 次回実行予測' },
     { name: 'twitter:description', content: 'crontab形式のスケジュールから日本時間・UTCで次回実行時刻を予測。共有リンク・プリセット・CSVダウンロード対応。全処理ローカル。' }
   ],
   script: [
