@@ -20,7 +20,7 @@
               <NuxtLink :to="p._path" class="focus-ring" style="text-decoration:none; color:inherit;">{{ p.title }}
               </NuxtLink>
             </h3>
-            <p style="margin:.25rem 0 0; color:#6b7280; font-size:.8rem;">{{ formatDate(p.date) }}</p>
+            <p style="margin:.25rem 0 0; color:#6b7280; font-size:.8rem;">{{ formatDateIso(p.date) }}</p>
             <p v-if="p.description" style="margin:.5rem 0 0; color:#374151; font-size:.95rem;">{{ p.description }}</p>
           </article>
         </li>
@@ -33,44 +33,12 @@
 import { useAsyncData, useSeoMeta, useHead } from '#imports'
 import { useSiteBrand } from '@/composables/useSiteBrand'
 import { siteUrl } from '@/utils/siteUrl'
+import { fetchPosts, type PostListItem } from '@/composables/usePosts'
+import { formatDateIso } from '@/utils/date'
 
-interface PostItem {
-  _path: string
-  title?: string
-  description?: string
-  date?: string
-}
-
-interface QueryChain<T> {
-  sort(sorter: Record<string, 1 | -1>): QueryChain<T>
-  only(keys: string[]): QueryChain<T>
-  limit(n: number): QueryChain<T>
-  find(): Promise<T[]>
-}
-type QueryContentFn = (path?: string) => QueryChain<PostItem>
-
-const qc = (globalThis as unknown as { queryContent?: QueryContentFn }).queryContent
-
-const { data } = await useAsyncData('home-latest-posts', async () => {
-  if (!qc) return [] as PostItem[]
-  const list = await qc('/blog')
-    .sort({ date: -1 })
-    .only(['_path', 'title', 'description', 'date'])
-    .limit(3)
-    .find()
-  return Array.isArray(list) ? list : ([] as PostItem[])
-})
-
-const posts = data.value ?? ([] as PostItem[])
+const { data } = await useAsyncData('home-latest-posts', () => fetchPosts({ limit: 3 }))
+const posts = (data.value ?? []) as PostListItem[]
 const { display, tagline } = useSiteBrand()
-
-function pad(n: number): string { return n < 10 ? '0' + n : String(n) }
-function formatDate(d?: string): string {
-  if (!d) return ''
-  const dt = new Date(d)
-  if (Number.isNaN(dt.getTime())) return ''
-  return `${dt.getFullYear()}-${pad(dt.getMonth() + 1)}-${pad(dt.getDate())}`
-}
 
 useHead({ link: [{ rel: 'canonical', href: siteUrl('/') }] })
 useSeoMeta({
