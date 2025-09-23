@@ -41,7 +41,10 @@ export async function fetchPosts(options: { limit?: number } = {}): Promise<Post
     .queryContent
   if (!qc) return []
   let chain = qc('/blog').sort({ date: -1 }).only(['_path', 'title', 'description', 'date'])
-  if (chain.where) chain = chain.where({ draft: { $ne: true } })
+  if (chain.where) {
+    chain = chain.where({ draft: { $ne: true } })
+    if (chain.where) chain = chain.where({ _path: { $regex: '^/blog/' } })
+  }
   if (options.limit && chain.limit) chain = chain.limit(options.limit)
   const list = await chain.find()
   if (!Array.isArray(list)) return []
