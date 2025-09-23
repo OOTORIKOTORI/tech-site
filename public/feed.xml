@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0"><channel><title>磨きエクスプローラー Blog</title><link>https://migakiexplorer.jp/blog</link><description>磨きエクスプローラー Blog RSS</description>
+    <item><title>Nuxt + @nuxt/contentで“土台SEO”を最短構築する最小セット</title><link>https://migakiexplorer.jp/blog/nuxt-seo-minimal-set</link><pubDate>Tue, 23 Sep 2025 00:00:00 GMT</pubDate><description>canonical/JSON-LD/robots/sitemap/feedを最小のコードで。プレビューnoindexとCIチェックまで。</description></item>
     <item><title>Cron の DOM×DOW は OR？AND？— タイムゾーン（JST/UTC）の落とし穴と対処法</title><link>https://migakiexplorer.jp/blog/first-cron-tz</link><pubDate>Sat, 20 Sep 2025 00:00:00 GMT</pubDate><description>crontab の日付×曜日の論理（OR/AND 切替）と JST/UTC のズレの罠、運用チェックリストまで。</description></item>
     <item><title>cronのDOM×DOWはORかANDか？JST運用の落とし穴</title><link>https://migakiexplorer.jp/blog/cron-or-and-jst</link><pubDate>Tue, 16 Sep 2025 00:00:00 GMT</pubDate><description>crontabのDOM×DOW（AND/OR）仕様とJST運用の注意点、失敗例・対策を解説。</description></item>
     <item><title>GitHub ActionsのcronはUTC！JSTで意図通りに動かす設計ガイド</title><link>https://migakiexplorer.jp/blog/gha-cron-utc</link><pubDate>Tue, 16 Sep 2025 00:00:00 GMT</pubDate><description>GitHub ActionsのcronはUTC基準。JST運用のための設計・変換・チェックリストを解説。</description></item>

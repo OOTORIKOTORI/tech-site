@@ -4,6 +4,8 @@ description: 'canonical/JSON-LD/robots/sitemap/feedを最小のコードで。�
 slug: 'nuxt-seo-minimal-set'
 date: '2025-09-23'
 tags: ['Nuxt', 'SEO', 'JSON-LD', 'CI']
+published: true
+draft: false
 ---
 
 > **この記事は何？**
