@@ -35,7 +35,7 @@
 - 解析: ページビュー/コンバージョン（広告クリック）収集の方針（匿名集計）。
 
 - Vercel での CD（自動デプロイ）を採用し、`NUXT_PUBLIC_SITE_ORIGIN` は本番独自ドメインを必須（例: https://migakiexplorer.jp）。
-- robots.txt / sitemap.xml / feed.xml は postbuild（`scripts/gen-meta.mjs`）で生成し、`--check-only` でホスト一致を検証。
+- robots.txt / sitemap.xml / feed.xml は postbuild（`scripts/gen-meta.mjs`）で生成し、`--check-only` でホスト一致を検証（ホスト検証専用）。
 
 ---
 
@@ -86,7 +86,7 @@
 - `utils/siteUrl.ts` / `utils/siteMeta.ts`: 絶対 URL 化（canonical / og:url など）。
 - `server/middleware/noindex-preview.ts`: host が `*.vercel.app` の場合に `X-Robots-Tag: noindex, nofollow` を付与。
 - `scripts/gen-meta.mjs`: Postbuild で `public/robots.txt` / `public/sitemap.xml` / `public/feed.xml` を生成。`--check-only` でホスト一致を検証（生成物のドメインが `NUXT_PUBLIC_SITE_ORIGIN` と一致することを確認）。
-- `server/api/og/[slug].png.ts`: 既定は 302 で `/og-default.png` にフォールバック（no-store / X-OG-Fallback）。`ENABLE_DYNAMIC_OG=1` で軽量 PNG を動的生成（失敗時は即 302）。
+- `server/api/og/[slug].png.ts`: 既定は 302 で `/og-default.png` にフォールバック（no-store / X-OG-Fallback）。`ENABLE_DYNAMIC_OG=1` で軽量 PNG を動的生成（成功時 200、失敗時は即 302）。
 - Cron 仕様: `utils/cron.ts` に実装。`dowDomMode` と `'*'` の解釈（OR=unrestricted / AND=always-true）。
 - Auto-reload: `configVersion` / `settingsUpdatedAt` 変化 → 次 tick（10s）で再読込。
 
@@ -153,7 +153,7 @@
 
 ### ドメイン / リダイレクト
 
-- 本番: `migakiexplorer.jp`（apex）。旧 `kotorilab.jp` は新ドメインへ 308 Permanent で全パス 1:1 リダイレクト。
+- 本番: `migakiexplorer.jp`（apex）。旧称・旧ドメイン（KOTORI Lab / `kotorilab.jp`）はすべて新ドメインへ恒久リダイレクト（308）し、ドキュメント上の残存表記は最新へ統一。
 - DNS 例:
   - apex: `A(@)=76.76.21.21`
   - `www`: `CNAME=cname.vercel-dns.com`
@@ -174,9 +174,9 @@ iwr -Uri 'https://migakiexplorer.jp/sitemap.xml'
 
 - Postbuild で `public/robots.txt` / `public/sitemap.xml` / `public/feed.xml` を生成。
 - `<lastmod>` はブログ記事の Frontmatter `updated`（または `date`）。
-- `--check-only` でホスト一致検証。OK ログ: `[gen-meta] OK robots/sitemap host = <host>`。
+- `--check-only` はホスト一致検証専用。OK ログ: `[gen-meta] OK robots/sitemap host = <host>`。
 
-Workflow 上での meta check 用 ENV 注入手順:
+Workflow 上での meta-check 用 ENV 注入手順（集約・正準）:
 
 - `.github/workflows/ci.yml` の postbuild 検証（`--check-only`）ステップで次の環境変数を付与して実行する。
 
@@ -294,6 +294,16 @@ pnpm typecheck; pnpm lint; pnpm test -- --run; pnpm build; node .\scripts\gen-me
   - 成功（200）時: `console.info('[og:ok]', { slug, bytes })`
   - 失敗（302 フォールバック直前）: `console.warn('[og:fallback]', { slug, ua, err })`
 - 本番はデフォルトで無効（静粛運用）。
+
+---
+
+## 変更点サマリ（この更新）
+
+- ブランド表記を「磨きエクスプローラー（Migaki Explorer）」、公開ドメインを `https://migakiexplorer.jp` に統一。
+- OGP API の既定 302 フォールバックと `ENABLE_DYNAMIC_OG=1` 時の 200 応答（失敗時は即 302）を明文化。
+- robots/sitemap/RSS は postbuild の `scripts/gen-meta.mjs` が生成し、`--check-only` はホスト検証専用である旨を明記。
+- CI の meta-check サンプルは本節に集約し、他ドキュメントでは参照誘導とした。
+- 旧名称（KOTORI Lab / kotorilab.jp）に関する説明を最新ポリシーへ改め、記述の残存を排除。
 
 ---
 

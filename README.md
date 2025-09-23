@@ -79,6 +79,8 @@ Lighthouse 閾値（budgets）:
 
 Postbuild の検証は `scripts/gen-meta.mjs --check-only` で robots.txt / sitemap.xml / feed.xml のホスト一致を確認（OK ログ: `[gen-meta] OK ...`）。Workflow の ENV 注入サンプルなどの完全版は `PROJECT_SPEC.md` を参照。
 
+- CI の meta-check では `NUXT_PUBLIC_SITE_ORIGIN=https://migakiexplorer.jp` を明示し、`NUXT_PUBLIC_SITE_URL=''` を指定（詳細は `PROJECT_SPEC.md` の CI 節）。
+
 ---
 
 ## 実装 TODO（短期）
@@ -233,3 +235,12 @@ yarn preview
 
 - 仕様詳細は `PROJECT_SPEC.md` を参照
 - Nuxt デプロイ: https://nuxt.com/docs/getting-started/deployment
+
+---
+
+## 変更点サマリ（この更新）
+
+- ブランド/ドメインの表記を「磨きエクスプローラー（Migaki Explorer）」/ `https://migakiexplorer.jp` に統一確認。
+- OGP API の既定（302 フォールバック）と `ENABLE_DYNAMIC_OG=1` 時の 200 応答を明記済みであることを再確認。
+- robots/sitemap/RSS は postbuild の `scripts/gen-meta.mjs` で生成、`--check-only` はホスト検証用途である旨を明記。
+- CI meta-check の要件（`NUXT_PUBLIC_SITE_ORIGIN` を明示し、`NUXT_PUBLIC_SITE_URL=''`）を追記し、完全例は `PROJECT_SPEC.md` に集約。
