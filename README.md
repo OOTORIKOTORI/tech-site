@@ -1,124 +1,58 @@
 # 磨きエクスプローラー — Tech Tools & Notes（開発者向けユーティリティ＋技術メモ集）
 
-フロント/バックエンドの“毎回ググる小ワーク”を手元で安全・素早く検証できる軽量ツール（Cron / JWT など）と、実装運用の落とし穴を最小編集でまとめた短文ブログを提供するサイトです。収益はディスプレイ広告を想定。ローカル完結と品質ゲートを重視しています。
+フロント/バックエンドの“毎回ググる小ワーク”を手元で安全・素早く検証できる軽量ツール（Cron / JWT など）と、実装運用の落とし穴を最小編集でまとめた短文ブログを提供するサイトです。ローカル完結と品質ゲートを重視しています。
 
-ブランド: 磨きエクスプローラー（Migaki Explorer） / 本番ドメイン: https://migakiexplorer.jp
+- 正式名: 『磨きエクスプローラー（Migaki Explorer）』
+- 表示/短縮名: Migaki Explorer（`<title>` / og:site_name / Organization.name / publisher.name）
+- 本番 ORIGIN: https://migakiexplorer.jp
 
 ## ブランド名の一元化（概要）
 
-- ブランド設定は `app.config.ts` に集約（`site.brand` と `site.tagline`）。
-  - `brand.nameJa` / `brand.nameEn` / `brand.short`（サイト名/短縮名）/ `tagline`
-- 参照先（自動連携）
-  - `<title>` の既定は `brand.short`（`titleTemplate`）
-  - OGP: `og:site_name` は `brand.short`
-  - JSON-LD: `Organization.name` / `BlogPosting.publisher.name` は `brand.short`
-  - ロゴの代替テキスト: `/logo.png` の `alt` は 'Migaki Explorer' を推奨
-- 実装詳細は PROJECT_SPEC「サイト設定 / ブランド名」を参照。
+- 管理場所: `app.config.ts`（`site.brand` / `site.tagline`）。参照は `composables/useSiteBrand.ts` 方針。
+- 正式名は『磨きエクスプローラー（Migaki Explorer）』、表示/短縮名は常に `Migaki Explorer` を使用。
+- 反映先: `<title>` 既定、`og:site_name`、JSON-LD の `Organization.name` / `BlogPosting.publisher.name`。
+- ロゴ代替テキストは `/logo.png` に対し 'Migaki Explorer' を推奨。
+- 詳細は PROJECT_SPEC「サイト設定 / ブランド名」を参照。
 
 ---
 
-## 導線とページ構成（現状）
+## 要点（実装済みの方針）
 
-- トップ `/`:
-  - ヒーロー＋ CTA（`/tools/cron-jst`, `/blog`）。
-  - 「Latest posts」で最新 3 件を表示（Nuxt Content の `date` 降順）。
-- ブログ一覧 `/blog`:
-  - タイトル / 日付（YYYY-MM-DD） / 説明 / リンクをカード表示。カードに a11y ラベル付与。
-  - 投稿 0 件時は「No posts yet」を表示。
-- ブログ詳細 `/blog/[slug]`:
-  - 本文レンダリング＋ SEO メタ（title/description/canonical/og:url）。
-  - `canonical` は Frontmatter で指定可（未指定時は自動）。
-- 既存ツール:
-
-  - Cron JST 予測: `/tools/cron-jst`
-  - JWT Decode: `/tools/jwt-decode`
-
-- フッタ: `/privacy`, `/terms`, `/ads` への導線を設置。
-
-ナビゲーション:
-
-- ヘッダは **Home / Tools / Blog**。**「メインへスキップ」**リンクを設置。
-
-サイトマップ/フィード:
-
-- `scripts/gen-meta.mjs` により `public/robots.txt` / `public/sitemap.xml` / `public/feed.xml` を生成。
-- サイトマップにはブログ URL を含め、`<lastmod>` は Frontmatter の `updated`（なければ `date`）。
-- RSS は postbuild で生成（チャネル `/blog`、各 item は title/link/pubDate/description）。
+- 生成物の表記を統一: `robots.txt` / `sitemap.xml` / `feed.xml`（postbuild で生成）。
+- ORIGIN 基準の一元化: `NUXT_PUBLIC_SITE_ORIGIN` を canonical / og:url / robots / sitemap / RSS の基点に使用。
+- プレビュー noindex: `*.vercel.app` は `X-Robots-Tag: noindex, nofollow` を付与（middleware）。
+- 構造化データ: Organization.logo は `/logo.png` 絶対 URL、BlogPosting.publisher.logo、BreadcrumbList（/blog, /blog/[slug]）。
+- a11y: `focus-visible` は `.focus-ring` ユーティリティで統一（主要リンク/ナビに適用）。
+- OGP API: 既定は 302 で `/og-default.png` へフォールバック。`ENABLE_DYNAMIC_OG=1` で動的 PNG（失敗時は即 302）。`LOG_OG=1` で最小ログ。
+- CI 概要: install → typecheck → lint → test → build → postbuild（`--check-only`）→ smoke:og → LHCI（詳細は PROJECT_SPEC）。
+- （任意）Web App Manifest の `name`/`short_name` はブランド準拠。詳細は `PROJECT_SPEC.md` を参照。
 
 ---
 
-## SEO / OGP / プレビュー方針
-
-- 絶対 URL 化: `canonical` と `og:url` は `NUXT_PUBLIC_SITE_ORIGIN` を基準に絶対 URL を生成（`utils/siteUrl.ts` / `utils/siteMeta.ts`）。
-- 互換変数: `NUXT_PUBLIC_SITE_URL` は互換の補助（将来削除予定）。
-- プレビュー noindex: ホストが `*.vercel.app` の場合はミドルウェアで `X-Robots-Tag: noindex, nofollow` を付与（環境変数に依存しない）。
-- OGP API（安定デフォルト）:
-  - `GET /api/og/[slug].png` は既定で 302 により `/og-default.png` へフォールバック。
-  - レスポンスヘッダ: `Cache-Control: no-store`, `X-OG-Fallback: 1`。
-  - `ENABLE_DYNAMIC_OG=1` で軽量 PNG を動的生成（試験的）。失敗時は即時 302 フォールバック。
-  - `scripts/smoke-og.mjs` は 200/302 を合格とするスモークテスト。
-  - 任意ログ: `LOG_OG=1` で最小ロギング（成功時 `[og:ok]`、失敗フォールバック時 `[og:fallback]`）。
-
-補足: 構造化データに BreadcrumbList JSON-LD を実装済み（/blog と /blog/[slug]）。詳細は `PROJECT_SPEC.md` を参照。
+詳細仕様やコード参照は `PROJECT_SPEC.md` を参照してください（README は要点のみ）。
 
 ---
 
-## CI/CD と品質ゲート
+## CI 概要（要点）
 
-ジョブ順序（推奨・運用中）:
-
-1. install（frozen lockfile）→ 2) typecheck → 3) lint → 4) test → 5) build → 6) postbuild（`--check-only` 検証）→ 7) smoke:og → 8) LHCI。
-
-Lighthouse 閾値（budgets）:
-
-- desktop: perf ≥ 90 / a11y ≥ 90 / best‑practices ≥ 100 / SEO ≥ 100
-- mobile: perf ≥ 85 / a11y ≥ 90 / best‑practices ≥ 100 / SEO ≥ 100
-- ワークフロー上は desktop のみ `preset: desktop` を使用。mobile は `formFactor` / `screenEmulation` などで指定（`preset: mobile` は未使用）。
-
-テスト基盤: Vitest は `clearMocks: true` と `environmentOptions.jsdom.url=https://migakiexplorer.jp` を既定化し、`tests/setup/global-stubs.ts` を常時読み込み。
-
-Postbuild の検証は `scripts/gen-meta.mjs --check-only` で robots.txt / sitemap.xml / feed.xml のホスト一致を確認（OK ログ: `[gen-meta] OK ...`）。Workflow の ENV 注入サンプルなどの完全版は `PROJECT_SPEC.md` を参照。
-
-- CI の meta-check では `NUXT_PUBLIC_SITE_ORIGIN=https://migakiexplorer.jp` を明示し、`NUXT_PUBLIC_SITE_URL=''` を指定（詳細は `PROJECT_SPEC.md` の CI 節）。
+- 順序: install → typecheck → lint → test → build → postbuild（`--check-only` でホスト一致検証）→ smoke:og → LHCI。
+- meta-check では `NUXT_PUBLIC_SITE_ORIGIN=https://migakiexplorer.jp` を明示（`NUXT_PUBLIC_SITE_URL=''`）。
+- 具体例・閾値・テスト基盤の詳細は `PROJECT_SPEC.md` を参照。
 
 ---
 
-## 実装 TODO（短期）
+## 実装メモ（抜粋）
 
-（実装済み）ヘッダに **最小ナビ（Home/Tools/Blog）** と **Skip リンク**
-（実装済み）ブログ一覧カード: **日付 `YYYY-MM-DD`** / **a11y ラベル**
-（実装済み）フッタに **/privacy /terms /ads** への導線
-（実装済み）**Nuxt グローバルスタブ** 運用（`__mocks__/` 等）
-
-→ 上記は「導線とページ構成（現状）」等の現状仕様各節に反映済み。
+- ヘッダ最小ナビ（Home/Tools/Blog）と Skip リンクは実装済み。
+- フッタに `/privacy` `/terms` `/ads` への導線あり。
+- Nuxt グローバルスタブ運用（`tests/setup/global-stubs.ts` 等）。
 
 ---
 
-## 開発運用（直 push 前提）
+## 運用メモ（抜粋）
 
-- Husky pre-push（順次実行）:
-  - `pnpm typecheck; pnpm lint; pnpm test -- --run; pnpm build; pnpm postbuild; pnpm run smoke:og`
-  - 既存の `husky.sh` シム行は削除済み。
-- タグ運用: `vX.Y.Z`。コミット → タグ付け → push で簡易リリース。リリースノートは基本不要（必要時は `gh` CLI で補助）。
-  - Windows: `pnpm run tag:patch` 等が使えます。Mac/Linux は `pwsh` が無い場合、`./scripts/bump-tag.ps1 patch` を直接実行してください。
-- Windows PowerShell では `;` で連結推奨。パッチ差分出力は `Out-File -Encoding utf8 -Width 4096` を推奨。
-
-チェック（抜粋）: 法務ページ（`/privacy`, `/terms`, `/ads`）の雛形とフッタ導線の有無を確認。
-ヘッダナビや主要カードリンクの `focus-visible` は `.focus-ring` ユーティリティで統一。
-
-例（PowerShell）:
-
-```powershell
-git add -A; git diff --staged --no-color | Out-File -FilePath review.patch -Encoding utf8 -Width 4096
-pnpm typecheck; pnpm lint; pnpm test -- --run; pnpm build; pnpm postbuild; pnpm run smoke:og
-```
-
-例（bash）:
-
-```bash
-git add -A && git diff --staged --no-color > review.patch
-pnpm typecheck && pnpm lint && pnpm test -- --run && pnpm build && pnpm postbuild && pnpm run smoke:og
-```
+- pre-push 例: `typecheck → lint → test → build → postbuild → smoke:og`。
+- 主要リンクの `focus-visible` は `.focus-ring` を適用し視認性を統一。
 
 ---
 
@@ -139,28 +73,12 @@ pnpm typecheck && pnpm lint && pnpm test -- --run && pnpm build && pnpm postbuil
 
 ---
 
-## クイックチェック（運用）
+## クイックチェック（要点）
 
-- ローカルビルドとホスト検証（PowerShell）:
+- ローカルでのホスト検証（PowerShell）:
 
 ```powershell
 pnpm build; node .\scripts\gen-meta.mjs --check-only
-```
-
-- ドメイン/リダイレクト確認（PowerShell）:
-
-```powershell
-iwr -Uri 'http://www.migakiexplorer.jp' -Method Head -MaximumRedirection 0 | Select-Object StatusCode, StatusDescription, Headers
-iwr -Uri 'https://migakiexplorer.jp/robots.txt'
-iwr -Uri 'https://migakiexplorer.jp/sitemap.xml'
-```
-
-- 同（bash）:
-
-```bash
-curl -sI http://www.migakiexplorer.jp | sed -n '1p; s/^Location: //p'
-curl -s https://migakiexplorer.jp/robots.txt | sed -n '1,3p'
-curl -s https://migakiexplorer.jp/sitemap.xml | head -n 5
 ```
 
 ---
@@ -208,9 +126,9 @@ Nuxt グローバルスタブ指針:
 
 構造化データ（実装）:
 
-- Organization.logo は `/logo.png`（512x512）を**絶対 URL**で出力。将来は `logo.svg` への差し替え検討。
-- BlogPosting の `publisher.logo` も出力済み（`Organization` を `publisher` として付与）。
-- BreadcrumbList JSON-LD を /blog および /blog/[slug] に出力（詳細は `PROJECT_SPEC.md`）。
+- Organization.logo は `/logo.png`（512x512）を絶対 URL で出力。
+- BlogPosting の `publisher.logo` も出力済み。
+- BreadcrumbList JSON-LD を /blog /blog/[slug] に出力（詳細は `PROJECT_SPEC.md`）。
 
 タグの最新取得（SemVer 運用）:
 
@@ -240,7 +158,5 @@ yarn preview
 
 ## 変更点サマリ（この更新）
 
-- ブランド/ドメインの表記を「磨きエクスプローラー（Migaki Explorer）」/ `https://migakiexplorer.jp` に統一確認。
-- OGP API の既定（302 フォールバック）と `ENABLE_DYNAMIC_OG=1` 時の 200 応答を明記済みであることを再確認。
-- robots/sitemap/RSS は postbuild の `scripts/gen-meta.mjs` で生成、`--check-only` はホスト検証用途である旨を明記。
-- CI meta-check の要件（`NUXT_PUBLIC_SITE_ORIGIN` を明示し、`NUXT_PUBLIC_SITE_URL=''`）を追記し、完全例は `PROJECT_SPEC.md` に集約。
+- README を「要点＋参照」に整理（詳細は PROJECT_SPEC に集約）。
+- ブランド正式名/短縮名、ORIGIN/RSS/OGP/a11y/構造化データの指針を明記。

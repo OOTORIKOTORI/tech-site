@@ -10,7 +10,7 @@
 
 本サイトは「便利ツール＋技術ブログ」の開発者向け情報サイトです。
 ツールはローカル完結（ブラウザ/Node 内）と安全性を重視し、記事は実務志向の短文ノートを配信します。
-公開ドメイン: https://migakiexplorer.jp
+公開ドメイン（本番 ORIGIN）: https://migakiexplorer.jp
 
 ---
 
@@ -34,8 +34,8 @@
 - a11y: コントラスト/キーボード操作/aria/ラベル。
 - 解析: ページビュー/コンバージョン（広告クリック）収集の方針（匿名集計）。
 
-- Vercel での CD（自動デプロイ）を採用し、`NUXT_PUBLIC_SITE_ORIGIN` は本番独自ドメインを必須（例: https://migakiexplorer.jp）。
-- robots.txt / sitemap.xml / feed.xml は postbuild（`scripts/gen-meta.mjs`）で生成し、`--check-only` でホスト一致を検証（ホスト検証専用）。
+- Vercel での CD（自動デプロイ）を採用し、`NUXT_PUBLIC_SITE_ORIGIN` を canonical / og:url / robots / sitemap / RSS の基点に統一（例: https://migakiexplorer.jp）。
+- 生成物は `robots.txt` / `sitemap.xml` / `feed.xml` に表記統一。postbuild（`scripts/gen-meta.mjs`）で生成し、`--check-only` でホスト一致を検証（ホスト検証専用）。
 
 ---
 
@@ -105,6 +105,7 @@
 - 実装補助
   - `composables/useSiteBrand.ts`: `brand` / `display`（=short）/ `tagline` を返すコンポーザブル
   - Home/フッタ/メタは当該コンポーザブル経由で参照
+- （任意）Web App Manifest の `name`/`short_name` はブランド準拠（『磨きエクスプローラー（Migaki Explorer）』/ `Migaki Explorer`）。
 
 ## 🔗 リンク
 
@@ -148,7 +149,7 @@
 
 ### 環境変数（必須）
 
-- `NUXT_PUBLIC_SITE_ORIGIN`（Production 必須）: `https://migakiexplorer.jp`。canonical / og:url / robots / sitemap の基準。
+- `NUXT_PUBLIC_SITE_ORIGIN`（Production 必須）: `https://migakiexplorer.jp`。canonical / og:url / robots / sitemap / RSS の基準。
 - `NUXT_PUBLIC_SITE_URL` は互換の補助変数（将来削除予定）。
 
 ### ドメイン / リダイレクト
@@ -168,9 +169,9 @@ iwr -Uri 'https://migakiexplorer.jp/sitemap.xml'
 
 ### プレビュー noindex
 
-- `*.vercel.app` は host ベースで `X-Robots-Tag: noindex, nofollow` を付与（middleware 実装）。
+- `*.vercel.app` は host ベースで `X-Robots-Tag: noindex, nofollow` を付与（middleware 実装）。設定詳細は既存実装に準拠。
 
-### サイトマップ / RSS / 検証
+### サイトマップ / RSS / 検証（正準）
 
 - Postbuild で `public/robots.txt` / `public/sitemap.xml` / `public/feed.xml` を生成。
 - `<lastmod>` はブログ記事の Frontmatter `updated`（または `date`）。
@@ -192,7 +193,7 @@ Workflow 上での meta-check 用 ENV 注入手順（集約・正準）:
 
 ## 🛠 CI/CD と品質ゲート
 
-順序（実行中の基準）:
+順序（実行中の基準・正準）:
 
 1. Install（frozen lockfile）
 2. Typecheck
@@ -215,7 +216,7 @@ Windows PowerShell tips:
 pnpm typecheck; pnpm lint; pnpm test -- --run; pnpm build; node .\scripts\gen-meta.mjs --check-only
 ```
 
-### ビルド後処理（sitemap/robots の静的生成）
+### ビルド後処理（robots/sitemap/RSS の静的生成）
 
 - Postbuild で `scripts/gen-meta.mjs` を実行し、`public/sitemap.xml` と `public/robots.txt` を生成。
 - その後 `--check-only` でホスト一致を検証（正常時 `[gen-meta] OK ...`）。
@@ -285,7 +286,7 @@ pnpm typecheck; pnpm lint; pnpm test -- --run; pnpm build; node .\scripts\gen-me
 
 - Tailwind ユーティリティ `.focus-ring` を定義（outline 無し / `focus-visible:ring-2` / `ring-offset-2` / `ring-blue-600`）。
 - ヘッダナビやカード主要リンク（a / NuxtLink）に `.focus-ring` を付与して視認性を統一。
-- 既存の outline / ring が重複する場合は競合しないよう整理。
+- 既存の outline / ring が重複する場合は競合しないよう整理（`.focus-ring` を優先）。
 
 #### OGP API（最小ロギング・任意）
 
@@ -294,6 +295,11 @@ pnpm typecheck; pnpm lint; pnpm test -- --run; pnpm build; node .\scripts\gen-me
   - 成功（200）時: `console.info('[og:ok]', { slug, bytes })`
   - 失敗（302 フォールバック直前）: `console.warn('[og:fallback]', { slug, ua, err })`
 - 本番はデフォルトで無効（静粛運用）。
+
+#### 旧名/旧ドメイン（履歴）
+
+- 旧名（KOTORI Lab / Kotorilab）や旧ドメイン表記が Docs に残っている場合は新ブランドへ修正。
+- 旧ドメインからは恒久リダイレクト（308）を構成済み。現運用は `migakiexplorer.jp`。
 
 ---
 
