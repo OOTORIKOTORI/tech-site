@@ -1,8 +1,8 @@
 ﻿<template>
   <main class="container" style="max-width: 56rem; margin: 0 auto; padding: 2.5rem 1rem;">
     <section aria-labelledby="hero-title" style="text-align: left;">
-      <h1 id="hero-title" style="font-size: 2rem; font-weight: 800; margin: 0;">KOTORI Lab</h1>
-      <p style="margin:.5rem 0 1.25rem 0; color:#4b5563; font-size:1rem;">Tech Tools & Notes — 実務のための小さな道具とメモ。</p>
+      <h1 id="hero-title" style="font-size: 2rem; font-weight: 800; margin: 0;">{{ display }}</h1>
+      <p style="margin:.5rem 0 1.25rem 0; color:#4b5563; font-size:1rem;">{{ tagline }}</p>
       <div style="display:flex; gap:.75rem; flex-wrap: wrap;">
         <NuxtLink to="/tools/cron-jst" aria-label="Open Cron Tool" class="btn-primary">Open Cron Tool</NuxtLink>
         <NuxtLink to="/blog" aria-label="Open Blog" class="btn-secondary">Open Blog</NuxtLink>
@@ -29,6 +29,8 @@
 
 <script setup lang="ts">
 import { useAsyncData, useSeoMeta, useHead } from '#imports'
+import { useSiteBrand } from '@/composables/useSiteBrand'
+import { siteUrl } from '@/utils/siteUrl'
 
 interface PostItem {
   _path: string
@@ -58,6 +60,7 @@ const { data } = await useAsyncData('home-latest-posts', async () => {
 })
 
 const posts = data.value ?? ([] as PostItem[])
+const { display, tagline } = useSiteBrand()
 
 function pad(n: number): string { return n < 10 ? '0' + n : String(n) }
 function formatDate(d?: string): string {
@@ -67,11 +70,11 @@ function formatDate(d?: string): string {
   return `${dt.getFullYear()}-${pad(dt.getMonth() + 1)}-${pad(dt.getDate())}`
 }
 
-useHead({ link: [{ rel: 'canonical', href: 'https://kotorilab.jp/' }] })
+useHead({ link: [{ rel: 'canonical', href: siteUrl('/') }] })
 useSeoMeta({
-  title: 'KOTORI Lab — Tech Tools & Notes',
-  ogTitle: 'KOTORI Lab — Tech Tools & Notes',
-  ogUrl: 'https://kotorilab.jp/',
+  title: `${display} — Tech Tools & Notes`,
+  ogTitle: `${display} — Tech Tools & Notes`,
+  ogUrl: siteUrl('/'),
 })
 </script>
 

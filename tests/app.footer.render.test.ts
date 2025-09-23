@@ -25,7 +25,7 @@ describe('components/AppFooter.vue', () => {
     expect(wrapper.find('a[href="/privacy"]').exists()).toBe(true)
     expect(wrapper.find('a[href="/terms"]').exists()).toBe(true)
     expect(wrapper.find('a[href="/ads"]').exists()).toBe(true)
-    expect(wrapper.text()).toContain('© KOTORI Lab')
+    expect(wrapper.text()).toContain('© Migaki Explorer')
     // appVersion not shown by default
     expect(wrapper.text()).not.toMatch(/v\d+/)
   })

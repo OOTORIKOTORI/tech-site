@@ -7,6 +7,7 @@
 <script setup lang="ts">
 import { useHead, useSeoMeta, computed, useServerHead, useRuntimeConfig, useRoute } from '#imports'
 import { useDefaultTitle, useDefaultDescription, absoluteUrl, useOgDefaultPath } from '@/utils/siteMeta'
+import { useSiteBrand } from '@/composables/useSiteBrand'
 
 const route = useRoute()
 type PublicConfig = { siteOrigin?: string; siteUrl?: string; siteName?: string }
@@ -15,11 +16,13 @@ const siteOrigin: string = String(pub?.siteOrigin || pub?.siteUrl || 'http://loc
 const siteName: string = String(pub?.siteName || useDefaultTitle())
 
 const ogDefaultPath = useOgDefaultPath()
+const { brand } = useSiteBrand()
+const displayShort = brand?.short || 'Migaki Explorer'
 const ogImage = computed(() => absoluteUrl(ogDefaultPath, siteOrigin))
 useSeoMeta({
   title: useDefaultTitle(),
   description: useDefaultDescription(),
-  ogSiteName: siteName,
+  ogSiteName: displayShort,
   ogType: 'website',
   ogTitle: useDefaultTitle(),
   ogDescription: useDefaultDescription(),
@@ -34,7 +37,7 @@ const setHead = (typeof useServerHead === 'function' ? useServerHead : useHead)
 const org = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
-  name: siteName,
+  name: displayShort,
   alternateName: ['Migaki Explorer', 'みがきエクスプローラー'],
   url: siteOrigin,
   logo: `${siteOrigin}/logo.png`
@@ -55,9 +58,9 @@ setHead(() => ({
 
 // Canonical, RSS link, and site_name meta
 useHead(() => ({
-  titleTemplate: (title?: string) => (title ? `${siteName} | ${title}` : String(siteName)),
+  titleTemplate: (title?: string) => (title ? `${title} | ${displayShort}` : String(displayShort)),
   meta: [
-    { property: 'og:site_name', content: String(siteName) },
+    { property: 'og:site_name', content: String(displayShort) },
   ],
   link: [
     { rel: 'canonical', href: `${siteOrigin}${route.fullPath}` },

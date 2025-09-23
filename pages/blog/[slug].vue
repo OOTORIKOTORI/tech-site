@@ -15,6 +15,7 @@
 <script setup lang="ts">
 import { useRoute, useAsyncData, createError, useHead, useSeoMeta, useServerHead, useRuntimeConfig } from '#imports'
 import { useBreadcrumbJsonLd } from '@/composables/useBreadcrumbJsonLd'
+import { useSiteBrand } from '@/composables/useSiteBrand'
 import { siteUrl } from '@/utils/siteUrl'
 
 interface BlogDoc {
@@ -72,8 +73,8 @@ useHead({
   link: doc.canonical ? [{ rel: 'canonical', href: doc.canonical }] : [],
 })
 
-const title = doc.title ?? 'Blog Post | Kotorilab'
-const description = doc.description ?? 'Kotorilab blog post'
+const title = doc.title ?? 'Blog Post'
+const description = doc.description ?? 'Blog post'
 const canonical = doc.canonical
 
 useSeoMeta({
@@ -89,6 +90,7 @@ type PublicConfig = { siteOrigin?: string; siteUrl?: string; siteName?: string }
 const { public: pub } = useRuntimeConfig() as { public: PublicConfig }
 const siteOrigin: string = String(pub?.siteOrigin || pub?.siteUrl || 'http://localhost:3000').replace(/\/$/, '')
 const routePath = route.path || doc._path || '/'
+const { brand } = useSiteBrand()
 
 function toAbsoluteImageUrl(img: unknown): string | undefined {
   if (!img) return undefined
@@ -129,7 +131,7 @@ const postLd = {
   mainEntityOfPage: { '@type': 'WebPage', '@id': siteOrigin + routePath },
   publisher: {
     '@type': 'Organization',
-    name: 'Migaki Explorer',
+    name: brand.short || 'Migaki Explorer',
     url: siteOrigin,
     logo: {
       '@type': 'ImageObject',

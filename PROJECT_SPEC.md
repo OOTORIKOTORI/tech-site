@@ -90,6 +90,22 @@
 - Cron 仕様: `utils/cron.ts` に実装。`dowDomMode` と `'*'` の解釈（OR=unrestricted / AND=always-true）。
 - Auto-reload: `configVersion` / `settingsUpdatedAt` 変化 → 次 tick（10s）で再読込。
 
+### サイト設定 / ブランド名（一元化）
+
+- 定義場所: `app.config.ts`
+  - `site.brand.nameJa`: 正式名（例: `磨きエクスプローラー`）
+  - `site.brand.nameEn`: 英語名（例: `Migaki Explorer`）
+  - `site.brand.short`: 短縮名/サイト名（`<title>` デフォルト、`og:site_name` に使用）
+  - `site.tagline`: サイトの短い説明（ヒーロー下のコピー等）
+- 参照先のルール
+  - `<title>` と `titleTemplate`: `brand.short` を使用（`title ? `${title} | ${brand.short}` : brand.short`）
+  - OGP: `og:site_name` は `brand.short`
+  - JSON-LD: `Organization.name` および `BlogPosting.publisher.name` は `brand.short`
+  - ロゴ: `/logo.png` の `alt` は `'Migaki Explorer'` を推奨（i18n のない単一ブランド表記）
+- 実装補助
+  - `composables/useSiteBrand.ts`: `brand` / `display`（=short）/ `tagline` を返すコンポーザブル
+  - Home/フッタ/メタは当該コンポーザブル経由で参照
+
 ## 🔗 リンク
 
 - [GitHub リポジトリ](https://github.com/OOTORIKOTORI/tech-site)

@@ -37,12 +37,12 @@ import { siteUrl } from '@/utils/siteUrl'
 const { data } = await useAsyncData('blog-list', () => fetchPosts())
 const posts = (data.value ?? []) as PostListItem[]
 
-useHead({ link: [{ rel: 'canonical', href: 'https://kotorilab.jp/blog' }] })
+useHead({ link: [{ rel: 'canonical', href: siteUrl('/blog') }] })
 useSeoMeta({
-  title: 'Blog | Kotorilab',
-  description: 'KOTORI Lab のブログ一覧。開発の気づきや設計メモを短くまとめています。',
-  ogTitle: 'Blog | Kotorilab',
-  ogUrl: 'https://kotorilab.jp/blog',
+  title: 'Blog',
+  description: '開発ノウハウやツール設計の考察メモ。',
+  ogTitle: 'Blog',
+  ogUrl: siteUrl('/blog'),
 })
 
 useBreadcrumbJsonLd([

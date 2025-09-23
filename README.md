@@ -4,6 +4,17 @@
 
 ブランド: 磨きエクスプローラー（Migaki Explorer） / 本番ドメイン: https://migakiexplorer.jp
 
+## ブランド名の一元化（概要）
+
+- ブランド設定は `app.config.ts` に集約（`site.brand` と `site.tagline`）。
+  - `brand.nameJa` / `brand.nameEn` / `brand.short`（サイト名/短縮名）/ `tagline`
+- 参照先（自動連携）
+  - `<title>` の既定は `brand.short`（`titleTemplate`）
+  - OGP: `og:site_name` は `brand.short`
+  - JSON-LD: `Organization.name` / `BlogPosting.publisher.name` は `brand.short`
+  - ロゴの代替テキスト: `/logo.png` の `alt` は 'Migaki Explorer' を推奨
+- 実装詳細は PROJECT_SPEC「サイト設定 / ブランド名」を参照。
+
 ---
 
 ## 導線とページ構成（現状）
