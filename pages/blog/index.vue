@@ -28,14 +28,18 @@
   </div>
 </template>
 <script setup lang="ts">
-import { useAsyncData, useSeoMeta, useHead } from '#imports'
-import { fetchPosts, type PostListItem } from '~/composables/usePosts'
+import { useAsyncData, useSeoMeta, useHead, queryContent } from '#imports'
 import { formatDateIso } from '@/utils/date'
 import { useBreadcrumbJsonLd } from '@/composables/useBreadcrumbJsonLd'
 import { siteUrl } from '@/utils/siteUrl'
 
-const { data } = await useAsyncData('blog-list', () => fetchPosts())
-const posts = (data.value ?? []) as PostListItem[]
+const { data: posts } = await useAsyncData<any[]>('blog-list', () =>
+  queryContent('/blog')
+    .where({ draft: { $ne: true } })
+    .where({ $or: [{ published: true }, { published: { $exists: false } }] })
+    .sort({ date: -1 })
+    .find()
+)
 
 useHead({ link: [{ rel: 'canonical', href: siteUrl('/blog') }] })
 useSeoMeta({

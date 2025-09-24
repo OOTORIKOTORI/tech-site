@@ -21,3 +21,6 @@ export const useServerHead: AnyFn = (...args) =>
 // Expose queryContent via global to match page's access
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ;(globalThis as any).queryContent = (globalThis as any).queryContent
+
+// Provide named export so pages can import from '#imports'
+export const queryContent: AnyFn = (...args) => g.queryContent?.(...args)
