@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useRoute, useRuntimeConfig, useAsyncData, useSeoMeta, useHead, computed } from '#imports'
+import { useRoute, useRuntimeConfig, useAsyncData, useSeoMeta, useHead } from '#imports'
 
 const route = useRoute()
 const runtimeConfig = useRuntimeConfig()
@@ -13,23 +13,21 @@ const doc = data as any
 
 const siteOrigin: string = String(runtimeConfig.public?.siteOrigin || '')
 const url = new URL(route.path || '/', siteOrigin).toString()
-const canonical = computed(() => (doc.value?.canonical || url))
+const canonical = doc.value?.canonical ?? url
 
-const title: string = page?.title || ''
-const description: string = page?.description || ''
+const title = doc.value?.title ?? ''
+const description = doc.value?.description ?? ''
 
-useSeoMeta(
-  {
-    title,
-    description,
-    ogTitle: title,
-    ogDescription: description,
-    ogUrl: canonical,
-    canonical: canonical.value,
-  } as any,
-)
+useSeoMeta({
+  title,
+  description,
+  ogTitle: title,
+  ogDescription: description,
+  ogUrl: canonical,
+  canonical,
+} as any)
 
-const schema = {
+const blogLd = {
   '@context': 'https://schema.org',
   '@type': 'BlogPosting',
   headline: title,
@@ -54,7 +52,7 @@ useHead({
   script: [
     {
       type: 'application/ld+json',
-      children: JSON.stringify(schema),
+      children: JSON.stringify(blogLd),
     } as any,
   ],
 })
