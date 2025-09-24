@@ -40,11 +40,13 @@ export async function fetchPosts(options: { limit?: number } = {}): Promise<Post
   const qc: QueryContentFn | undefined = (globalThis as { queryContent?: QueryContentFn })
     .queryContent
   if (!qc) return []
-  let chain = qc('/blog').sort({ date: -1 }).only(['_path', 'title', 'description', 'date'])
+  let chain = qc('/blog').only(['_path', 'title', 'description', 'date'])
   if (chain.where) {
     chain = chain.where({ draft: { $ne: true } })
-    if (chain.where) chain = chain.where({ _path: { $regex: '^/blog/' } })
+    if (chain.where)
+      chain = chain.where({ $or: [{ published: true }, { published: { $exists: false } }] })
   }
+  chain = chain.sort({ date: -1 })
   if (options.limit && chain.limit) chain = chain.limit(options.limit)
   const list = await chain.find()
   if (!Array.isArray(list)) return []

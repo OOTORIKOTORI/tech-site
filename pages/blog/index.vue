@@ -9,15 +9,15 @@
       <template v-if="posts && posts.length">
         <ul role="list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
           style="list-style: none; padding: 0; margin: 0;">
-          <li v-for="p in posts" :key="p._path" role="listitem">
-            <NuxtLink :to="p._path" :aria-label="`${p.title ?? 'Post'} の詳細を見る`" class="block h-full focus-ring">
-              <article :aria-labelledby="'post-' + p.slug"
+          <li v-for="post in posts" :key="post._path" role="listitem">
+            <NuxtLink :to="post._path" :aria-label="`${post.title ?? 'Post'} の詳細を見る`" class="block h-full focus-ring">
+              <article :aria-labelledby="'post-' + post.slug"
                 class="h-full rounded-lg border border-gray-200 bg-white p-4 shadow-sm hover:shadow transition-shadow">
                 <header>
-                  <h2 :id="'post-' + p.slug" class="m-0 text-lg font-semibold">{{ p.title }}</h2>
-                  <p class="mt-1 text-xs text-gray-500">{{ formatDateIso(p.date) }}</p>
+                  <h2 :id="'post-' + post.slug" class="m-0 text-lg font-semibold">{{ post.title }}</h2>
+                  <p class="mt-1 text-xs text-gray-500">{{ formatDateIso(post.date) }}</p>
                 </header>
-                <p v-if="p.description" class="mt-2 text-sm text-gray-700">{{ p.description }}</p>
+                <p v-if="post.description" class="mt-2 text-sm text-gray-700">{{ post.description }}</p>
               </article>
             </NuxtLink>
           </li>
