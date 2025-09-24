@@ -1,7 +1,5 @@
 <script setup lang="ts">
-// @ts-expect-error: Virtual module provided by Nuxt at runtime
-import { ContentDoc } from '#components'
-import { useRoute, useRuntimeConfig, useAsyncData, useSeoMeta, useHead } from '#imports'
+import { useRoute, useRuntimeConfig, useAsyncData, useSeoMeta, useHead, computed } from '#imports'
 
 const route = useRoute()
 const runtimeConfig = useRuntimeConfig()
@@ -11,10 +9,11 @@ const runtimeConfig = useRuntimeConfig()
 const qc: any = (globalThis as any).queryContent
 const { data } = await useAsyncData(`blog:${route.path}`, () => qc(route.path).findOne())
 const page = data.value as any
+const doc = data as any
 
 const siteOrigin: string = String(runtimeConfig.public?.siteOrigin || '')
 const url = new URL(route.path || '/', siteOrigin).toString()
-const canonical: string = (page?.canonical && String(page.canonical)) || url
+const canonical = computed(() => (doc.value?.canonical || url))
 
 const title: string = page?.title || ''
 const description: string = page?.description || ''
@@ -26,7 +25,7 @@ useSeoMeta(
     ogTitle: title,
     ogDescription: description,
     ogUrl: canonical,
-    canonical,
+    canonical: canonical.value,
   } as any,
 )
 
