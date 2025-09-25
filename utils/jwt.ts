@@ -27,7 +27,7 @@ function _u8ToB64(u8: Uint8Array): string {
 function _pemToDerU8(pem: string, label: string): Uint8Array {
   const re = new RegExp(`-----BEGIN ${label}-----(.*?)-----END ${label}-----`, 'ms')
   const m = pem.match(re)
-  const body = ((m && m[1]) ? m[1] : pem).replace(/[\r\n\s]/g, '')
+  const body = (m && m[1] ? m[1] : pem).replace(/[\r\n\s]/g, '')
   return _b64ToU8(body)
 }
 
@@ -68,7 +68,11 @@ export function decodeBase64Url(s: string): Uint8Array {
 }
 
 // ---- parseJwt ----
-export interface ParsedJwt { header: Record<string, unknown>; payload: Record<string, unknown>; signature: string }
+export interface ParsedJwt {
+  header: Record<string, unknown>
+  payload: Record<string, unknown>
+  signature: string
+}
 
 export function parseJwt(token: string): ParsedJwt {
   if (!token || typeof token !== 'string') throw new Error('JWTの形式が正しくありません')
@@ -82,13 +86,15 @@ export function parseJwt(token: string): ParsedJwt {
   try {
     header = JSON.parse(new TextDecoder().decode(decodeBase64Url(hSeg)))
   } catch (e) {
-    if (e instanceof Error && /Base64URL形式/.test(e.message)) throw new Error('Base64URL形式が正しくありません')
+    if (e instanceof Error && /Base64URL形式/.test(e.message))
+      throw new Error('Base64URL形式が正しくありません')
     throw new Error('有効なJSON形式ではありません')
   }
   try {
     payload = JSON.parse(new TextDecoder().decode(decodeBase64Url(pSeg)))
   } catch (e) {
-    if (e instanceof Error && /Base64URL形式/.test(e.message)) throw new Error('Base64URL形式が正しくありません')
+    if (e instanceof Error && /Base64URL形式/.test(e.message))
+      throw new Error('Base64URL形式が正しくありません')
     throw new Error('有効なJSON形式ではありません')
   }
   return { header, payload, signature }
@@ -103,15 +109,29 @@ export function isProbablyJwt(s: unknown): boolean {
 }
 
 // ---- verifyJwt ----
-export interface JwtVerifyError { code: string; message: string; hint?: string }
+export interface JwtVerifyError {
+  code: string
+  message: string
+  hint?: string
+}
 
 export async function verifyJwt(
   token: string,
-  opts: { expectedAlg: 'HS256' | 'RS256'; key: Uint8Array | string; currentTimeSec?: number; leewaySec?: number }
-): Promise<{ valid: boolean; header: Record<string, unknown> | null; payload: Record<string, unknown> | null; errors: JwtVerifyError[] }> {
+  opts: {
+    expectedAlg: 'HS256' | 'RS256'
+    key: Uint8Array | string
+    currentTimeSec?: number
+    leewaySec?: number
+  }
+): Promise<{
+  valid: boolean
+  header: Record<string, unknown> | null
+  payload: Record<string, unknown> | null
+  errors: JwtVerifyError[]
+}> {
   const errors: JwtVerifyError[] = []
   const addError = (code: string, message: string, hint?: string) => {
-    errors.push({ code, message, hint })
+    errors.push({ code, message, hint: hint ?? '' })
   }
 
   if (!token || typeof token !== 'string') {
@@ -167,7 +187,8 @@ export async function verifyJwt(
 
   try {
     if (header.alg === 'HS256') {
-      const keyBytes: Uint8Array = typeof opts.key === 'string' ? new TextEncoder().encode(opts.key) : opts.key
+      const keyBytes: Uint8Array =
+        typeof opts.key === 'string' ? new TextEncoder().encode(opts.key) : opts.key
       // crypto.subtle.importKey expects BufferSource (ArrayBuffer or ArrayBufferView)
       const cryptoKey = await crypto.subtle.importKey(
         'raw',
@@ -177,10 +198,20 @@ export async function verifyJwt(
         ['verify']
       )
       const sig = decodeBase64Url(sigSeg)
-      signatureValid = await crypto.subtle.verify('HMAC', cryptoKey, sig as unknown as BufferSource, signingInputU8 as unknown as BufferSource)
+      signatureValid = await crypto.subtle.verify(
+        'HMAC',
+        cryptoKey,
+        sig as unknown as BufferSource,
+        signingInputU8 as unknown as BufferSource
+      )
     } else if (header.alg === 'RS256') {
-      const keyStr = typeof opts.key === 'string' ? opts.key.trim() : new TextDecoder().decode(opts.key).trim()
-      if (/BEGIN PRIVATE KEY/.test(keyStr) || /BEGIN CERTIFICATE/.test(keyStr) || /BEGIN RSA PUBLIC KEY/.test(keyStr)) {
+      const keyStr =
+        typeof opts.key === 'string' ? opts.key.trim() : new TextDecoder().decode(opts.key).trim()
+      if (
+        /BEGIN PRIVATE KEY/.test(keyStr) ||
+        /BEGIN CERTIFICATE/.test(keyStr) ||
+        /BEGIN RSA PUBLIC KEY/.test(keyStr)
+      ) {
         addError('ERR_KEY_FORMAT', '公開鍵(-----BEGIN PUBLIC KEY-----) のみ受け付けます')
         return { valid: false, header, payload, errors }
       }
@@ -192,14 +223,27 @@ export async function verifyJwt(
       try {
         pub = await _importRsaSpkiPublicKey(keyStr)
       } catch (e: unknown) {
-        addError('ERR_KEY_IMPORT', '公開鍵の読み込みに失敗しました', e instanceof Error ? e.message : undefined)
+        addError(
+          'ERR_KEY_IMPORT',
+          '公開鍵の読み込みに失敗しました',
+          e instanceof Error ? e.message : undefined
+        )
         return { valid: false, header, payload, errors }
       }
-  const sig = decodeBase64Url(sigSeg)
-      signatureValid = await crypto.subtle.verify('RSASSA-PKCS1-v1_5', pub, sig as unknown as BufferSource, signingInputU8 as unknown as BufferSource)
+      const sig = decodeBase64Url(sigSeg)
+      signatureValid = await crypto.subtle.verify(
+        'RSASSA-PKCS1-v1_5',
+        pub,
+        sig as unknown as BufferSource,
+        signingInputU8 as unknown as BufferSource
+      )
     }
   } catch (e: unknown) {
-    addError('ERR_VERIFY_EXCEPTION', '署名検証処理で例外', e instanceof Error ? e.message : undefined)
+    addError(
+      'ERR_VERIFY_EXCEPTION',
+      '署名検証処理で例外',
+      e instanceof Error ? e.message : undefined
+    )
     return { valid: false, header, payload, errors }
   }
 
@@ -210,8 +254,10 @@ export async function verifyJwt(
   if (payload && typeof payload === 'object') {
     const now = opts.currentTimeSec ?? Math.floor(Date.now() / 1000)
     const leeway = opts.leewaySec ?? 0
-    if (typeof payload.exp === 'number' && now > payload.exp + leeway) addError('ERR_EXPIRED', 'トークンが期限切れです')
-    if (typeof payload.nbf === 'number' && now + leeway < payload.nbf) addError('ERR_NOT_BEFORE', 'nbf前です')
+    if (typeof payload.exp === 'number' && now > payload.exp + leeway)
+      addError('ERR_EXPIRED', 'トークンが期限切れです')
+    if (typeof payload.nbf === 'number' && now + leeway < payload.nbf)
+      addError('ERR_NOT_BEFORE', 'nbf前です')
   }
 
   const valid = errors.length === 0 && signatureValid
@@ -225,15 +271,26 @@ export async function fetchJwks(url: string): Promise<{ keys?: unknown[]; [k: st
   return res.json()
 }
 
-interface JwksRsaKey { kty: 'RSA'; kid?: string; use?: string; alg?: string; n: string; e: string; [k: string]: unknown }
+interface JwksRsaKey {
+  kty: 'RSA'
+  kid?: string
+  use?: string
+  alg?: string
+  n: string
+  e: string
+  [k: string]: unknown
+}
 function isJwksRsaKey(x: unknown): x is JwksRsaKey {
   if (!x || typeof x !== 'object') return false
   const o = x as Record<string, unknown>
   return o.kty === 'RSA' && typeof o.n === 'string' && typeof o.e === 'string'
 }
-export function findJwksRsaKeyByKid(jwks: { keys?: unknown[] } | null | undefined, kid: string): { n: string; e: string } | null {
+export function findJwksRsaKeyByKid(
+  jwks: { keys?: unknown[] } | null | undefined,
+  kid: string
+): { n: string; e: string } | null {
   if (!jwks || !Array.isArray(jwks.keys)) return null
-  const k = jwks.keys.find((x) => isJwksRsaKey(x) && x.kid === kid)
+  const k = jwks.keys.find(x => isJwksRsaKey(x) && x.kid === kid)
   return k && isJwksRsaKey(k) ? { n: k.n, e: k.e } : null
 }
 

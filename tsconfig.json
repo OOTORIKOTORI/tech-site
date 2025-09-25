@@ -1,28 +1,3 @@
 {
-  // https://nuxt.com/docs/guide/concepts/typescript
-  "extends": "./.nuxt/tsconfig.json",
-  "compilerOptions": {
-    "types": ["node", "vitest/globals"],
-    "moduleResolution": "bundler",
-    "target": "ES2022",
-    "lib": ["ES2022", "DOM"],
-    "strict": true,
-    "noImplicitAny": true,
-    "noImplicitReturns": true,
-    "noImplicitThis": true,
-    "strictNullChecks": true,
-    "strictFunctionTypes": true,
-    "strictBindCallApply": true,
-    "strictPropertyInitialization": true,
-    "noImplicitOverride": true,
-    "exactOptionalPropertyTypes": true,
-    "baseUrl": ".",
-    "paths": {
-      "~/*": ["./*"],
-      "@/*": ["./*"],
-      "#imports": ["tests/_stubs/nuxt-imports.ts"]
-    }
-  },
-  "files": [],
-  "include": ["types/**/*.d.ts", "**/*.ts", "**/*.tsx", "**/*.vue"]
+  "extends": "./.nuxt/tsconfig.json"
 }

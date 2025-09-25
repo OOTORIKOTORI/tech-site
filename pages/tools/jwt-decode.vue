@@ -194,9 +194,9 @@
               <div class="space-y-1">
                 <div v-for="e in sortedErrors" :key="e.code" class="text-xs flex gap-2">
                   <span class="inline-block px-2 py-0.5 rounded bg-red-100 text-red-700 font-semibold">{{ e.code
-                  }}</span>
+                    }}</span>
                   <span class="text-gray-800">{{ e.message }}<span v-if="e.hint" class="text-gray-500"> ({{ e.hint
-                  }})</span></span>
+                      }})</span></span>
                 </div>
               </div>
             </template>
@@ -321,12 +321,17 @@ async function doVerify() {
       const k = findJwksRsaKeyByKid({ keys: jwks.keys }, rawHeader.kid)
       if (k) { const pem = buildRsaPemFromModExp(k.n as string, k.e as string); if (pem) useKey = pem }
     }
-    const res = await verifyJwt(token.value, {
-      expectedAlg: verifyInput.expectedAlg as any || undefined,
-      key: useKey,
-      currentTimeSec: verifyInput.nowOverride || undefined,
-      leewaySec: verifyInput.leewaySec
-    })
+    const opts: any = {
+      expectedAlg: verifyInput.expectedAlg as any,
+      key: useKey
+    }
+    if (typeof verifyInput.nowOverride === 'number' && !Number.isNaN(verifyInput.nowOverride)) {
+      opts.currentTimeSec = verifyInput.nowOverride
+    }
+    if (typeof verifyInput.leewaySec === 'number' && !Number.isNaN(verifyInput.leewaySec)) {
+      opts.leewaySec = verifyInput.leewaySec
+    }
+    const res = await verifyJwt(token.value, opts)
     Object.assign(verifyState, res)
   } catch (e: any) { verifyState.errors.push({ code: 'UI_EXCEPTION', message: 'UI処理中例外', hint: e.message }) }
   finally { verifying.value = false }

@@ -13,6 +13,7 @@ interface QueryChain<T> {
   where?(cond: Record<string, unknown>): QueryChain<T>
   sort?(sorter: Record<string, 1 | -1>): QueryChain<T>
   only?<K extends keyof T & string>(keys: K[]): QueryChain<Pick<T, K>>
+  limit?(n: number): QueryChain<T>
   find?(): Promise<T[]>
 }
 
@@ -38,7 +39,7 @@ function slugFromPath(path: string): string {
   return seg[seg.length - 1] || path.replaceAll('/', '-')
 }
 
-export async function fetchPosts(): Promise<PostListItem[]> {
+export async function fetchPosts(opts?: { limit?: number }): Promise<PostListItem[]> {
   try {
     const qc: QueryContentFn | undefined = (globalThis as { queryContent?: QueryContentFn })
       .queryContent
@@ -51,6 +52,7 @@ export async function fetchPosts(): Promise<PostListItem[]> {
     if (chain.where)
       chain = chain.where({ $or: [{ published: true }, { published: { $exists: false } }] })
     if (chain.sort) chain = chain.sort({ date: -1 })
+    if (opts?.limit && chain.limit) chain = chain.limit(opts.limit)
     let list: any[]
     try {
       list = await chain.find()
