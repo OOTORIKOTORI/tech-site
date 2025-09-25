@@ -15,8 +15,14 @@
     "strictBindCallApply": true,
     "strictPropertyInitialization": true,
     "noImplicitOverride": true,
-    "exactOptionalPropertyTypes": true
+    "exactOptionalPropertyTypes": true,
+    "baseUrl": ".",
+    "paths": {
+      "~/*": ["./*"],
+      "@/*": ["./*"],
+      "#imports": ["tests/_stubs/nuxt-imports.ts"]
+    }
   },
   "files": [],
-  "include": ["types/**/*.d.ts"]
+  "include": ["types/**/*.d.ts", "**/*.ts", "**/*.tsx", "**/*.vue"]
 }

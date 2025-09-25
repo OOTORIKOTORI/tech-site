@@ -1,20 +1,22 @@
 export interface PostListItem {
   _path: string
   title?: string
-  description?: string
   date?: string
-  slug: string
+  description?: string
+  tags?: string[]
+  draft?: boolean
+  published?: boolean
+  slug?: string
 }
 
 interface QueryChain<T> {
   where?(cond: Record<string, unknown>): QueryChain<T>
-  sort(sorter: Record<string, 1 | -1>): QueryChain<T>
-  only<K extends keyof T & string>(keys: K[]): QueryChain<Pick<T, K>>
-  limit?(n: number): QueryChain<T>
-  find(): Promise<T[]>
+  sort?(sorter: Record<string, 1 | -1>): QueryChain<T>
+  only?<K extends keyof T & string>(keys: K[]): QueryChain<Pick<T, K>>
+  find?(): Promise<T[]>
 }
 
-type QueryContentFn = (path?: string) => QueryChain<Omit<PostListItem, 'slug'>>
+type QueryContentFn = (path?: string) => QueryChain<any>
 
 function pad(n: number): string {
   return n < 10 ? '0' + n : String(n)
@@ -36,19 +38,28 @@ function slugFromPath(path: string): string {
   return seg[seg.length - 1] || path.replaceAll('/', '-')
 }
 
-export async function fetchPosts(options: { limit?: number } = {}): Promise<PostListItem[]> {
-  const qc: QueryContentFn | undefined = (globalThis as { queryContent?: QueryContentFn })
-    .queryContent
-  if (!qc) return []
-  let chain = qc('/blog').only(['_path', 'title', 'description', 'date'])
-  if (chain.where) {
-    chain = chain.where({ draft: { $ne: true } })
+export async function fetchPosts(): Promise<PostListItem[]> {
+  try {
+    const qc: QueryContentFn | undefined = (globalThis as { queryContent?: QueryContentFn })
+      .queryContent
+    if (!qc) return []
+    let chain: any = qc('/blog')
+    if (!chain || !chain.where || !chain.find) return []
+    if (chain.only)
+      chain = chain.only(['_path', 'title', 'description', 'date', 'tags', 'draft', 'published'])
+    if (chain.where) chain = chain.where({ draft: { $ne: true } })
     if (chain.where)
       chain = chain.where({ $or: [{ published: true }, { published: { $exists: false } }] })
+    if (chain.sort) chain = chain.sort({ date: -1 })
+    let list: any[]
+    try {
+      list = await chain.find()
+    } catch {
+      return []
+    }
+    if (!Array.isArray(list)) return []
+    return list.map(p => ({ ...p, slug: p.slug ?? slugFromPath(p._path) }))
+  } catch {
+    return []
   }
-  chain = chain.sort({ date: -1 })
-  if (options.limit && chain.limit) chain = chain.limit(options.limit)
-  const list = await chain.find()
-  if (!Array.isArray(list)) return []
-  return list.map(p => ({ ...p, slug: slugFromPath(p._path) }))
 }
