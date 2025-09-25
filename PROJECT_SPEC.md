@@ -122,7 +122,7 @@
 
 ## 🏗️ 技術スタック
 
-- **フレームワーク**: Nuxt 4
+- **フレームワーク**: Nuxt（v3+）
 - **言語**: TypeScript
 - **テスト**: Vitest
 - **スタイリング**: Tailwind CSS
@@ -318,3 +318,32 @@ pnpm typecheck; pnpm lint; pnpm test -- --run; pnpm build; node .\scripts\gen-me
 1. `content/blog/*.md` に Frontmatter（`title/description/date/tags/draft/canonical`）。
 2. 追加すると `/blog` 一覧へ自動反映。サイトマップ/RSS も postbuild で更新。
 3. 参考テンプレ（DOM×DOW の OR/AND と TZ の落とし穴）: `cron-or-and-jst.md`, `first-cron-tz.md`, `gha-cron-utc.md` など。
+
+---
+
+## Troubleshooting: /blog が "No posts yet" のとき
+
+確認順（上から潰す）:
+
+1. 配置: Markdown が `content/blog/*.md` に存在するか（パス/拡張子綴り含め再確認）。
+2. Frontmatter: `draft: false` か `draft` 未指定。`published: true` または `published` 未指定。例:
+
+```yaml
+---
+title: Sample
+date: 2025-01-01
+draft: false
+# published: true (省略可)
+---
+```
+
+3. 一覧クエリ条件: 下書き除外 & 公開判定。
+
+```js
+where({ draft: { $ne: true } })
+where({ $or: [{ published: true }, { published: { $exists: false } }] })
+```
+
+4. リンク: 一覧カードは `<NuxtLink :to="_path">` を使用。`_path` が欠落していないか（`only()` でフィールド削り過ぎていないか）を確認。
+
+補足: date が未来でも除外ロジックは現状なし（必要なら将来 `date <= today` 条件を追加検討）。

@@ -1,11 +1,11 @@
 ---
 title: Tools ヘルプ（Q&A）
-description: KOTORI Lab のツールに関するよくある質問と回答
+description: Migaki Explorer のツールに関するよくある質問と回答
 ---
 
 # Tools ヘルプ（Q&A）
 
-本ページは KOTORI Lab のツール（Cron JST / JWT など）に関する Q&A 集です。各項目は見出しにアンカーが付与されているため、`#` を付けたリンクで直接共有できます。
+本ページは Migaki Explorer のツール（Cron JST / JWT など）に関する Q&A 集です。各項目は見出しにアンカーが付与されているため、`#` を付けたリンクで直接共有できます。
 
 ## 共有リンクはどうやって作成しますか？ {#share-link}
 

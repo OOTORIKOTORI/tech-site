@@ -1,8 +1,6 @@
 # 磨きエクスプローラー — Tech Tools & Notes（開発者向けユーティリティ＋技術メモ集）
 
-> 運用の恒久ルールは **docs/HANDBOOK.md** を参照（Git 運用/OGP/CI/リリース規約など）。
-
-フロント/バックエンドの“毎回ググる小ワーク”を手元で安全・素早く検証できる軽量ツール（Cron / JWT など）と、実装運用の落とし穴を最小編集でまとめた短文ブログを提供するサイトです。ローカル完結と品質ゲートを重視しています。
+本リポジトリは「Cron / JWT などの小ワークを即検証できる軽量ツール」と「再発しがちな実務の落とし穴を最小編集で整理した短文ブログ」を統合したサイトです。依存固定と postbuild 検証による安全なローカル再現、小さく差分を出す文化、CI での型チェック / Lint / テスト / ビルド / メタ検証 / OGP スモーク / Lighthouse 通過を公開条件とする品質ゲートを重視します。恒久ルール/詳細手順は `PROJECT_SPEC.md` および **docs/HANDBOOK.md**（Git/OGP/CI/リリース規約）を参照してください。
 
 - 正式名: 『磨きエクスプローラー（Migaki Explorer）』
 - 表示/短縮名: Migaki Explorer（`<title>` / og:site_name / Organization.name / publisher.name）
@@ -40,6 +38,7 @@
 - 順序: install → typecheck → lint → test → build → postbuild（`--check-only` でホスト一致検証）→ smoke:og → LHCI。
 - meta-check では `NUXT_PUBLIC_SITE_ORIGIN=https://migakiexplorer.jp` を明示（`NUXT_PUBLIC_SITE_URL=''`）。
 - 具体例・閾値・テスト基盤の詳細は `PROJECT_SPEC.md` を参照。
+- Lighthouse の各スコア閾値（Accessibility ≥ 90 など）の正準値は `PROJECT_SPEC.md` を参照（README では要点のみ）。
 
 ---
 
