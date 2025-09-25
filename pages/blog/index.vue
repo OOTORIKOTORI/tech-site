@@ -28,7 +28,8 @@
   </div>
 </template>
 <script setup lang="ts">
-import { useAsyncData, useSeoMeta, useHead, queryContent } from '#imports'
+import { useAsyncData, useSeoMeta, useHead } from '#imports'
+import { queryContent } from '#content'
 import { formatDateIso } from '@/utils/date'
 import { useBreadcrumbJsonLd } from '@/composables/useBreadcrumbJsonLd'
 import { siteUrl } from '@/utils/siteUrl'
