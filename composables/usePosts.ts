@@ -1,5 +1,4 @@
-// NOTE: '#content' 直 import を避け、globalThis.queryContent (tests でスタブ) に依存。
-// ビルド時型エラー回避のため最低限の any 利用。
+// NOTE: 必要時に動的 import で '#content' を解決
 
 export interface PostListItem {
   _path: string
@@ -27,10 +26,17 @@ function slugFromPath(p: string) {
 }
 
 export async function fetchPosts(opts?: { limit?: number }): Promise<PostListItem[]> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const qc: any = (globalThis as any).queryContent
+  // prefer global stub in tests; otherwise dynamic import
+  let qc: unknown = (globalThis as unknown as { queryContent?: unknown }).queryContent
+  if (typeof qc !== 'function') {
+    // eslint-disable-next-line no-new-func
+    const dynImport = new Function('s', 'return import(s)') as (s: string) => Promise<unknown>
+    const mod = (await dynImport('#content')) as { queryContent?: (path?: string) => unknown }
+    qc = mod.queryContent
+  }
   if (typeof qc !== 'function') return []
-  let q = qc('/blog') as QueryChain<PostListItem>
+  const qInit = (qc as (path?: string) => unknown)('/blog')
+  let q = qInit as QueryChain<PostListItem>
 
   // フィールド最小に絞る
   q =

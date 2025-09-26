@@ -26,6 +26,7 @@ export default defineConfig({
       '~': fileURLToPath(new URL('./', import.meta.url)),
       '@': fileURLToPath(new URL('./', import.meta.url)),
       '#imports': fileURLToPath(new URL('./tests/_stubs/nuxt-imports.ts', import.meta.url)),
+      '#content': fileURLToPath(new URL('./tests/_stubs/nuxt-content.ts', import.meta.url)),
     },
   },
 })

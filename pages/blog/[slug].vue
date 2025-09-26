@@ -4,10 +4,21 @@ import { useRoute, useRuntimeConfig, useAsyncData, useSeoMeta, useHead } from '#
 const route = useRoute()
 const runtimeConfig = useRuntimeConfig()
 
-// Nuxt tests expose queryContent via globalThis; use it directly here
+// Resolve queryContent at runtime: prefer test stub on global, otherwise lazy-import @nuxt/content
+// Prefer sync path under tests; fallback to runtime dynamic import in real build
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const qc: any = (globalThis as any).queryContent
-const { data } = await useAsyncData(`blog:${route.path}`, () => qc(route.path).findOne())
+const g: any = globalThis as any
+let data: any
+if (typeof g.queryContent === 'function') {
+  ({ data } = await useAsyncData(`blog:${route.path}`, () => g.queryContent(route.path).findOne()))
+} else {
+  // Hide import from bundler to avoid rollup resolving '#content' at build time
+  // eslint-disable-next-line no-new-func
+  const dynImport = new Function('s', 'return import(s)') as (s: string) => Promise<any>
+  const mod = await dynImport('#content')
+  const qc = mod.queryContent
+    ; ({ data } = await useAsyncData(`blog:${route.path}`, () => qc(route.path).findOne()))
+}
 const page = data.value as any
 const doc = data as any
 

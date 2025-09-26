@@ -4,7 +4,8 @@
       <h1 id="hero-title" style="font-size: 2rem; font-weight: 800; margin: 0;">{{ display }}</h1>
       <p style="margin:.5rem 0 1.25rem 0; color:#4b5563; font-size:1rem;">{{ tagline }}</p>
       <div style="display:flex; gap:.75rem; flex-wrap: wrap;">
-        <NuxtLink to="/tools/cron-jst" aria-label="Open Cron Tool" class="btn-primary focus-ring">Open Cron Tool
+        <NuxtLink to="/tools/cron-jst" aria-label="Open Cron Tool" class="btn-primary focus-ring">
+Open Cron Tool
         </NuxtLink>
         <NuxtLink to="/blog" aria-label="Open Blog" class="btn-secondary focus-ring">Open Blog</NuxtLink>
       </div>
@@ -17,7 +18,8 @@
           style="border:1px solid #e5e7eb; border-radius:.5rem; padding:1rem; background:#fff;">
           <article>
             <h3 style="margin:0; font-size:1.05rem;">
-              <NuxtLink :to="p._path" class="focus-ring" style="text-decoration:none; color:inherit;">{{ p.title }}
+              <NuxtLink :to="p._path" class="focus-ring" style="text-decoration:none; color:inherit;">
+{{ p.title }}
               </NuxtLink>
             </h3>
             <p style="margin:.25rem 0 0; color:#6b7280; font-size:.8rem;">{{ formatDateIso(p.date) }}</p>
