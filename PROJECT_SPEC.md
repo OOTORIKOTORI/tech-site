@@ -89,6 +89,9 @@
 - `server/api/og/[slug].png.ts`: 既定は 302 で `/og-default.png` にフォールバック（no-store / X-OG-Fallback）。`ENABLE_DYNAMIC_OG=1` で軽量 PNG を動的生成（成功時 200、失敗時は即 302）。
 - Cron 仕様: `utils/cron.ts` に実装。`dowDomMode` と `'*'` の解釈（OR=unrestricted / AND=always-true）。
 - Auto-reload: `configVersion` / `settingsUpdatedAt` 変化 → 次 tick（10s）で再読込。
+- dev 安定メモ:
+  - `package.json` に `"imports": { "#content/server": "@nuxt/content/dist/runtime/server/index.mjs" }` を設定
+  - `nuxt.config.ts` の `nitro.prerender.ignore` で `/blog/**` `/api/**` を prerender 対象外（dev 向けの明示メモ）
 
 ### サイト設定 / ブランド名（一元化）
 
@@ -223,11 +226,12 @@ pnpm typecheck; pnpm lint; pnpm test -- --run; pnpm build; node .\scripts\gen-me
 
 ### 実装補足
 
-- `nuxt.config.ts` Nitro 設定: prerender.ignore で内部 API を静的化しない。
+- `nuxt.config.ts` Nitro 設定: prerender.ignore で内部 API を静的化しない（dev 向けに `/blog/**` `/api/**` を対象外にする）。
 - `error.vue`: 404/500 の簡易ページ。
 - テスト: `tests/api/og.spec.ts`（OGP 200/302 と no-store ヘッダ）/ `tests/scripts/gen-meta.sitemap.test.ts`（サイトマップとホスト検証）。
 - JWT: `test/jwt-es256.spec.ts` で ES256 の DER ↔ JOSE 変換。
 - Nuxt グローバルスタブ: プラグイン/グローバル依存の安定化は app レベルのモック（`tests/setup/global-stubs.ts` 等）＋ `__mocks__` ディレクトリ運用で行う。テストは app-level mock を優先し、個別コンポーネントは必要最小のスタブに留める。
+- Blog v2（実験/一時運用）: `/api/blogv2/list` と `/api/blogv2/doc` を暫定提供。当面は「確実に出す」ためのフォールバック可（将来削除前提）。
 
 ### テストノイズ低減（Nuxt グローバルスタブ）
 
@@ -347,3 +351,26 @@ where({ $or: [{ published: true }, { published: { $exists: false } }] })
 4. リンク: 一覧カードは `<NuxtLink :to="_path">` を使用。`_path` が欠落していないか（`only()` でフィールド削り過ぎていないか）を確認。
 
 補足: date が未来でも除外ロジックは現状なし（必要なら将来 `date <= today` 条件を追加検討）。
+
+方針メモ（取得ポリシー / 実装上の注意）:
+
+- “落とす条件だけ厳格” = `draft !== true && published !== false`（未指定は表示）
+- 取得は 1 経路に統一。リンクは `_path` を使用し、テンプレ側の二重フィルタは禁止
+- dev の SQLite コネクタ差を踏まえ、`$regex` / `$exists` は極力避ける（安定性重視）
+
+補遺（Blog v2 暫定 API の安定運用メモ）:
+
+- `/api/blogv2/list` はコレクションごとに安全な select を行う。
+  - blog: optional カラム（例: `updated`）を SQL で直接 SELECT しない。DB から全件取得して JS でマップ（`_path/_id`）。
+  - docs: `content/docs` ディレクトリが存在する場合のみクエリする（存在しない場合はスキップ）。
+  - JSON では `_path/_id` にマップして返す（safe‑select をやめ JS map に一本化）。
+- 例外は握りつぶし、`200` として `{ blog:[], docs:[], errors:[{collection,message}] }` を返す。
+- 表示判定は文字列ブール対応で `draft !== true && published !== false`（`'true'/'false'` を含む）。
+- コネクタ依存の `$regex` / `$exists` は使用しない。
+
+### Troubleshooting: /blog/[slug] で 500（ContentDoc 解決失敗）
+
+- 動的 import（例: `new Function('s', 'return import(s)')` 経由で `'#content'` を読み込む）を使用しない。
+- 代わりに静的 import を使用する: `import { queryContent } from '#content'`
+- ページ側では `<ContentRenderer :value="doc" />` で描画し、グローバル登録の `<ContentDoc>` に依存しない。
+- SSR で `doc` が無い場合は 404 を投げる（500 にしない）。

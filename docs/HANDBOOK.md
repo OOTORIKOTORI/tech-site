@@ -86,6 +86,7 @@
 - Release: 手動で `git tag vX.Y.Z && git push --follow-tags`。ノートは簡潔に。
 - Optional: Manifest（`name`/`short_name`）のブランド準拠を確認（任意）。
 - Logging: 機密を出さない。`LOG_OG=1` は短時間スポットのみ。
+- /blog 表示（>0 件）確認と `blogv2` API（`/api/blogv2/list` `/api/blogv2/doc`）の一時運用メモ確認（将来削除前提）。
 
 ### PR 本文テンプレ（コピペ用）
 

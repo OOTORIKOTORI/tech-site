@@ -4,6 +4,9 @@ export default defineNuxtConfig({
   modules: ['@nuxt/content', '@nuxtjs/tailwindcss', '@nuxtjs/sitemap'],
   css: ['@@/assets/css/tailwind.css'],
   pages: true,
+  alias: {
+    '#content/server': '@nuxt/content/nitro',
+  },
 
   tailwindcss: {
     cssPath: '@@/assets/css/tailwind.css',
@@ -42,17 +45,33 @@ export default defineNuxtConfig({
     xsl: false,
     defaults: { changefreq: 'weekly' },
   },
+  // 静的化対象から除外
+  routeRules: {
+    '/**': { prerender: false },
+    '/blog': { prerender: false },
+    '/blog/**': { prerender: false },
+    '/api/**': { prerender: false },
+  },
   nitro: {
+    alias: {
+      '#content/server': '@nuxt/content/nitro',
+    },
     routeRules: {
       '/assets/**': { headers: { 'cache-control': 'public, max-age=31536000, immutable' } },
       '/favicon.ico': { headers: { 'cache-control': 'public, max-age=86400' } },
       '/sitemap.xml': { headers: { 'cache-control': 'public, max-age=3600' } },
       '/robots.txt': { headers: { 'cache-control': 'public, max-age=3600' } },
       '/api/og/**': { headers: { 'Cache-Control': 'no-store' } },
+      // v2 blog/API は動的に提供するため静的化しない
+      '/blog': { prerender: false },
+      '/blog/**': { prerender: false },
+      '/api/**': { prerender: false },
     },
     prerender: {
       // 内部APIは静的化しない
-      ignore: ['/__nuxt_content/**'],
+      ignore: ['/__nuxt_content/**', '/blog', '/blog/**', '/api/**'],
+      crawlLinks: false,
+      routes: [],
       // 念のため：取りこぼしがあってもビルド継続
       failOnError: false,
     },
@@ -78,4 +97,5 @@ export default defineNuxtConfig({
       link: [],
     },
   },
+  vite: { resolve: { alias: { '#content/server': '@nuxt/content/nitro' } } },
 })

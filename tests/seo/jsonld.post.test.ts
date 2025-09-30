@@ -62,13 +62,16 @@ beforeEach(() => {
     findOne: () => makeDoc(),
     findSurround: () => [null, null],
   })
+  // definePageMeta stub for Nuxt SFC
+  // @ts-expect-error test stub
+  globalThis.definePageMeta = () => {}
   // resolveSiteUrl used by page imports
   vi.resetModules()
 })
 
 describe('pages/blog/[slug].vue JSON-LD', () => {
   it('injects BlogPosting JSON-LD via children with @type and headline', async () => {
-    const mod = await import('@/pages/blog/[slug].vue')
+    const mod = await import('@/pages/blog/[...slug].vue')
     const Page = mod.default
 
     const Wrapper = defineComponent({

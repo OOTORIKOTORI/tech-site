@@ -29,7 +29,7 @@ function wrapperOf(component: any) {
   })
 }
 
-describe('pages/blog/[slug].vue render + SEO', () => {
+describe('pages/blog/[...slug].vue render + SEO', () => {
   let seoSpy: ReturnType<typeof vi.fn>
 
   beforeEach(() => {
@@ -59,10 +59,13 @@ describe('pages/blog/[slug].vue render + SEO', () => {
     globalThis.useRuntimeConfig = () => ({
       public: { siteOrigin: 'https://migakiexplorer.jp', siteName: '磨きエクスプローラー' },
     })
+    // definePageMeta stub for Nuxt SFC
+    // @ts-expect-error test stub
+    globalThis.definePageMeta = () => {}
   })
 
   it('calls useSeoMeta with title and canonical from frontmatter', async () => {
-    const mod = await import('@/pages/blog/[slug].vue')
+    const mod = await import('@/pages/blog/[...slug].vue')
     const Comp = wrapperOf(mod.default)
     const wrapper = mount(Comp as any, {
       global: {

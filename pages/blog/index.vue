@@ -1,51 +1,67 @@
 <template>
-  <!-- replaced outer <main> with <div> to avoid duplicate main with layout -->
-  <div class="container" style="max-width: 48rem; margin: 0 auto; padding: 2rem 1rem;">
-    <header>
-      <h1 style="font-size: 1.5rem; font-weight: 700;">Blog</h1>
-      <p style="color:#555; font-size: .9rem;">開発ノウハウやツール設計の考察メモ。</p>
-    </header>
-    <section aria-live="polite" style="margin-top: 1.5rem;">
-      <template v-if="posts && posts.length">
-        <ul role="list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
-          style="list-style: none; padding: 0; margin: 0;">
-          <li v-for="post in posts" :key="post._path" role="listitem">
-            <NuxtLink :to="post._path" :aria-label="`${post.title ?? 'Post'} の詳細を見る`" class="block h-full focus-ring">
-              <article :aria-labelledby="'post-' + post.slug"
-                class="h-full rounded-lg border border-gray-200 bg-white p-4 shadow-sm hover:shadow transition-shadow">
-                <header>
-                  <h2 :id="'post-' + post.slug" class="m-0 text-lg font-semibold">{{ post.title }}</h2>
-                  <p class="mt-1 text-xs text-gray-500">{{ formatDateIso(post.date) }}</p>
-                </header>
-                <p v-if="post.description" class="mt-2 text-sm text-gray-700">{{ post.description }}</p>
-              </article>
-            </NuxtLink>
-          </li>
-        </ul>
-      </template>
-      <p v-else role="status" style="color:#555;">No posts yet</p>
-    </section>
-  </div>
+  <main class="mx-auto max-w-3xl px-4 py-10">
+    <h1 class="text-3xl font-semibold mb-6">Blog</h1>
+
+    <div v-if="error" class="text-red-600">Failed to load posts: {{ error.statusMessage || error.message }}</div>
+
+    <template v-else>
+      <p v-if="items.length === 0" class="text-gray-500">No posts yet</p>
+
+      <ul v-else role="list" class="space-y-6">
+        <li v-for="p in items" :key="p._id || p._path" role="listitem">
+          <NuxtLink class="text-xl font-medium underline" :to="p._path">{{ p.title || p._path }}</NuxtLink>
+          <p v-if="p.description" class="text-gray-600">{{ p.description }}</p>
+          <p class="text-gray-400 text-sm">{{ formatDateIso(p.date || p.updated) }}</p>
+        </li>
+      </ul>
+
+      <!-- デバッグは“常時表示” -->
+      <section class="mt-10 text-sm text-gray-600 space-y-2">
+        <div><b>fallback:</b> {{ data?.debug?.fallback }}</div>
+        <div>
+          <b>allCount:</b> {{ data?.debug?.allCount }} / <b>blogOnlyCount:</b> {{
+            data?.debug?.blogOnlyCount }}
+        </div>
+        <div><b>samplePaths:</b> <code>{{ data?.debug?.samplePaths }}</code></div>
+        <div>
+          <a class="underline" href="/__nuxt_content/blog/sql_dump.txt"
+            target="_blank">/__nuxt_content/blog/sql_dump.txt</a>
+          &nbsp;/&nbsp;
+          <a class="underline" href="/__nuxt_content/docs/sql_dump.txt"
+            target="_blank">/__nuxt_content/docs/sql_dump.txt</a>
+        </div>
+      </section>
+    </template>
+  </main>
 </template>
 <script setup lang="ts">
-import { useAsyncData, useSeoMeta, useHead } from '#imports'
+import { useFetch } from '#imports'
 import { formatDateIso } from '@/utils/date'
-import { useBreadcrumbJsonLd } from '@/composables/useBreadcrumbJsonLd'
-import { siteUrl } from '@/utils/siteUrl'
-import { fetchPosts, type PostListItem } from '~/composables/usePosts'
-const { data } = await useAsyncData('blog-list', () => fetchPosts())
-const posts = (data.value ?? []) as PostListItem[]
+type BlogV2Item = {
+  _id?: string
+  _path?: string
+  title?: string
+  description?: string
+  date?: string
+  updated?: string
+  tags?: string[]
+  draft?: boolean | string
+  published?: boolean | string
+}
+type BlogV2ListLegacy = { count?: number; items?: BlogV2Item[]; debug?: Record<string, unknown> }
+type BlogV2ListNew = { source?: string; blog?: BlogV2Item[]; docs?: any[]; errors?: any[] }
+const { data, error } = await useFetch<BlogV2ListLegacy & BlogV2ListNew>('/api/blogv2/list', { server: true })
 
-useHead({ link: [{ rel: 'canonical', href: siteUrl('/blog') }] })
-useSeoMeta({
-  title: 'Blog',
-  description: '開発ノウハウやツール設計の考察メモ。',
-  ogTitle: 'Blog',
-  ogUrl: siteUrl('/blog'),
-})
+const truthy = (v: any) => v === true || v === 'true'
+const falsy = (v: any) => v === false || v === 'false'
+const visible = (it: any) => !truthy(it?.draft) && !falsy(it?.published)
 
-useBreadcrumbJsonLd([
-  { name: 'Home', url: siteUrl('/') },
-  { name: 'Blog', url: siteUrl('/blog') },
-])
+const raw: BlogV2Item[] = ((data as any)?.value?.items ?? (data as any)?.value?.blog ?? []) as any
+const items: BlogV2Item[] = (Array.isArray(raw) ? raw : [])
+  .filter(visible)
+  .sort(
+    (a, b) =>
+      new Date((b?.date as any) ?? (b?.updated as any) ?? 0).getTime() -
+      new Date((a?.date as any) ?? (a?.updated as any) ?? 0).getTime()
+  )
 </script>

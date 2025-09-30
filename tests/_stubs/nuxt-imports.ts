@@ -7,6 +7,39 @@ const g: any = globalThis as any
 
 export const useRoute: AnyFn = (...args) => g.useRoute?.(...args)
 export const useAsyncData: AnyFn = (...args) => g.useAsyncData?.(...args)
+export const useFetch: AnyFn = async (url: string) => {
+  // When testing our blog v2 list page, synthesize API from queryContent stub
+  if (typeof url === 'string' && url.includes('/api/blogv2/list')) {
+    const compute = async () => {
+      try {
+        const q = g.queryContent?.()
+        const all =
+          (await q?.only?.(['_path', 'title', 'description', 'date', 'updated'])?.find?.()) ?? []
+        const blogOnly = all.filter(
+          (p: any) =>
+            typeof p?._path === 'string' && (p._path === '/blog' || p._path.startsWith('/blog/'))
+        )
+        const fallback = blogOnly.length === 0
+        const items = (fallback ? all.slice(0, 10) : blogOnly).sort(
+          (a: any, b: any) =>
+            new Date(b?.date ?? b?.updated ?? 0).getTime() -
+            new Date(a?.date ?? a?.updated ?? 0).getTime()
+        )
+        return { count: items.length, items, debug: { fallback } }
+      } catch {
+        return { count: 0, items: [], debug: { fallback: true } }
+      }
+    }
+    // Return a ref-like object so Vue template auto-unwrapping works in tests
+    const result = await compute()
+    return { data: { value: result, __v_isRef: true } }
+  }
+  // Fallback: approximate useFetch via useAsyncData if available
+  if (typeof g.useAsyncData === 'function') {
+    return g.useAsyncData(url, async () => (g.$fetch ? g.$fetch(url) : undefined))
+  }
+  return { data: { value: undefined } }
+}
 export const createError: AnyFn = (...args) => g.createError?.(...args)
 export const useHead: AnyFn = (...args) => g.useHead?.(...args)
 export const useSeoMeta: AnyFn = (...args) => g.useSeoMeta?.(...args)

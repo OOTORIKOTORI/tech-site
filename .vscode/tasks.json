@@ -493,6 +493,143 @@
 				"--run"
 			],
 			"group": "test"
+		},
+		{
+			"label": "Typecheck (one-off)",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"-s",
+				"typecheck"
+			],
+			"group": "test"
+		},
+		{
+			"label": "Run Vitest Once (one-off)",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"-s",
+				"test",
+				"--",
+				"--run"
+			],
+			"group": "test"
+		},
+		{
+			"label": "Run Vitest Once (re-run)",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"-s",
+				"test",
+				"--",
+				"--run"
+			],
+			"group": "test"
+		},
+		{
+			"label": "Run Vitest Once (re-run 2)",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"-s",
+				"test",
+				"--",
+				"--run"
+			],
+			"group": "test"
+		},
+		{
+			"label": "Run Vitest Once (re-run 3)",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"-s",
+				"test",
+				"tests/pages/blog.index.render.test.ts",
+				"tests/pages/blog.index.date-format.test.ts",
+				"--",
+				"--run"
+			],
+			"group": "test"
+		},
+		{
+			"label": "Run Vitest Once (re-run 4)",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"-s",
+				"test",
+				"tests/pages/blog.index.render.test.ts",
+				"tests/pages/blog.index.date-format.test.ts",
+				"--",
+				"--run"
+			],
+			"group": "test"
+		},
+		{
+			"label": "Run Vitest Once (re-run 5)",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"-s",
+				"test",
+				"tests/pages/blog.index.render.test.ts",
+				"tests/pages/blog.index.date-format.test.ts",
+				"--",
+				"--run"
+			],
+			"group": "test"
+		},
+		{
+			"label": "Run Vitest Once (full suite)",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"-s",
+				"test",
+				"--",
+				"--run"
+			],
+			"group": "test"
+		},
+		{
+			"label": "Typecheck, Lint, Test (once) - via task",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"-s",
+				"typecheck",
+				";",
+				"pnpm -s lint",
+				";",
+				"pnpm -s test",
+				"--",
+				"--run"
+			]
+		},
+		{
+			"label": "Typecheck (one-off)",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"-s",
+				"typecheck"
+			],
+			"group": "test"
+		},
+		{
+			"label": "Run Vitest Once (one-off)",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"-s",
+				"test",
+				"--",
+				"--run"
+			],
+			"group": "test"
 		}
 	]
 }

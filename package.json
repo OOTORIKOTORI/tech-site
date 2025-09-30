@@ -38,6 +38,9 @@
   "engines": {
     "node": ">=18"
   },
+  "imports": {
+    "#content/server": "@nuxt/content/nitro"
+  },
   "devDependencies": {
     "@eslint/js": "^9.10.0",
     "@nuxtjs/sitemap": "latest",

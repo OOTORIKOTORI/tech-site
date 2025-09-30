@@ -26,6 +26,9 @@
 - OGP API: 既定は 302 で `/og-default.png` へフォールバック。`ENABLE_DYNAMIC_OG=1` で動的 PNG（失敗時は即 302）。`LOG_OG=1` で最小ログ。
 - CI 概要: install → typecheck → lint → test → build → postbuild（`--check-only`）→ smoke:og → LHCI（詳細は PROJECT_SPEC）。
 - （任意）Web App Manifest の `name`/`short_name` はブランド準拠。詳細は `PROJECT_SPEC.md` を参照。
+- /blog 方針: “落とす条件だけ厳格”=`draft !== true && published !== false`、取得は 1 経路・リンクは `_path`、テンプレ側の二重フィルタ禁止（詳細は SPEC）。
+- dev 安定: `package.json` の `imports.#content/server` 設定と `nuxt.config.ts` の `nitro.prerender.ignore` で `/blog/**` `/api/**` を静的化対象外（詳細は SPEC）。
+- Blog v2（暫定）: `/api/blogv2/list` `/api/blogv2/doc` を実験的に運用（将来削除前提、詳細は SPEC）。
 
 ---
 

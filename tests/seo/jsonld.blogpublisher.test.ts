@@ -55,6 +55,9 @@ beforeEach(() => {
     },
     findOne: () => makeDoc(),
   })
+  // definePageMeta stub for Nuxt SFC
+  // @ts-expect-error test stub
+  globalThis.definePageMeta = () => {}
   vi.resetModules()
 })
 
@@ -69,7 +72,7 @@ function getBlogJsonLd() {
 
 describe('BlogPosting publisher.logo', () => {
   it('has absolute publisher.logo and correct name', async () => {
-    const mod = await import('@/pages/blog/[slug].vue')
+    const mod = await import('@/pages/blog/[...slug].vue')
     const Page = mod.default
 
     const Wrapper = defineComponent({

@@ -73,11 +73,14 @@ describe('pages/blog/[slug].vue SEO', () => {
     globalThis.useRuntimeConfig = () => ({
       public: { siteOrigin: 'https://migakiexplorer.jp', siteName: '磨きエクスプローラー' },
     })
+    // definePageMeta stub for Nuxt SFC
+    // @ts-expect-error test stub
+    globalThis.definePageMeta = () => {}
   })
 
   it('passes canonical from frontmatter into useSeoMeta', async () => {
     // Dynamically import after mocks are in place
-    const mod = await import('@/pages/blog/[slug].vue')
+    const mod = await import('@/pages/blog/[...slug].vue')
     const BlogPage = mod.default
 
     // Wrap in Suspense to support async setup (due to top-level await)
