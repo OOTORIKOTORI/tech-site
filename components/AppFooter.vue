@@ -10,6 +10,8 @@
           <NuxtLink to="/terms" class="hover:underline focus-ring">利用規約</NuxtLink>
           <span class="text-gray-400">/</span>
           <NuxtLink to="/ads" class="hover:underline focus-ring">広告</NuxtLink>
+          <span class="text-gray-400">/</span>
+          <a href="/feed.xml" class="hover:underline focus-ring">RSS</a>
         </nav>
         <span v-if="appVersion" class="ml-auto text-gray-400" aria-label="App version">v{{ appVersion }}</span>
       </div>

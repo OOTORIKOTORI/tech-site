@@ -1,7 +1,7 @@
 // Blog v2 listing API: returns {id, path} arrays only; always 200; errors[] optional
 import { defineEventHandler } from 'h3'
 import { queryCollection } from '@nuxt/content/nitro'
-import { existsSync } from 'node:fs'
+import { existsSync, statSync } from 'node:fs'
 import { resolve } from 'node:path'
 
 // Resilient Blog v2 listing API
@@ -43,34 +43,106 @@ export default defineEventHandler(async event => {
     docsRows = []
   }
 
-  // id/path/title のみ返す（後方互換: 既存の id/path は維持）
-  const mapBlog = (x: unknown) => {
-    if (x && typeof x === 'object') {
-      const obj = x as Record<string, unknown>
-      return {
-        id: String(obj._id ?? obj.id ?? ''),
-        path: String(obj._path ?? obj.path ?? ''),
-        title: typeof obj.title === 'string' ? obj.title : undefined,
-      }
-    }
-    return { id: '', path: '', title: undefined }
+  // Helpers: title/description/updated normalization
+  const humanizeTitle = (p: string): string => {
+    const seg = (p || '').split('/').filter(Boolean).pop() || ''
+    const t = seg.replace(/[-_]+/g, ' ').trim()
+    return t ? t.charAt(0).toUpperCase() + t.slice(1) : 'Untitled'
   }
-  const mapDocs = (x: unknown) => {
-    if (x && typeof x === 'object') {
-      const obj = x as Record<string, unknown>
-      return {
-        id: String(obj._id ?? obj.id ?? ''),
-        path: String(obj._path ?? obj.path ?? ''),
-        title: typeof obj.title === 'string' ? obj.title : undefined,
-      }
+  const extractTextFromBody = (body: unknown): string => {
+    // Try to walk nuxt/content AST-like structure
+    const pieces: string[] = []
+    const walk = (node: unknown): void => {
+      if (!node || typeof node !== 'object') return
+      const n = node as { value?: unknown; text?: unknown; children?: unknown; body?: unknown }
+      if (typeof n.value === 'string') pieces.push(n.value)
+      if (typeof n.text === 'string') pieces.push(n.text)
+      const children = Array.isArray(n.children)
+        ? (n.children as unknown[])
+        : Array.isArray(n.body)
+        ? (n.body as unknown[])
+        : []
+      for (const c of children) walk(c)
     }
-    return { id: '', path: '', title: undefined }
+    if (typeof body === 'string') return body
+    walk(body)
+    return pieces.join(' ')
   }
-  const blog = (Array.isArray(blogRows) ? blogRows : []).map(mapBlog)
-  const docs = (Array.isArray(docsRows) ? docsRows : []).map(mapDocs)
+  const normalizeDesc = (obj: Record<string, unknown>): string => {
+    const descRaw = obj['description']
+    const bodyRaw = (obj as Record<string, unknown>)['body']
+    const excerptRaw = (obj as Record<string, unknown>)['excerpt']
+    const init =
+      (typeof descRaw === 'string' && descRaw) ||
+      extractTextFromBody(bodyRaw) ||
+      (typeof excerptRaw === 'string' && excerptRaw) ||
+      ''
+    const txt = String(init)
+      .replace(/[^\p{L}\p{N}\s.,、。!！?？-]/gu, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+    const target = 140 // 120-160 の中庸
+    return txt ? txt.slice(0, Math.max(120, Math.min(160, target))) : ''
+  }
+  const tryGetMtimeIso = (pathStr: string): string | undefined => {
+    try {
+      const contentRoot = resolve(process.cwd(), 'content')
+      const rel = String(pathStr || '').replace(/^\/+/, '') // e.g. blog/hello-world
+      const p1 = resolve(contentRoot, rel + '.md')
+      const p2 = resolve(contentRoot, rel, 'index.md')
+      const file = existsSync(p1) ? p1 : existsSync(p2) ? p2 : undefined
+      if (!file) return undefined
+      const stat = statSync(file)
+      return new Date(stat.mtime).toISOString()
+    } catch {
+      return undefined
+    }
+  }
+  const normRow = (x: unknown) => {
+    const obj = x && typeof x === 'object' ? (x as Record<string, unknown>) : {}
+    const id = String(obj['_id'] ?? obj['id'] ?? '')
+    const path = String(obj['_path'] ?? obj['path'] ?? '')
+    const title =
+      typeof obj['title'] === 'string' && (obj['title'] as string).trim().length > 0
+        ? (obj['title'] as string)
+        : humanizeTitle(path)
+    const date = typeof obj['date'] === 'string' ? (obj['date'] as string) : null
+    const updated =
+      (typeof obj['updated'] === 'string' && (obj['updated'] as string)) ||
+      (date ?? undefined) ||
+      tryGetMtimeIso(path) ||
+      null
+    const description = normalizeDesc(obj) || title
+    const tagsRaw = obj['tags']
+    const tags = Array.isArray(tagsRaw) ? (tagsRaw as unknown[]).map(v => String(v)) : []
+    const ogRaw = obj['ogImage']
+    const ogImage = typeof ogRaw === 'string' && ogRaw ? String(ogRaw) : null
+    return { id, path, title, description, date, updated, tags, ogImage }
+  }
+
+  const blog = (Array.isArray(blogRows) ? blogRows : []).map(normRow)
+  const docs = (Array.isArray(docsRows) ? docsRows : []).map(normRow)
   const res: {
-    blog: { id: string; path: string; title?: string }[]
-    docs: { id: string; path: string; title?: string }[]
+    blog: {
+      id: string
+      path: string
+      title: string
+      description: string
+      date: string | null
+      updated: string | null
+      tags: string[]
+      ogImage: string | null
+    }[]
+    docs: {
+      id: string
+      path: string
+      title: string
+      description: string
+      date: string | null
+      updated: string | null
+      tags: string[]
+      ogImage: string | null
+    }[]
     errors?: { collection: string; message: string }[]
   } = { blog, docs }
   if (errors.length > 0) res.errors = errors

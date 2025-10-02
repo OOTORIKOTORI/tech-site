@@ -17,7 +17,17 @@ const parts = Array.isArray(raw)
 const exactPath = parts.length > 0 ? ('/blog/' + parts.join('/')) : '/blog'
 
 // Minimal type for page consumption
-type BlogDoc = { id?: string; path?: string; title?: string; body?: unknown }
+type BlogDoc = {
+  id?: string
+  path?: string
+  title?: string
+  description?: string
+  date?: string | null
+  updated?: string | null
+  tags?: string[]
+  ogImage?: string | null
+  body?: unknown
+}
 
 // Fetch strictly via API with SSR-safe resolver (no relative ofetch)
 const { data: doc, error } = await useFetch<BlogDoc>('/api/blogv2/doc', { query: { path: exactPath } })
@@ -54,6 +64,11 @@ useSeoMeta({
   canonical,
   // Test requirement: ogUrl uses absolute siteOrigin + path
   ogUrl: String(cfg.public?.siteOrigin || '') + pagePath,
+  // OG/Twitter
+  ogTitle: (doc.value as any)?.title as any,
+  ogDescription: (doc.value as any)?.description as any,
+  ogImage: ((doc.value as any)?.ogImage as any) || (String(cfg.public?.siteOrigin || '') + '/og-default.png'),
+  twitterCard: 'summary_large_image',
 })
 
 // BlogPosting JSON-LD
@@ -66,6 +81,17 @@ useHead({
         '@context': 'https://schema.org',
         '@type': 'BlogPosting',
         headline: (doc.value as any)?.title || (pagePath || 'Untitled'),
+        description: (doc.value as any)?.description,
+        datePublished: (doc.value as any)?.date,
+        dateModified: (doc.value as any)?.updated || (doc.value as any)?.date,
+        author: {
+          '@type': 'Person',
+          name: (cfg.public as any)?.authorName || (cfg.public as any)?.siteName,
+        },
+        image: (doc.value as any)?.ogImage ? [(doc.value as any)?.ogImage] : undefined,
+        keywords: Array.isArray((doc.value as any)?.tags)
+          ? ((doc.value as any)?.tags as string[]).join(', ')
+          : undefined,
         mainEntityOfPage: {
           '@type': 'WebPage',
           '@id': String(cfg.public?.siteOrigin || '') + pagePath,
