@@ -5,7 +5,7 @@ author: site-admin
 description: alg=none攻撃の拒否、署名鍵形式（PKCS#1/PKCS#8/SPKI）の扱い、`exp`/`nbf`のズレ対処（leeway）など、実務で最低限押さえるべきJWT運用の基礎と検証ポイントを整理します。
 ---
 
-**対象読者**: JWT を発行/検証するバックエンド開発者・セキュリティ担当。
+**対象読者**: <Term k="JWT" /> <Ref id="rfc7519" label="RFC" /> を発行/検証するバックエンド開発者・セキュリティ担当。
 
 **この記事で得られること**: alg=none 拒否、鍵形式、期限検証(leeway)など最低限の安全運用ポイントが分かります。
 
@@ -13,9 +13,9 @@ description: alg=none攻撃の拒否、署名鍵形式（PKCS#1/PKCS#8/SPKI）�
 
 ## 用語ミニ辞典（簡易）
 
-- JWS: 署名付きトークン（署名の検証で改ざん検出）
-- JWE: 暗号化トークン（内容を秘匿）。JWS と混同しない
-- `alg`: 署名/暗号アルゴリズム。例: HS256（共有鍵）, RS256（公開鍵）
+- <Term k="JWS" />: 署名付きトークン（署名の検証で改ざん検出）
+- <Term k="JWE" />: 暗号化トークン（内容を秘匿）。JWS と混同しない
+- `alg`: 署名/暗号アルゴリズム。例: <Term k="HS256" />（共有鍵）, <Term k="RS256" />（公開鍵）
 - `exp`/`nbf`: 期限（有効期限/Not Before）。小さな leeway を設ける
 
 **JSON Web Token (JWT)** はヘッダ・ペイロード・署名の 3 区分で構成される自己完結型トークンです。API Gateway / フロント間セッションレス認証などで広く利用されています。
@@ -51,6 +51,11 @@ header.payload.signature
 JWT は便利だが「入力を無条件信頼しない」ことが最重要。verify ロジックを簡潔かつ明示的に保ち、監査可能性を高めることで安全性と可観測性が向上します。
 
 ## 関連リンク
+
+<Footnotes>
+	<Footnote id="rfc7519" href="https://www.rfc-editor.org/rfc/rfc7519" label="RFC 7519">JSON Web Token (JWT)</Footnote>
+	<Footnote id="jwa" href="https://www.rfc-editor.org/rfc/rfc7518" label="RFC 7518">JSON Web Algorithms (JWA)</Footnote>
+</Footnotes>
 
 - 内部: [JWT デコードツール](/tools/jwt-decode)
 - 外部: [RFC 7519: JSON Web Token (JWT)](https://www.rfc-editor.org/rfc/rfc7519)
