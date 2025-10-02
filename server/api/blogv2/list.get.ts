@@ -43,16 +43,17 @@ export default defineEventHandler(async event => {
     docsRows = []
   }
 
-  // id/path のみ返す
+  // id/path/title のみ返す（後方互換: 既存の id/path は維持）
   const mapBlog = (x: unknown) => {
     if (x && typeof x === 'object') {
       const obj = x as Record<string, unknown>
       return {
         id: String(obj._id ?? obj.id ?? ''),
         path: String(obj._path ?? obj.path ?? ''),
+        title: typeof obj.title === 'string' ? obj.title : undefined,
       }
     }
-    return { id: '', path: '' }
+    return { id: '', path: '', title: undefined }
   }
   const mapDocs = (x: unknown) => {
     if (x && typeof x === 'object') {
@@ -60,15 +61,16 @@ export default defineEventHandler(async event => {
       return {
         id: String(obj._id ?? obj.id ?? ''),
         path: String(obj._path ?? obj.path ?? ''),
+        title: typeof obj.title === 'string' ? obj.title : undefined,
       }
     }
-    return { id: '', path: '' }
+    return { id: '', path: '', title: undefined }
   }
   const blog = (Array.isArray(blogRows) ? blogRows : []).map(mapBlog)
   const docs = (Array.isArray(docsRows) ? docsRows : []).map(mapDocs)
   const res: {
-    blog: { id: string; path: string }[]
-    docs: { id: string; path: string }[]
+    blog: { id: string; path: string; title?: string }[]
+    docs: { id: string; path: string; title?: string }[]
     errors?: { collection: string; message: string }[]
   } = { blog, docs }
   if (errors.length > 0) res.errors = errors

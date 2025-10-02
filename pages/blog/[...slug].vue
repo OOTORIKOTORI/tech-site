@@ -86,22 +86,31 @@ useHead({
 })
 
 // Dev log: visibility + body presence
-import.meta.dev &&
+if (import.meta.dev) {
   console.debug('[blog/slug]', {
     routePath: (route as any).fullPath || undefined,
     exactPath,
     hasDoc: !!doc.value,
     hasBody: !!(doc.value as any)?.body,
   })
+}
 </script>
 
 <template>
   <main class="container mx-auto px-4 py-6">
     <!-- ...既存のブログ記事表示UI... -->
-    <article v-if="doc && doc.body" class="prose prose-slate max-w-none opacity-100">
-      <h1>{{ typeof doc.title === 'string' ? doc.title : (typeof doc.path === 'string' ? doc.path : 'Untitled') }}
+    <article v-if="doc && doc.body"
+      class="prose prose-slate max-w-none opacity-100 prose-a:underline-offset-2 hover:prose-a:underline prose-a:font-medium prose-ul:ml-6 prose-ol:ml-6 prose-li:my-1">
+      <h1>
+        {{ typeof doc.title === 'string' ? doc.title : (typeof doc.path === 'string' ? doc.path : 'Untitled') }}
       </h1>
       <ContentRenderer :value="doc" />
     </article>
+    <div v-else class="max-w-prose mx-auto text-center py-16">
+      <p class="text-lg">記事が見つかりませんでした。</p>
+      <p class="mt-4">
+        <NuxtLink to="/blog/" class="underline">記事一覧へ戻る</NuxtLink>
+      </p>
+    </div>
   </main>
 </template>

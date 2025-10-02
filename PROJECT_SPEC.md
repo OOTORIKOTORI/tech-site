@@ -11,6 +11,8 @@
 - 選択ロジックは API 経由に一本化中（`/api/blogv2/doc?path=/blog/<slug>`）。collections 環境では `path` を一次キーとして厳密一致させる。
 - SSR 時の相対 URL に注意。`ofetch` の `$fetch` に相対 URL を渡すと「Only absolute URLs are supported」で 500 になり得る。Nuxt グローバル `$fetch` / `useFetch` を使うか、`useRequestURL().origin`（または `useRuntimeConfig().public.siteOrigin`）で絶対 URL を組み立てる。
 
+実装完了メモ: 本文は `<ContentRenderer>`、SSR は `useFetch` を使用し相対 URL 問題なし。E2E/ユニット全緑。
+
 - ルート: `pages/blog/[...slug].vue`。受け取った `slug` 配列を `'/'` で結合し、**先頭に `/blog/` を必ず付与**して `_path` 候補を生成（例：`/blog/hello-world`）。
   ...
 - **禁止**: `$regex` / `$exists` による曖昧選択。**許可**: 候補配列 → `queryContent('/blog')` で取得 → `array.filter(x => x._path === exactPath)` の**手動厳密一致**。ヒット 0 件なら 404（白紙は不可）。

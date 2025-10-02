@@ -2,7 +2,7 @@
   <main class="mx-auto max-w-3xl px-4 py-10">
     <h1 class="text-3xl font-semibold mb-6">Blog</h1>
     <p class="mb-4">
-      <NuxtLink to="/blog/" class="underline">Blog</NuxtLink>
+      <NuxtLink to="/blog/" class="sr-only">Blog</NuxtLink>
     </p>
 
     <div v-if="error" class="text-red-600">Failed to load posts: {{ error.statusMessage || error.message }}</div>
@@ -17,23 +17,6 @@
           <p class="text-gray-400 text-sm">{{ formatDateIso(p.date || p.updated) }}</p>
         </li>
       </ul>
-
-      <!-- デバッグは“常時表示” -->
-      <section class="mt-10 text-sm text-gray-600 space-y-2">
-        <div><b>fallback:</b> {{ data?.debug?.fallback }}</div>
-        <div>
-          <b>allCount:</b> {{ data?.debug?.allCount }} / <b>blogOnlyCount:</b> {{
-            data?.debug?.blogOnlyCount }}
-        </div>
-        <div><b>samplePaths:</b> <code>{{ data?.debug?.samplePaths }}</code></div>
-        <div>
-          <a class="underline" href="/__nuxt_content/blog/sql_dump.txt"
-            target="_blank">/__nuxt_content/blog/sql_dump.txt</a>
-          &nbsp;/&nbsp;
-          <a class="underline" href="/__nuxt_content/docs/sql_dump.txt"
-            target="_blank">/__nuxt_content/docs/sql_dump.txt</a>
-        </div>
-      </section>
     </template>
   </main>
 </template>
