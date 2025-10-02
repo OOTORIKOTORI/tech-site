@@ -1,3 +1,71 @@
+※詳細ページの取得は `queryContent(exactPath).findOne()` か `where({_path})` のいずれか一法のみ／`find`→ 手動 filter は禁止
+詳細ページは `queryContent(exactPath).findOne()` を使用（`find`→ 手動 filter 禁止）
+
+## ブログ詳細の選択ロジック（正準）
+
+- `_path` 完全一致・本文なしは 404（白紙回避）
+
+補足（現状実装・collections 移行の運用メモ）:
+
+- doc.body は AST（構造化ツリー）であり、文字列 HTML ではない。テンプレートで v-html に直接渡さないこと。描画は `<ContentRenderer :value="doc" />` を使うか、サーバー側で `renderContent` により HTML 化して返す。
+- 選択ロジックは API 経由に一本化中（`/api/blogv2/doc?path=/blog/<slug>`）。collections 環境では `path` を一次キーとして厳密一致させる。
+- SSR 時の相対 URL に注意。`ofetch` の `$fetch` に相対 URL を渡すと「Only absolute URLs are supported」で 500 になり得る。Nuxt グローバル `$fetch` / `useFetch` を使うか、`useRequestURL().origin`（または `useRuntimeConfig().public.siteOrigin`）で絶対 URL を組み立てる。
+
+- ルート: `pages/blog/[...slug].vue`。受け取った `slug` 配列を `'/'` で結合し、**先頭に `/blog/` を必ず付与**して `_path` 候補を生成（例：`/blog/hello-world`）。
+  ...
+- **禁止**: `$regex` / `$exists` による曖昧選択。**許可**: 候補配列 → `queryContent('/blog')` で取得 → `array.filter(x => x._path === exactPath)` の**手動厳密一致**。ヒット 0 件なら 404（白紙は不可）。
+- `body` 不在のレコードは描画しない（白紙対策）。
+  ※body 不在は 404 扱いで白紙を避ける（暫定運用）。
+- dev では `console.debug` で `candidates / hits / chosen` を表示する（運用ログの粒度指針）。
+
+## ページメタの安全策
+
+- `definePageMeta` は 1 回だけ。**await を含めない**（ビルド時 500 の回避）。失敗時はデフォルト値で回復。
+
+## Blog v2（実験 API）の SELECT 安全化（/api/blogv2/list）
+
+重要（強調）: `/api/blogv2/list` は **`id` と `path` のみ**を SELECT。取得失敗時も **200/空配列にフォールバック**（暫定運用）。仕様に明記済み。
+
+- `blog` テーブルは拡張列 OK。`docs` は **必ず `id`/`path` のみ**に限定して SELECT（欠損列で 500 にしない）。
+- 取得失敗時は 200 でフォールバック（空配列）を返す暫定運用。
+- 返却スキーマは `{id,path}` 固定・200 フォールバックを厳守（再掲）。
+- dev 検証用ダンプ: `__nuxt_content/blog/sql_dump.txt` / `__nuxt_content/docs/sql_dump.txt` 参照手順を明記（**本番リンク禁止**）。
+
+## 表示条件の“落とすルール”の正準化
+
+- “落とす条件だけ厳格” = `draft !== true && published !== false` を再掲（一覧/詳細とも二重フィルタ禁止、取得系 1 経路）。
+
+## テスト方針
+
+- 単体/統合:
+  - `/_path` 厳密一致：既存記事 → 200、未知スラッグ → 404。
+  - frontmatter の `'true'/'false'`（**string**）を含む判定のユニット/E2E。
+- CI での通し順序は既定に従う（typecheck → lint → test → build → postbuild --check-only → smoke:og → LHCI）。
+
+## ブログ追加手順（運用）
+
+## Troubleshooting: /blog が "No posts yet" のとき
+
+## Troubleshooting: /blog が "No posts yet" のとき
+
+1. 配置: Markdown が `content/blog/*.md` に存在するか（パス/拡張子繋がり含め再確認）。
+2. Frontmatter: `draft: false` か `draft` 未指定。`published: true` または `published` 未指定。例:
+
+3. 配置: Markdown が `content/blog/*.md` に存在するか（パス/拡張子繋がり含め再確認）。
+4. Frontmatter: `draft: false` か `draft` 未指定。`published: true` または `published` 未指定。例:
+5. 一覧クエリ条件: 下書き除外 & 公開判定。
+6. 詳細ページ: `_path` 厳密一致の手動選択ロジックで取得。`body` 不在レコードは描画しない（白紙防止）。
+7. dev では candidates/hits/chosen を console.debug で出力。
+8. frontmatter の `'true'/'false'`（string）も判定テスト対象。
+
+### /blog 表示安定化（最短ルート方針）
+
+### /blog 表示安定化（最短ルート方針）
+
+### Troubleshooting: /blog 詳細（補足・最小）
+
+`doc.body` は AST であり、テンプレートでは `<ContentRenderer :value="doc" />` を使用する。API レイヤで HTML にする場合は `renderContent` を使う。F5 リロードで 500 になる場合は SSR で ofetch の相対 URL が原因となり得るため、Nuxt の `$fetch`/`useFetch` を使うか `useRequestURL().origin` などで絶対 URL を渡す。
+
 # プロジェクト仕様書 - 磨きエクスプローラー（Migaki Explorer）
 
 ## 📋 プロジェクト概要
@@ -352,11 +420,17 @@ where({ $or: [{ published: true }, { published: { $exists: false } }] })
 
 補足: date が未来でも除外ロジックは現状なし（必要なら将来 `date <= today` 条件を追加検討）。
 
-方針メモ（取得ポリシー / 実装上の注意）:
+### /blog 表示安定化（最短ルート方針）
 
-- “落とす条件だけ厳格” = `draft !== true && published !== false`（未指定は表示）
-- 取得は 1 経路に統一。リンクは `_path` を使用し、テンプレ側の二重フィルタは禁止
-- dev の SQLite コネクタ差を踏まえ、`$regex` / `$exists` は極力避ける（安定性重視）
+- /blog/[...slug] の記事詳細は「最短&確実に表示」できるルートへ固定。
+- 404 の再発要因（ゆらぎ/順序/メタ行ヒット）を潰す。
+- dev 中は candidates/hits/chosen を console.debug で一撃可視化、prod では出さない。
+- @nuxt/content v2 想定。$exists/$regex は使わず、候補配列と filter で解決。
+- query は 'blog' 配下のみ。decodeURI 対応、末尾スラッシュ/大小文字ゆらぎ吸収。
+- 404 は「doc が厳密一致で取れなかったときのみ」。白紙禁止。
+- 一覧 → 記事の遷移は item.\_path をそのまま使う（連結生成しない）。
+- ContentRenderer は doc.body がないレコードを描画しない。
+- SSR で `doc` が無い場合は 404 を投げる（500 にしない）。
 
 補遺（Blog v2 暫定 API の安定運用メモ）:
 

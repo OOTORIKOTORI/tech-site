@@ -1,10 +1,13 @@
+末尾スラ・大文字小文字・URL デコード差の“パス揺れ”を禁止
+
 # HANDBOOK — Migaki Explorer
 
 ## Copilot 運用ガイド（最小差分）
 
 - 目的: README / PROJECT_SPEC / HANDBOOK の整合と軽微リファクタ（重複削減/誤記修正/テスト補完）を高速支援すること。
 - 範囲: docs 変更・小さなテスト/型補助のみ。アプリ本体の大規模改変・設定変更（CI/ビルド/Tailwind/tsconfig）は人間レビュー前提で自動提案しない。
-- 制約:
+  - Copilot は docs 中心・コミット禁止・最小差分・アンカー維持。再試行は最大 2 回。失敗時 revert。
+  - definePageMeta に await を置かない（Troubleshooting 参照）。
   - コード全文/巨大ファイルは貼らず必要最小断片のみ。
   - 既存ポリシー（OGP 既定 302 / ORIGIN 一元化 / SemVer 判定）を変更しない。
   - 既存見出しアンカーは維持（挿入は既存節の直後に最小追記）。
@@ -76,7 +79,27 @@
 - Secrets は環境変数にのみ。リポジトリ禁止
 - PII/トークンのログ出力禁止。漏えい疑いは即ローテート
 
+## Troubleshooting: /blog 詳細表示の 404/白紙対策
+
+- /blog/[...slug] の記事詳細で 404 や白紙になる場合は、`_path` 厳密一致の手動選択ロジックに切り替える。
+- `$exists` や `$regex` は使わず、候補配列と filter で解決。
+- `body` がないレコードは描画しない（白紙禁止）。
+- dev では candidates/hits/chosen を console.debug で可視化。
+
+### 追加メモ: SSR 相対 URL による 500 エラー
+
+- `ofetch` の `$fetch` に相対 URL（例: `/api/...`）を渡すと SSR（F5 リロード等）で「Only absolute URLs are supported」となり 500 になることがある。
+- 回避策: Nuxt グローバル `$fetch` または `useFetch` を用いる。`ofetch` を使う場合は `useRequestURL().origin` や `useRuntimeConfig().public.siteOrigin` で絶対 URL を組み立てる。
+
+### 追加メモ: `doc.body` の描画
+
+- `doc.body` は AST（構造化ツリー）。`v-html` を使わず、`<ContentRenderer :value="doc" />` を利用するか、API 側で `renderContent` により HTML 文字列へ変換して返す。
+
 ## Handover Checklist
+
+- 既知=200／未知=404 の E2E を毎回確認
+
+- 既知 slug=200/未知 slug=404 の E2E を毎回確認すること
 
 - Spec sync: `PROJECT_SPEC.md`（正）と `README.md`（要点）に差分がないか。必要なら最小追記。
 - Health checks: CI 全緑（typecheck/lint/test/build/postbuild --check-only/smoke:og/LHCI≥90）。ORIGIN/プレビュー noindex も確認。
@@ -87,6 +110,7 @@
 - Optional: Manifest（`name`/`short_name`）のブランド準拠を確認（任意）。
 - Logging: 機密を出さない。`LOG_OG=1` は短時間スポットのみ。
 - /blog 表示（>0 件）確認と `blogv2` API（`/api/blogv2/list` `/api/blogv2/doc`）の一時運用メモ確認（将来削除前提）。
+- 既知 slug で 200・未知 slug で 404 を確認。
 
 ### PR 本文テンプレ（コピペ用）
 

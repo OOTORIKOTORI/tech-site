@@ -18,12 +18,13 @@ function makeDoc() {
     description: 'Desc',
     date: '2025-09-20T00:00:00.000Z',
     canonical: expectedCanonical,
+    frontmatter: { canonical: expectedCanonical },
     body: { children: [] },
   }
 }
 
 function useAsyncData(_key: string, fn: () => any) {
-  return { data: { value: fn() } }
+  return { data: { value: makeDoc() } }
 }
 function createError(err: unknown) {
   throw err
@@ -43,7 +44,7 @@ describe('pages/blog/[slug].vue SEO', () => {
     seoSpy = vi.fn()
     // Install global stubs consumed by the alias module `#imports`
     // @ts-expect-error test shim
-    globalThis.useRoute = () => route
+    globalThis.useRoute = () => ({ ...route, path: '/blog/first-cron-tz' })
     // @ts-expect-error test shim
     globalThis.useAsyncData = useAsyncData
     // @ts-expect-error test shim
@@ -56,7 +57,7 @@ describe('pages/blog/[slug].vue SEO', () => {
     globalThis.computed = vueComputed
     // expose queryContent on global since page reads from globalThis.queryContent
     // @ts-expect-error test shim
-    globalThis.queryContent = () => ({
+    globalThis.queryContent = (type?: string) => ({
       where() {
         return this
       },
@@ -66,7 +67,13 @@ describe('pages/blog/[slug].vue SEO', () => {
       only() {
         return this
       },
-      findOne: () => makeDoc(),
+      async find() {
+        // ページロジックが candidates.includes(d._path) で厳密一致を探すため、body有りdocを返す
+        return [makeDoc()]
+      },
+      async findOne() {
+        return makeDoc()
+      },
       findSurround: () => [null, null],
     })
     // @ts-expect-error test shim

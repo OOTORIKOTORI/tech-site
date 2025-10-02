@@ -5,6 +5,7 @@ interface __QCBuilder<T> {
   sort?(s: Record<string, 1 | -1>): __QCBuilder<T>
   limit?(n: number): __QCBuilder<T>
   find?(): Promise<T[]>
+  findOne?(id?: string): Promise<T | null>
 }
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 declare const queryContent: <T = unknown>(path?: string) => __QCBuilder<T>

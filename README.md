@@ -1,3 +1,6 @@
+既知=200／未知=404／白紙なし の動作チェックをクイック検証に追加
+既知=200／未知=404／白紙なし の動作チェックをクイック検証に追加
+
 # 磨きエクスプローラー — Tech Tools & Notes（開発者向けユーティリティ＋技術メモ集）
 
 本リポジトリは「Cron / JWT などの小ワークを即検証できる軽量ツール」と「再発しがちな実務の落とし穴を最小編集で整理した短文ブログ」を統合したサイトです。依存固定と postbuild 検証による安全なローカル再現、小さく差分を出す文化、CI での型チェック / Lint / テスト / ビルド / メタ検証 / OGP スモーク / Lighthouse 通過を公開条件とする品質ゲートを重視します。恒久ルール/詳細手順は `PROJECT_SPEC.md` および **docs/HANDBOOK.md**（Git/OGP/CI/リリース規約）を参照してください。
@@ -30,9 +33,45 @@
 - dev 安定: `package.json` の `imports.#content/server` 設定と `nuxt.config.ts` の `nitro.prerender.ignore` で `/blog/**` `/api/**` を静的化対象外（詳細は SPEC）。
 - Blog v2（暫定）: `/api/blogv2/list` `/api/blogv2/doc` を実験的に運用（将来削除前提、詳細は SPEC）。
 
+### Troubleshooting: /blog 詳細表示（要点メモ）
+
+- 本文が `[object Object]` になる: `doc.body` は AST。`v-html` 直接渡し不可。`<ContentRenderer :value="doc" />` を使うか、API 側で `renderContent` により HTML 化する。
+- F5 リロードで 500 になる: SSR で `ofetch` `$fetch` に相対 URL を渡すと失敗（Only absolute URLs are supported）。Nuxt グローバル `$fetch` か `useFetch` を使う、または `useRequestURL().origin` 等で絶対 URL にする。
+
 ---
 
-詳細仕様やコード参照は `PROJECT_SPEC.md` を参照してください（README は要点のみ）。
+---
+
+---
+
+### /blog 詳細 404/白紙対策の要点
+
+\_path 完全一致＋本文なしは 404
+
+\_path 厳密一致 + body 不在は 404（暫定運用）。
+
+詳細ページで 404/白紙が出る場合は、[PROJECT_SPEC.md](./PROJECT_SPEC.md)「ブログ詳細の選択ロジック」および下記 Troubleshooting 節を参照。\_path 厳密一致・body 不在描画禁止・dev console.debug 出力・frontmatter の'true'/'false'文字列テスト等、実装ガードと検証手順を明記。
+
+---
+
+## Troubleshooting: /blog 詳細表示の 404/白紙対策
+
+- /blog/[...slug] の記事詳細で 404 や白紙になる場合は、`_path` 厳密一致の手動選択ロジックに切り替える。
+- `$exists` や `$regex` は使わず、候補配列と filter で解決。
+- `body` がないレコードは描画しない（白紙禁止）。
+- dev では candidates/hits/chosen を console.debug で可視化。
+
+---
+
+### クイック検証チェックリスト
+
+- 未知 slug は 404
+
+- 未知 slug で 404 になること
+
+- `/__nuxt_content/blog/sql_dump.txt` が読める
+- `/blog/hello-world` が 200
+- dev console に candidates/hits/chosen が出る
 
 ---
 

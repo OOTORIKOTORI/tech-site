@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+// Blog v2 listing API: returns {id, path} arrays only; always 200; errors[] optional
 import { defineEventHandler } from 'h3'
 import { queryCollection } from '@nuxt/content/nitro'
 import { existsSync } from 'node:fs'
@@ -10,42 +10,21 @@ import { resolve } from 'node:path'
 // - Minimal, connector-agnostic: no $exists / $regex
 
 // Return types (map DB columns → API shape)
-type BlogItem = {
-  _path: string
-  _id?: string
-  title?: string
-  description?: string
-  date?: string
-  updated?: string
-  tags?: string[]
-  draft?: boolean | string
-  published?: boolean | string
-}
-type DocsItem = { _path: string; _id: string }
-
-export type Blogv2ListResponse = {
-  source: string
-  blog: BlogItem[]
-  docs: DocsItem[]
-  errors?: Array<{ collection: 'blog' | 'docs'; message: string }>
-}
 
 export default defineEventHandler(async event => {
   const errors: Array<{ collection: 'blog' | 'docs'; message: string }> = []
 
-  // truthy/falsy helpers (string-bool aware)
-  const truthy = (v: any) => v === true || v === 'true'
-  const falsy = (v: any) => v === false || v === 'false'
-
-  let blogRows: any[] = []
-  let docsRows: any[] = []
+  let blogRows: unknown[] = []
+  let docsRows: unknown[] = []
 
   try {
     // BLOG: never SELECT optional columns (e.g., "updated").
     // Fetch all columns and map in JS to avoid SQLite "no such column" errors.
     blogRows = await queryCollection(event, 'blog').all()
-  } catch (e: any) {
-    errors.push({ collection: 'blog', message: String(e?.message ?? e) })
+  } catch (e: unknown) {
+    const err =
+      e && typeof e === 'object' && 'message' in e ? (e as { message?: unknown }).message : e
+    errors.push({ collection: 'blog', message: String(err ?? e) })
     blogRows = []
   }
 
@@ -57,30 +36,41 @@ export default defineEventHandler(async event => {
     } else {
       docsRows = []
     }
-  } catch (e: any) {
-    errors.push({ collection: 'docs', message: String(e?.message ?? e) })
+  } catch (e: unknown) {
+    const err =
+      e && typeof e === 'object' && 'message' in e ? (e as { message?: unknown }).message : e
+    errors.push({ collection: 'docs', message: String(err ?? e) })
     docsRows = []
   }
 
-  const mapBlog = (x: any): BlogItem => ({
-    _path: x?.path,
-    _id: x?.id,
-    title: x?.title,
-    description: x?.description,
-    date: x?.date,
-    updated: x?.updated,
-    tags: Array.isArray(x?.tags) ? x.tags : undefined,
-    draft: truthy(x?.draft) ? true : falsy(x?.draft) ? false : x?.draft,
-    published: truthy(x?.published) ? true : falsy(x?.published) ? false : x?.published,
-  })
-  const mapDocs = (x: any): DocsItem => ({ _path: x?.path, _id: String(x?.id) })
-
-  const res: Blogv2ListResponse = {
-    source: 'content-nitro',
-    blog: (Array.isArray(blogRows) ? blogRows : []).map(mapBlog),
-    docs: (Array.isArray(docsRows) ? docsRows : []).map(mapDocs),
-    ...(errors.length > 0 ? { errors } : {}),
+  // id/path のみ返す
+  const mapBlog = (x: unknown) => {
+    if (x && typeof x === 'object') {
+      const obj = x as Record<string, unknown>
+      return {
+        id: String(obj._id ?? obj.id ?? ''),
+        path: String(obj._path ?? obj.path ?? ''),
+      }
+    }
+    return { id: '', path: '' }
   }
-
+  const mapDocs = (x: unknown) => {
+    if (x && typeof x === 'object') {
+      const obj = x as Record<string, unknown>
+      return {
+        id: String(obj._id ?? obj.id ?? ''),
+        path: String(obj._path ?? obj.path ?? ''),
+      }
+    }
+    return { id: '', path: '' }
+  }
+  const blog = (Array.isArray(blogRows) ? blogRows : []).map(mapBlog)
+  const docs = (Array.isArray(docsRows) ? docsRows : []).map(mapDocs)
+  const res: {
+    blog: { id: string; path: string }[]
+    docs: { id: string; path: string }[]
+    errors?: { collection: string; message: string }[]
+  } = { blog, docs }
+  if (errors.length > 0) res.errors = errors
   return res
 })

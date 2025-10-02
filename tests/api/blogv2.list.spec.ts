@@ -25,7 +25,7 @@ vi.mock('@nuxt/content/nitro', () => {
       // our handler calls .all() directly (no .select())
       all: async () => (name === 'blog' ? BLOG_ROWS : DOCS_ROWS),
       // keep select chaining for compatibility if used elsewhere
-      select: (..._args: any[]) => ({
+      select: (..._: any[]) => ({
         all: async () => (name === 'blog' ? BLOG_ROWS : DOCS_ROWS),
       }),
     }),
@@ -33,7 +33,7 @@ vi.mock('@nuxt/content/nitro', () => {
 })
 
 describe('Blog v2 list API resilience', () => {
-  it('returns 200 with arrays; maps path/id → _path/_id; errors optional', async () => {
+  it('returns 200 with arrays; maps id/path only; errors optional', async () => {
     BLOG_ROWS = [
       {
         path: '/blog/hello-world',
@@ -75,15 +75,20 @@ describe('Blog v2 list API resilience', () => {
     expect(res.status).toBe(200)
     expect(res.type).toMatch(/json/)
     expect(res.body).toBeTruthy()
-    expect(res.body.source).toBeDefined()
+    // sourceは返却されない仕様に変更
+    // expect(res.body.source).toBeDefined()
     expect(Array.isArray(res.body.blog)).toBe(true)
     expect(Array.isArray(res.body.docs)).toBe(true)
-    // Mapping check
-    expect(res.body.blog[0]._path).toBe('/blog/hello-world')
-    expect(res.body.blog[0]._id).toBe('blog:1')
-    expect(res.body.docs[0]._path).toBe('/docs/guide')
-    expect(res.body.docs[0]._id).toBe('docs:1')
-    expect(res.body.docs[1]._id).toBe('2')
+    // errorsは任意
+    if (res.body.errors) {
+      expect(Array.isArray(res.body.errors)).toBe(true)
+    }
+    // Mapping check (id/path のみ)
+    expect(res.body.blog[0].path).toBe('/blog/hello-world')
+    expect(res.body.blog[0].id).toBe('blog:1')
+    expect(res.body.docs[0].path).toBe('/docs/guide')
+    expect(res.body.docs[0].id).toBe('docs:1')
+    expect(res.body.docs[1].id).toBe('2')
 
     await new Promise<void>(resolve => server.close(() => resolve()))
   })

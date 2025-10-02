@@ -42,6 +42,7 @@
     "#content/server": "@nuxt/content/nitro"
   },
   "devDependencies": {
+    "ofetch": "^1.1.0",
     "@eslint/js": "^9.10.0",
     "@nuxtjs/sitemap": "latest",
     "@nuxtjs/tailwindcss": "^6.14.0",

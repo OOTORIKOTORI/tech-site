@@ -91,6 +91,9 @@ describe('pages/blog/index.vue listing', () => {
     expect(a.exists()).toBe(true)
     // Check date format is YYYY-MM-DD
     expect(first.text()).toContain('2025-09-20')
+    // Assert that there is at least one link to /blog/
+    const blogLink = wrapper.findAll('a[href="/blog/"]')
+    expect(blogLink.length).toBeGreaterThan(0)
   })
 
   it('shows "No posts yet" when list is empty', async () => {

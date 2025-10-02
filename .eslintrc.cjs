@@ -29,7 +29,11 @@ module.exports = {
       files: ['**/*.test.*', 'tests/**/*'],
       env: { node: true },
       globals: { describe: 'readonly', it: 'readonly', expect: 'readonly' },
-      rules: { '@typescript-eslint/no-explicit-any': 'off' },
+      rules: {
+        '@typescript-eslint/no-explicit-any': 'off',
+        // Tests often keep placeholders/mocks; suppress noisy unused-var errors
+        '@typescript-eslint/no-unused-vars': 'off',
+      },
     },
     {
       files: ['pages/**/*.{ts,vue}', 'components/**/*.{ts,vue}'],

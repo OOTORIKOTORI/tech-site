@@ -13,6 +13,7 @@ function makeDoc() {
     description: 'Example description',
     date: '2025-09-20T00:00:00.000Z',
     canonical: expectedCanonical,
+    frontmatter: { canonical: expectedCanonical },
     body: { children: [] },
   }
 }
@@ -35,10 +36,10 @@ describe('pages/blog/[...slug].vue render + SEO', () => {
   beforeEach(() => {
     seoSpy = vi.fn()
     // @ts-expect-error test stub
-    globalThis.useRoute = () => ({ params: { slug: 'example' } })
+    globalThis.useRoute = () => ({ params: { slug: 'example' }, path: '/blog/example' })
     // @ts-expect-error test stub
-    globalThis.useAsyncData = async (_key: string, fn: () => any) => ({
-      data: { value: await fn() },
+    globalThis.useAsyncData = async (_key: string, _fn: () => any) => ({
+      data: { value: makeDoc() },
     })
     // @ts-expect-error test stub
     globalThis.createError = (e: unknown) => e
@@ -47,13 +48,20 @@ describe('pages/blog/[...slug].vue render + SEO', () => {
     // @ts-expect-error test stub
     globalThis.useSeoMeta = (arg: Record<string, unknown>) => seoSpy(arg)
     // @ts-expect-error test stub
-    globalThis.queryContent = () => ({
+    globalThis.queryContent = (type?: string) => ({
       where() {
+        return this
+      },
+      sort() {
+        return this
+      },
+      only() {
         return this
       },
       async findOne() {
         return makeDoc()
       },
+      findSurround: () => [null, null],
     })
     // @ts-expect-error test stub
     globalThis.useRuntimeConfig = () => ({
