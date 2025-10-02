@@ -133,3 +133,5 @@ Checks:
 - typecheck / lint / test / build / postbuild(--check-only) / smoke:og / LHCI ≥ 基準 green
 - sitemap/robots ホスト一致ログ OK
 ```
+
+記事で用語を定義するには frontmatter の `glossary` を使うか、記事本文内に `<Glossary/>` を設置してください。
