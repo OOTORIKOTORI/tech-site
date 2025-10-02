@@ -156,6 +156,20 @@ const hasPrevNext = computed(() => {
   const v = (prevNext as any).value as { prev: BlogItem | null; next: BlogItem | null } | undefined
   return !!(v && (v.prev || v.next))
 })
+
+// Related posts by tag overlap (score = number of shared tags), then date desc
+const currentTags = computed(() => new Set(((doc.value as any)?.tags) || []))
+const related = computed(() => {
+  const list = (blogList as any[]) || []
+  if (!list.length) return []
+  const tags = currentTags.value
+  return list
+    .filter((p: any) => p.path !== pagePath)
+    .map((p: any) => ({ ...p, score: ((p.tags || []) as string[]).filter((t: string) => tags.has(t)).length }))
+    .filter((p: any) => p.score > 0)
+    .sort((a: any, b: any) => b.score - a.score || (new Date(b.date).getTime() - new Date(a.date).getTime()))
+    .slice(0, 3)
+})
 </script>
 
 <template>
@@ -203,6 +217,19 @@ const hasPrevNext = computed(() => {
             <NuxtLink v-if="prevNext?.next" :to="prevNext?.next?.path">次の記事 →</NuxtLink>
           </span>
         </nav>
+
+        <!-- 関連記事 -->
+        <section v-if="related && related.length" aria-labelledby="related-heading" class="mt-12 border-t pt-6">
+          <h2 id="related-heading" class="text-base font-semibold opacity-80">関連記事</h2>
+          <ul role="list" class="mt-4 grid gap-3">
+            <li v-for="p in related" :key="p.path">
+              <NuxtLink :to="p.path" class="block hover:underline">
+                <span class="font-medium">{{ p.title }}</span>
+                <span v-if="p.tags?.length" class="ml-2 text-xs opacity-70">#{{ p.tags.slice(0, 3).join(' #') }}</span>
+              </NuxtLink>
+            </li>
+          </ul>
+        </section>
       </div>
     </div>
   </main>
