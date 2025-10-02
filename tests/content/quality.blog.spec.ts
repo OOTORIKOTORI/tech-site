@@ -120,6 +120,26 @@ function codeFencesHaveLang(md: string): boolean {
   return fences.every(f => /```\s*([a-zA-Z][^\s`]*)/.test(f))
 }
 
+function extractParagraphByLabel(mdRaw: string, labelRe: RegExp): string | null {
+  const idx = mdRaw.search(labelRe)
+  if (idx === -1) return null
+  const rest = mdRaw.slice(idx)
+  const parts = rest.split(/\r?\n\r?\n/)
+  if (!parts || parts.length === 0 || !parts[0]) return null
+  return parts[0].trim()
+}
+
+function extractSectionByHeading(mdRaw: string, headingRe: RegExp): string | null {
+  const m = mdRaw.match(headingRe)
+  if (!m || !m.index) return null
+  const start = m.index
+  const after = mdRaw.slice(start)
+  // split at next heading (lookahead for line starting with #)
+  const parts = after.split(/\r?\n(?=#{1,6}\s)/)
+  if (!parts || parts.length === 0 || !parts[0]) return null
+  return parts[0].trim()
+}
+
 function imagesHaveAlt(md: string): boolean {
   // ![alt](src) — altは空でないこと
   const matches = [...md.matchAll(reImgAlt)]
@@ -194,6 +214,32 @@ describe('CQ-QUALITY — ブログ内容の品質チェック（Must/Should）',
       if (mdRaw) {
         if (!codeFencesHaveLang(mdRaw)) mustFails.push('code block without language')
         if (!imagesHaveAlt(mdRaw)) mustFails.push('image alt empty')
+      }
+
+      // 7) terminology placement rules (new)
+      // Must: audience block must not contain <Term
+      const audiencePara = extractParagraphByLabel(
+        mdRaw,
+        /^(\*\*|)対象読者|^この記事で得られること/m
+      )
+      if (audiencePara && /<Term\s+/.test(audiencePara)) {
+        mustFails.push('audience contains <Term>')
+      }
+
+      // Must: glossary section must not contain <Term
+      const glossarySection = extractSectionByHeading(
+        mdRaw,
+        /^#{1,6}\s*(用語|用語集|ミニ辞典|Glossary)/m
+      )
+      if (glossarySection && /<Term\s+/.test(glossarySection)) {
+        mustFails.push('glossary contains <Term>')
+      }
+
+      // Should: if glossary section exists, it should use <Glossary />
+      if (glossarySection) {
+        if (!/<Glossary\s*\/>/.test(glossarySection) && !/<Glossary\b/.test(mdRaw)) {
+          shouldWarns.push('glossary section present but <Glossary /> not used')
+        }
       }
 
       // Shoulds
