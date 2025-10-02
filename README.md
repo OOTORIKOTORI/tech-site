@@ -154,6 +154,8 @@ pnpm install
 pnpm dev
 ```
 
+補足: ローカル開発では `.env.local` の `NUXT_PUBLIC_SITE_ORIGIN` を `http://localhost:3000` に設定してください（dev の各種リンク/メタ生成が正しく動作します）。
+
 本番ビルド / プレビュー:
 
 ```bash

@@ -1,11 +1,21 @@
 ---
 title: 'Cron の DOM×DOW は OR？AND？— タイムゾーン（JST/UTC）の落とし穴と対処法'
-description: 'crontab の日付×曜日の論理（OR/AND 切替）と JST/UTC のズレの罠、運用チェックリストまで。'
-date: '2025-09-20T00:00:00.000Z'
+description: 'crontabのDOM×DOW（OR/AND）の違いと、JST/UTC変換で起こる境界ズレの典型事故を、設計指針・検証手順・運用チェックリスト付きで解説。GitHub Actions等の実運用で迷わない基礎固め。'
+date: '2025-09-20'
 tags: ['cron', 'timezone', 'JST', 'UTC', 'scheduler']
 draft: false
 canonical: 'https://migakiexplorer.jp/blog/first-cron-tz'
 ---
+
+**対象読者**: CI/CD やサーバのスケジュール実行を JST 前提で運用するエンジニア・SRE。
+
+**この記事で得られること**: DOM×DOW の OR/AND 差異と JST/UTC 変換での落とし穴を避ける設計・検証・運用チェックリストが分かります。
+
+## 用語ミニ辞典（30 秒で把握）
+
+- DOM: day-of-month（「日」フィールド）
+- DOW: day-of-week（「曜日」フィールド）
+- OR/AND: DOM と DOW を同時指定したときの評価論理（実装により異なる）
 
 ## なぜ DOM×DOW が「難しい」のか
 
@@ -38,8 +48,14 @@ canonical: 'https://migakiexplorer.jp/blog/first-cron-tz'
 
 ## サンプル（JST 前提での平日朝実行）
 
-```
+```text
 0 9 * * 1-5
 ```
+
+## 関連リンク
+
+- 内部: [Cron JST ツール](/tools/cron-jst)
+- 内部: [本シリーズの導入編](/blog/cron-jst-intro)
+- 外部: [crontab(5) — Linux man-pages](https://man7.org/linux/man-pages/man5/crontab.5.html)
 
 JST の 9:00 に平日実行。UTC では 0:00 実行として解釈されるため、UTC 基盤に載せる場合は 0:00 に設定するか、アプリ側で TZ 変換を前提に設計します。

@@ -186,7 +186,7 @@ export default defineNuxtPlugin(() => {
 
 - **本番**（例：`public/robots.txt`）
 
-```
+```text
 User-agent: *
 Allow: /
 Sitemap: https://example.com/sitemap.xml
@@ -227,3 +227,8 @@ Sitemap: https://example.com/sitemap.xml
 ## まとめ
 
 “土台 SEO”は**足し算より引き算**。まずは **canonical / JSON-LD / robots / sitemap / feed** の 5 点を揃え、**ORIGIN 一元化 + CI 検査**で“壊れない基盤”にするのが近道です。
+
+## 関連リンク
+
+- 内部: [ブログ一覧](/blog)
+- 外部: [Nuxt Content 公式ドキュメント](https://content.nuxt.com/)
