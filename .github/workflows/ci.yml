@@ -35,6 +35,14 @@ jobs:
       # optional:
       - name: Build
         run: pnpm build
+      - name: Generate content quality report
+        run: pnpm -s report:content
+      - name: Upload content quality report artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: content-quality-${{ github.run_number }}
+          path: reports/content-quality.md
+          if-no-files-found: ignore
       - name: API tests
         run: pnpm run test:api
       - name: Echo origin
