@@ -1,13 +1,16 @@
 <template>
   <main class="mx-auto max-w-3xl px-4 py-10">
     <h1 class="text-3xl font-semibold mb-6">Blog</h1>
+    <p class="mb-4">
+      <NuxtLink to="/blog/" class="underline">Blog</NuxtLink>
+    </p>
 
     <div v-if="error" class="text-red-600">Failed to load posts: {{ error.statusMessage || error.message }}</div>
 
     <template v-else>
       <p v-if="items.length === 0" class="text-gray-500">No posts yet</p>
 
-      <ul v-else role="list" class="space-y-6">
+      <ul v-else role="list" data-testid="blog-list" class="space-y-6">
         <li v-for="p in items" :key="p.id || p.path" role="listitem">
           <NuxtLink class="text-xl font-medium underline" :to="p.path">{{ p.title || p.path }}</NuxtLink>
           <p v-if="p.description" class="text-gray-600">{{ p.description }}</p>

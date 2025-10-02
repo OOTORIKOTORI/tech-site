@@ -26,7 +26,11 @@ export default defineNuxtConfig({
 
   content: {
     experimental: { sqliteConnector: 'native' },
-    // highlight: { theme: 'github-dark' }, // 型不一致の可能性があるため保留
+    // @ts-expect-error - type defs may lag behind content runtime options
+    highlight: {
+      theme: 'github-light',
+      preload: ['ts', 'js', 'json', 'bash', 'diff', 'vue', 'html', 'md'],
+    },
   },
 
   runtimeConfig: {
