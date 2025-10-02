@@ -4,11 +4,11 @@ date: 2025-09-05
 author: site-admin
 description: alg=none攻撃の拒否、署名鍵形式（PKCS#1/PKCS#8/SPKI）の扱い、`exp`/`nbf`のズレ対処（leeway）など、実務で最低限押さえるべきJWT運用の基礎と検証ポイントを整理します。
 glossary:
-	JWS: "署名付きトークン（署名の検証で改ざん検出）"
-	JWE: "暗号化トークン（内容を秘匿）。JWS と混同しない"
-	HS256: "共有鍵（HMAC）による署名アルゴリズム"
-	RS256: "公開鍵（RSA）による署名アルゴリズム"
-	"exp/nbf": "期限（有効期限/Not Before）。小さな leeway を設ける"
+  JWS: '署名付きトークン（署名の検証で改ざん検出）'
+  JWE: '暗号化トークン（内容を秘匿）。JWS と混同しない'
+  HS256: '共有鍵（HMAC）による署名アルゴリズム'
+  RS256: '公開鍵（RSA）による署名アルゴリズム'
+  'exp/nbf': '期限（有効期限/Not Before）。小さな leeway を設ける'
 ---
 
 **対象読者**: JWT <Ref id="rfc7519" label="RFC" /> を発行/検証するバックエンド開発者・セキュリティ担当。
