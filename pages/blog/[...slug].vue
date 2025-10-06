@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { createError, useRoute, useFetch, useSeoMeta, useHead, useRuntimeConfig, computed } from '#imports'
-import { provide } from 'vue'
 // Optional fallback for tests: queryContent when API stub is unavailable
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const queryContent: any = (globalThis as any).queryContent
@@ -54,10 +53,6 @@ if (!doc.value && typeof queryContent === 'function') {
 if (!doc.value) {
   throw createError({ statusCode: 404, statusMessage: 'Post not found' })
 }
-
-// expose local glossary from frontmatter to content components
-// (articles can define `glossary` in frontmatter; injected as 'localGlossary')
-provide('localGlossary', (doc.value as any)?.glossary || {})
 
 // SEO + Canonical
 const cfg = useRuntimeConfig()
