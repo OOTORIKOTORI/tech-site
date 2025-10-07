@@ -1,5 +1,19 @@
 ---
-title: 'Nuxt + @nuxt/contentで“土台SEO”を最短構築する最小セット'
+title: 'Nuxt + @nuxt/contentで"土台SEO"を最短構築する最小セット'
+description: 'canonical/JSON-LD/robots/sitemap/feedを最小のコードで。プレビューnoindexとCIチェックまで。'
+slug: 'nuxt-seo-minimal-set'
+date: '2025-09-23'
+published: false
+robots: "noindex,follow"
+tags:
+  - Nuxt
+  - SEO
+  - JSON-LD
+  - CI
+  - internal
+  - archived
+draft: false
+---: 'Nuxt + @nuxt/contentで“土台SEO”を最短構築する最小セット'
 description: 'canonical/JSON-LD/robots/sitemap/feedを最小のコードで。プレビューnoindexとCIチェックまで。'
 slug: 'nuxt-seo-minimal-set'
 date: '2025-09-23'

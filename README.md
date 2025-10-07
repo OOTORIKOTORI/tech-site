@@ -98,7 +98,10 @@
 1. `content/blog/*.md` を追加し、Frontmatter を付与: `title`, `description`, `date`, `tags`, `draft`, `canonical`。
 2. 追加後は `/blog` 一覧・トップの「Latest posts」・サイトマップ・RSS に自動反映。
 3. 記事テンプレ／参考: DOM×DOW の OR/AND とタイムゾーンの落とし穴
-   - 例: `content/blog/cron-or-and-jst.md`, `content/blog/first-cron-tz.md`, `content/blog/gha-cron-utc.md`
+
+**リセット時の状態**: welcome のみ公開 / アーカイブは internal タグで非露出
+
+- 例: `content/blog/cron-or-and-jst.md`, `content/blog/first-cron-tz.md`, `content/blog/gha-cron-utc.md`
 
 ---
 

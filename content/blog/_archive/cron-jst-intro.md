@@ -2,6 +2,11 @@
 title: CronとJSTの落とし穴入門
 date: 2025-09-01
 author: site-admin
+published: false
+robots: 'noindex,follow'
+tags:
+  - internal
+  - archived
 description: JSTとUTCのズレ、夏時間非対応、曜日と日付条件の優先関係など、cron運用で詰まりやすい要点を最速で把握するための入門ガイド。設計と検証のコツも簡潔に整理します。
 ---
 

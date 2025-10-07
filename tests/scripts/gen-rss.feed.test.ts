@@ -20,14 +20,14 @@ describe('RSS feed generation', () => {
     runNode([script])
   })
 
-  it('writes /public/feed.xml and contains first post', () => {
+  it('writes /public/feed.xml and contains welcome post after reset', () => {
     expect(existsSync(feedPath)).toBe(true)
     const xml = readFileSync(feedPath, 'utf8')
     expect(xml).toContain('<title>磨きエクスプローラー Blog</title>')
     expect(xml).toContain('<link>https://migakiexplorer.jp/blog</link>')
-    // first-cron-tz title existence
+    // welcome post title existence
     expect(xml).toMatch(
-      /<item>[^]*<title>[^<]*Cron[^<]*<\/title>[^]*<link>https:\/\/migakiexplorer\.jp\/blog\/first-cron-tz<\/link>/
+      /<item>[^]*<title>[^<]*Welcome[^<]*<\/title>[^]*<link>https:\/\/migakiexplorer\.jp\/blog\/welcome<\/link>/
     )
   })
 })

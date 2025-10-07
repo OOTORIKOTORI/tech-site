@@ -1,20 +1,17 @@
 ---
-
 title: 'cron の DOM×DOW は OR か AND か？JST 運用の落とし穴'
 description: 'crontab の DOM×DOW（AND/OR）仕様と JST 運用の注意点、失敗例・対策を解説。'
 date: '2025-09-16'
+published: false
+robots: 'noindex,follow'
 tags:
-
-- cron
-- JST
-
----
-
-title: 'cron の DOM×DOW は OR か AND か？JST 運用の落とし穴'
-description: 'crontab の DOM×DOW（AND/OR）仕様と JST 運用の注意点、失敗例・対策を解説。'
-date: '2025-09-16'
-tags: - cron - JST - AND - OR - 運用
-
+  - cron
+  - JST
+  - AND
+  - OR
+  - 運用
+  - internal
+  - archived
 ---
 
 **対象読者**: crontab の DOM/DOW を使い分ける SRE/開発者、CI 運用担当。

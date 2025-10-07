@@ -2,6 +2,8 @@
 title: 'JavaScriptの日時とタイムゾーン超入門（getDayがズレる理由）'
 description: 'JSのDate/Intl/timeZoneの基礎と、getDayがズレる典型原因を解説。Intlでの表示TZ明示や、テストをTZ非依存にする実践的な手順も紹介し、環境差による不具合を防ぎます。'
 date: '2025-09-16'
+published: false
+robots: 'noindex,follow'
 tags:
   - JavaScript
   - Date
@@ -10,6 +12,8 @@ tags:
   - テスト
   - JST
   - UTC
+  - internal
+  - archived
 ---
 
 JavaScript で日時を扱うとき、タイムゾーンの違いで「getDay()」の値がズレることがあります。なぜでしょう？

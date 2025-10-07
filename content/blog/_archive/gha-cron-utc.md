@@ -2,6 +2,8 @@
 title: 'GitHub ActionsのcronはUTC！JSTで意図通りに動かす設計ガイド'
 description: 'GitHub ActionsのcronはUTC基準。JSTで「毎朝9時」等を意図通りに動かすための設計パターン、UTC変換の勘所、よくある誤解と対策、具体的なcron例、検証チェックリストまでを網羅し、運用事故を未然に防ぎます。'
 date: '2025-09-16'
+published: false
+robots: 'noindex,follow'
 tags:
   - GitHubActions
   - cron
@@ -9,6 +11,8 @@ tags:
   - JST
   - 運用
   - 設計
+  - internal
+  - archived
 ---
 
 **対象読者**: GitHub Actions のスケジュール実行を JST 前提で設計・運用する開発者/運用者。

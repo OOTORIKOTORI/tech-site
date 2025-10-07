@@ -21,12 +21,12 @@ describe('scripts/gen-meta.mjs sitemap', () => {
     runNode([script])
   })
 
-  it('includes blog first-cron-tz route when content exists', () => {
+  it('includes blog welcome route after reset', () => {
     expect(existsSync(sitemapPath)).toBe(true)
     const xml = readFileSync(sitemapPath, 'utf8')
-    expect(xml).toContain('<loc>https://migakiexplorer.jp/blog/first-cron-tz</loc>')
+    expect(xml).toContain('<loc>https://migakiexplorer.jp/blog/welcome</loc>')
     const m = xml.match(
-      /<url>\s*<loc>https:\/\/migakiexplorer\.jp\/blog\/first-cron-tz<\/loc>[\s\S]*?<lastmod>([^<]+)<\/lastmod>[\s\S]*?<\/url>/
+      /<url>\s*<loc>https:\/\/migakiexplorer\.jp\/blog\/welcome<\/loc>[\s\S]*?<lastmod>([^<]+)<\/lastmod>[\s\S]*?<\/url>/
     )
     expect(m && typeof m[1] === 'string').toBeTruthy()
     const lastmod = m && m[1] ? m[1] : ''

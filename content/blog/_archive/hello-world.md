@@ -1,6 +1,8 @@
 ---
 title: 'Hello World'
 date: '2025-09-16'
+published: false
+robots: 'noindex,follow'
 tags:
   - お知らせ
   - Nuxt
@@ -12,6 +14,8 @@ tags:
   - JWT
   - RSS
   - Sitemap
+  - internal
+  - archived
 description: 'Tech Siteブログの最初の記事。Nuxt Contentでコードハイライトや目次・タグ・前後記事ナビなどの基本機能を試しつつ、サイトの構成と書き味を確認できます。以後の記事の読み方ガイドとしてもどうぞ。'
 author: 'Tech Site運営'
 ---

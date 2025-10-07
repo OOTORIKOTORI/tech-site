@@ -2,7 +2,16 @@
 title: 'Cron の DOM×DOW は OR？AND？— タイムゾーン（JST/UTC）の落とし穴と対処法'
 description: 'crontabのDOM×DOW（OR/AND）の違いと、JST/UTC変換で起こる境界ズレの典型事故を、設計指針・検証手順・運用チェックリスト付きで解説。GitHub Actions等の実運用で迷わない基礎固め。'
 date: '2025-09-20'
-tags: ['cron', 'timezone', 'JST', 'UTC', 'scheduler']
+published: false
+robots: 'noindex,follow'
+tags:
+  - cron
+  - timezone
+  - JST
+  - UTC
+  - scheduler
+  - internal
+  - archived
 draft: false
 canonical: 'https://migakiexplorer.jp/blog/first-cron-tz'
 ---

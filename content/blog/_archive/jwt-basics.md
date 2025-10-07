@@ -2,6 +2,11 @@
 title: JWT基礎と安全な検証のポイント
 date: 2025-09-05
 author: site-admin
+published: false
+robots: 'noindex,follow'
+tags:
+  - internal
+  - archived
 description: alg=none攻撃の拒否、署名鍵形式（PKCS#1/PKCS#8/SPKI）の扱い、`exp`/`nbf`のズレ対処（leeway）など、実務で最低限押さえるべきJWT運用の基礎と検証ポイントを整理します。
 ---
 
