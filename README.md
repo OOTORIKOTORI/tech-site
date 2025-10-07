@@ -60,6 +60,7 @@
 ### クイック検証チェックリスト
 
 - \_control は noindex、feed/sitemap に含まれない（ci:guards で検知）
+- ローカル確認: `pnpm run ops:smoke` （BASE_URL で本番にも適用可）
 - 既知 slug で 200 / 未知 slug で 404 / **白紙なし**
 
 - `/__nuxt_content/blog/sql_dump.txt` が読める
