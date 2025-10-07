@@ -59,6 +59,7 @@
 
 ### クイック検証チェックリスト
 
+- \_control は noindex、feed/sitemap に含まれない（ci:guards で検知）
 - 既知 slug で 200 / 未知 slug で 404 / **白紙なし**
 
 - `/__nuxt_content/blog/sql_dump.txt` が読める

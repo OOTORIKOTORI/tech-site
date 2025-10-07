@@ -1,4 +1,5 @@
 # Stop on first failure
+
 set -e
 
 pnpm typecheck
@@ -6,4 +7,6 @@ pnpm lint
 pnpm test -- --run
 pnpm build
 pnpm postbuild
+
 pnpm run smoke:og
+pnpm run ci:guards

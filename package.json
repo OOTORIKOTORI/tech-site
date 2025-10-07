@@ -27,7 +27,8 @@
     "tag:auto": "powershell -ExecutionPolicy Bypass -File ./scripts/bump-tag.ps1 auto",
     "tag:patch": "powershell -ExecutionPolicy Bypass -File ./scripts/bump-tag.ps1 patch",
     "tag:minor": "powershell -ExecutionPolicy Bypass -File ./scripts/bump-tag.ps1 minor",
-    "tag:major": "powershell -ExecutionPolicy Bypass -File ./scripts/bump-tag.ps1 major"
+    "tag:major": "powershell -ExecutionPolicy Bypass -File ./scripts/bump-tag.ps1 major",
+    "ci:guards": "node scripts/ci/guard-control-post.cjs && node scripts/ci/guard-relative-fetch.cjs"
   },
   "dependencies": {
     "@nuxt/content": "3.6.3",
