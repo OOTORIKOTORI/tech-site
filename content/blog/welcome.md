@@ -5,7 +5,6 @@ date: 2025-10-07
 draft: false
 published: true
 tags: []
-canonical:
 ---
 
 # ようこそ 👋

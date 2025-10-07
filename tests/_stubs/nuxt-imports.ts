@@ -7,7 +7,7 @@ const g: any = globalThis as any
 
 export const useRoute: AnyFn = (...args) => g.useRoute?.(...args)
 export const useAsyncData: AnyFn = (...args) => g.useAsyncData?.(...args)
-export const useFetch: AnyFn = async (url: string) => {
+export const useFetch: AnyFn = async (url: string, opts?: any) => {
   // When testing our blog v2 list page, synthesize API from queryContent stub
   if (typeof url === 'string' && url.includes('/api/blogv2/list')) {
     const compute = async () => {
@@ -36,7 +36,7 @@ export const useFetch: AnyFn = async (url: string) => {
   }
   // Fallback: approximate useFetch via useAsyncData if available
   if (typeof g.useAsyncData === 'function') {
-    return g.useAsyncData(url, async () => (g.$fetch ? g.$fetch(url) : undefined))
+    return await g.useAsyncData(url, async () => (g.$fetch ? g.$fetch(url, opts) : undefined))
   }
   return { data: { value: undefined } }
 }
