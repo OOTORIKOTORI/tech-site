@@ -86,6 +86,7 @@ export default defineEventHandler(async event => {
   const tags = Array.isArray(tagsRaw) ? (tagsRaw as unknown[]).map(v => String(v)) : []
   const ogRaw = obj['ogImage']
   const ogImage = typeof ogRaw === 'string' && ogRaw ? String(ogRaw) : null
+  const robotsValue = typeof obj['robots'] === 'string' ? (obj['robots'] as string) : undefined
 
   // Return unified shape along with original body for rendering
   return {
@@ -97,6 +98,7 @@ export default defineEventHandler(async event => {
     updated,
     tags,
     ogImage,
+    robots: robotsValue,
     // keep rest for ContentRenderer compatibility
     body: (obj as Record<string, unknown>)['body'],
   }

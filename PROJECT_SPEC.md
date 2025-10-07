@@ -1,9 +1,16 @@
 ※詳細ページの取得は `queryContent(exactPath).findOne()` か `where({_path})` のいずれか一法のみ／`find`→ 手動 filter は禁止
-詳細ページは `queryContent(exactPath).findOne()` を使用（`find`→ 手動 filter 禁止）
 
 ## ブログ詳細の選択ロジック（正準）
 
 - `_path` 完全一致・本文なしは 404（白紙回避）
+
+- **テンプレ最小条件（固定）**:
+
+```vue
+<ContentRenderer v-if="doc?.body" :value="doc" />
+```
+
+（`v-else` は 404 専用。白紙描画は禁止）
 
 補足（現状実装・collections 移行の運用メモ）:
 
@@ -15,10 +22,6 @@
 
 - ルート: `pages/blog/[...slug].vue`。受け取った `slug` 配列を `'/'` で結合し、**先頭に `/blog/` を必ず付与**して `_path` 候補を生成（例：`/blog/hello-world`）。
   ...
-- **禁止**: `$regex` / `$exists` による曖昧選択。**許可**: 候補配列 → `queryContent('/blog')` で取得 → `array.filter(x => x._path === exactPath)` の**手動厳密一致**。ヒット 0 件なら 404（白紙は不可）。
-- `body` 不在のレコードは描画しない（白紙対策）。
-  ※body 不在は 404 扱いで白紙を避ける（暫定運用）。
-- dev では `console.debug` で `candidates / hits / chosen` を表示する（運用ログの粒度指針）。
 
 ## ページメタの安全策
 
@@ -46,27 +49,36 @@
 
 ## ブログ追加手順（運用）
 
-## Troubleshooting: /blog が "No posts yet" のとき
+### 制御記事（常時検証用）
+
+- `content/blog/_control.md` を常設（公開想定だが低露出）。本文は段落 2 つのみ。
+- 役割: 取得 1 経路・`doc?.body` の存在・レンダラ固定の健全性を E2E で常時検証。
 
 ## Troubleshooting: /blog が "No posts yet" のとき
 
 1. 配置: Markdown が `content/blog/*.md` に存在するか（パス/拡張子繋がり含め再確認）。
 2. Frontmatter: `draft: false` か `draft` 未指定。`published: true` または `published` 未指定。例:
-
-3. 配置: Markdown が `content/blog/*.md` に存在するか（パス/拡張子繋がり含め再確認）。
-4. Frontmatter: `draft: false` か `draft` 未指定。`published: true` または `published` 未指定。例:
-5. 一覧クエリ条件: 下書き除外 & 公開判定。
-6. 詳細ページ: `_path` 厳密一致の手動選択ロジックで取得。`body` 不在レコードは描画しない（白紙防止）。
-7. dev では candidates/hits/chosen を console.debug で出力。
-8. frontmatter の `'true'/'false'`（string）も判定テスト対象。
-
-### /blog 表示安定化（最短ルート方針）
+3. 一覧クエリ条件: 下書き除外 & 公開判定。
+4. 詳細ページは `queryContent(exactPath).findOne()` または `where({_path})` の 1 経路のみで取得し、filter 等の手動選択は禁止。`body` が無い場合は 404（白紙禁止）。
+5. dev では candidates/hits/chosen を console.debug で出力。
+6. frontmatter の `'true'/'false'`（string）も判定テスト対象。
 
 ### /blog 表示安定化（最短ルート方針）
 
 ### Troubleshooting: /blog 詳細（補足・最小）
 
 `doc.body` は AST であり、テンプレートでは `<ContentRenderer :value="doc" />` を使用する。API レイヤで HTML にする場合は `renderContent` を使う。F5 リロードで 500 になる場合は SSR で ofetch の相対 URL が原因となり得るため、Nuxt の `$fetch`/`useFetch` を使うか `useRequestURL().origin` などで絶対 URL を渡す。
+
+※`ContentRendererMarkdown`というコンポーネントは存在しません。描画は必ず`<ContentRenderer :value="doc" />`を使うこと。
+
+# Debug クエリ早見表（dev 限定）
+
+| クエリ      | 効果                     | 備考（dev 限定） |
+| ----------- | ------------------------ | ---------------- |
+| debug=1     | デバッグログ出力         | 開発時のみ有効   |
+| mdfb=1      | Markdown fallback 強制   | テスト・開発用   |
+| forceHtml=1 | HTML 直描画強制          | テスト・開発用   |
+| cr=1        | ContentRenderer 分岐強制 | テスト・開発用   |
 
 # プロジェクト仕様書 - 磨きエクスプローラー（Migaki Explorer）
 
@@ -427,7 +439,6 @@ where({ $or: [{ published: true }, { published: { $exists: false } }] })
 - /blog/[...slug] の記事詳細は「最短&確実に表示」できるルートへ固定。
 - 404 の再発要因（ゆらぎ/順序/メタ行ヒット）を潰す。
 - dev 中は candidates/hits/chosen を console.debug で一撃可視化、prod では出さない。
-- @nuxt/content v2 想定。$exists/$regex は使わず、候補配列と filter で解決。
 - query は 'blog' 配下のみ。decodeURI 対応、末尾スラッシュ/大小文字ゆらぎ吸収。
 - 404 は「doc が厳密一致で取れなかったときのみ」。白紙禁止。
 - 一覧 → 記事の遷移は item.\_path をそのまま使う（連結生成しない）。
@@ -447,6 +458,6 @@ where({ $or: [{ published: true }, { published: { $exists: false } }] })
 ### Troubleshooting: /blog/[slug] で 500（ContentDoc 解決失敗）
 
 - 動的 import（例: `new Function('s', 'return import(s)')` 経由で `'#content'` を読み込む）を使用しない。
-- 代わりに静的 import を使用する: `import { queryContent } from '#content'`
+  ページ側は auto-import で OK。API/サーバ側は `import { queryContent } from '#content/server'` を使う。動的 import は使用しない。
 - ページ側では `<ContentRenderer :value="doc" />` で描画し、グローバル登録の `<ContentDoc>` に依存しない。
 - SSR で `doc` が無い場合は 404 を投げる（500 にしない）。

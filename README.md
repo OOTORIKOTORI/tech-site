@@ -1,5 +1,4 @@
 既知=200／未知=404／白紙なし の動作チェックをクイック検証に追加
-既知=200／未知=404／白紙なし の動作チェックをクイック検証に追加
 
 # 磨きエクスプローラー — Tech Tools & Notes（開発者向けユーティリティ＋技術メモ集）
 
@@ -33,20 +32,18 @@
 - dev 安定: `package.json` の `imports.#content/server` 設定と `nuxt.config.ts` の `nitro.prerender.ignore` で `/blog/**` `/api/**` を静的化対象外（詳細は SPEC）。
 - Blog v2（暫定）: `/api/blogv2/list` `/api/blogv2/doc` を実験的に運用（将来削除前提、詳細は SPEC）。
 
-### Troubleshooting: /blog 詳細表示（要点メモ）
+## /blog 詳細 404/白紙対策（要点）
 
-- 本文が `[object Object]` になる: `doc.body` は AST。`v-html` 直接渡し不可。`<ContentRenderer :value="doc" />` を使うか、API 側で `renderContent` により HTML 化する。
-- F5 リロードで 500 になる: SSR で `ofetch` `$fetch` に相対 URL を渡すと失敗（Only absolute URLs are supported）。Nuxt グローバル `$fetch` か `useFetch` を使う、または `useRequestURL().origin` 等で絶対 URL にする。
+- 1 経路のみ（findOne(exactPath)優先、where({\_path})も可。filter 等の手動選択は禁止）
+- `<ContentRenderer :value="doc" />` または API 側で `renderContent`
+- SSR は絶対 URL を使用
+- `body`が無い場合は 404（白紙禁止）
 
----
+```vue
+<ContentRenderer v-if="doc?.body" :value="doc" />
+```
 
----
-
----
-
-### /blog 詳細 404/白紙対策の要点
-
-\_path 完全一致＋本文なしは 404
+- 詳細は PROJECT_SPEC 参照
 
 \_path 厳密一致 + body 不在は 404（暫定運用）。
 
@@ -56,18 +53,13 @@
 
 ## Troubleshooting: /blog 詳細表示の 404/白紙対策
 
-- /blog/[...slug] の記事詳細で 404 や白紙になる場合は、`_path` 厳密一致の手動選択ロジックに切り替える。
-- `$exists` や `$regex` は使わず、候補配列と filter で解決。
-- `body` がないレコードは描画しない（白紙禁止）。
-- dev では candidates/hits/chosen を console.debug で可視化。
+/blog/[...slug] の記事詳細は `findOne(exactPath)` または `where({_path})` の**1 経路のみ**で取得し、filter 等の**手動選択は禁止**。`body` が無い場合は 404（白紙禁止）。
 
 ---
 
 ### クイック検証チェックリスト
 
-- 未知 slug は 404
-
-- 未知 slug で 404 になること
+- 既知 slug で 200 / 未知 slug で 404 / **白紙なし**
 
 - `/__nuxt_content/blog/sql_dump.txt` が読める
 - `/blog/hello-world` が 200

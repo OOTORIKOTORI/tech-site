@@ -29,6 +29,28 @@ function readBlogRoutes() {
   const slugs = entries
     .filter(e => e.isFile() && e.name.endsWith('.md'))
     .map(e => basename(e.name, '.md'))
+    .filter(slug => {
+      // Exclude internal-tagged posts from sitemap
+      const filePath = join(dir, `${slug}.md`)
+      const raw = readFileSync(filePath, 'utf8')
+      const fmMatch = raw.match(/^---[\s\S]*?---/)
+      if (!fmMatch) return true
+      const tagsStr = extractYamlScalar('tags', fmMatch[0])
+      if (!tagsStr) return true
+      try {
+        // Handle YAML array format: [internal, control]
+        let tags = []
+        if (tagsStr.startsWith('[') && tagsStr.endsWith(']')) {
+          const arrayContent = tagsStr.slice(1, -1).trim()
+          tags = arrayContent.split(',').map(t => t.trim().replace(/['"]/g, ''))
+        } else {
+          tags = [tagsStr]
+        }
+        return !tags.includes('internal')
+      } catch {
+        return true
+      }
+    })
   return slugs.map(s => `/blog/${s}`)
 }
 
@@ -83,12 +105,28 @@ function readBlogFrontmatterMeta() {
     const title = extractYamlScalar('title', yaml)
     const description = extractYamlScalar('description', yaml)
     const dateStr = extractYamlScalar('date', yaml)
+    const tagsStr = extractYamlScalar('tags', yaml)
+    // Parse tags array and check for 'internal'
+    let tags = []
+    if (tagsStr) {
+      try {
+        // Handle YAML array format: [internal, control]
+        if (tagsStr.startsWith('[') && tagsStr.endsWith(']')) {
+          const arrayContent = tagsStr.slice(1, -1).trim()
+          tags = arrayContent.split(',').map(t => t.trim().replace(/['"]/g, ''))
+        } else {
+          tags = [tagsStr]
+        }
+      } catch {
+        tags = []
+      }
+    }
     let pubIso
     if (dateStr) {
       const dt = new Date(dateStr)
       if (!isNaN(dt.getTime())) pubIso = dt.toISOString()
     }
-    if (title && pubIso) {
+    if (title && pubIso && !tags.includes('internal')) {
       list.push({ slug, title, description: description || '', pubIso })
     }
   }

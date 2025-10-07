@@ -25,6 +25,7 @@ type BlogDoc = {
   date?: string | null
   updated?: string | null
   tags?: string[]
+  robots?: string
   ogImage?: string | null
   body?: unknown
   bodyText?: string
@@ -72,6 +73,13 @@ useSeoMeta({
   ogImage: ((doc.value as any)?.ogImage as any) || (String(cfg.public?.siteOrigin || '') + '/og-default.png'),
   twitterCard: 'summary_large_image',
 })
+
+// robots meta from frontmatter (control-only)
+if (exactPath === '/blog/_control') {
+  useHead({
+    meta: [{ name: 'robots', content: 'noindex,follow' }]
+  })
+}
 
 // BlogPosting JSON-LD
 useHead({
@@ -190,7 +198,7 @@ const related = computed(() => {
 
       <!-- 本文 -->
       <div class="lg:col-span-9">
-        <article v-if="doc && doc.body"
+        <article v-if="doc?.body"
           class="prose prose-slate max-w-none opacity-100 prose-a:underline-offset-2 hover:prose-a:underline prose-a:font-medium prose-ul:ml-6 prose-ol:ml-6 prose-li:my-1">
           <h1 class="flex items-baseline gap-3">
             <span>

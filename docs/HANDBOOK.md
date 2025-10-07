@@ -4,6 +4,79 @@
 
 ## Copilot 運用ガイド（最小差分）
 
+### Dev 検証運用（Dual-terminal Policy）
+
+- Terminal A: `pnpm dev` を起動したら **以後コマンドを打たない**（サーバ専用）。
+- Terminal B: 検証専用ターミナルを**新規**に開き、API/ページ検証を行う。
+- すべての Copilot プロンプトの末尾に **「検証ブロック」** を **必ず**添付する（人手による省略禁止）。
+- 検証は SSR 実体で行う（View Source / curl / Invoke-WebRequest を優先）。
+- DevTools: Network で **Disable cache** を ON、更新は **Ctrl+Shift+R**（ハードリロード）。
+
+#### 検証ブロック（貼り付け用）
+
+````md
+=== 検証ブロック（必ず“別ターミナル/別ペイン”で実行）===
+前提: Terminal A で `pnpm dev` を起動したら **そのターミナルは触らない**。確認は **Terminal B**（新しいタブ/ペイン/ウィンドウ）で行う。
+
+[共通準備]
+
+- ブラウザは DevTools の Network で **Disable cache** を ON。更新は **Ctrl+Shift+R**（ハードリロード）。
+- SSR の実体を確認したいときは **View Source (Ctrl+U)** または curl/iwr を使う。
+
+[1) API が robots を返すか確認]
+
+- Windows (PowerShell):
+  ```powershell
+  (Invoke-RestMethod -Uri "http://localhost:3000/api/blogv2/doc?path=/blog/_control").robots
+  ```
+````
+
+- macOS/Linux:
+  ```bash
+  curl -s "http://localhost:3000/api/blogv2/doc?path=/blog/_control" | node -e "process.stdin.on('data',d=>console.log(JSON.parse(d).robots))"
+  ```
+  → `"noindex,follow"` が表示されること。
+
+[2) ページの <head> に meta robots が出ているか確認]
+
+- Windows (PowerShell):
+  ```powershell
+  ($r = Invoke-WebRequest -UseBasicParsing -Uri "http://localhost:3000/blog/_control").Content
+  $r -match '<meta name="robots" content="noindex,follow"'
+  ```
+  True が返れば OK。詳細を見たい場合:
+  ```powershell
+  $r | Select-String -Pattern '<meta name="robots"' -SimpleMatch
+  ```
+- macOS/Linux:
+  ```bash
+  curl -s "http://localhost:3000/blog/_control" | grep -i '<meta name="robots" content="noindex,follow"'
+  ```
+  マッチ行が出れば OK。
+
+[3) 通常記事/一覧では meta robots が **出ていない** ことを確認]
+
+- Windows (PowerShell):
+  ```powershell
+  (Invoke-WebRequest -UseBasicParsing -Uri "http://localhost:3000/blog/jwt-basics").Content | Select-String -Pattern '<meta name="robots"' -SimpleMatch || echo "OK: no robots meta"
+  (Invoke-WebRequest -UseBasicParsing -Uri "http://localhost:3000/blog").Content | Select-String -Pattern '<meta name="robots"' -SimpleMatch || echo "OK: no robots meta"
+  ```
+- macOS/Linux:
+  ```bash
+  curl -s "http://localhost:3000/blog/jwt-basics" | grep -i 'meta name="robots"' || echo "OK: no robots meta"
+  curl -s "http://localhost:3000/blog" | grep -i 'meta name="robots"' || echo "OK: no robots meta"
+  ```
+
+[4) うまくいかないときの速攻メモ]
+
+- HMR のズレ/キャッシュ疑い → ハードリロード、DevTools「Disable cache」ON。
+- API が `robots` を返していない → `/api/blogv2/doc?path=/blog/_control` の JSON を確認。
+- フロントで useHead 条件が噛んでいない → 一時的に `key:'robots'` を付けて衝突を回避し、`doc?.robots` の有無を console.log で確認。
+
+※ 重要: **確認コマンドは絶対に Terminal A（pnpm dev 実行中のターミナル）では叩かない。**
+
+```
+
 - 目的: README / PROJECT_SPEC / HANDBOOK の整合と軽微リファクタ（重複削減/誤記修正/テスト補完）を高速支援すること。
 - 範囲: docs 変更・小さなテスト/型補助のみ。アプリ本体の大規模改変・設定変更（CI/ビルド/Tailwind/tsconfig）は人間レビュー前提で自動提案しない。
   - Copilot は docs 中心・コミット禁止・最小差分・アンカー維持。再試行は最大 2 回。失敗時 revert。
@@ -81,10 +154,7 @@
 
 ## Troubleshooting: /blog 詳細表示の 404/白紙対策
 
-- /blog/[...slug] の記事詳細で 404 や白紙になる場合は、`_path` 厳密一致の手動選択ロジックに切り替える。
-- `$exists` や `$regex` は使わず、候補配列と filter で解決。
-- `body` がないレコードは描画しない（白紙禁止）。
-- dev では candidates/hits/chosen を console.debug で可視化。
+/blog/[...slug] の記事詳細は「findOne(exactPath)」または「where({\_path})」で 1 経路のみ取得し、filter 等の手動選択は禁止。`body` がない場合は 404（白紙禁止）。
 
 ### 追加メモ: SSR 相対 URL による 500 エラー
 
@@ -96,10 +166,9 @@
 - `doc.body` は AST（構造化ツリー）。`v-html` を使わず、`<ContentRenderer :value="doc" />` を利用するか、API 側で `renderContent` により HTML 文字列へ変換して返す。
 
 ## Handover Checklist
+ - Dev 検証は **Terminal B**（別ターミナル）で実施し、robots/SSR などは **検証ブロック**の手順で確認済み。
 
-- 既知=200／未知=404 の E2E を毎回確認
-
-- 既知 slug=200/未知 slug=404 の E2E を毎回確認すること
+既知=200／未知=404 の E2E を毎回確認
 
 - Spec sync: `PROJECT_SPEC.md`（正）と `README.md`（要点）に差分がないか。必要なら最小追記。
 - Health checks: CI 全緑（typecheck/lint/test/build/postbuild --check-only/smoke:og/LHCI≥90）。ORIGIN/プレビュー noindex も確認。
@@ -115,21 +184,31 @@
 ### PR 本文テンプレ（コピペ用）
 
 ```
+
 ### Handover Summary
+
 Done:
+
 - （例）README の 3 文サマリ追加 / 重複節統合
 
 Now:
+
 - （例）次リリースタグ検討中（feat 1 件 → MINOR 想定）
 
 Next:
+
 - （例）/tools 新規ツールの軽量 PoC（未着手）
 
 Ops:
+
 - ORIGIN= https://migakiexplorer.jp / Preview noindex 動作確認済み
 - OGP API 既定 302 / 動的 OFF（想定どおり）
 
 Checks:
+
 - typecheck / lint / test / build / postbuild(--check-only) / smoke:og / LHCI ≥ 基準 green
 - sitemap/robots ホスト一致ログ OK
+
+```
+
 ```

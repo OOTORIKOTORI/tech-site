@@ -35,4 +35,34 @@ describe('blog detail page', () => {
       ofetch(`${ORIGIN}/blog/` + (knownSlug ? knownSlug + '/' : 'withslash/'))
     ).rejects.toThrow()
   })
+
+  it('should render control post without blank content', async () => {
+    try {
+      await ofetch(ORIGIN, { method: 'HEAD' })
+    } catch (e: any) {
+      const msg = String(e?.message || '')
+      if (msg.includes('ECONNREFUSED') || msg.includes('fetch failed')) {
+        return
+      }
+    }
+    const res = await ofetch(`${ORIGIN}/blog/_control`)
+    expect(res).toBeTruthy()
+    expect(typeof res).toBe('string')
+    expect(res.length).toBeGreaterThan(100) // 白紙でないことを確認
+    expect(res).toContain('ContentRenderer') // 制御記事の特徴的なキーワード
+  })
+
+  it('should have strict _path matching', async () => {
+    // _control は存在するが、_Control（大文字）は404
+    try {
+      await ofetch(ORIGIN, { method: 'HEAD' })
+    } catch (e: any) {
+      const msg = String(e?.message || '')
+      if (msg.includes('ECONNREFUSED') || msg.includes('fetch failed')) {
+        return
+      }
+    }
+    await expect(ofetch(`${ORIGIN}/blog/_Control`)).rejects.toThrow()
+    await expect(ofetch(`${ORIGIN}/blog/_control/`)).rejects.toThrow()
+  })
 })
