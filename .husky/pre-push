@@ -2,6 +2,18 @@
 
 set -e
 
+# hook 専用の環境変数をロード（存在すれば）
+
+ENV_FILE="$(dirname "$0")/.env"
+if [ -f "$ENV_FILE" ]; then
+
+# 読み込む間だけ自動エクスポート
+
+set -a
+. "$ENV_FILE"
+set +a
+fi
+
 pnpm typecheck
 pnpm lint
 pnpm test -- --run
