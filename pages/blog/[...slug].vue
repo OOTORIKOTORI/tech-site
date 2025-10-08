@@ -166,12 +166,24 @@ const hasPrevNext = computed(() => {
 
 // Related posts by tag overlap (score = number of shared tags), then date desc
 const currentTags = computed(() => new Set(((doc.value as any)?.tags) || []))
+// 可視性ガード: /blog/_archive 除外・draft/published・本文必須
+function visible(doc: any) {
+  const isTrue = (v: any) => v === true || v === 'true'
+  const isFalse = (v: any) => v === false || v === 'false'
+  if (!doc?.path || !doc?.title) return false
+  if (/^\/blog\/_archive(\/|$)/.test(doc.path)) return false
+  if (isTrue(doc.draft)) return false
+  if (isFalse(doc.published)) return false
+  if (!doc.body) return false
+  return true
+}
 const related = computed(() => {
   const list = (blogList as any[]) || []
   if (!list.length) return []
   const tags = currentTags.value
   return list
     .filter((p: any) => p.path !== pagePath)
+    .filter(visible)
     .map((p: any) => ({ ...p, score: ((p.tags || []) as string[]).filter((t: string) => tags.has(t)).length }))
     .filter((p: any) => p.score > 0)
     .sort((a: any, b: any) => b.score - a.score || (new Date(b.date).getTime() - new Date(a.date).getTime()))
