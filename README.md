@@ -11,6 +11,8 @@
 - `pnpm run ops:rollback <tag>`で安定タグへスナップショット復元
 - /blog 詳細は**1 経路のみ取得・白紙禁止・テンプレ 1 行**（詳細は PROJECT_SPEC 参照）
 
+* **smoke:og**: `https://<ORIGIN>/api/og/hello.png` に対し **200 または 302** なら合格。308/301 を踏む場合も **1 回のみ自動フォロー**して再判定（URL 結合は `new URL()` で正規化済み）。
+
 ## ブランド・ORIGIN・ルール序列
 
 - ブランド: 「磨きエクスプローラー（Migaki Explorer）」／短縮名「Migaki Explorer」

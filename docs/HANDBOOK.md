@@ -1,4 +1,4 @@
-末尾スラ・大文字小文字・URL デコード差の“パス揺れ”を禁止
+末尾スラ有無・大文字小文字・URL デコード差の“パス揺れ”を禁止
 
 # HANDBOOK — Migaki Explorer
 
@@ -6,11 +6,22 @@
 
 - **Dual-terminal Policy**: Terminal A は`pnpm dev`専用（以降コマンド禁止）、Terminal B は検証専用で新規に開く。
 - すべての検証ブロックは折りたたまずそのまま残す。
-- パス揺れ（末尾スラッシュ・大文字小文字・URL デコード差）は禁止。
+- パス揺れ（末尾スラッシュ有無・大文字小文字・URL デコード差）は禁止。
 - CI 失敗は出荷ブロック。
 - ルール序列: 正準=PROJECT_SPEC / 要点=README / 規約=HANDBOOK
 - ブランド: 「磨きエクスプローラー（Migaki Explorer）」／短縮名「Migaki Explorer」
 - ORIGIN: https://migakiexplorer.jp
+
+### pre-push の環境と OGP スモーク（運用固定）
+
+- **pre-push は `.husky/.env` を読み込む**（POSIX sh）。hook 専用で機密は含めない。
+  ```sh
+  # .husky/.env（例 / 末尾スラッシュはあってもなくても可）
+  NUXT_PUBLIC_SITE_ORIGIN=https://migakiexplorer.jp/
+  ```
+
+* **smoke:og の URL 結合は `new URL('/api/og/hello.png', ORIGIN)` で正規化**し、**301/308 は 1 回だけフォロー**して 200/302 到達を合格とする。
+* **ORIGIN の末尾スラッシュ有無は不問**（スクリプトで正規化）。ただしアプリ本体は従来どおり**パス揺れ禁止**。
 
 ## Copilot 運用ガイド（最小差分）
 
