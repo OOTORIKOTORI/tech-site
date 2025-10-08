@@ -40,9 +40,8 @@ if (error?.value) {
 // Fallback for test env: try @nuxt/content when API is not stubbed
 if (!doc.value && typeof queryContent === 'function') {
   try {
-    const alt =
-      (await queryContent(exactPath)?.findOne?.()) ||
-      (await queryContent()?.where?.({ _path: exactPath })?.findOne?.())
+    // フォールバック取得は「一法のみ」（findOne(exactPath)）に統一
+    const alt = await queryContent(exactPath)?.findOne?.()
     if (alt) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (doc as any).value = alt as any
@@ -206,7 +205,8 @@ const related = computed(() => {
             </span>
             <small class="text-sm opacity-70">（約 {{ minutes }} 分）</small>
           </h1>
-          <ContentRenderer :value="doc" />
+          <!-- テンプレ1行規則: 本文は ContentRenderer の1行で描画（v-if 付き） -->
+          <ContentRenderer v-if="doc?.body" :value="doc" />
         </article>
 
         <div v-else class="max-w-prose mx-auto text-center py-16">

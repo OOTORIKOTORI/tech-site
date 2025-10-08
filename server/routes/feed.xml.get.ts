@@ -1,4 +1,4 @@
-import { defineEventHandler, setHeader } from 'h3'
+import { defineEventHandler, setHeader, getRequestURL } from 'h3'
 import { ofetch } from 'ofetch'
 import { useRuntimeConfig } from '#imports'
 
@@ -23,8 +23,9 @@ export default defineEventHandler(async event => {
   const cfg = useRuntimeConfig()
   const pub = (cfg as unknown as { public?: Record<string, unknown> }).public || {}
   const ORIGIN = typeof pub['siteOrigin'] === 'string' ? (pub['siteOrigin'] as string) : ''
-
-  const list = await ofetch<unknown>('/api/blogv2/list')
+  // SSR: 相対URL ofetch を避け、現在リクエストのオリジンを baseURL に指定
+  const base = getRequestURL(event).origin
+  const list = await ofetch<unknown>('/api/blogv2/list', { baseURL: base })
   const asObj = list && typeof list === 'object' ? (list as Record<string, unknown>) : {}
   const blog = Array.isArray(asObj['blog']) ? (asObj['blog'] as unknown[]) : []
   const legacy = Array.isArray(asObj['items']) ? (asObj['items'] as unknown[]) : []
