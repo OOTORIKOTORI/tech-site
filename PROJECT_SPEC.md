@@ -87,37 +87,28 @@
 ### プロジェクト名
 
 **磨きエクスプローラー（Migaki Explorer）** - 開発者向けツールサイト
+**本ドキュメントは「正準仕様」です。要点は README、恒久規約は HANDBOOK を参照。ブランド名・ORIGIN・ルール序列は全体で統一。**
+
+## /blog 詳細ページの正準ルール
+
+- 取得は `findOne(exactPath)` または `where({_path})` の**1 経路のみ**。filter 等の手動選別は禁止。
+- `doc?.body` が無い場合は**404**（白紙描画禁止）。
+- テンプレ最小条件は**固定**:
+  ```vue
+  <ContentRenderer v-if="doc?.body" :value="doc" />
+  ```
+  （`v-else`は 404 専用。白紙描画は禁止）
 
 ### サイト概要
 
-本サイトは「便利ツール＋技術ブログ」の開発者向け情報サイトです。
-ツールはローカル完結（ブラウザ/Node 内）と安全性を重視し、記事は実務志向の短文ノートを配信します。
-公開ドメイン（本番 ORIGIN）: https://migakiexplorer.jp
-
----
-
 ### ビジネスモデル
-
-- 当面はディスプレイ広告中心。将来はスポンサー/アフィ/寄付等を検討。
-
----
-
-### コンテンツ方針
-
-- ツール: 実務で“すぐ役立つ”小粒機能を継続追加。共有リンク/SEO/a11y を必須要件化。
-- ブログ: 週 1〜2 本を目標。検索意図に沿った構成（問題 → 解法 → 実例 → 落とし穴 → チェックリスト）。
 
 ---
 
 ### 運用/品質
 
 - CI でテスト必須、PR レビュー（単独開発でもセルフレビュー手順を記載）。
-- SEO ベースライン: Title/Description/OG/構造化データ、内部リンク、更新頻度。
 - a11y: コントラスト/キーボード操作/aria/ラベル。
-- 解析: ページビュー/コンバージョン（広告クリック）収集の方針（匿名集計）。
-
-- Vercel での CD（自動デプロイ）を採用し、`NUXT_PUBLIC_SITE_ORIGIN` を canonical / og:url / robots / sitemap / RSS の基点に統一（例: https://migakiexplorer.jp）。
-- 生成物は `robots.txt` / `sitemap.xml` / `feed.xml` に表記統一。postbuild（`scripts/gen-meta.mjs`）で生成し、`--check-only` でホスト一致を検証（ホスト検証専用）。
 
 ---
 
@@ -133,16 +124,10 @@
 - ヘッダ: **Home / Tools / Blog**（現状）。
 - フッタ: **法務導線（/privacy, /terms, /ads）** を配置。
 - トップ `/`: ヒーロー＋ CTA（`/tools/cron-jst`, `/blog`）/ 最新 3 件を「Latest posts」で表示
-- ブログ `/blog`: タイトル/日付（YYYY-MM-DD）/説明/リンク（0 件時は "No posts yet"）。カードに a11y ラベル付与。
 - ブログ詳細 `/blog/[slug]`: 本文＋ SEO メタ（title/description/canonical/og:url）
 - ツール: `/tools/cron-jst`, `/tools/jwt-decode`
 
 - （実装済み）ヘッダ最小ナビ＋ Skip リンク。ブログ一覧カードは日付 `YYYY-MM-DD` と a11y ラベルを付与。
-
-### 主要機能
-
-- **JWT Decoder**: JSON Web Token のデコードツール（パス: `/tools/jwt-decode`）
-- **Cron JST 予測**: crontab 形式のスケジュールから日本時間での次回実行時刻を予測（パス: `/tools/cron-jst`）
 
 ---
 
@@ -155,27 +140,15 @@
    ```
 2. 依存関係をインストールします。
    ```bash
-   pnpm install
-   ```
-3. 開発サーバーを起動します。
-   ```bash
-   pnpm dev
+
    ```
 
-## ⚙️ 主要設定 / 実装
-
-- `nuxt.config.ts`: Nuxt 設定（`@nuxt/content`, `@nuxtjs/tailwindcss`）。`routeRules` で `/api/og/**` に `Cache-Control: no-store`。
 - `utils/siteUrl.ts` / `utils/siteMeta.ts`: 絶対 URL 化（canonical / og:url など）。
 - `server/middleware/noindex-preview.ts`: host が `*.vercel.app` の場合に `X-Robots-Tag: noindex, nofollow` を付与。
 - `scripts/gen-meta.mjs`: Postbuild で `public/robots.txt` / `public/sitemap.xml` / `public/feed.xml` を生成。`--check-only` でホスト一致を検証（生成物のドメインが `NUXT_PUBLIC_SITE_ORIGIN` と一致することを確認）。
-- `server/api/og/[slug].png.ts`: 既定は 302 で `/og-default.png` にフォールバック（no-store / X-OG-Fallback）。`ENABLE_DYNAMIC_OG=1` で軽量 PNG を動的生成（成功時 200、失敗時は即 302）。
-- Cron 仕様: `utils/cron.ts` に実装。`dowDomMode` と `'*'` の解釈（OR=unrestricted / AND=always-true）。
-- Auto-reload: `configVersion` / `settingsUpdatedAt` 変化 → 次 tick（10s）で再読込。
 - dev 安定メモ:
-  - `package.json` に `"imports": { "#content/server": "@nuxt/content/dist/runtime/server/index.mjs" }` を設定
-  - `nuxt.config.ts` の `nitro.prerender.ignore` で `/blog/**` `/api/**` を prerender 対象外（dev 向けの明示メモ）
 
-### サイト設定 / ブランド名（一元化）
+  - `nuxt.config.ts` の `nitro.prerender.ignore` で `/blog/**` `/api/**` を prerender 対象外（dev 向けの明示メモ）
 
 - 定義場所: `app.config.ts`
   - `site.brand.nameJa`: 正式名（例: `磨きエクスプローラー`）

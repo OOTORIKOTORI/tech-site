@@ -4,15 +4,18 @@
 
 本リポジトリは「Cron / JWT などの小ワークを即検証できる軽量ツール」と「再発しがちな実務の落とし穴を最小編集で整理した短文ブログ」を統合したサイトです。依存固定と postbuild 検証による安全なローカル再現、小さく差分を出す文化、CI での型チェック / Lint / テスト / ビルド / メタ検証 / OGP スモーク / Lighthouse 通過を公開条件とする品質ゲートを重視します。恒久ルール/詳細手順は `PROJECT_SPEC.md` および **docs/HANDBOOK.md**（Git/OGP/CI/リリース規約）を参照してください。
 
-**クイックチェック:** `queryContent` は `#content` から import してください（`#imports` からの import は禁止されています）。
+## クイックチェック（要点）
 
-**クイックチェック:** content/blog の .md ファイルは frontmatter（---）とコードフェンス（```）の形状崩れを自動検知します（\_archive 配下は除外）。
+- `queryContent`は**必ず`#content`から import**（`#imports`は禁止）
+- Markdown 形状ガードは`_archive`を**除外**
+- `pnpm run ops:rollback <tag>`で安定タグへスナップショット復元
+- /blog 詳細は**1 経路のみ取得・白紙禁止・テンプレ 1 行**（詳細は PROJECT_SPEC 参照）
 
-**運用:** `pnpm run ops:rollback v0.9.44` で指定タグのスナップショットに復元＆コミット＆プッシュします。
+## ブランド・ORIGIN・ルール序列
 
-- 正式名: 『磨きエクスプローラー（Migaki Explorer）』
-- 表示/短縮名: Migaki Explorer（`<title>` / og:site_name / Organization.name / publisher.name）
-- 本番 ORIGIN: https://migakiexplorer.jp
+- ブランド: 「磨きエクスプローラー（Migaki Explorer）」／短縮名「Migaki Explorer」
+- ORIGIN: https://migakiexplorer.jp
+- ルール序列: 正準=PROJECT_SPEC / 要点=README / 規約=HANDBOOK
 
 ## ブランド名の一元化（概要）
 
@@ -24,7 +27,7 @@
 
 ---
 
-## 要点（実装済みの方針）
+## 要点（実装済みの方針・抜粋）
 
 - 生成物の表記を統一: `robots.txt` / `sitemap.xml` / `feed.xml`（postbuild で生成）。
 - ORIGIN 基準の一元化: `NUXT_PUBLIC_SITE_ORIGIN` を canonical / og:url / robots / sitemap / RSS の基点に使用。
@@ -34,26 +37,18 @@
 - OGP API: 既定は 302 で `/og-default.png` へフォールバック。`ENABLE_DYNAMIC_OG=1` で動的 PNG（失敗時は即 302）。`LOG_OG=1` で最小ログ。
 - CI 概要: install → typecheck → lint → test → build → postbuild（`--check-only`）→ smoke:og → LHCI（詳細は PROJECT_SPEC）。
 - （任意）Web App Manifest の `name`/`short_name` はブランド準拠。詳細は `PROJECT_SPEC.md` を参照。
-- /blog 方針: “落とす条件だけ厳格”=`draft !== true && published !== false`、取得は 1 経路・リンクは `_path`、テンプレ側の二重フィルタ禁止（詳細は SPEC）。
-- dev 安定: `package.json` の `imports.#content/server` 設定と `nuxt.config.ts` の `nitro.prerender.ignore` で `/blog/**` `/api/**` を静的化対象外（詳細は SPEC）。
-- Blog v2（暫定）: `/api/blogv2/list` `/api/blogv2/doc` を実験的に運用（将来削除前提、詳細は SPEC）。
+- /blog 詳細は**1 経路のみ取得・白紙禁止・テンプレ 1 行**（`<ContentRenderer v-if="doc?.body" :value="doc" />`）。詳細は[PROJECT_SPEC.md](./PROJECT_SPEC.md)参照。
+- `queryContent`は**#content から import**（#imports は禁止）。
+- Markdown 形状ガードは`_archive`を除外。
+- `pnpm run ops:rollback <tag>`で安定タグへスナップショット復元。
 
 ## /blog 詳細 404/白紙対策（要点）
 
 - 1 経路のみ（findOne(exactPath)優先、where({\_path})も可。filter 等の手動選択は禁止）
-- `<ContentRenderer :value="doc" />` または API 側で `renderContent`
+- `<ContentRenderer v-if="doc?.body" :value="doc" />`（テンプレ 1 行）
 - SSR は絶対 URL を使用
 - `body`が無い場合は 404（白紙禁止）
-
-```vue
-<ContentRenderer v-if="doc?.body" :value="doc" />
-```
-
-- 詳細は PROJECT_SPEC 参照
-
-\_path 厳密一致 + body 不在は 404（暫定運用）。
-
-詳細ページで 404/白紙が出る場合は、[PROJECT_SPEC.md](./PROJECT_SPEC.md)「ブログ詳細の選択ロジック」および下記 Troubleshooting 節を参照。\_path 厳密一致・body 不在描画禁止・dev console.debug 出力・frontmatter の'true'/'false'文字列テスト等、実装ガードと検証手順を明記。
+- 詳細は[PROJECT_SPEC.md](./PROJECT_SPEC.md)参照
 
 ---
 
@@ -77,10 +72,9 @@
 
 ## CI 概要（要点）
 
-- 順序: install → typecheck → lint → test → build → postbuild（`--check-only` でホスト一致検証）→ smoke:og → LHCI。
-- meta-check では `NUXT_PUBLIC_SITE_ORIGIN=https://migakiexplorer.jp` を明示（`NUXT_PUBLIC_SITE_URL=''`）。
-- 具体例・閾値・テスト基盤の詳細は `PROJECT_SPEC.md` を参照。
-- Lighthouse の各スコア閾値（Accessibility ≥ 90 など）の正準値は `PROJECT_SPEC.md` を参照（README では要点のみ）。
+- 順序: install → typecheck → lint → test → build → postbuild（`--check-only`でホスト一致検証）→ smoke:og → LHCI。
+- meta-check では`NUXT_PUBLIC_SITE_ORIGIN=https://migakiexplorer.jp`を明示。
+- 詳細・閾値・テスト基盤は[PROJECT_SPEC.md](./PROJECT_SPEC.md)参照。
 
 ---
 

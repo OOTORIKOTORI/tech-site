@@ -2,17 +2,21 @@
 
 # HANDBOOK — Migaki Explorer
 
+## 運用ルール・ルール序列・ブランド
+
+- **Dual-terminal Policy**: Terminal A は`pnpm dev`専用（以降コマンド禁止）、Terminal B は検証専用で新規に開く。
+- すべての検証ブロックは折りたたまずそのまま残す。
+- パス揺れ（末尾スラッシュ・大文字小文字・URL デコード差）は禁止。
+- CI 失敗は出荷ブロック。
+- ルール序列: 正準=PROJECT_SPEC / 要点=README / 規約=HANDBOOK
+- ブランド: 「磨きエクスプローラー（Migaki Explorer）」／短縮名「Migaki Explorer」
+- ORIGIN: https://migakiexplorer.jp
+
 ## Copilot 運用ガイド（最小差分）
 
-### Dev 検証運用（Dual-terminal Policy）
+---
 
-- Terminal A: `pnpm dev` を起動したら **以後コマンドを打たない**（サーバ専用）。
-- Terminal B: 検証専用ターミナルを**新規**に開き、API/ページ検証を行う。
-- すべての Copilot プロンプトの末尾に **「検証ブロック」** を **必ず**添付する（人手による省略禁止）。
-- 検証は SSR 実体で行う（View Source / curl / Invoke-WebRequest を優先）。
-- DevTools: Network で **Disable cache** を ON、更新は **Ctrl+Shift+R**（ハードリロード）。
-
-#### 検証ブロック（貼り付け用）
+#### 検証ブロック（貼り付け用・省略禁止）
 
 ````md
 === 検証ブロック（必ず“別ターミナル/別ペイン”で実行）===
@@ -165,23 +169,22 @@
 
 - `doc.body` は AST（構造化ツリー）。`v-html` を使わず、`<ContentRenderer :value="doc" />` を利用するか、API 側で `renderContent` により HTML 文字列へ変換して返す。
 
-## Handover Checklist
- - Dev 検証は **Terminal B**（別ターミナル）で実施し、robots/SSR などは **検証ブロック**の手順で確認済み。
+## Handover Checklist（最新運用）
 
-既知=200／未知=404 の E2E を毎回確認
-
-- Spec sync: `PROJECT_SPEC.md`（正）と `README.md`（要点）に差分がないか。必要なら最小追記。
-- Health checks: CI 全緑（typecheck/lint/test/build/postbuild --check-only/smoke:og/LHCI≥90）。ORIGIN/プレビュー noindex も確認。
-- Ops rules: 本 HANDBOOK のルールに逸脱がないか。必要なら本書を最小更新。
-- Comms: PR 本文に「Handover Summary（Done/Next/Ops/Checks）」を記載（テンプレ参照）。
-- Versioning: 変更内容に応じて SemVer を決定（feat=MINOR, fix/docs/ci=PATCH, 破壊的=MAJOR）。
-- Release: 手動で `git tag vX.Y.Z && git push --follow-tags`。ノートは簡潔に。
+- Dev検証は**Terminal B**（別ターミナル）で実施し、robots/SSR等は**検証ブロック**の手順で確認済み。
+- 既知=200／未知=404のE2Eを毎回確認。
+- Spec sync: `PROJECT_SPEC.md`（正）と`README.md`（要点）に差分がないか。必要なら最小追記。
+- Health checks: CI全緑（typecheck/lint/test/build/postbuild --check-only/smoke:og/LHCI≥90）。ORIGIN/プレビューnoindexも確認。
+- Ops rules: 本HANDBOOKのルールに逸脱がないか。必要なら本書を最小更新。
+- Comms: PR本文に「Handover Summary（Done/Next/Ops/Checks）」を記載（テンプレ参照）。
+- Versioning: 変更内容に応じてSemVerを決定（feat=MINOR, fix/docs/ci=PATCH, 破壊的=MAJOR）。
+- Release: 手動で`git tag vX.Y.Z && git push --follow-tags`。ノートは簡潔に。
 - Optional: Manifest（`name`/`short_name`）のブランド準拠を確認（任意）。
-- Logging: 機密を出さない。`LOG_OG=1` は短時間スポットのみ。
-- /blog 表示（>0 件）確認と `blogv2` API（`/api/blogv2/list` `/api/blogv2/doc`）の一時運用メモ確認（将来削除前提）。
-- 既知 slug で 200・未知 slug で 404 を確認。
+- Logging: 機密を出さない。`LOG_OG=1`は短時間スポットのみ。
+- /blog表示（>0件）確認と`blogv2`API（`/api/blogv2/list` `/api/blogv2/doc`）の暫定運用メモ確認（将来削除前提）。
+- 既知slugで200・未知slugで404を確認。
 
-### PR 本文テンプレ（コピペ用）
+### PR本文テンプレ（コピペ用）
 
 ```
 
