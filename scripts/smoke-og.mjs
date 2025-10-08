@@ -4,7 +4,7 @@
 // Retry: up to 6 retries (7 attempts total) every 30s
 
 const ORIGIN = process.env.NUXT_PUBLIC_SITE_ORIGIN || 'https://migakiexplorer.jp'
-const TARGET_URL = `${ORIGIN}/api/og/hello.png`
+const TARGET_URL = new URL('/api/og/hello.png', ORIGIN).href
 const MAX_RETRIES = 6
 const ATTEMPTS = MAX_RETRIES + 1
 const INTERVAL_MS = 30_000
@@ -22,6 +22,25 @@ async function tryOnce(attempt) {
         `${loc ? ` location=${loc}` : ''}` +
         `${fallback ? ` x-og-fallback=${fallback}` : ''}`
     )
+
+    // 308/301 の場合、Location を正規化して1回だけ再試行
+    if ((status === 308 || status === 301) && loc) {
+      const redirectUrl = new URL(loc, ORIGIN).href
+      console.log(`[smoke-og] following redirect to ${redirectUrl}`)
+      const res2 = await fetch(redirectUrl, { method: 'GET', redirect: 'manual' })
+      const status2 = res2.status
+      const loc2 = res2.headers.get('location') || ''
+      const fallback2 = res2.headers.get('x-og-fallback') || res2.headers.get('X-OG-Fallback') || ''
+      console.log(
+        `[smoke-og] redirect result status=${status2}` +
+          `${loc2 ? ` location=${loc2}` : ''}` +
+          `${fallback2 ? ` x-og-fallback=${fallback2}` : ''}`
+      )
+      if (status2 === 200 || status2 === 302) {
+        console.log(`[smoke-og] OK: status=${status2} (after redirect)`)
+        return true
+      }
+    }
 
     if (status === 200 || status === 302) {
       console.log(`[smoke-og] OK: status=${status}`)
