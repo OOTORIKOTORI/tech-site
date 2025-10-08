@@ -54,10 +54,6 @@ if (!doc.value && typeof queryContent === 'function') {
 if (!doc.value) {
   throw createError({ statusCode: 404, statusMessage: 'Post not found' })
 }
-// Ensure body exists for proper rendering
-if (!doc.value.body) {
-  throw createError({ statusCode: 404, statusMessage: 'Post not found' })
-}
 
 // SEO + Canonical
 const cfg = useRuntimeConfig()
