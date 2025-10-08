@@ -4,6 +4,12 @@
 
 本リポジトリは「Cron / JWT などの小ワークを即検証できる軽量ツール」と「再発しがちな実務の落とし穴を最小編集で整理した短文ブログ」を統合したサイトです。依存固定と postbuild 検証による安全なローカル再現、小さく差分を出す文化、CI での型チェック / Lint / テスト / ビルド / メタ検証 / OGP スモーク / Lighthouse 通過を公開条件とする品質ゲートを重視します。恒久ルール/詳細手順は `PROJECT_SPEC.md` および **docs/HANDBOOK.md**（Git/OGP/CI/リリース規約）を参照してください。
 
+**クイックチェック:** `queryContent` は `#content` から import してください（`#imports` からの import は禁止されています）。
+
+**クイックチェック:** content/blog の .md ファイルは frontmatter（---）とコードフェンス（```）の形状崩れを自動検知します（\_archive 配下は除外）。
+
+**運用:** `pnpm run ops:rollback v0.9.44` で指定タグのスナップショットに復元＆コミット＆プッシュします。
+
 - 正式名: 『磨きエクスプローラー（Migaki Explorer）』
 - 表示/短縮名: Migaki Explorer（`<title>` / og:site_name / Organization.name / publisher.name）
 - 本番 ORIGIN: https://migakiexplorer.jp
