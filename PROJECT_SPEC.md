@@ -40,12 +40,18 @@
 
 - “落とす条件だけ厳格” = `draft !== true && published !== false` を再掲（一覧/詳細とも二重フィルタ禁止、取得系 1 経路）。
 
+### 関連記事の可視性ガード
+
+- 取得対象は `/blog/**` のみ（`/blog/_archive/**` は除外）。
+- 可視条件は「落とす条件だけ厳格」: `draft === true`/`'true'` を除外、`published === false`/`'false'` を除外。
+- `doc.body` は必須（本文なしは非表示）。
+
 ## テスト方針
 
 - 単体/統合:
   - `/_path` 厳密一致：既存記事 → 200、未知スラッグ → 404。
   - frontmatter の `'true'/'false'`（**string**）を含む判定のユニット/E2E。
-- CI での通し順序は既定に従う（typecheck → lint → test → build → postbuild --check-only → smoke:og → LHCI）。
+- CI での通し順序は既定に従う（typecheck → lint → test → build → postbuild --check-only → smoke:og → ci:guards → LHCI）。
 
 ## ブログ追加手順（運用）
 
@@ -72,8 +78,9 @@
 
 ### CI/品質ゲート・運用ルール
 
-- **pre-push フックは `.husky/.env` を読み込む**。ORIGIN はここで固定し、CI/ローカル差を無くす。
+- **pre-push フックは `.husky/.env` を POSIX sh で読み込む（機密は含めない）**。ORIGIN はここで固定し、CI/ローカル差を無くす。
 - **`scripts/smoke-og.mjs` は `new URL(path, origin)` で URL を正規化**し、**301/308 は単発フォロー**→ **200/302 到達を PASS** とする。
+  - ORIGIN の末尾スラッシュ有無は不問（`new URL` により正規化）。
 
 ## Troubleshooting: /blog 詳細（補足・最小）
 
@@ -271,7 +278,8 @@ Workflow 上での meta-check 用 ENV 注入手順（集約・正準）:
 5. Build
 6. Postbuild（`--check-only`）
 7. Smoke:OG（200/302 合格）
-8. LHCI
+8. ci:guards
+9. LHCI
 
 Lighthouse budgets:
 
@@ -306,7 +314,7 @@ pnpm typecheck; pnpm lint; pnpm test -- --run; pnpm build; node .\scripts\gen-me
 
 ### リリース運用（直 push 前提）
 
-- Husky pre-push: `typecheck → lint → test → build → postbuild → smoke:og`。
+- Husky pre-push: `typecheck → lint → test → build → postbuild → smoke:og → ci:guards`。
 - タグ運用: `vX.Y.Z`。コミット → タグ → push の簡易リリース。Release ノートは基本不要（必要に応じて `gh` CLI）。
 - チェックリスト（抜粋）:
   - `NUXT_PUBLIC_SITE_ORIGIN`=https://migakiexplorer.jp（Production）
@@ -427,7 +435,7 @@ where({ $or: [{ published: true }, { published: { $exists: false } }] })
 
 ### CI/品質ゲート・運用ルール
 
-- **pre-push フックは `.husky/.env` を読み込む**。ORIGIN はここで固定し、CI/ローカル差を無くす。
+- **pre-push フックは `.husky/.env` を POSIX sh で読み込む（機密は含めない）**。ORIGIN はここで固定し、CI/ローカル差を無くす。
 - **`scripts/smoke-og.mjs` は `new URL(path, origin)` で URL を正規化**し、**301/308 は単発フォロー**→ **200/302 到達を PASS** とする。
 
 ### Troubleshooting: /blog 詳細（補足・最小）
@@ -661,7 +669,7 @@ pnpm typecheck; pnpm lint; pnpm test -- --run; pnpm build; node .\scripts\gen-me
 
 ### リリース運用（直 push 前提）
 
-- Husky pre-push: `typecheck → lint → test → build → postbuild → smoke:og`。
+- Husky pre-push: `typecheck → lint → test → build → postbuild → smoke:og → ci:guards`。
 - タグ運用: `vX.Y.Z`。コミット → タグ → push の簡易リリース。Release ノートは基本不要（必要に応じて `gh` CLI）。
 - チェックリスト（抜粋）:
   - `NUXT_PUBLIC_SITE_ORIGIN`=https://migakiexplorer.jp（Production）
@@ -782,7 +790,7 @@ where({ $or: [{ published: true }, { published: { $exists: false } }] })
 
 ### CI/品質ゲート・運用ルール
 
-- **pre-push フックは `.husky/.env` を読み込む**。ORIGIN はここで固定し、CI/ローカル差を無くす。
+- **pre-push フックは `.husky/.env` を POSIX sh で読み込む（機密は含めない）**。ORIGIN はここで固定し、CI/ローカル差を無くす。
 - **`scripts/smoke-og.mjs` は `new URL(path, origin)` で URL を正規化**し、**301/308 は単発フォロー**→ **200/302 到達を PASS** とする。
 
 ### Troubleshooting: /blog 詳細（補足・最小）
@@ -1016,7 +1024,7 @@ pnpm typecheck; pnpm lint; pnpm test -- --run; pnpm build; node .\scripts\gen-me
 
 ### リリース運用（直 push 前提）
 
-- Husky pre-push: `typecheck → lint → test → build → postbuild → smoke:og`。
+- Husky pre-push: `typecheck → lint → test → build → postbuild → smoke:og → ci:guards`。
 - タグ運用: `vX.Y.Z`。コミット → タグ → push の簡易リリース。Release ノートは基本不要（必要に応じて `gh` CLI）。
 - チェックリスト（抜粋）:
   - `NUXT_PUBLIC_SITE_ORIGIN`=https://migakiexplorer.jp（Production）
@@ -1137,7 +1145,7 @@ where({ $or: [{ published: true }, { published: { $exists: false } }] })
 
 ### CI/品質ゲート・運用ルール
 
-- **pre-push フックは `.husky/.env` を読み込む**。ORIGIN はここで固定し、CI/ローカル差を無くす。
+- **pre-push フックは `.husky/.env` を POSIX sh で読み込む（機密は含めない）**。ORIGIN はここで固定し、CI/ローカル差を無くす。
 - **`scripts/smoke-og.mjs` は `new URL(path, origin)` で URL を正規化**し、**301/308 は単発フォロー**→ **200/302 到達を PASS** とする。
 
 ### Troubleshooting: /blog 詳細（補足・最小）
@@ -1371,7 +1379,7 @@ pnpm typecheck; pnpm lint; pnpm test -- --run; pnpm build; node .\scripts\gen-me
 
 ### リリース運用（直 push 前提）
 
-- Husky pre-push: `typecheck → lint → test → build → postbuild → smoke:og`。
+- Husky pre-push: `typecheck → lint → test → build → postbuild → smoke:og → ci:guards`。
 - タグ運用: `vX.Y.Z`。コミット → タグ → push の簡易リリース。Release ノートは基本不要（必要に応じて `gh` CLI）。
 - チェックリスト（抜粋）:
   - `NUXT_PUBLIC_SITE_ORIGIN`=https://migakiexplorer.jp（Production）
@@ -1492,7 +1500,7 @@ where({ $or: [{ published: true }, { published: { $exists: false } }] })
 
 ### CI/品質ゲート・運用ルール
 
-- **pre-push フックは `.husky/.env` を読み込む**。ORIGIN はここで固定し、CI/ローカル差を無くす。
+- **pre-push フックは `.husky/.env` を POSIX sh で読み込む（機密は含めない）**。ORIGIN はここで固定し、CI/ローカル差を無くす。
 - **`scripts/smoke-og.mjs` は `new URL(path, origin)` で URL を正規化**し、**301/308 は単発フォロー**→ **200/302 到達を PASS** とする。
 
 ### Troubleshooting: /blog 詳細（補足・最小）
@@ -1726,7 +1734,7 @@ pnpm typecheck; pnpm lint; pnpm test -- --run; pnpm build; node .\scripts\gen-me
 
 ### リリース運用（直 push 前提）
 
-- Husky pre-push: `typecheck → lint → test → build → postbuild → smoke:og`。
+- Husky pre-push: `typecheck → lint → test → build → postbuild → smoke:og → ci:guards`。
 - タグ運用: `vX.Y.Z`。コミット → タグ → push の簡易リリース。Release ノートは基本不要（必要に応じて `gh` CLI）。
 - チェックリスト（抜粋）:
   - `NUXT_PUBLIC_SITE_ORIGIN`=https://migakiexplorer.jp（Production）
@@ -1847,7 +1855,7 @@ where({ $or: [{ published: true }, { published: { $exists: false } }] })
 
 ### CI/品質ゲート・運用ルール
 
-- **pre-push フックは `.husky/.env` を読み込む**。ORIGIN はここで固定し、CI/ローカル差を無くす。
+- **pre-push フックは `.husky/.env` を POSIX sh で読み込む（機密は含めない）**。ORIGIN はここで固定し、CI/ローカル差を無くす。
 - **`scripts/smoke-og.mjs` は `new URL(path, origin)` で URL を正規化**し、**301/308 は単発フォロー**→ **200/302 到達を PASS** とする。
 
 ### Troubleshooting: /blog 詳細（補足・最小）

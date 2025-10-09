@@ -7,6 +7,7 @@
 - **Dual-terminal Policy**: Terminal A は`pnpm dev`専用（以降コマンド禁止）、Terminal B は検証専用で新規に開く。
 - すべての検証ブロックは折りたたまずそのまま残す。
 - パス揺れ（末尾スラッシュ有無・大文字小文字・URL デコード差）は禁止。
+- SSR 実行パスでは相対 URL を使わない（`useFetch` か ORIGIN 由来の絶対 URL）。
 - CI 失敗は出荷ブロック。
 - ルール序列: 正準=PROJECT_SPEC / 要点=README / 規約=HANDBOOK
 - ブランド: 「磨きエクスプローラー（Migaki Explorer）」／短縮名「Migaki Explorer」
@@ -22,6 +23,11 @@
 
 * **smoke:og の URL 結合は `new URL('/api/og/hello.png', ORIGIN)` で正規化**し、**301/308 は 1 回だけフォロー**して 200/302 到達を合格とする。
 * **ORIGIN の末尾スラッシュ有無は不問**（スクリプトで正規化）。ただしアプリ本体は従来どおり**パス揺れ禁止**。
+
+### 記事ポリシー（ブログ運用）
+
+- 初期公開記事「OG プレビューが出ない時の最初の 3 手」に倣い、短く読めるチェックリスト型を推奨スタイルとする。
+- 「関連ツール」は（準備中）を許容。公開後に当該記事へリンクを追記する運用。
 
 ## Copilot 運用ガイド（最小差分）
 
@@ -154,7 +160,7 @@
 
 ## 8. CI パイプライン & ブロッカー
 
-- `install → typecheck → lint → test → build → postbuild(--check-only) → smoke:og → LHCI`
+- `install → typecheck → lint → test → build → postbuild(--check-only) → smoke:og → ci:guards → LHCI`
 - CI 失敗は出荷ブロック
 
 ## 9. リリース/タグ

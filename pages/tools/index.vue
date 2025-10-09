@@ -15,6 +15,18 @@
           <p class="text-gray-600">JWT をブラウザで安全にデコード。</p>
         </NuxtLink>
       </li>
+      <li class="border rounded-lg p-4 bg-white">
+        <NuxtLink to="/tools/og-check" class="group block focus-ring">
+          <h2 class="text-lg font-medium text-blue-600 group-hover:underline">OGプレビュー確認</h2>
+          <p class="text-gray-600">リダイレクト連鎖と最終URL/ステータスを確認</p>
+        </NuxtLink>
+      </li>
+      <li class="border rounded-lg p-4 bg-white">
+        <NuxtLink to="/tools/site-check" class="group block focus-ring">
+          <h2 class="text-lg font-medium text-blue-600 group-hover:underline">サイトマップ / robots チェッカー</h2>
+          <p class="text-gray-600">robots.txt と sitemap.xml のステータス/要約を確認</p>
+        </NuxtLink>
+      </li>
     </ul>
   </section>
 </template>

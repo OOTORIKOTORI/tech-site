@@ -8,8 +8,11 @@
 
 - `queryContent`は**必ず`#content`から import**（`#imports`は禁止）
 - Markdown 形状ガードは`_archive`を**除外**
+- Related（関連記事）は `/blog/**` のみ取得（`/blog/_archive/**` は除外）。`draft===true`/`published===false` は除外し、`body` が必須。
 - `pnpm run ops:rollback <tag>`で安定タグへスナップショット復元
 - /blog 詳細は**1 経路のみ取得・白紙禁止・テンプレ 1 行**（詳細は PROJECT_SPEC 参照）
+
+- クイック検証: `/api/og/hello.png` が **200 または 302** であること（smoke:og 合格基準）。
 
 * **smoke:og**: `https://<ORIGIN>/api/og/hello.png` に対し **200 または 302** なら合格。308/301 を踏む場合も **1 回のみ自動フォロー**して再判定（URL 結合は `new URL()` で正規化済み）。
 
@@ -37,7 +40,7 @@
 - 構造化データ: Organization.logo は `/logo.png` 絶対 URL、BlogPosting.publisher.logo、BreadcrumbList（/blog, /blog/[slug]）。
 - a11y: `focus-visible` は `.focus-ring` ユーティリティで統一（主要リンク/ナビに適用）。
 - OGP API: 既定は 302 で `/og-default.png` へフォールバック。`ENABLE_DYNAMIC_OG=1` で動的 PNG（失敗時は即 302）。`LOG_OG=1` で最小ログ。
-- CI 概要: install → typecheck → lint → test → build → postbuild（`--check-only`）→ smoke:og → LHCI（詳細は PROJECT_SPEC）。
+- CI 概要: install → typecheck → lint → test → build → postbuild（`--check-only`）→ smoke:og → ci:guards → LHCI（詳細は PROJECT_SPEC）。
 - （任意）Web App Manifest の `name`/`short_name` はブランド準拠。詳細は `PROJECT_SPEC.md` を参照。
 - /blog 詳細は**1 経路のみ取得・白紙禁止・テンプレ 1 行**（`<ContentRenderer v-if="doc?.body" :value="doc" />`）。詳細は[PROJECT_SPEC.md](./PROJECT_SPEC.md)参照。
 - `queryContent`は**#content から import**（#imports は禁止）。
@@ -74,7 +77,7 @@
 
 ## CI 概要（要点）
 
-- 順序: install → typecheck → lint → test → build → postbuild（`--check-only`でホスト一致検証）→ smoke:og → LHCI。
+- 順序: install → typecheck → lint → test → build → postbuild（`--check-only`でホスト一致検証）→ smoke:og → ci:guards → LHCI。
 - meta-check では`NUXT_PUBLIC_SITE_ORIGIN=https://migakiexplorer.jp`を明示。
 - 詳細・閾値・テスト基盤は[PROJECT_SPEC.md](./PROJECT_SPEC.md)参照。
 
@@ -90,7 +93,7 @@
 
 ## 運用メモ（抜粋）
 
-- pre-push 例: `typecheck → lint → test → build → postbuild → smoke:og`。
+- pre-push 例: `typecheck → lint → test → build → postbuild → smoke:og → ci:guards`。
 - 主要リンクの `focus-visible` は `.focus-ring` を適用し視認性を統一。
 
 ---
