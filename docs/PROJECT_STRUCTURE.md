@@ -93,6 +93,7 @@ C:\website\tech-site
 |  |  ├── og-check.vue
 |  |  └── site-check.vue
 |  ├── tools.vue
+|  ├── [...path].vue
 |  └── __blog_v1
 |     └── [slug].vue
 ├── plugins
@@ -224,5 +225,5 @@ C:\website\tech-site
 ├── vercel.json
 └── vitest.config.ts
 
-directory: 57 file: 162 symboliclink: 34
+directory: 57 file: 163 symboliclink: 34
 

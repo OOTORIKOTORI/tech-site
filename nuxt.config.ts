@@ -54,7 +54,16 @@ export default defineNuxtConfig({
   },
   // 静的化対象から除外
   routeRules: {
-    '/**': { prerender: false },
+    '/**': {
+      prerender: false,
+      headers: {
+        'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
+        'X-Content-Type-Options': 'nosniff',
+        'X-Frame-Options': 'DENY',
+        'Referrer-Policy': 'no-referrer-when-downgrade',
+        'Permissions-Policy': 'interest-cohort=()',
+      },
+    },
     '/blog': { prerender: false },
     '/blog/**': { prerender: false },
     '/api/**': { prerender: false },
