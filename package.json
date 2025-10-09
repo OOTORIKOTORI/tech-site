@@ -30,7 +30,8 @@
     "tag:major": "powershell -ExecutionPolicy Bypass -File ./scripts/bump-tag.ps1 major",
     "ci:guards": "node scripts/ci/guard-control-post.cjs && node scripts/ci/guard-relative-fetch.cjs && node scripts/ci/guard-content-import.cjs && node scripts/ci/guard-markdown-shapes.cjs",
     "ops:smoke": "node scripts/ops/smoke-control-seo.cjs",
-    "ops:rollback": "powershell -ExecutionPolicy Bypass -File ./scripts/ops/rollback.ps1 -Tag"
+    "ops:rollback": "powershell -ExecutionPolicy Bypass -File ./scripts/ops/rollback.ps1 -Tag",
+    "docs:tree": "pnpm --package=tree-cli dlx tree -a -I \"node_modules,.git,.nuxt,.output,dist,coverage,.turbo,.cache,.vercel,.vscode\" -l 4 -o docs/PROJECT_STRUCTURE.md"
   },
   "dependencies": {
     "@nuxt/content": "3.6.3",

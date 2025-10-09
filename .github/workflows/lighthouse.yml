@@ -26,8 +26,24 @@ jobs:
       - name: Warm up homepage
         if: ${{ matrix.preset == 'desktop' }}
         run: |
-          curl -sS https://migakiexplorer.jp/ -o /dev/null -w "HTTP %{http_code}\n"
-          sleep 2
+          set -Eeuo pipefail
+          url="https://migakiexplorer.jp/"
+          ua="gh-actions-warmup"
+          attempt=0
+          while [ $attempt -lt 3 ]; do
+            attempt=$((attempt+1))
+            echo "Attempt ${attempt}: default curl"
+            if curl -sS -A "$ua" "$url" -o /dev/null -w "HTTP %{http_code}\n"; then
+              exit 0
+            fi
+            echo "Attempt ${attempt}: force IPv4 + TLS1.2"
+            if curl -sS -4 --tlsv1.2 -A "$ua" "$url" -o /dev/null -w "HTTP %{http_code}\n"; then
+              exit 0
+            fi
+            sleep $((attempt*3))
+          done
+          echo "Warm-up failed after retries" >&2
+          exit 1
 
       - name: Audit migakiexplorer.jp (desktop)
         if: ${{ matrix.preset == 'desktop' }}
@@ -44,8 +60,24 @@ jobs:
       - name: Warm up homepage
         if: ${{ matrix.preset == 'mobile' }}
         run: |
-          curl -sS https://migakiexplorer.jp/ -o /dev/null -w "HTTP %{http_code}\n"
-          sleep 2
+          set -Eeuo pipefail
+          url="https://migakiexplorer.jp/"
+          ua="gh-actions-warmup"
+          attempt=0
+          while [ $attempt -lt 3 ]; do
+            attempt=$((attempt+1))
+            echo "Attempt ${attempt}: default curl"
+            if curl -sS -A "$ua" "$url" -o /dev/null -w "HTTP %{http_code}\n"; then
+              exit 0
+            fi
+            echo "Attempt ${attempt}: force IPv4 + TLS1.2"
+            if curl -sS -4 --tlsv1.2 -A "$ua" "$url" -o /dev/null -w "HTTP %{http_code}\n"; then
+              exit 0
+            fi
+            sleep $((attempt*3))
+          done
+          echo "Warm-up failed after retries" >&2
+          exit 1
 
       - name: Audit migakiexplorer.jp (mobile)
         if: ${{ matrix.preset == 'mobile' }}

@@ -4,6 +4,12 @@
 
 本リポジトリは「Cron / JWT などの小ワークを即検証できる軽量ツール」と「再発しがちな実務の落とし穴を最小編集で整理した短文ブログ」を統合したサイトです。依存固定と postbuild 検証による安全なローカル再現、小さく差分を出す文化、CI での型チェック / Lint / テスト / ビルド / メタ検証 / OGP スモーク / Lighthouse 通過を公開条件とする品質ゲートを重視します。恒久ルール/詳細手順は `PROJECT_SPEC.md` および **docs/HANDBOOK.md**（Git/OGP/CI/リリース規約）を参照してください。
 
+---
+
+## プロジェクト構成ドキュメント
+
+- プロジェクト構成の更新: `pnpm docs:tree` を実行すると docs/PROJECT_STRUCTURE.md を再生成します
+
 ## クイックチェック（要点）
 
 - `queryContent`は**必ず`#content`から import**（`#imports`は禁止）
