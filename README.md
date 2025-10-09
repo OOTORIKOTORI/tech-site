@@ -8,7 +8,7 @@
 
 ## プロジェクト構成ドキュメント
 
-- プロジェクト構成の更新: `pnpm docs:tree` を実行すると docs/PROJECT_STRUCTURE.md を再生成します
+- プロジェクト構成: `pnpm docs:tree`（軽量） / `pnpm docs:tree:deep`（詳細）
 
 ## クイックチェック（要点）
 
