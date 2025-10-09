@@ -62,6 +62,8 @@ export default defineNuxtConfig({
         'X-Frame-Options': 'DENY',
         'Referrer-Policy': 'no-referrer-when-downgrade',
         'Permissions-Policy': 'interest-cohort=()',
+        'Content-Security-Policy-Report-Only':
+          "default-src 'self'; img-src 'self' data: https:; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self'; base-uri 'self'; frame-ancestors 'none'",
       },
     },
     '/blog': { prerender: false },
