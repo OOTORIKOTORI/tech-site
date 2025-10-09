@@ -30,6 +30,11 @@
             Contact
           </NuxtLink>
         </li>
+        <li>
+          <NuxtLink to="/about" class="text-blue-600 hover:underline focus-ring">
+            About
+          </NuxtLink>
+        </li>
       </ul>
     </nav>
   </header>

@@ -2,6 +2,7 @@
 
 export default defineNuxtConfig({
   modules: ['@nuxt/content', '@nuxtjs/tailwindcss', '@nuxtjs/sitemap'],
+  plugins: ['~/plugins/meta-defaults.client.ts'],
   css: ['@@/assets/css/tailwind.css'],
   pages: true,
   // Rely on @nuxt/content to provide queryContent via auto-imports; do not re-register here
@@ -100,7 +101,14 @@ export default defineNuxtConfig({
     head: {
       htmlAttrs: { lang: 'ja' },
       meta: [{ name: 'viewport', content: 'width=device-width, initial-scale=1' }],
-      link: [],
+      link: [
+        {
+          rel: 'alternate',
+          type: 'application/rss+xml',
+          title: 'Migaki Explorer',
+          href: '/feed.xml',
+        },
+      ],
     },
   },
   vite: { resolve: { alias: { '#content/server': '@nuxt/content/nitro' } } },

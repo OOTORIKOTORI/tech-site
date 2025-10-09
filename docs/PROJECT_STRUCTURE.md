@@ -76,6 +76,7 @@ C:\website\tech-site
 ├── nuxt.config.ts
 ├── package.json
 ├── pages
+|  ├── about.vue
 |  ├── ads.vue
 |  ├── blog
 |  |  ├── index.vue
@@ -94,6 +95,8 @@ C:\website\tech-site
 |  ├── tools.vue
 |  └── __blog_v1
 |     └── [slug].vue
+├── plugins
+|  └── meta-defaults.client.ts
 ├── pnpm-lock.yaml
 ├── pnpm-workspace.yaml
 ├── PROJECT_SPEC.md
@@ -221,5 +224,5 @@ C:\website\tech-site
 ├── vercel.json
 └── vitest.config.ts
 
-directory: 56 file: 160 symboliclink: 34
+directory: 57 file: 162 symboliclink: 34
 

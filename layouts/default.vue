@@ -10,4 +10,22 @@
 
 <script setup lang="ts">
 // Nuxt auto-import resolves components
+import { useHead } from '#imports'
+
+const orgJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'Migaki Explorer',
+  url: 'https://migakiexplorer.jp/',
+  sameAs: []
+}
+
+useHead({
+  script: [
+    {
+      type: 'application/ld+json',
+      innerHTML: JSON.stringify(orgJsonLd)
+    }
+  ]
+})
 </script>
