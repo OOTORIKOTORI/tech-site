@@ -6,7 +6,10 @@ const title = 'Ads Policy'
 const description = '広告に関する表示の雛形です。'
 const canonical = useCanonicalUrl()
 
-useHead(() => ({ link: [{ rel: 'canonical', href: canonical.value }] }))
+useHead(() => ({
+  link: [{ rel: 'canonical', href: canonical.value }],
+  meta: [{ name: 'robots', content: 'noindex,follow' }]
+}))
 useSeoMeta({
   title,
   description,

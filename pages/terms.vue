@@ -6,7 +6,10 @@ const title = 'Terms of Service'
 const description = '本サイトの利用規約の雛形です。'
 const canonical = useCanonicalUrl()
 
-useHead(() => ({ link: [{ rel: 'canonical', href: canonical.value }] }))
+useHead(() => ({
+  link: [{ rel: 'canonical', href: canonical.value }],
+  meta: [{ name: 'robots', content: 'noindex,follow' }]
+}))
 useSeoMeta({
   title,
   description,
