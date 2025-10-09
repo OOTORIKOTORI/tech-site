@@ -37,7 +37,7 @@ const doCheck = async () => {
 <template>
   <main class="mx-auto max-w-3xl p-6 space-y-6">
     <h1 class="text-2xl font-bold">サイトマップ / robots チェッカー</h1>
-    <form @submit.prevent="doCheck" class="space-y-3">
+    <form class="space-y-3" @submit.prevent="doCheck">
       <label class="block">
         <span class="block text-sm mb-1">Origin</span>
         <input v-model="origin" type="url" required placeholder="https://migakiexplorer.jp"
@@ -59,8 +59,10 @@ const doCheck = async () => {
           <li>User-agent: * セクション検出: {{ result.robots.hasUserAgentAll ? 'Yes' : 'No' }}</li>
           <li>Disallow: /（全ブロック）: {{ result.robots.disallowAll ? 'Yes' : 'No' }}</li>
           <li>許可全部 (空Disallow): {{ result.robots.allowAll ? 'Yes' : 'No' }}</li>
-          <li>Sitemap 行: <span v-if="result.robots.sitemapsInRobots?.length">{{ robotsSitemaps }}</span><span
-              v-else>なし</span></li>
+          <li>
+Sitemap 行: <span v-if="result.robots.sitemapsInRobots?.length">{{ robotsSitemaps }}</span><span
+              v-else>なし</span>
+</li>
         </ul>
         <details class="mt-2">
           <summary class="cursor-pointer text-sm underline">raw</summary>
@@ -75,9 +77,12 @@ const doCheck = async () => {
         </p>
         <ul class="list-disc pl-5 text-sm">
           <li>URL件数: {{ result.sitemap.count }}</li>
-          <li>検出ホスト: <span v-if="result.sitemap.hosts?.length">{{ result.sitemap.hosts.join(', ') }}</span><span
-              v-else>なし</span></li>
-          <li>ホスト一致（{{ origin }}）:
+          <li>
+検出ホスト: <span v-if="result.sitemap.hosts?.length">{{ result.sitemap.hosts.join(', ') }}</span><span
+              v-else>なし</span>
+</li>
+          <li>
+ホスト一致（{{ origin }}）:
             <strong
               :class="result.sitemap.hostOk ? 'text-green-600' : (result.sitemap.hostOk === false ? 'text-amber-600' : 'text-gray-500')">
               {{ result.sitemap.hostOk === null ? 'N/A' : (result.sitemap.hostOk ? 'OK' : 'Mismatch') }}

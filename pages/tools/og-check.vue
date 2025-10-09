@@ -30,7 +30,7 @@ const doCheck = async () => {
 <template>
   <main class="mx-auto max-w-3xl p-6 space-y-6">
     <h1 class="text-2xl font-bold">OG プレビュー確認</h1>
-    <form @submit.prevent="doCheck" class="space-y-3">
+    <form class="space-y-3" @submit.prevent="doCheck">
       <label class="block">
         <span class="block text-sm mb-1">URL</span>
         <input v-model="url" type="url" required placeholder="https://example.com/..."
@@ -46,8 +46,10 @@ const doCheck = async () => {
     </form>
     <p v-if="err" class="text-red-600">{{ err }}</p>
     <section v-if="result" class="space-y-2">
-      <p class="text-sm text-gray-600">Final: {{ result.finalUrl }} (status {{ result.status }}) — hops {{ result.hops
-        }}</p>
+      <p class="text-sm text-gray-600">
+Final: {{ result.finalUrl }} (status {{ result.status }}) — hops {{ result.hops
+        }}
+</p>
       <div class="overflow-x-auto">
         <table class="w-full text-sm">
           <thead>

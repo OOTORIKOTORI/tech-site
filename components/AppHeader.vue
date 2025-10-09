@@ -14,13 +14,20 @@
           </NuxtLink>
         </li>
         <li>
-          <NuxtLink to="/tools" :aria-current="isTools ? 'page' : undefined" class="text-blue-600 hover:underline focus-ring">
+          <NuxtLink to="/tools" :aria-current="isTools ? 'page' : undefined"
+            class="text-blue-600 hover:underline focus-ring">
             Tools
           </NuxtLink>
         </li>
         <li>
-          <NuxtLink to="/blog" :aria-current="isBlog ? 'page' : undefined" class="text-blue-600 hover:underline focus-ring">
+          <NuxtLink to="/blog" :aria-current="isBlog ? 'page' : undefined"
+            class="text-blue-600 hover:underline focus-ring">
             Blog
+          </NuxtLink>
+        </li>
+        <li>
+          <NuxtLink to="/contact" class="text-blue-600 hover:underline focus-ring">
+            Contact
           </NuxtLink>
         </li>
       </ul>

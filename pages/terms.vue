@@ -30,7 +30,7 @@ const updatedAt = new Date().toISOString()
         <li>第三者の権利を侵害する行為</li>
       </ul>
       <h2>準拠法・裁判管轄</h2>
-      <p>準拠法・裁判管轄はダミーです（後日確定）。</p>
+      <p>お問い合わせ: <a href="/contact" class="text-blue-600 hover:underline">ootorikotori981@gmail.com</a></p>
       <p>最終更新日: <time :datetime="updatedAt">{{ updatedAt }}</time></p>
     </article>
   </main>

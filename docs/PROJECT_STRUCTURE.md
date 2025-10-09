@@ -80,6 +80,7 @@ C:\website\tech-site
 |  ├── blog
 |  |  ├── index.vue
 |  |  └── [...slug].vue
+|  ├── contact.vue
 |  ├── index.vue
 |  ├── privacy.vue
 |  ├── terms.vue
@@ -220,5 +221,5 @@ C:\website\tech-site
 ├── vercel.json
 └── vitest.config.ts
 
-directory: 56 file: 159 symboliclink: 34
+directory: 56 file: 160 symboliclink: 34
 

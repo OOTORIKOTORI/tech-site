@@ -30,7 +30,7 @@ const updatedAt = new Date().toISOString()
       <h2>利用目的</h2>
       <p>品質向上、セキュリティ確保、統計的分析のために用います。</p>
       <h2>問い合わせ先</h2>
-      <p>お問い合わせ: example@example.com（ダミー）</p>
+      <p>お問い合わせ: <a href="/contact" class="text-blue-600 hover:underline">ootorikotori981@gmail.com</a></p>
       <p>最終更新日: <time :datetime="updatedAt">{{ updatedAt }}</time></p>
     </article>
   </main>

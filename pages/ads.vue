@@ -25,7 +25,7 @@ const updatedAt = new Date().toISOString()
       <h2>クッキー等の利用</h2>
       <p>広告配信・アクセス解析のために Cookie 等の技術を用いる場合があります。</p>
       <h2>アフィリエイト</h2>
-      <p>アフィリエイトプログラムを利用する場合があります（有無はダミー）。</p>
+      <p>お問い合わせ: <a href="/contact" class="text-blue-600 hover:underline">ootorikotori981@gmail.com</a></p>
       <p>最終更新日: <time :datetime="updatedAt">{{ updatedAt }}</time></p>
     </article>
   </main>
