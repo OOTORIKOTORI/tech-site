@@ -7,7 +7,7 @@
       <NuxtLink to="/tools" class="btn">Tools</NuxtLink>
       <NuxtLink to="/contact" class="btn">Contact</NuxtLink>
     </nav>
-    <form @submit.prevent class="mb-4 max-w-xs">
+    <form class="mb-4 max-w-xs" @submit.prevent>
       <input type="search" placeholder="サイト内検索" class="input w-full" />
     </form>
   </section>
@@ -15,6 +15,7 @@
 
 <script setup lang="ts">
 import { setResponseStatus } from 'h3'
+import { useRequestEvent } from '#imports'
 if (process.server) {
   const e = useRequestEvent()
   if (e) setResponseStatus(e, 404)
