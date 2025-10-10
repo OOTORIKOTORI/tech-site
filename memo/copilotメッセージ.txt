@@ -1,0 +1,247 @@
+OOTORIKOTORI: # Guardrails（重要）
+- 絶対に git 操作はしない（commit/push/amend/stash/checkout 等すべて禁止）。
+- 端末コマンドの提案も禁止。必要なのは最小差分のパッチだけ。
+- 1トピック=1パッチ。ユーザーが手動でステージ/コミット/プッシュする。
+
+# Purpose
+CI の Lighthouse（mobile）で `categories.best-practices` の minScore=1.00 を満たすため、
+外部リンクの安全対策だけを最小差分で修正する。機能やUIは変更しない。
+
+# Scope / Targets
+- ホームに表示されるレイアウト/ヘッダー/フッター/ヒーロー等の **外部リンク**を出力する SFC
+  （例: `components/**/Header*.vue`, `components/**/Footer*.vue`, `app.vue`, `layouts/**` 等）
+- 新規ファイルの大量追加は禁止。既存のテンプレ内の a/NuxtLink だけ修正。
+
+# Changes
+1) `target="_blank"` を持つ外部リンクに **必ず** `rel="noopener noreferrer"` を追加。
+   - 例: `<a href="https://github.com/..." target="_blank">` →
+         `<a href="https://github.com/..." target="_blank" rel="noopener noreferrer">`
+   - `<NuxtLink>` を使っている場合も同様に
+         `<NuxtLink to="https://..." target="_blank" external rel="noopener noreferrer">`
+     のように `external` と `rel` を付与。
+   - 既に `rel` がある場合は `noopener` と `noreferrer` が含まれるか確認し、無ければ追加。
+2) 変更は**ホームに実際に描画される要素**に限定（ブログ本文レンダラー等の動的コンテンツは触らない）。
+3) 文字列やスタイル、クラス名、レイアウト構造は変更しない。
+
+# Acceptance Criteria
+- `pnpm ci:local` で Lighthouse（mobile）が Green、`categories.best-practices` が 1.00。
+- UI/挙動の変更なし（見た目・リンク先は従来通り）。
+- lint/typecheck/test/build/postbuild すべて Green。
+
+# Non-goals
+- 依存パッケージ更新、スコア閾値の緩和、ページ内容の編集、リンクの削除/追加は行わない。
+
+# Patch style
+- 差分は編集のあった行のみ。ファイル全体の整形は禁止。
+
+# Commit message (出力用)
+fix(home): add rel="noopener noreferrer" to external links opened with target=_blank to satisfy Lighthouse best-practices
+
+
+GitHub Copilot: ToDo 項目が 3 件作成されました
+
+まずはホームに表示される SFC 内で target="_blank" や外部 URL を含む a/NuxtLink を一括で洗い出し、修正箇所を特定します。 
+
+検索された `target\s*=\s*"_blank"` (`**/components/**`) のテキスト、1 件の結果
+
+検索された `target\s*=\s*"_blank"` (`**/*.vue`) のテキスト、1 件の結果
+
+`href\s*=\s*"https?://` (`**/*.vue`) の検索されたテキスト、結果なし
+
+[](file:///c%3A/website/tech-site/components/AppHeader.vue) の読み取り
+
+[](file:///c%3A/website/tech-site/components/AppFooter.vue) の読み取り
+
+[](file:///c%3A/website/tech-site/layouts/default.vue) の読み取り
+
+[](file:///c%3A/website/tech-site/app.vue) の読み取り
+
+`<NuxtLink[^>]*to=\s*"https?://` (`**/*.vue`) の検索されたテキスト、結果なし
+
+[](file:///c%3A/website/tech-site/pages/index.vue) の読み取り
+
+[](file:///c%3A/website/tech-site/components/GlobalNav.vue) の読み取り
+
+[](file:///c%3A/website/tech-site/pages/tools.vue) の読み取り
+
+検索された `target\s*=\s*"_blank"|external\b|rel=\s*"noopener|noreferrer` (`**/*.*`) のテキスト、結果 20
+
+[](file:///c%3A/website/tech-site/error.vue) の読み取り
+
+完了 (1/3) *Scan home-visible SFCs for external links*
+
+ホームに表示されるヘッダー/フッター/レイアウト/ヒーロー内の外部リンクを全ファイル走査し、target="_blank" の安全属性を確認します。
+
+## 対象の確認結果
+
+確認対象:
+- app.vue
+- default.vue
+- AppHeader.vue
+- AppFooter.vue
+- GlobalNav.vue
+- index.vue
+
+発見状況:
+- 上記ホーム描画系 SFC 内に、外部 URL を開く `target="_blank"` のリンクは見当たりませんでした。
+- リポジトリ内で唯一の `target="_blank"` は Footnote.vue にあり、すでに `rel="noopener noreferrer"` が付与済みです。
+  - `<a :href="href" target="_blank" rel="noopener noreferrer" ...>`
+
+そのため、ホームに実際に描画される要素に対しては追加修正は不要です。
+
+## 結論
+
+- 変更は不要（最小差分のポリシー上、パッチなし）。
+- 現状のホームでは Lighthouse Best Practices の「新しいタブで開く外部リンクの `rel=noopener`」要件は満たしています。
+
+## 受け入れ基準との対応
+
+- Lighthouse（mobile）Best Practices 1.00: 該当リグレッション要因は見当たらず満たす見込み。
+- UI/挙動の変更なし: 変更なしのため満たします。
+- lint/typecheck/test/build/postbuild: 変更なしのため影響なし。
+
+パッチが不要なため、コミットメッセージの出力も省略します（実ファイル変更がないため）。もしヘッダーやフッターに外部リンク（例: GitHub/Twitter など）を今後追加し、かつ `target="_blank"` で開く場合は、以下のように属性を付与してください。
+
+- a タグ: `<a href="https://..." target="_blank" rel="noopener noreferrer">`
+- NuxtLink: `<NuxtLink to="https://..." target="_blank" external rel="noopener noreferrer">`
+
+OOTORIKOTORI: プッシュしたらlighthouseのチェックでエラーになるんだけど原因分かりますか？調査してください！修正はとりあえず不要！
+
+GitHub Copilot: 原因を特定するため、提示された Lighthouse レポート URL を取得して「Best Practices 0.96」の内訳（どの監査が落ちているか）を直接確認します。 
+
+"Web ページのフェッチ" を使用しています
+
+https://storage.googleapis.com/lighthouse-infrastructure.appspot.com/reports/1760104684272-4917.report.html をフェッチしました
+
+レポート内の Best Practices のどの監査が失敗しているかを特定するため、該当セクションから具体的な監査名と説明文を抽出します。 
+
+"Web ページのフェッチ" を使用しています
+
+https://storage.googleapis.com/lighthouse-infrastructure.appspot.com/reports/1760104684272-4917.report.html をフェッチしました
+
+レポート内の「Best Practices」詳細から失敗した監査の具体的なテキスト（例: CSP 監査、DevTools Issues 監査）をピンポイントで検索します。 
+
+"Web ページのフェッチ" を使用しています
+
+https://storage.googleapis.com/lighthouse-infrastructure.appspot.com/reports/1760104684272-4917.report.html をフェッチしました
+
+"Web ページのフェッチ" を使用しています
+
+https://storage.googleapis.com/lighthouse-infrastructure.appspot.com/reports/1760104684272-4917.report.html をフェッチしました
+
+ベストプラクティス低下の直接原因を特定するため、デプロイ設定（例: vercel.json）に CSP ヘッダー設定がないか確認します。 
+
+[](file:///c%3A/website/tech-site/vercel.json) の読み取り
+
+検索された `Content-Security-Policy|CSP|useHead\(\) security|meta name=\"csp\"` (`**/*.*`) のテキスト、結果 20
+
+"Web ページのフェッチ" を使用しています
+
+https://storage.googleapis.com/lighthouse-infrastructure.appspot.com/reports/1760104684272-4917.report.html をフェッチしました
+
+[](file:///c%3A/website/tech-site/nuxt.config.ts) の読み取り
+
+依頼のCI失敗の原因を特定します。まずLighthouseレポートを直接確認し、スコア低下の内訳を突き止めました。
+
+## 結論（原因）
+
+- Best Practices が 0.96 になっている主因は「Ensure CSP is effective against XSS attacks（CSPがXSSに対して有効であること）」の監査が落ちているためです。
+  - サイトのレスポンスヘッダーは `Content-Security-Policy-Report-Only` を返しており、CSPが「レポートのみ」で強制されていません。
+  - リポジトリ上でも nuxt.config.ts の `routeRules` にて次のように設定されています。
+    - `Content-Security-Policy-Report-Only: "default-src 'self'; img-src 'self' data: https:; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self'; base-uri 'self'; frame-ancestors 'none'"`
+  - Lighthouseの該当監査は「有効（enforced）なCSPヘッダー」を期待します。Report-Onlyでは失敗扱いになります。
+  - さらに、Lighthouseが最低限推奨する `object-src 'none'` がポリシーに含まれていない点も、監査の減点要因になり得ます。
+
+- レポートには Best Practices 配下で「Issues were logged in the Issues panel in Chrome Devtools」も表示されています。これはDevToolsのIssuesパネルに何らかの警告が記録されているという一般監査で、スコアに影響することがあります。今回の主要因はCSPですが、この一般監査もスコアをわずかに押し下げている可能性があります。
+
+## 誤検知候補だった「外部リンクのnoopener/noreferrer」
+
+- ホームに描画されるSFC群（app.vue, default.vue, AppHeader.vue, AppFooter.vue, GlobalNav.vue, index.vue）を検索したところ、該当箇所の `target="_blank"` は見つかりませんでした。
+- リポジトリ内で唯一見つかったのは Footnote.vue ですが、すでに `rel="noopener noreferrer"` が付与済みです。
+- よって今回のBest Practices低下は「外部リンクのnoopener不足」ではなく、CSP関連が原因です。
+
+## 次にやるべきこと（修正方針の提案のみ・実装不要の説明）
+
+- Best Practicesを1.00に戻すには、Report-Onlyではなく有効なCSPヘッダー（`Content-Security-Policy`）を返すようにするのが近道です。
+- その際、Lighthouseが最低限推奨する以下を含めると通りやすいです。
+  - `base-uri 'self'`
+  - `object-src 'none'`
+- ただし「有効化」すると実際にブロックが発生するため、現在のページ内のインラインスクリプト（JSON-LDなど）が許可されるかを事前に確認する必要があります。必要に応じて nonce/hash 方式で許可する設計にするとより堅牢です。
+- 併せて、DevTools Issues（レポートに表示されている一般監査）もローカル/ステージングでIssueパネルを確認し、不要な警告が出ていないか整理すると、スコアの安定に寄与します。
+
+## まとめ
+
+- CIでのLighthouse Best Practices 0.96は、CSPがReport-Onlyで「有効でない」ことが主因です。
+- 外部リンクの `rel="noopener noreferrer"` は今回のホーム描画範囲では問題ありませんでした。
+- 修正は今は不要とのことなので、原因レポートのみ共有しました。必要になったら、CSPを「有効化」しつつ安全に通す最小変更案をご用意します。
+
+OOTORIKOTORI: # Guardrails（重要）
+- 絶対に git 操作はしない（commit/push/amend/checkout 等すべて禁止）。
+- 端末コマンドの提案も禁止。必要なのは最小差分パッチだけ。
+- 1トピック=1パッチ。ユーザーが手動でステージ/コミット/プッシュする。
+
+# Purpose
+Lighthouse（mobile）の Best Practices が、CSP が Report-Only のため 0.96 になる既知仕様。
+本番は当面 Report-Only を維持する方針のため、.lighthouserc.mobile.json の閾値のみ最小差分で調整し CI を通す。
+
+# Scope / Targets
+- .lighthouserc.mobile.json のみ（desktop 側は合格しているので触らない）
+
+# Changes
+- assertions の `categories:best-practices`（または `categories.best-practices`）の minScore を **0.96** に変更。
+- 他のカテゴリ・個別監査の設定は一切変更しない。
+- JSON の並び・インデント等は現状維持（差分最小）。
+- ファイルが JSONC でない場合、コメントは入れない。
+
+# Acceptance Criteria
+- `pnpm ci:local` が Green（mobile の lh ジョブを含む）。
+- 他カテゴリのスコア・閾値は従来通り。
+- ソースコードやヘッダー値（CSP Report-Only）は変更しない。
+
+# Patch style
+- 具体例（実際のキー表記に合わせてピンポイント置換）:
+  "assertions": {
+-   "categories:best-practices": ["error", {"minScore": 1}]
++   "categories:best-practices": ["error", {"minScore": 0.96}]
+    ...
+  }
+
+# Commit message（出力用）
+ci(lhci): set mobile best-practices minScore=0.96 because CSP is intentionally report-only for now
+
+
+GitHub Copilot: `**/.lighthouserc.mobile.json` に一致するファイルを検索しました。一致 2
+
+[](file:///c%3A/website/tech-site/.lighthouserc.mobile.json) の読み取り
+
+"パッチの適用" を使用しています
+
+
+```
+
+```
+目的どおり、mobile 用の Lighthouse 設定だけを最小差分で調整します。.lighthouserc.mobile.json の Best Practices の閾値を 1 → 0.96 に変更しました。
+
+## 変更内容
+
+- 対象: .lighthouserc.mobile.json
+- 修正点: assertions の `categories:best-practices` の `minScore` を 1 から 0.96 に更新
+- 他のキーや並び・インデントはそのまま
+
+## パッチ
+
+- 編集行のみ差分
+
+  - .lighthouserc.mobile.json
+    - "categories:best-practices": ["error", { "minScore": 0.96 }],
+
+## 期待される結果
+
+- CI の Lighthouse（mobile）が、CSP を Report-Only のままでも Green になります
+- 他カテゴリ（Performance, Accessibility, SEO）の閾値・挙動は従来どおり
+- アプリのコードやヘッダー（CSP）には一切変更なし
+
+コミットメッセージ（出力用）
+ci(lhci): set mobile best-practices minScore=0.96 because CSP is intentionally report-only for now
+
+変更を行いました。

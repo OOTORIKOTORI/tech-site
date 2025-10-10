@@ -1,0 +1,67 @@
+39s
+Run treosh/lighthouse-ci-action@v11
+  with:
+    urls: https://migakiexplorer.jp
+  
+    configPath: .lighthouserc.mobile.json
+    uploadArtifacts: true
+    artifactName: lighthouse-results-mobile
+    temporaryPublicStorage: true
+    runs: 3
+  env:
+    LHCI_EMULATE_FORM_FACTOR: mobile
+/home/runner/work/_actions/treosh/lighthouse-ci-action/v11/node_modules/@lhci/cli/src/cli.js
+Action config
+  Input args: {
+    "urls": [
+      "https://migakiexplorer.jp"
+    ],
+    "runs": 3,
+    "staticDistDir": null,
+    "budgetPath": "",
+    "configPath": "/home/runner/work/tech-site/tech-site/.lighthouserc.mobile.json",
+    "serverBaseUrl": "",
+    "serverToken": "",
+    "temporaryPublicStorage": true,
+    "uploadArtifacts": true,
+    "uploadExtraArgs": "",
+    "basicAuthUsername": "lighthouse",
+    "basicAuthPassword": "",
+    "artifactName": "lighthouse-results-mobile"
+  }
+Collecting
+  Running Lighthouse 3 time(s) on https://migakiexplorer.jp
+  Run #1...done.
+  Run #2...done.
+  Run #3...done.
+  Done running Lighthouse!
+Asserting
+  Checking assertions against 1 URL(s), 3 total run(s)
+  
+  1 result(s) for https://migakiexplorer.jp/ :
+  
+    ✘  categories.best-practices failure for minScore assertion
+          expected: >=1
+             found: 0.96
+        all values: 0.96, 0.96, 0.96
+  
+  Assertion failed. Exiting with status code 1.
+Uploading
+  Artifact name is valid!
+  Root directory input is valid!
+  Beginning upload of artifact content to blob storage
+  Uploaded bytes 521487
+  Finished uploading artifact content to blob storage!
+  SHA256 hash of uploaded artifact zip is e658f4fb9d834760a11a46f2363773f4f0b3b2cc0771c8fe01b9dfa7cda337c6
+  Finalizing artifact upload
+  Artifact lighthouse-results-mobile.zip successfully finalized. Artifact ID 4237798987
+  Uploading median LHR of https://migakiexplorer.jp/...success!
+  Open the report at https://storage.googleapis.com/lighthouse-infrastructure.appspot.com/reports/1760104684272-4917.report.html
+  No GitHub token set, skipping GitHub status check.
+  Dumping 3 reports to disk at /home/runner/work/tech-site/tech-site/.lighthouseci...
+  Done writing reports to disk.
+Error: 1 result for https://migakiexplorer.jp/
+Report: https://storage.googleapis.com/lighthouse-infrastructure.appspot.com/reports/1760104684272-4917.report.html
+
+❌ `categories.best-practices` failure for `minScore` assertion
+Expected >= 1, but found 0.96
