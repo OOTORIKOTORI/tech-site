@@ -8,6 +8,7 @@
 - すべての検証ブロックは折りたたまずそのまま残す。
 - パス揺れ（末尾スラッシュ有無・大文字小文字・URL デコード差）は禁止。
 - SSR 実行パスでは相対 URL を使わない（`useFetch` か ORIGIN 由来の絶対 URL）。
+- SSR 実行パスでは相対 URL を使わない（`useFetch` か ORIGIN 由来の絶対 URL）。F5 リロード時の 500（Only absolute URLs...）を未然に防ぐ。
 - CI 失敗は出荷ブロック。
 - ルール序列: 正準=PROJECT_SPEC / 要点=README / 規約=HANDBOOK
 - ブランド: 「磨きエクスプローラー（Migaki Explorer）」／短縮名「Migaki Explorer」
@@ -93,6 +94,19 @@
 - HMR のズレ/キャッシュ疑い → ハードリロード、DevTools「Disable cache」ON。
 - API が `robots` を返していない → `/api/blogv2/doc?path=/blog/_control` の JSON を確認。
 - フロントで useHead 条件が噛んでいない → 一時的に `key:'robots'` を付けて衝突を回避し、`doc?.robots` の有無を console.log で確認。
+
+[5) Preview 環境が noindex か確認（オプション）]
+
+- Windows (PowerShell):
+  ```powershell
+  (Invoke-WebRequest -UseBasicParsing -Uri "https://<your-project>.vercel.app/robots.txt").Content
+  ```
+  `X-Robots-Tag: noindex, nofollow` がレスポンスヘッダに付与されるか、`robots.txt` の記載と併せて確認。
+- macOS/Linux:
+  ```bash
+  curl -I https://<your-project>.vercel.app/ | grep -i x-robots-tag || echo "header missing"
+  curl -s https://<your-project>.vercel.app/robots.txt | sed -n '1,20p'
+  ```
 
 ※ 重要: **確認コマンドは絶対に Terminal A（pnpm dev 実行中のターミナル）では叩かない。**
 

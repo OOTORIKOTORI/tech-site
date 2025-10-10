@@ -1,102 +1,153 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
-import { useFetch } from '#app'
-const origin = ref('')
-const result = ref<any | null>(null)
-const err = ref<string | null>(null)
+import { ref } from 'vue'
+import { useRuntimeConfig } from '#app'
+const origin = useRuntimeConfig().public.siteOrigin
 const checking = ref(false)
-const robotsSitemaps = computed(() => (result.value?.robots?.sitemapsInRobots ?? []).join(', '))
+const err = ref<string | null>(null)
+const robots = ref<any>(null)
+const sitemap = ref<any>(null)
+const feed = ref<any>(null)
+const showRaw = ref({ robots: false, sitemap: false, feed: false })
+
+const badge = (ok: boolean | null) => ok === null ? 'N/A' : ok ? 'Pass' : 'Fail'
+const badgeClass = (ok: boolean | null) => ok === null ? 'bg-gray-300 text-gray-700' : ok ? 'bg-green-600 text-white' : 'bg-red-600 text-white'
 
 const doCheck = async () => {
   err.value = null
-  result.value = null
   checking.value = true
+  robots.value = sitemap.value = feed.value = null
+  // robots.txt
   try {
-    const { data, error } = await useFetch('/api/sitecheck', {
-      query: { origin: origin.value },
-      lazy: true
-    })
-    if (error.value) throw error.value
-    result.value = data.value
-  } catch (e: any) {
-    err.value = e?.statusMessage || e?.message || 'Error'
-  } finally {
-    checking.value = false
-  }
-
-  onMounted(() => {
-    try {
-      origin.value = window.location.origin
-    } catch {
-      /* noop: window が無い環境(SSR等)では初期化スキップ */
+    const url = origin + '/robots.txt'
+    const res = await fetch(url)
+    const text = await res.text()
+    const status = res.status
+    // Sitemap行抽出
+    const sitemaps = Array.from(text.matchAll(/^Sitemap:\s*(.+)$/gim)).map(m => m[1])
+    const sitemapOk = sitemaps.some(u => u && u.startsWith(origin))
+    robots.value = {
+      url, status, raw: text, sitemaps, sitemapOk,
+      ok: status === 200 && (sitemaps.length === 0 || sitemapOk),
     }
-  })
+  } catch (e) {
+    robots.value = { ok: false, raw: String(e) }
+  }
+  // sitemap.xml
+  try {
+    const url = origin + '/sitemap.xml'
+    const res = await fetch(url)
+    const text = await res.text()
+    const status = res.status
+    let locs: string[] = []
+    let allOk = null
+    try {
+      const doc = new DOMParser().parseFromString(text, 'application/xml')
+      locs = Array.from(doc.querySelectorAll('url>loc')).map(e => e.textContent || '')
+      allOk = locs.length > 0 ? locs.every(u => u.startsWith(origin)) : null
+    } catch {
+      void 0
+    }
+    sitemap.value = {
+      url, status, raw: text, count: locs.length, sample: locs.slice(0, 3), allOk,
+      ok: status === 200 && allOk,
+    }
+  } catch (e) {
+    sitemap.value = { ok: false, raw: String(e) }
+  }
+  // feed.xml
+  try {
+    const url = origin + '/feed.xml'
+    const res = await fetch(url)
+    const text = await res.text()
+    const status = res.status
+    let links: string[] = []
+    let allOk = null
+    try {
+      const doc = new DOMParser().parseFromString(text, 'application/xml')
+      links = Array.from(doc.querySelectorAll('item>link')).map(e => e.textContent || '')
+      allOk = links.length > 0 ? links.every(u => u.startsWith(origin)) : null
+    } catch {
+      void 0
+    }
+    feed.value = {
+      url, status, raw: text, count: links.length, sample: links.slice(0, 3), allOk,
+      ok: status === 200 && allOk,
+    }
+  } catch (e) {
+    feed.value = { ok: false, raw: String(e) }
+  }
+  checking.value = false
 }
 </script>
 
 <template>
   <main class="mx-auto max-w-3xl p-6 space-y-6">
-    <h1 class="text-2xl font-bold">サイトマップ / robots チェッカー</h1>
-    <form class="space-y-3" @submit.prevent="doCheck">
-      <label class="block">
-        <span class="block text-sm mb-1">Origin</span>
-        <input v-model="origin" type="url" required placeholder="https://migakiexplorer.jp"
-          class="w-full rounded-md border px-3 py-2" />
-      </label>
-      <button :disabled="checking" class="rounded-xl px-4 py-2 bg-blue-600 text-white">
-        {{ checking ? 'Checking…' : 'Check' }}
-      </button>
-    </form>
+    <h1 class="text-2xl font-bold">robots / sitemap / feed チェッカー</h1>
+    <div class="mb-2 text-sm text-gray-700">現在のORIGIN: <span class="font-mono">{{ origin }}</span></div>
+    <button :disabled="checking" class="rounded-xl px-4 py-2 bg-blue-600 text-white focus-ring mb-4" @click="doCheck">
+      {{ checking ? 'まとめてチェック中…' : 'まとめてチェック' }}
+    </button>
     <p v-if="err" class="text-red-600">{{ err }}</p>
-    <section v-if="result" class="space-y-6">
-      <div>
-        <h2 class="font-semibold mb-2">robots.txt</h2>
-        <p class="text-sm text-gray-600">
-          {{ result.robots.url }} — status {{ result.robots.status }}
-          <span v-if="result.robots.location"> (→ {{ result.robots.location }})</span>
-        </p>
-        <ul class="list-disc pl-5 text-sm">
-          <li>User-agent: * セクション検出: {{ result.robots.hasUserAgentAll ? 'Yes' : 'No' }}</li>
-          <li>Disallow: /（全ブロック）: {{ result.robots.disallowAll ? 'Yes' : 'No' }}</li>
-          <li>許可全部 (空Disallow): {{ result.robots.allowAll ? 'Yes' : 'No' }}</li>
+    <section class="space-y-6">
+      <!-- robots.txt -->
+      <div class="border rounded p-4">
+        <div class="flex items-center gap-2 mb-2">
+          <h2 class="font-semibold">robots.txt</h2>
+          <span :class="'px-2 py-0.5 rounded text-xs ' + badgeClass(robots?.ok)">{{ badge(robots?.ok) }}</span>
+        </div>
+        <div class="text-sm text-gray-600 mb-1">{{ robots?.url }} — status {{ robots?.status }}</div>
+        <ul class="list-disc pl-5 text-sm mb-2">
           <li>
-Sitemap 行: <span v-if="result.robots.sitemapsInRobots?.length">{{ robotsSitemaps }}</span><span
+            Sitemap行: <span v-if="robots?.sitemaps?.length">{{ robots.sitemaps.join(', ') }}</span><span
               v-else>なし</span>
-</li>
-        </ul>
-        <details class="mt-2">
-          <summary class="cursor-pointer text-sm underline">raw</summary>
-          <pre class="whitespace-pre-wrap text-xs mt-2">{{ result.robots.raw }}</pre>
-        </details>
-      </div>
-      <div>
-        <h2 class="font-semibold mb-2">sitemap.xml</h2>
-        <p class="text-sm text-gray-600">
-          {{ result.sitemap.url }} — status {{ result.sitemap.status }}
-          <span v-if="result.sitemap.location"> (→ {{ result.sitemap.location }})</span>
-        </p>
-        <ul class="list-disc pl-5 text-sm">
-          <li>URL件数: {{ result.sitemap.count }}</li>
+          </li>
           <li>
-検出ホスト: <span v-if="result.sitemap.hosts?.length">{{ result.sitemap.hosts.join(', ') }}</span><span
-              v-else>なし</span>
-</li>
-          <li>
-ホスト一致（{{ origin }}）:
-            <strong
-              :class="result.sitemap.hostOk ? 'text-green-600' : (result.sitemap.hostOk === false ? 'text-amber-600' : 'text-gray-500')">
-              {{ result.sitemap.hostOk === null ? 'N/A' : (result.sitemap.hostOk ? 'OK' : 'Mismatch') }}
-            </strong>
+            ORIGIN一致: <span :class="robots?.sitemapOk ? 'text-green-700' : 'text-red-600'">{{ robots?.sitemapOk ? 'OK'
+              : 'NG' }}</span>
           </li>
         </ul>
-        <details class="mt-2">
-          <summary class="cursor-pointer text-sm underline">sample & raw</summary>
-          <pre class="whitespace-pre-wrap text-xs mt-2">Sample:
-{{ (result.sitemap.sample || []).join('\n') }}
-
-Raw:
-{{ result.sitemap.raw }}</pre>
-        </details>
+        <button class="focus-ring text-xs underline mb-1" @click="showRaw.robots = !showRaw.robots">生データ表示</button>
+        <pre v-if="showRaw.robots"
+          class="whitespace-pre-wrap text-xs bg-gray-100 rounded p-2 mt-1">{{ robots?.raw }}</pre>
+      </div>
+      <!-- sitemap.xml -->
+      <div class="border rounded p-4">
+        <div class="flex items-center gap-2 mb-2">
+          <h2 class="font-semibold">sitemap.xml</h2>
+          <span :class="'px-2 py-0.5 rounded text-xs ' + badgeClass(sitemap?.ok)">{{ badge(sitemap?.ok) }}</span>
+        </div>
+        <div class="text-sm text-gray-600 mb-1">{{ sitemap?.url }} — status {{ sitemap?.status }}</div>
+        <ul class="list-disc pl-5 text-sm mb-2">
+          <li>URL件数: {{ sitemap?.count }}</li>
+          <li>
+            ORIGIN一致: <span :class="sitemap?.allOk ? 'text-green-700' : 'text-red-600'">{{ sitemap?.allOk ? 'OK' :
+              'NG' }}</span>
+          </li>
+          <li>
+            サンプル: <span v-if="sitemap?.sample?.length">{{ sitemap.sample.join(', ') }}</span><span v-else>なし</span>
+          </li>
+        </ul>
+        <button class="focus-ring text-xs underline mb-1" @click="showRaw.sitemap = !showRaw.sitemap">生データ表示</button>
+        <pre v-if="showRaw.sitemap"
+          class="whitespace-pre-wrap text-xs bg-gray-100 rounded p-2 mt-1">{{ sitemap?.raw }}</pre>
+      </div>
+      <!-- feed.xml -->
+      <div class="border rounded p-4">
+        <div class="flex items-center gap-2 mb-2">
+          <h2 class="font-semibold">feed.xml</h2>
+          <span :class="'px-2 py-0.5 rounded text-xs ' + badgeClass(feed?.ok)">{{ badge(feed?.ok) }}</span>
+        </div>
+        <div class="text-sm text-gray-600 mb-1">{{ feed?.url }} — status {{ feed?.status }}</div>
+        <ul class="list-disc pl-5 text-sm mb-2">
+          <li>URL件数: {{ feed?.count }}</li>
+          <li>
+            ORIGIN一致: <span :class="feed?.allOk ? 'text-green-700' : 'text-red-600'">{{ feed?.allOk ? 'OK' : 'NG'
+              }}</span>
+          </li>
+          <li>サンプル: <span v-if="feed?.sample?.length">{{ feed.sample.join(', ') }}</span><span v-else>なし</span></li>
+        </ul>
+        <button class="focus-ring text-xs underline mb-1" @click="showRaw.feed = !showRaw.feed">生データ表示</button>
+        <pre v-if="showRaw.feed" class="whitespace-pre-wrap text-xs bg-gray-100 rounded p-2 mt-1">{{ feed?.raw }}</pre>
       </div>
     </section>
   </main>

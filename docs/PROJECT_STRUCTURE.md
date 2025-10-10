@@ -62,7 +62,15 @@ C:\website\tech-site
 ├── handover_document.md
 ├── layouts
 |  └── default.vue
-├── memo.txt
+├── memo
+|  ├── copilotメッセージ.txt
+|  ├── Github_CI_ログ.txt
+|  ├── memo.txt
+|  ├── review.patch.txt
+|  ├── コードまとめ.txt
+|  ├── ターミナルログ.txt
+|  ├── ネットワークタブのログ.txt
+|  └── ブラウザ_コンソールログ.txt
 ├── node_modules
 |  ├── @eslint
 |  ├── @nuxt
@@ -112,6 +120,8 @@ C:\website\tech-site
 |  └── sitemap.xml
 ├── README.md
 ├── review.patch
+├── review.patch.txt
+├── review_patch.txt
 ├── scripts
 |  ├── bump-tag.ps1
 |  ├── ci
@@ -225,5 +235,5 @@ C:\website\tech-site
 ├── vercel.json
 └── vitest.config.ts
 
-directory: 57 file: 163 symboliclink: 34
+directory: 58 file: 172 symboliclink: 34
 

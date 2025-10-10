@@ -52,6 +52,7 @@
   - `/_path` 厳密一致：既存記事 → 200、未知スラッグ → 404。
   - frontmatter の `'true'/'false'`（**string**）を含む判定のユニット/E2E。
 - CI での通し順序は既定に従う（typecheck → lint → test → build → postbuild --check-only → smoke:og → ci:guards → LHCI）。
+- CI での通し順序は既定に従う（install → typecheck → lint → test → build → postbuild --check-only → smoke:og → ci:guards → LHCI）。
 
 ## ブログ追加手順（運用）
 
@@ -115,6 +116,8 @@
   <ContentRenderer v-if="doc?.body" :value="doc" />
   ```
   （`v-else`は 404 専用。白紙描画は禁止）
+
+補足: README では要点のみ記載し、詳細仕様・背景は本ドキュメント（PROJECT_SPEC）を参照する。
 
 ### サイト概要
 

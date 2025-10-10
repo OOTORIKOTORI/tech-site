@@ -40,6 +40,9 @@
 
 ## 要点（実装済みの方針・抜粋）
 
+- `/tools/og-check` で OG タグ/OG 画像の 200/302 を即確認（SSR でも絶対 URL 運用）
+- `/tools/site-check` で robots/sitemap/feed をまとめて取得・ORIGIN 一致の簡易検証
+
 - 生成物の表記を統一: `robots.txt` / `sitemap.xml` / `feed.xml`（postbuild で生成）。
 - ORIGIN 基準の一元化: `NUXT_PUBLIC_SITE_ORIGIN` を canonical / og:url / robots / sitemap / RSS の基点に使用。
 - プレビュー noindex: `*.vercel.app` は `X-Robots-Tag: noindex, nofollow` を付与（middleware）。
@@ -60,6 +63,8 @@
 - SSR は絶対 URL を使用
 - `body`が無い場合は 404（白紙禁止）
 - 詳細は[PROJECT_SPEC.md](./PROJECT_SPEC.md)参照
+
+補足: 具体的な確認手順（API 応答/robots meta/一覧の挙動/SSR 500 回避・プレビュー noindex など）は docs/HANDBOOK.md の「検証ブロック」を参照してください。
 
 ---
 
