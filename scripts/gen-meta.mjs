@@ -1,6 +1,8 @@
 import 'dotenv/config'
 // scripts/gen-meta.mjs
-import { mkdirSync, writeFileSync, existsSync, readFileSync, readdirSync } from 'node:fs'
+import { mkdirSync, existsSync, readFileSync, readdirSync } from 'node:fs'
+import { writeFile, rename } from 'node:fs/promises'
+import { randomUUID } from 'node:crypto'
 import { join, basename } from 'node:path'
 
 const CHECK_ONLY = process.argv.includes('--check-only')
@@ -142,7 +144,13 @@ function xmlEscape(s) {
 const outDir = 'public'
 if (!existsSync(outDir)) mkdirSync(outDir, { recursive: true })
 
-function generate() {
+async function writeTextAtomic(dst, text) {
+  const tmp = dst + '.' + randomUUID() + '.tmp'
+  await writeFile(tmp, text, 'utf8')
+  await rename(tmp, dst)
+}
+
+async function generate() {
   const now = new Date().toISOString()
   const blog = readBlogRoutes()
   const blogDates = readBlogFrontmatterDates()
@@ -162,13 +170,13 @@ function generate() {
     .join('')
 
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls}</urlset>\n`
-  writeFileSync(join(outDir, 'sitemap.xml'), sitemap, 'utf8')
+  await writeTextAtomic(join(outDir, 'sitemap.xml'), sitemap)
 
   const robots = `User-agent: *\nAllow: /\nSitemap: ${ORIGIN_URL.href.replace(
     /\/$/,
     ''
   )}/sitemap.xml\n`
-  writeFileSync(join(outDir, 'robots.txt'), robots, 'utf8')
+  await writeTextAtomic(join(outDir, 'robots.txt'), robots)
 
   // Generate RSS feed for blog posts
   const channelTitle = '磨きエクスプローラー Blog'
@@ -186,7 +194,7 @@ function generate() {
     })
     .join('')
   const rss = `<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0"><channel><title>${channelTitle}</title><link>${channelLink}</link><description>${channelDesc}</description>${items}\n</channel></rss>\n`
-  writeFileSync(join(outDir, 'feed.xml'), rss, 'utf8')
+  await writeTextAtomic(join(outDir, 'feed.xml'), rss)
 
   // success logging is only emitted at the end in checkHosts()
 }
@@ -259,6 +267,8 @@ function checkHosts() {
 if (CHECK_ONLY) {
   checkHosts()
 } else {
-  generate()
-  checkHosts()
+  ;(async () => {
+    await generate()
+    checkHosts()
+  })()
 }

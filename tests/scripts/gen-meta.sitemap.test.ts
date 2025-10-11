@@ -21,9 +21,20 @@ describe('scripts/gen-meta.mjs sitemap', () => {
     runNode([script])
   })
 
-  it('includes blog welcome route after reset', () => {
-    expect(existsSync(sitemapPath)).toBe(true)
-    const xml = readFileSync(sitemapPath, 'utf8')
+  async function waitForSitemap(path: string, timeout = 2000) {
+    const start = Date.now()
+    for (;;) {
+      if (existsSync(path)) {
+        const xml = readFileSync(path, 'utf8')
+        if (xml.includes('<urlset') && xml.length > 0) return xml
+      }
+      if (Date.now() - start > timeout) throw new Error('sitemap not ready')
+      await new Promise(r => setTimeout(r, 50))
+    }
+  }
+
+  it('includes blog welcome route after reset', async () => {
+    const xml = await waitForSitemap(sitemapPath)
     expect(xml).toContain('<loc>https://migakiexplorer.jp/blog/welcome</loc>')
     const m = xml.match(
       /<url>\s*<loc>https:\/\/migakiexplorer\.jp\/blog\/welcome<\/loc>[\s\S]*?<lastmod>([^<]+)<\/lastmod>[\s\S]*?<\/url>/
