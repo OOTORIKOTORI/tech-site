@@ -147,6 +147,9 @@ C:\website\tech-site
 |  |  ├── og
 |  |  ├── ogcheck.get.ts
 |  |  └── sitecheck.get.ts
+|  ├── assets
+|  |  ├── feed.xml
+|  |  └── sitemap.xml
 |  ├── middleware
 |  |  └── noindex-preview.ts
 |  ├── plugins
@@ -240,5 +243,5 @@ C:\website\tech-site
 ├── vercel.json
 └── vitest.config.ts
 
-directory: 58 file: 177 symboliclink: 34
+directory: 59 file: 179 symboliclink: 34
 
