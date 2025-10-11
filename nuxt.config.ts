@@ -77,7 +77,18 @@ export default defineNuxtConfig({
     routeRules: {
       '/assets/**': { headers: { 'cache-control': 'public, max-age=31536000, immutable' } },
       '/favicon.ico': { headers: { 'cache-control': 'public, max-age=86400' } },
-      '/sitemap.xml': { headers: { 'cache-control': 'public, max-age=3600' } },
+      '/sitemap.xml': {
+        headers: {
+          'cache-control': 'public, max-age=3600',
+          'Content-Type': 'application/xml; charset=utf-8',
+        },
+      },
+      '/feed.xml': {
+        headers: {
+          'cache-control': 'public, max-age=3600',
+          'Content-Type': 'application/xml; charset=utf-8',
+        },
+      },
       '/robots.txt': { headers: { 'cache-control': 'public, max-age=3600' } },
       '/api/og/**': { headers: { 'Cache-Control': 'no-store' } },
       // v2 blog/API は動的に提供するため静的化しない

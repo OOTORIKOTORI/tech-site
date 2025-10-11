@@ -13,5 +13,5 @@
 </template>
 
 <script setup lang="ts">
-const contactEmail = process.env.NUXT_PUBLIC_CONTACT_EMAIL || 'migakiexplorer@gmail.com';
+const contactEmail = process.env.NUXT_PUBLIC_CONTACT_EMAIL || 'ootorikotori981@gmail.com';
 </script>
