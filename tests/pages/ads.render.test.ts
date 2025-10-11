@@ -21,7 +21,7 @@ describe('pages/ads.vue', () => {
     const mod = await import('@/pages/ads.vue')
     const wrapper = mount(mod.default as any)
     const html = wrapper.html()
-    expect(html).toContain('<h1>広告に関する表示</h1>')
+    expect(html).toContain('<h1>広告について（Ads Policy）</h1>')
     expect(html).toContain('Cookie')
   })
 })

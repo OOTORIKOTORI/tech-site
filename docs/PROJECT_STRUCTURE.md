@@ -106,6 +106,7 @@ C:\website\tech-site
 |  └── __blog_v1
 |     └── [slug].vue
 ├── plugins
+|  ├── ads.client.ts
 |  ├── consent.client.ts
 |  └── meta-defaults.client.ts
 ├── pnpm-lock.yaml
@@ -240,5 +241,5 @@ C:\website\tech-site
 ├── vercel.json
 └── vitest.config.ts
 
-directory: 59 file: 176 symboliclink: 34
+directory: 59 file: 177 symboliclink: 34
 

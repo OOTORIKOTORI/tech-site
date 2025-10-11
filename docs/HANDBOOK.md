@@ -242,8 +242,7 @@ Ops:
 
 Checks:
 
-- typecheck / lint / test / build / postbuild(--check-only) / smoke:og / LHCI ≥ 基準 green
-- sitemap/robots ホスト一致ログ OK
+- 環境変数で on/off：`NUXT_PUBLIC_ENABLE_ADS=1` と `NUXT_PUBLIC_ADSENSE_CLIENT=ca-pub-…` が揃ったときのみ Preview/Production で有効（Dev は常に無効）
 
 ```
 

@@ -48,6 +48,9 @@ export default defineNuxtConfig({
       enableConsentMode:
         (process.env.NUXT_PUBLIC_ENABLE_CONSENT_MODE || '').toLowerCase() === 'true',
       cmpRegionFilter: process.env.NUXT_PUBLIC_CMP_REGION_FILTER || '',
+      // 広告スクリプト制御（Dev常時無効、Preview/Production でフラグ式有効化）
+      enableAds: process.env.NUXT_PUBLIC_ENABLE_ADS || '0',
+      adsenseClient: process.env.NUXT_PUBLIC_ADSENSE_CLIENT || '',
     },
   },
   sitemap: {
