@@ -28,11 +28,17 @@ Open Cron Tool
         </li>
       </ul>
     </section>
+
+    <!-- Ad placeholder: top page single slot -->
+    <section aria-label="ad-placeholder" style="margin-top: 2rem;">
+      <AdSlot height="280px" label="広告（仮）" />
+    </section>
   </main>
 </template>
 
 <script setup lang="ts">
 import { useAsyncData, useSeoMeta, useHead } from '#imports'
+import AdSlot from '@/components/AdSlot.vue'
 import { useSiteBrand } from '@/composables/useSiteBrand'
 import { siteUrl } from '@/utils/siteUrl'
 import { fetchPosts, type PostListItem } from '@/composables/usePosts'

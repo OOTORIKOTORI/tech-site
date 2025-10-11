@@ -15,6 +15,7 @@ C:\website\tech-site
 |     └── tailwind.css
 ├── check-status.txt
 ├── components
+|  ├── AdSlot.vue
 |  ├── AppFooter.vue
 |  ├── AppHeader.vue
 |  ├── content
@@ -105,6 +106,7 @@ C:\website\tech-site
 |  └── __blog_v1
 |     └── [slug].vue
 ├── plugins
+|  ├── consent.client.ts
 |  └── meta-defaults.client.ts
 ├── pnpm-lock.yaml
 ├── pnpm-workspace.yaml
@@ -235,5 +237,5 @@ C:\website\tech-site
 ├── vercel.json
 └── vitest.config.ts
 
-directory: 58 file: 172 symboliclink: 34
+directory: 58 file: 174 symboliclink: 34
 

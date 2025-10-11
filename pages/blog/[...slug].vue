@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { createError, useRoute, useFetch, useSeoMeta, useHead, useRuntimeConfig, computed } from '#imports'
+import AdSlot from '@/components/AdSlot.vue'
 // Optional fallback for tests: queryContent when API stub is unavailable
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const queryContent: any = (globalThis as any).queryContent
@@ -227,6 +228,11 @@ const related = computed(() => {
             <NuxtLink to="/blog/" class="underline">記事一覧へ戻る</NuxtLink>
           </p>
         </div>
+
+        <!-- 記事下の広告プレースホルダ（noindexの制御ページは除外） -->
+        <section v-if="doc?.body && doc?.path !== '/blog/_control'" aria-label="ad-placeholder" class="mt-8">
+          <AdSlot height="280px" label="広告（仮）" />
+        </section>
 
         <!-- 前後記事ナビ -->
         <nav v-if="hasPrevNext" class="mt-10 flex justify-between text-sm opacity-80 hover:opacity-100">

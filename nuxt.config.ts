@@ -2,7 +2,7 @@
 
 export default defineNuxtConfig({
   modules: ['@nuxt/content', '@nuxtjs/tailwindcss', '@nuxtjs/sitemap'],
-  plugins: ['~/plugins/meta-defaults.client.ts'],
+  plugins: ['~/plugins/meta-defaults.client.ts', '~/plugins/consent.client.ts'],
   css: ['@@/assets/css/tailwind.css'],
   pages: true,
   // Rely on @nuxt/content to provide queryContent via auto-imports; do not re-register here
@@ -44,6 +44,10 @@ export default defineNuxtConfig({
         process.env.NUXT_PUBLIC_SITE_URL ||
         process.env.NUXT_PUBLIC_SITE_ORIGIN ||
         'http://localhost:3000',
+      // Consent Mode 受け皿（EEA/UK/CH でのみ有効化したい場合に使用）
+      enableConsentMode:
+        (process.env.NUXT_PUBLIC_ENABLE_CONSENT_MODE || '').toLowerCase() === 'true',
+      cmpRegionFilter: process.env.NUXT_PUBLIC_CMP_REGION_FILTER || '',
     },
   },
   sitemap: {
@@ -131,6 +135,9 @@ export default defineNuxtConfig({
           href: '/feed.xml',
         },
       ],
+      // 注意: CSP の Report-Only ヘッダがあるため、インライン script を入れると警告が出る可能性があります。
+      // そのため dataLayer 初期化は plugins/consent.client.ts 側で実施しています（head.script での ID 設定は未対応のまま）。
+      // 実運用で ID を設定する際は、外部 JS として提供するか CSP を調整してください。
     },
   },
   vite: { resolve: { alias: { '#content/server': '@nuxt/content/nitro' } } },

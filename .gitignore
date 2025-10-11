@@ -26,6 +26,8 @@ logs
 memo.txt
 review.patch
 review.patch.txt
+memo/review.patch.txt
+memo/*.txt
 
 # Lighthouse CI artifacts
 .lighthouseci/
