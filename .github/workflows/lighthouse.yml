@@ -25,25 +25,29 @@ jobs:
 
       - name: Warm up homepage
         if: ${{ matrix.preset == 'desktop' }}
+        continue-on-error: true
         run: |
           set -Eeuo pipefail
-          url="https://migakiexplorer.jp/"
+          base="${SITE_ORIGIN:-https://migakiexplorer.jp}"
           ua="gh-actions-warmup"
-          attempt=0
-          while [ $attempt -lt 3 ]; do
-            attempt=$((attempt+1))
-            echo "Attempt ${attempt}: default curl"
-            if curl -sS -A "$ua" "$url" -o /dev/null -w "HTTP %{http_code}\n"; then
-              exit 0
-            fi
-            echo "Attempt ${attempt}: force IPv4 + TLS1.2"
-            if curl -sS -4 --tlsv1.2 -A "$ua" "$url" -o /dev/null -w "HTTP %{http_code}\n"; then
-              exit 0
-            fi
-            sleep $((attempt*3))
+          # 候補URL（軽い順）。1つでも成功したら成功扱い。
+          candidates=(
+            "$base/api/health"
+            "$base/"
+          )
+          try() { curl -fsSIL --max-time 20 --connect-timeout 10 -A "$ua" "$1" -w " HTTP %{http_code}\n" ; }
+          for attempt in 1 2 3 4 5; do
+            for u in "${candidates[@]}"; do
+              echo "Attempt $attempt: default -> $u"
+              if try "$u"; then exit 0; fi
+              echo "Attempt $attempt: force IPv4 + TLS1.2 -> $u"
+              if curl -fsSIL -4 --tlsv1.2 --max-time 20 --connect-timeout 10 -A "$ua" "$u" -w " HTTP %{http_code}\n" ; then
+                exit 0
+              fi
+            done
+            sleep $((attempt*2))
           done
-          echo "Warm-up failed after retries" >&2
-          exit 1
+          echo "::warning::Warm-up failed after retries; continuing to Lighthouse"
 
       - name: Audit migakiexplorer.jp (desktop)
         if: ${{ matrix.preset == 'desktop' }}
@@ -59,25 +63,29 @@ jobs:
 
       - name: Warm up homepage
         if: ${{ matrix.preset == 'mobile' }}
+        continue-on-error: true
         run: |
           set -Eeuo pipefail
-          url="https://migakiexplorer.jp/"
+          base="${SITE_ORIGIN:-https://migakiexplorer.jp}"
           ua="gh-actions-warmup"
-          attempt=0
-          while [ $attempt -lt 3 ]; do
-            attempt=$((attempt+1))
-            echo "Attempt ${attempt}: default curl"
-            if curl -sS -A "$ua" "$url" -o /dev/null -w "HTTP %{http_code}\n"; then
-              exit 0
-            fi
-            echo "Attempt ${attempt}: force IPv4 + TLS1.2"
-            if curl -sS -4 --tlsv1.2 -A "$ua" "$url" -o /dev/null -w "HTTP %{http_code}\n"; then
-              exit 0
-            fi
-            sleep $((attempt*3))
+          # 候補URL（軽い順）。1つでも成功したら成功扱い。
+          candidates=(
+            "$base/api/health"
+            "$base/"
+          )
+          try() { curl -fsSIL --max-time 20 --connect-timeout 10 -A "$ua" "$1" -w " HTTP %{http_code}\n" ; }
+          for attempt in 1 2 3 4 5; do
+            for u in "${candidates[@]}"; do
+              echo "Attempt $attempt: default -> $u"
+              if try "$u"; then exit 0; fi
+              echo "Attempt $attempt: force IPv4 + TLS1.2 -> $u"
+              if curl -fsSIL -4 --tlsv1.2 --max-time 20 --connect-timeout 10 -A "$ua" "$u" -w " HTTP %{http_code}\n" ; then
+                exit 0
+              fi
+            done
+            sleep $((attempt*2))
           done
-          echo "Warm-up failed after retries" >&2
-          exit 1
+          echo "::warning::Warm-up failed after retries; continuing to Lighthouse"
 
       - name: Audit migakiexplorer.jp (mobile)
         if: ${{ matrix.preset == 'mobile' }}
