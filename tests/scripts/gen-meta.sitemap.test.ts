@@ -52,6 +52,8 @@ describe('scripts/gen-meta.mjs sitemap', () => {
       encoding: 'utf8',
     })
     expect(res.status).toBe(0)
-    expect(res.stdout).toMatch(/\[gen-meta] OK robots\/sitemap host = migakiexplorer.jp/)
+    expect(res.stdout).toMatch(
+      /\[gen-meta] OK (robots\/sitemap|sitemap\/feed(?:\/robots)?) host = migakiexplorer\.jp/
+    )
   })
 })

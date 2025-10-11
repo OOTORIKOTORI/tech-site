@@ -205,7 +205,9 @@
 - Dev検証は**Terminal B**（別ターミナル）で実施し、robots/SSR等は**検証ブロック**の手順で確認済み。
 - 既知=200／未知=404のE2Eを毎回確認。
 - Spec sync: `PROJECT_SPEC.md`（正）と`README.md`（要点）に差分がないか。必要なら最小追記。
-- Health checks: CI全緑（typecheck/lint/test/build/postbuild --check-only/smoke:og/LHCI≥90）。ORIGIN/プレビューnoindexも確認。
+- Health checks: CI全緑（typecheck/lint/test/build/postbuild --check-only/smoke:og/ci:guards/LHCI≥90）。ORIGIN/プレビューnoindexも確認。
+- sitemap/robots ホスト一致ログ OK（OK ログ例: `[gen-meta] OK sitemap/feed[/robots] host = <host>  （robots.txt は任意。無い場合は /robots なし）`）。
+ - robots.txt はサーバールートで返せるため静的生成は任意。静的に出す場合は GENERATE_ROBOTS=1 を設定。
 - Ops rules: 本HANDBOOKのルールに逸脱がないか。必要なら本書を最小更新。
 - Comms: PR本文に「Handover Summary（Done/Next/Ops/Checks）」を記載（テンプレ参照）。
 - Versioning: 変更内容に応じてSemVerを決定（feat=MINOR, fix/docs/ci=PATCH, 破壊的=MAJOR）。

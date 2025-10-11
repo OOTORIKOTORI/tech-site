@@ -176,7 +176,7 @@ async function generate() {
     /\/$/,
     ''
   )}/sitemap.xml\n`
-  await writeTextAtomic(join(outDir, 'robots.txt'), robots)
+  if (process.env.GENERATE_ROBOTS === '1') await writeTextAtomic(join(outDir, 'robots.txt'), robots)
 
   // Generate RSS feed for blog posts
   const channelTitle = '磨きエクスプローラー Blog'
@@ -204,21 +204,51 @@ function checkHosts() {
 
   const robotsPath = join(outDir, 'robots.txt')
   const sitemapPath = join(outDir, 'sitemap.xml')
-  if (!existsSync(robotsPath) || !existsSync(sitemapPath)) {
+  const feedPath = join(outDir, 'feed.xml')
+
+  const hasSitemap = existsSync(sitemapPath)
+  const hasFeed = existsSync(feedPath)
+  const hasRobots = existsSync(robotsPath)
+
+  if (!hasSitemap || !hasFeed) {
     console.error(
-      '[gen-meta] ERROR: robots.txt or sitemap.xml not found. Expected at public/robots.txt and public/sitemap.xml'
+      '[gen-meta] ERROR: required file missing:',
+      !hasSitemap ? 'public/sitemap.xml' : '',
+      !hasFeed ? 'public/feed.xml' : ''
     )
     process.exit(1)
   }
+  if (!hasRobots) {
+    console.warn(
+      '[gen-meta] WARN: robots.txt not found (optional). Server route will serve robots; set GENERATE_ROBOTS=1 to emit static file.'
+    )
+  }
 
-  const robotsTxt = readFileSync(robotsPath, 'utf8')
-  const m = robotsTxt.match(/^Sitemap:\s*(\S+)/im)
-  let robotsHost = '(not-found)'
-  if (m && m[1]) {
-    try {
-      robotsHost = new URL(m[1]).host
-    } catch {
-      robotsHost = '(invalid-url)'
+  // Host validation (robots optional):
+  // - For sitemap.xml: verify all <loc> hosts match expectedHost
+  // - For robots.txt: validate only when present
+  let robotsOk = true
+  if (hasRobots) {
+    const robotsTxt = readFileSync(robotsPath, 'utf8')
+    const m = robotsTxt.match(/^Sitemap:\s*(\S+)/im)
+    let robotsHost = '(not-found)'
+    if (m && m[1]) {
+      try {
+        robotsHost = new URL(m[1]).host
+      } catch {
+        robotsHost = '(invalid-url)'
+      }
+    }
+    robotsOk = robotsHost === expectedHost
+    if (!robotsOk) {
+      console.error(
+        '[gen-meta] ERROR: expected host =',
+        expectedHost,
+        'but got =',
+        robotsHost,
+        '(robots.txt Sitemap)'
+      )
+      process.exit(1)
     }
   }
 
@@ -236,32 +266,20 @@ function checkHosts() {
   }
 
   const uniqueLocHosts = Array.from(locHosts)
-  const robotsOk = robotsHost === expectedHost
   const sitemapOk = uniqueLocHosts.length > 0 && uniqueLocHosts.every(h => h === expectedHost)
 
-  if (!robotsOk || !sitemapOk) {
-    if (!robotsOk) {
-      console.error(
-        '[gen-meta] ERROR: expected host =',
-        expectedHost,
-        'but got =',
-        robotsHost,
-        '(robots.txt Sitemap)'
-      )
-    }
-    if (!sitemapOk) {
-      console.error(
-        '[gen-meta] ERROR: expected host =',
-        expectedHost,
-        'but got =',
-        uniqueLocHosts.join(', '),
-        '(sitemap.xml <loc>)'
-      )
-    }
+  if (!sitemapOk) {
+    console.error(
+      '[gen-meta] ERROR: expected host =',
+      expectedHost,
+      'but got =',
+      uniqueLocHosts.join(', '),
+      '(sitemap.xml <loc>)'
+    )
     process.exit(1)
   }
 
-  console.log(`[gen-meta] OK robots/sitemap host = ${expectedHost}`)
+  console.log(`[gen-meta] OK sitemap/feed${hasRobots ? '/robots' : ''} host = ${expectedHost}`)
 }
 
 if (CHECK_ONLY) {

@@ -118,7 +118,6 @@ C:\website\tech-site
 |  ├── logo.png
 |  ├── manifest.webmanifest
 |  ├── og-default.png
-|  ├── robots.txt
 |  └── sitemap.xml
 ├── README.md
 ├── review.patch
@@ -156,10 +155,8 @@ C:\website\tech-site
 |  |  ├── log-site-url.ts
 |  |  └── query-content.ts
 |  └── routes
-|     ├── feed.xml.get.ts
 |     ├── feed.xml.ts
 |     ├── robots.txt.get.ts
-|     ├── robots.txt.ts
 |     └── sitemap.xml.ts
 ├── simple-test.mjs
 ├── System.Text.ASCIIEncoding
@@ -243,5 +240,5 @@ C:\website\tech-site
 ├── vercel.json
 └── vitest.config.ts
 
-directory: 59 file: 179 symboliclink: 34
+directory: 59 file: 176 symboliclink: 34
 

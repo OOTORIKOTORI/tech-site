@@ -2,7 +2,7 @@
 
 # 磨きエクスプローラー — Tech Tools & Notes（開発者向けユーティリティ＋技術メモ集）
 
-本リポジトリは「Cron / JWT などの小ワークを即検証できる軽量ツール」と「再発しがちな実務の落とし穴を最小編集で整理した短文ブログ」を統合したサイトです。依存固定と postbuild 検証による安全なローカル再現、小さく差分を出す文化、CI での型チェック / Lint / テスト / ビルド / メタ検証 / OGP スモーク / Lighthouse 通過を公開条件とする品質ゲートを重視します。恒久ルール/詳細手順は `PROJECT_SPEC.md` および **docs/HANDBOOK.md**（Git/OGP/CI/リリース規約）を参照してください。
+本リポジトリは「Cron / JWT などの小ワークを即検証できる軽量ツール」と「再発しがちな実務の落とし穴を最小編集で整理した短文ブログ」を統合したサイトです。依存固定と postbuild 検証による安全なローカル再現、小さく差分を出す文化、CI での型チェック / Lint / テスト / ビルド / メタ検証 / OGP スモーク / ci:guards / Lighthouse 通過を公開条件とする品質ゲートを重視します。恒久ルール/詳細手順は `PROJECT_SPEC.md` および **docs/HANDBOOK.md**（Git/OGP/CI/リリース規約）を参照してください。
 
 ---
 
@@ -104,7 +104,7 @@
 
 ## 運用メモ（抜粋）
 
-- pre-push 例: `typecheck → lint → test → build → postbuild → smoke:og → ci:guards`。
+- pre-push 例: `typecheck → lint → test → build → postbuild → smoke:og → ci:guards → LHCI`。
 - 主要リンクの `focus-visible` は `.focus-ring` を適用し視認性を統一。
 
 ---
@@ -136,6 +136,9 @@
 ```powershell
 pnpm build; node .\scripts\gen-meta.mjs --check-only
 ```
+
+OK ログ例: `[gen-meta] OK sitemap/feed[/robots] host = <host>  （robots.txt は任意。無い場合は /robots なし）`
+robots.txt はサーバールートで返せるため静的生成は任意。静的に出す場合は GENERATE_ROBOTS=1 を設定。
 
 ---
 
