@@ -1,7 +1,7 @@
 ﻿import { defineNuxtConfig } from 'nuxt/config'
 
 export default defineNuxtConfig({
-  modules: ['@nuxt/content', '@nuxtjs/tailwindcss', '@nuxtjs/sitemap'],
+  modules: ['@nuxt/content', '@nuxtjs/tailwindcss'],
   plugins: ['~/plugins/meta-defaults.client.ts', '~/plugins/consent.client.ts'],
   css: ['@@/assets/css/tailwind.css'],
   pages: true,
