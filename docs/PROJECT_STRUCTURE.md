@@ -154,8 +154,10 @@ C:\website\tech-site
 |  |  └── query-content.ts
 |  └── routes
 |     ├── feed.xml.get.ts
+|     ├── feed.xml.ts
 |     ├── robots.txt.get.ts
-|     └── robots.txt.ts
+|     ├── robots.txt.ts
+|     └── sitemap.xml.ts
 ├── simple-test.mjs
 ├── System.Text.ASCIIEncoding
 ├── tailwind.config.ts
@@ -238,5 +240,5 @@ C:\website\tech-site
 ├── vercel.json
 └── vitest.config.ts
 
-directory: 58 file: 175 symboliclink: 34
+directory: 58 file: 177 symboliclink: 34
 
