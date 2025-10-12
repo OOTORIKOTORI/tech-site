@@ -154,6 +154,7 @@ C:\website\tech-site
 |  ├── middleware
 |  |  └── noindex-preview.ts
 |  ├── plugins
+|  |  ├── ads-check.ts
 |  |  ├── log-site-url.ts
 |  |  └── query-content.ts
 |  └── routes
@@ -242,5 +243,5 @@ C:\website\tech-site
 ├── vercel.json
 └── vitest.config.ts
 
-directory: 59 file: 178 symboliclink: 34
+directory: 59 file: 179 symboliclink: 34
 
