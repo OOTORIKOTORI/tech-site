@@ -51,6 +51,7 @@ export default defineNuxtConfig({
       // 広告スクリプト制御（Dev常時無効、Preview/Production でフラグ式有効化）
       enableAds: process.env.NUXT_PUBLIC_ENABLE_ADS || '0',
       adsenseClient: process.env.NUXT_PUBLIC_ADSENSE_CLIENT || '',
+      vercelEnv: process.env.VERCEL_ENV || '',
     },
   },
   sitemap: {
