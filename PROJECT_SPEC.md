@@ -52,7 +52,6 @@
   - `/_path` 厳密一致：既存記事 → 200、未知スラッグ → 404。
   - frontmatter の `'true'/'false'`（**string**）を含む判定のユニット/E2E。
 - CI での通し順序は既定に従う（typecheck → lint → test → build → postbuild --check-only → smoke:og → ci:guards → LHCI）。
-- CI での通し順序は既定に従う（install → typecheck → lint → test → build → postbuild --check-only → smoke:og → ci:guards → LHCI）。
 
 ## ブログ追加手順（運用）
 
@@ -88,16 +87,6 @@
 `doc.body` は AST であり、テンプレートでは `<ContentRenderer :value="doc" />` を使用する。API レイヤで HTML にする場合は `renderContent` を使う。F5 リロードで 500 になる場合は SSR で ofetch の相対 URL が原因となり得るため、Nuxt の `$fetch`/`useFetch` を使うか `useRequestURL().origin` などで絶対 URL を渡す。
 
 ※`ContentRendererMarkdown`というコンポーネントは存在しません。描画は必ず`<ContentRenderer :value="doc" />`を使うこと。
-
-# Debug クエリ早見表（dev 限定）
-
-| クエリ      | 効果                     | 備考（dev 限定） |
-| ----------- | ------------------------ | ---------------- |
-| debug=1     | デバッグログ出力         | 開発時のみ有効   |
-| mdfb=1      | Markdown fallback 強制   | テスト・開発用   |
-| forceHtml=1 | HTML 直描画強制          | テスト・開発用   |
-| cr=1        | ContentRenderer 分岐強制 | テスト・開発用   |
-| cr=1        | ContentRenderer 分岐強制 | テスト・開発用   |
 
 # プロジェクト仕様書 - 磨きエクスプローラー（Migaki Explorer）
 
@@ -135,6 +124,17 @@
 
 - プライバシーポリシー/クッキーポリシー/広告に関する記載（例: 第三者配信の Cookie 使用）を別ページに整備予定。
 - ads.txt の配置（後日導入時）。具体的な広告コードは本仕様からは除外し、運用手順のみ記載。
+
+最小 Ads 仕様（暫定）:
+
+- 本番/プレビューでのみ有効化: `NUXT_PUBLIC_ENABLE_ADS=1` かつ `NUXT_PUBLIC_ADSENSE_CLIENT=ca-pub-…` が揃ったときのみ（Dev は常に無効）。
+- ads.txt は `pub-…` を使用（`ca-pub-…` ではない）。
+- 確認の目安（暫定のデバッグ用プラグインあり）:
+  - ヘッダ: `X-Ads-Script: 1` が返る
+  - 本文: `<script src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-…">` が SSR に出力される
+- デバッグ用フックは暫定であり、審査通過後に削除/無効化する。
+
+ads.txt の参照先: `/public/ads.txt`
 
 ---
 

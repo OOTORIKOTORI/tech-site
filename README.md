@@ -18,6 +18,8 @@
 - `pnpm run ops:rollback <tag>`で安定タグへスナップショット復元
 - /blog 詳細は**1 経路のみ取得・白紙禁止・テンプレ 1 行**（詳細は PROJECT_SPEC 参照）
 
+- Ads 有効化: Preview/Production で `NUXT_PUBLIC_ENABLE_ADS=1` ＋ `NUXT_PUBLIC_ADSENSE_CLIENT=ca-pub-…`。本文に `pagead/js/adsbygoogle.js?client=` が出ること。
+
 - クイック検証: `/api/og/hello.png` が **200 または 302** であること（smoke:og 合格基準）。
 
 * **smoke:og**: `https://<ORIGIN>/api/og/hello.png` に対し **200 または 302** なら合格。308/301 を踏む場合も **1 回のみ自動フォロー**して再判定（URL 結合は `new URL()` で正規化済み）。

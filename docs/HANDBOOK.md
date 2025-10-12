@@ -7,7 +7,6 @@
 - **Dual-terminal Policy**: Terminal A は`pnpm dev`専用（以降コマンド禁止）、Terminal B は検証専用で新規に開く。
 - すべての検証ブロックは折りたたまずそのまま残す。
 - パス揺れ（末尾スラッシュ有無・大文字小文字・URL デコード差）は禁止。
-- SSR 実行パスでは相対 URL を使わない（`useFetch` か ORIGIN 由来の絶対 URL）。
 - SSR 実行パスでは相対 URL を使わない（`useFetch` か ORIGIN 由来の絶対 URL）。F5 リロード時の 500（Only absolute URLs...）を未然に防ぐ。
 - CI 失敗は出荷ブロック。
 - ルール序列: 正準=PROJECT_SPEC / 要点=README / 規約=HANDBOOK
