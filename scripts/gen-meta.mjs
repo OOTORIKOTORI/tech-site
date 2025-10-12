@@ -1,7 +1,7 @@
 import 'dotenv/config'
 // scripts/gen-meta.mjs
 import { mkdirSync, existsSync, readFileSync, readdirSync } from 'node:fs'
-import { writeFile, rename } from 'node:fs/promises'
+import { writeFile, rename, copyFile, unlink } from 'node:fs/promises'
 import { randomUUID } from 'node:crypto'
 import { join, basename } from 'node:path'
 
@@ -144,10 +144,31 @@ function xmlEscape(s) {
 const outDir = 'public'
 if (!existsSync(outDir)) mkdirSync(outDir, { recursive: true })
 
+async function sleep(ms) {
+  return new Promise(r => setTimeout(r, ms))
+}
+async function renameWithRetry(src, dest, max = 8) {
+  const transient = new Set(['EPERM', 'EBUSY', 'EACCES'])
+  for (let i = 0; i < max; i++) {
+    try {
+      await rename(src, dest)
+      return
+    } catch (err) {
+      if (!err || !transient.has(err.code)) throw err
+      await sleep(50 * (i + 1)) // 50,100,150,...
+    }
+  }
+  // 最後の保険: copy→unlink（上書き）
+  await copyFile(src, dest)
+  try {
+    await unlink(src)
+  } catch {}
+}
+
 async function writeTextAtomic(dst, text) {
   const tmp = dst + '.' + randomUUID() + '.tmp'
   await writeFile(tmp, text, 'utf8')
-  await rename(tmp, dst)
+  await renameWithRetry(tmp, dst)
 }
 
 async function generate() {

@@ -120,7 +120,8 @@ C:\website\tech-site
 |  ├── logo.png
 |  ├── manifest.webmanifest
 |  ├── og-default.png
-|  └── sitemap.xml
+|  ├── sitemap.xml
+|  └── sitemap.xml.83830664-79b1-429b-b611-c2e6184c5a76.tmp
 ├── README.md
 ├── review.patch
 ├── review.patch.txt
@@ -243,5 +244,5 @@ C:\website\tech-site
 ├── vercel.json
 └── vitest.config.ts
 
-directory: 59 file: 179 symboliclink: 34
+directory: 59 file: 180 symboliclink: 34
 
