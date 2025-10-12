@@ -1,8 +1,10 @@
 export default defineNitroPlugin(nitroApp => {
   nitroApp.hooks.hook('render:html', (ctx, { event }) => {
-    const has = ctx.head?.includes('pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=')
+    const needle = 'pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client='
+    const inHead = (ctx.head || '').includes(needle)
+    const inHtml = (ctx.body || '').includes(needle)
     if (event) {
-      setHeader(event, 'x-ads-script', has ? '1' : '0')
+      setHeader(event, 'x-ads-script', inHead || inHtml ? '1' : '0')
     }
   })
 })
