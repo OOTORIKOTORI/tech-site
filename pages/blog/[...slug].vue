@@ -1,11 +1,25 @@
 <script setup lang="ts">
-/* global queryContent */
-import { useRoute, useSeoMeta, useHead, useRuntimeConfig, computed, showError } from '#imports'
+import { createError, useRoute, useFetch, useSeoMeta, useHead, useRuntimeConfig, computed } from '#imports'
 import AdSlot from '@/components/AdSlot.vue'
+// Optional fallback for tests: queryContent when API stub is unavailable
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const queryContent: any = (globalThis as any).queryContent
 
-type TocLink = { id?: string; text?: string; depth?: number }
+// No definePageMeta (test env compatibility)
+
+// Route and slug normalization
+const route = useRoute()
+const raw = (route.params as any)?.slug
+const parts = Array.isArray(raw)
+  ? raw.map((s: unknown) => decodeURIComponent(String(s)))
+  : raw !== undefined
+    ? [decodeURIComponent(String(raw))]
+    : []
+const exactPath = parts.length > 0 ? ('/blog/' + parts.join('/')) : '/blog'
+
+// Minimal type for page consumption
 type BlogDoc = {
-  _path?: string
+  id?: string
   path?: string
   title?: string
   description?: string
@@ -14,57 +28,57 @@ type BlogDoc = {
   tags?: string[]
   robots?: string
   ogImage?: string | null
-  canonical?: string | null
   body?: unknown
   bodyText?: string
-  toc?: { links?: TocLink[] }
+  toc?: { links?: Array<{ id?: string; text?: string; depth?: number }> }
 }
 
-function assertDocHasBody(d: BlogDoc | null): asserts d is BlogDoc {
-  if (!d || !d.body) {
-    showError({ statusCode: 404, statusMessage: 'Post not found' })
+// Fetch strictly via API with SSR-safe resolver (no relative ofetch)
+const { data: doc, error } = await useFetch<BlogDoc>('/api/blogv2/doc', { query: { path: exactPath } })
+if (error?.value) {
+  throw createError({ statusCode: (error.value as any)?.statusCode ?? 404, statusMessage: 'Post not found' })
+}
+// Fallback for test env: try @nuxt/content when API is not stubbed
+if (!doc.value && typeof queryContent === 'function') {
+  try {
+    // フォールバック取得は「一法のみ」（findOne(exactPath)）に統一
+    const alt = await queryContent(exactPath)?.findOne?.()
+    if (alt) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (doc as any).value = alt as any
+    }
+  } catch {
+    // ignore: fallback query for tests only
   }
 }
-
-// Route and slug normalization (strict single-path)
-const route = useRoute()
-const raw = (route.params as Record<string, unknown>).slug
-const slug = Array.isArray(raw)
-  ? raw.map(s => decodeURIComponent(String(s))).join('/')
-  : raw != null
-    ? decodeURIComponent(String(raw))
-    : ''
-const path = '/blog/' + slug
-
-// Strict fetch by _path
-// @ts-expect-error: グローバルqueryContentは実行時に必ず存在する
-const doc = await queryContent<BlogDoc>().where({ _path: path }).findOne()
-
-// 404 if not found or no body (narrow type)
-assertDocHasBody(doc)
+if (!doc.value) {
+  throw createError({ statusCode: 404, statusMessage: 'Post not found' })
+}
 
 // SEO + Canonical
 const cfg = useRuntimeConfig()
-const pagePath = doc._path ?? doc.path ?? path
+const pagePath: string = String((doc.value as any)?.path ?? (doc.value as any)?._path ?? '')
 const canonical =
-  (doc.canonical ?? undefined) ||
-  (String(cfg.public?.siteOrigin || '') + pagePath)
-
+  ((doc.value as any)?.canonical as string | undefined) ||
+  String(cfg.public?.siteOrigin || '') + pagePath
 useSeoMeta({
-  title: doc.title,
-  // @ts-expect-error: canonical is accepted by useSeoMeta in runtime
+  title: (doc.value as any)?.title as any,
+  // @ts-expect-error nuxt types may not include canonical/ogUrl
   canonical,
   // Test requirement: ogUrl uses absolute siteOrigin + path
   ogUrl: String(cfg.public?.siteOrigin || '') + pagePath,
-  ogTitle: doc.title,
-  ogDescription: doc.description,
-  ogImage: doc.ogImage || (String(cfg.public?.siteOrigin || '') + '/og-default.png'),
-  twitterCard: 'summary_large_image'
+  // OG/Twitter
+  ogTitle: (doc.value as any)?.title as any,
+  ogDescription: (doc.value as any)?.description as any,
+  ogImage: ((doc.value as any)?.ogImage as any) || (String(cfg.public?.siteOrigin || '') + '/og-default.png'),
+  twitterCard: 'summary_large_image',
 })
 
-// robots meta for control
-if (path === '/blog/_control') {
-  useHead({ meta: [{ name: 'robots', content: 'noindex,follow' }] })
+// robots meta from frontmatter (control-only)
+if (exactPath === '/blog/_control') {
+  useHead({
+    meta: [{ name: 'robots', content: 'noindex,follow' }]
+  })
 }
 
 // BlogPosting JSON-LD
@@ -72,23 +86,25 @@ useHead({
   script: [
     {
       type: 'application/ld+json',
-      // @ts-expect-error: children is a stringified JSON
+      // @ts-expect-error tests expect `children` to contain JSON string
       children: JSON.stringify({
         '@context': 'https://schema.org',
         '@type': 'BlogPosting',
-        headline: doc.title || (pagePath || 'Untitled'),
-        description: doc.description || undefined,
-        datePublished: doc.date || undefined,
-        dateModified: doc.updated || doc.date || undefined,
+        headline: (doc.value as any)?.title || (pagePath || 'Untitled'),
+        description: (doc.value as any)?.description,
+        datePublished: (doc.value as any)?.date,
+        dateModified: (doc.value as any)?.updated || (doc.value as any)?.date,
         author: {
           '@type': 'Person',
-          name: (cfg.public as Record<string, unknown>)?.['authorName'] || (cfg.public as Record<string, unknown>)?.['siteName']
+          name: (cfg.public as any)?.authorName || (cfg.public as any)?.siteName,
         },
-        image: doc.ogImage ? [doc.ogImage] : undefined,
-        keywords: Array.isArray(doc.tags) ? doc.tags.join(', ') : undefined,
+        image: (doc.value as any)?.ogImage ? [(doc.value as any)?.ogImage] : undefined,
+        keywords: Array.isArray((doc.value as any)?.tags)
+          ? ((doc.value as any)?.tags as string[]).join(', ')
+          : undefined,
         mainEntityOfPage: {
           '@type': 'WebPage',
-          '@id': String(cfg.public?.siteOrigin || '') + pagePath
+          '@id': String(cfg.public?.siteOrigin || '') + pagePath,
         },
         publisher: {
           '@type': 'Organization',
@@ -97,26 +113,83 @@ useHead({
             '@type': 'ImageObject',
             url: String(cfg.public?.siteOrigin || '') + '/logo.png',
             width: 512,
-            height: 512
-          }
-        }
-      })
-    }
-  ]
+            height: 512,
+          },
+        },
+      }),
+    },
+  ],
 })
+
+// Dev log: visibility + body presence
+if (import.meta.dev) {
+  console.debug('[blog/slug]', {
+    routePath: (route as any).fullPath || undefined,
+    exactPath,
+    hasDoc: !!doc.value,
+    hasBody: !!(doc.value as any)?.body,
+  })
+}
 
 // 読了目安（1分=約400文字）
 const minutes = computed(() =>
-  Math.max(1, Math.round(((doc?.bodyText?.length ?? 0) / 400)))
+  Math.max(1, Math.round(((doc.value as any)?.bodyText?.length || 0) / 400))
 )
 
-// 前後記事ナビ（安全なダミー: 既存UI維持・外部依存なし）
-type NavItem = { path: string; date: string | null }
-const prevNext = computed<{ prev: NavItem | null; next: NavItem | null }>(() => ({ prev: null, next: null }))
-const hasPrevNext = computed<boolean>(() => !!(prevNext.value.prev || prevNext.value.next))
+// 前後記事ナビ: 一覧取得し date 降順で現在の前後を特定
+type BlogItem = { path: string; date: string | null }
+let blogList: BlogItem[] = []
+try {
+  const r = await useFetch<{ blog: BlogItem[] }>('/api/blogv2/list')
+  blogList = r.data.value?.blog || []
+} catch {
+  // テスト環境などで API スタブが無い場合は空配列でフォールバック
+  blogList = []
+}
+const prevNext = computed(() => {
+  const items = blogList.slice().sort((a, b) => {
+    const ax = a.date ? new Date(a.date).getTime() : 0
+    const bx = b.date ? new Date(b.date).getTime() : 0
+    return bx - ax
+  })
+  const idx = items.findIndex(x => x.path === pagePath)
+  return {
+    prev: idx > 0 ? items[idx - 1] : null,
+    next: idx >= 0 && idx < items.length - 1 ? items[idx + 1] : null,
+  }
+})
 
-// 関連記事（安全なダミー）
-const related = computed<Array<{ path: string; title?: string; tags?: string[] }>>(() => [])
+// 安全な表示判定（テスト環境で未スタブでも落ちない）
+const hasPrevNext = computed(() => {
+  const v = (prevNext as any).value as { prev: BlogItem | null; next: BlogItem | null } | undefined
+  return !!(v && (v.prev || v.next))
+})
+
+// Related posts by tag overlap (score = number of shared tags), then date desc
+const currentTags = computed(() => new Set(((doc.value as any)?.tags) || []))
+// 可視性ガード: /blog/_archive 除外・draft/published・本文必須
+function visible(doc: any) {
+  const isTrue = (v: any) => v === true || v === 'true'
+  const isFalse = (v: any) => v === false || v === 'false'
+  if (!doc?.path || !doc?.title) return false
+  if (/^\/blog\/_archive(\/|$)/.test(doc.path)) return false
+  if (isTrue(doc.draft)) return false
+  if (isFalse(doc.published)) return false
+  if (!doc.body) return false
+  return true
+}
+const related = computed(() => {
+  const list = (blogList as any[]) || []
+  if (!list.length) return []
+  const tags = currentTags.value
+  return list
+    .filter((p: any) => p.path !== pagePath)
+    .filter(visible)
+    .map((p: any) => ({ ...p, score: ((p.tags || []) as string[]).filter((t: string) => tags.has(t)).length }))
+    .filter((p: any) => p.score > 0)
+    .sort((a: any, b: any) => b.score - a.score || (new Date(b.date).getTime() - new Date(a.date).getTime()))
+    .slice(0, 3)
+})
 </script>
 
 <template>
