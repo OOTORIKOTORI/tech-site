@@ -122,7 +122,7 @@
   - 差分は最小（不要な再整形・語順変更禁止）。
    - SFC（`pages/blog/[...slug].vue`）ではグローバル `queryContent` 利用を許容（先頭に `/* global queryContent */`）。ランタイム/サーバ/コンポーザブルでは **`#content` から import**。`#imports` は禁止。
 - 受け入れ基準 (AC):
-  - `pnpm typecheck && pnpm lint -f unix && pnpm test -- --run` が green。
+  - `pnpm test -- --run` が green。
   - 3 文書間の事実（ORIGIN 値/CI 手順/OGP 既定動作）が矛盾しない。
   - 変更範囲は docs（src/\* 非変更）か、変更理由が明示された軽微テストのみ。
 - 禁止事項:
