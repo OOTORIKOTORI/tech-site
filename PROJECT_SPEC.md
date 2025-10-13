@@ -1,4 +1,5 @@
-﻿※詳細ページの取得は `queryContent(exactPath).findOne()` か `where({_path})` のいずれか一法のみ／`find`→ 手動 filter は禁止
+﻿※詳細ページの取得は `queryContent(exactPath).findOne()` か `where({_path})` のいずれか一法のみ／`find`→ 手動 filter は禁止。
+SFC（`pages/blog/[...slug].vue`）ではグローバル `queryContent` 利用を許容（先頭に `/* global queryContent */` を付記）。ランタイム/サーバ/コンポーザブルでは **`#content` から import** を使用し、`#imports` からの import は禁止。
 
 ## ブログ詳細の選択ロジック（正準）
 
@@ -52,6 +53,8 @@
   - `/_path` 厳密一致：既存記事 → 200、未知スラッグ → 404。
   - frontmatter の `'true'/'false'`（**string**）を含む判定のユニット/E2E。
 - CI での通し順序は既定に従う（typecheck → lint → test → build → postbuild --check-only → smoke:og → ci:guards → LHCI）。
+  - LHCI は本番トップ（/）が **200 になるまで待機**してから収集し、失敗時は **1 回のみリトライ**。
+  - `categories:best-practices` のアサートは **minScore=0.70（暫定・AdSense 影響）**。budgets は参考、CI 失敗条件はアサートに従う。
 
 ## ブログ追加手順（運用）
 
@@ -132,7 +135,7 @@
 - 確認の目安（暫定のデバッグ用プラグインあり）:
   - ヘッダ: `X-Ads-Script: 1` が返る
   - 本文: `<script src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-…">` が SSR に出力される
-- デバッグ用フックは暫定であり、審査通過後に削除/無効化する。
+- デバッグ用フックは暫定であり、審査通過後に削除/無効化（もしくは完全無効化）する。
 
 ads.txt の参照先: `/public/ads.txt`
 
@@ -319,6 +322,7 @@ pnpm typecheck; pnpm lint; pnpm test -- --run; pnpm build; node .\scripts\gen-me
 
 - Husky pre-push: `typecheck → lint → test → build → postbuild → smoke:og → ci:guards → LHCI`。
 - タグ運用: `vX.Y.Z`。コミット → タグ → push の簡易リリース。Release ノートは基本不要（必要に応じて `gh` CLI）。
+  - Release ジョブは **タグ push 時のみ**実行。`gh release` ベースで **冪等（存在すれば更新・無ければ作成）**／**リトライ**／**最悪でもパイプライン非ブロッキング**。
 - チェックリスト（抜粋）:
   - `NUXT_PUBLIC_SITE_ORIGIN`=https://migakiexplorer.jp（Production）
   - テスト green（cron/jwt/og/sitemap）

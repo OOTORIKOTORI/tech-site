@@ -9,6 +9,7 @@
 - パス揺れ（末尾スラッシュ有無・大文字小文字・URL デコード差）は禁止。
 - SSR 実行パスでは相対 URL を使わない（`useFetch` か ORIGIN 由来の絶対 URL）。F5 リロード時の 500（Only absolute URLs...）を未然に防ぐ。
 - CI 失敗は出荷ブロック。
+- CI 失敗は出荷ブロック。LHCI は本番トップ（/）が **200 になるまで待機**してから収集し、失敗時は **1 回のみリトライ**。`categories:best-practices` の minScore は **0.70（暫定・AdSense 影響）**。
 - ルール序列: 正準=PROJECT_SPEC / 要点=README / 規約=HANDBOOK
 - ブランド: 「磨きエクスプローラー（Migaki Explorer）」／短縮名「Migaki Explorer」
 - ORIGIN: https://migakiexplorer.jp
@@ -119,6 +120,7 @@
   - 既存ポリシー（OGP 既定 302 / ORIGIN 一元化 / SemVer 判定）を変更しない。
   - 既存見出しアンカーは維持（挿入は既存節の直後に最小追記）。
   - 差分は最小（不要な再整形・語順変更禁止）。
+   - SFC（`pages/blog/[...slug].vue`）ではグローバル `queryContent` 利用を許容（先頭に `/* global queryContent */`）。ランタイム/サーバ/コンポーザブルでは **`#content` から import**。`#imports` は禁止。
 - 受け入れ基準 (AC):
   - `pnpm typecheck && pnpm lint -f unix && pnpm test -- --run` が green。
   - 3 文書間の事実（ORIGIN 値/CI 手順/OGP 既定動作）が矛盾しない。
@@ -180,6 +182,7 @@
 
 - SemVer: feat=MINOR / fix|docs|ci=PATCH / 破壊的=MAJOR
 - 手動タグ `vX.Y.Z`、簡潔なリリースノート
+ - CI Release ジョブは **タグ push 時のみ**実行。`gh release` ベースで **冪等（存在すれば更新・無ければ作成）**／**リトライ**／**非ブロッキング**。
 
 ## 10. ログ/秘密
 

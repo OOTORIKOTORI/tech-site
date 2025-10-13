@@ -12,13 +12,13 @@
 
 ## クイックチェック（要点）
 
-- `queryContent`は**必ず`#content`から import**（`#imports`は禁止）
+- `queryContent`の扱い: SFC（`pages/blog/[...slug].vue`）ではグローバル利用を許容（先頭に `/* global queryContent */` を付記）。ランタイム/サーバ/コンポーザブルでは **`#content` から import**。`#imports` からの import は禁止。
 - Markdown 形状ガードは`_archive`を**除外**
 - Related（関連記事）は `/blog/**` のみ取得（`/blog/_archive/**` は除外）。`draft===true`/`published===false` は除外し、`body` が必須。
 - `pnpm run ops:rollback <tag>`で安定タグへスナップショット復元
 - /blog 詳細は**1 経路のみ取得・白紙禁止・テンプレ 1 行**（詳細は PROJECT_SPEC 参照）
 
-- Ads 有効化: Preview/Production で `NUXT_PUBLIC_ENABLE_ADS=1` ＋ `NUXT_PUBLIC_ADSENSE_CLIENT=ca-pub-…`。本文に `pagead/js/adsbygoogle.js?client=` が出ること。
+- Ads 有効化: Preview/Production で `NUXT_PUBLIC_ENABLE_ADS=1` ＋ `NUXT_PUBLIC_ADSENSE_CLIENT=ca-pub-…`。本文に `pagead/js/adsbygoogle.js?client=` が出ること。デバッグ用フック（`X-Ads-Script` 等）は**審査通過後に撤去/完全無効化**。
 
 - クイック検証: `/api/og/hello.png` が **200 または 302** であること（smoke:og 合格基準）。
 
@@ -52,9 +52,11 @@
 - a11y: `focus-visible` は `.focus-ring` ユーティリティで統一（主要リンク/ナビに適用）。
 - OGP API: 既定は 302 で `/og-default.png` へフォールバック。`ENABLE_DYNAMIC_OG=1` で動的 PNG（失敗時は即 302）。`LOG_OG=1` で最小ログ。
 - CI 概要: install → typecheck → lint → test → build → postbuild（`--check-only`）→ smoke:og → ci:guards → LHCI（詳細は PROJECT_SPEC）。
+  - LHCI は本番が **200 になるまで待機**してから収集し、失敗時は **1 回だけリトライ**。
+  - `categories:best-practices` の CI 失敗閾値は **minScore=0.70（暫定・AdSense 影響）**。
 - （任意）Web App Manifest の `name`/`short_name` はブランド準拠。詳細は `PROJECT_SPEC.md` を参照。
 - /blog 詳細は**1 経路のみ取得・白紙禁止・テンプレ 1 行**（`<ContentRenderer v-if="doc?.body" :value="doc" />`）。詳細は[PROJECT_SPEC.md](./PROJECT_SPEC.md)参照。
-- `queryContent`は**#content から import**（#imports は禁止）。
+- `queryContent`の扱い統一: SFC（`pages/blog/[...slug].vue`）はグローバル許容（`/* global queryContent */`）、それ以外は **`#content` から import**。`#imports` は禁止。
 - Markdown 形状ガードは`_archive`を除外。
 - `pnpm run ops:rollback <tag>`で安定タグへスナップショット復元。
 
