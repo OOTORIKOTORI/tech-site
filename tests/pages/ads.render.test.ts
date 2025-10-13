@@ -29,7 +29,7 @@ describe('ads SSR/Dev script injection', () => {
   it('SSR/Prod: injects adsbygoogle script', async () => {
     // @ts-expect-error: defineNuxtPlugin is not typed in this test context
     globalThis.import = { meta: { dev: false } }
-    const mod = await import('../../plugins/ads')
+    const mod = (await import('../../plugins/ads')) as { default: (app: any) => any }
     // useHeadが呼ばれるかを監視
     const spy = vi.fn()
     ;(globalThis as any).useHead = spy
@@ -56,7 +56,7 @@ describe('ads SSR/Dev script injection', () => {
   it('Dev: does not inject adsbygoogle script', async () => {
     // @ts-expect-error: useHead is not typed in this test context
     globalThis.import = { meta: { dev: true } }
-    const mod = await import('../../plugins/ads')
+    const mod = (await import('../../plugins/ads')) as { default: (app: any) => any }
     const spy = vi.fn()
     ;(globalThis as any).useHead = spy
     mod.default({
