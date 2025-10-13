@@ -49,17 +49,28 @@ jobs:
           done
           echo "::warning::Warm-up failed after retries; continuing to Lighthouse"
 
+      - name: Wait for production 200
+        if: ${{ matrix.preset == 'desktop' }}
+        run: |
+          set -Eeuo pipefail
+          for i in {1..30}; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" https://migakiexplorer.jp/ || true)
+            echo "Attempt $i/30: status $code"
+            if [ "$code" = "200" ]; then 
+              echo "Production is ready (200)"
+              break
+            fi
+            sleep 10
+          done
+          test "$code" = "200" || (echo "Production not ready after 5 minutes" && exit 1)
+
       - name: Audit migakiexplorer.jp (desktop)
         if: ${{ matrix.preset == 'desktop' }}
-        uses: treosh/lighthouse-ci-action@v11
-        with:
-          urls: |
-            https://migakiexplorer.jp
-          configPath: .lighthouserc.desktop.json
-          uploadArtifacts: true
-          artifactName: lighthouse-results-desktop
-          temporaryPublicStorage: true
-          runs: 3
+        run: |
+          export LHCI_BUILD_CONTEXT__CURRENT_HASH="${GITHUB_SHA}"
+          export LHCI_BUILD_CONTEXT__CURRENT_BRANCH="${GITHUB_REF#refs/heads/}"
+          npx lhci autorun --config=.lighthouserc.desktop.json --upload.target=temporary-public-storage || \
+          (echo "LHCI failed, retrying once..." && sleep 10 && npx lhci autorun --config=.lighthouserc.desktop.json --upload.target=temporary-public-storage)
 
       - name: Warm up homepage
         if: ${{ matrix.preset == 'mobile' }}
@@ -87,16 +98,26 @@ jobs:
           done
           echo "::warning::Warm-up failed after retries; continuing to Lighthouse"
 
+      - name: Wait for production 200
+        if: ${{ matrix.preset == 'mobile' }}
+        run: |
+          set -Eeuo pipefail
+          for i in {1..30}; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" https://migakiexplorer.jp/ || true)
+            echo "Attempt $i/30: status $code"
+            if [ "$code" = "200" ]; then 
+              echo "Production is ready (200)"
+              break
+            fi
+            sleep 10
+          done
+          test "$code" = "200" || (echo "Production not ready after 5 minutes" && exit 1)
+
       - name: Audit migakiexplorer.jp (mobile)
         if: ${{ matrix.preset == 'mobile' }}
-        uses: treosh/lighthouse-ci-action@v11
-        with:
-          urls: |
-            https://migakiexplorer.jp
-          configPath: .lighthouserc.mobile.json
-          uploadArtifacts: true
-          artifactName: lighthouse-results-mobile
-          temporaryPublicStorage: true
-          runs: 3
-        env:
-          LHCI_EMULATE_FORM_FACTOR: mobile
+        run: |
+          export LHCI_BUILD_CONTEXT__CURRENT_HASH="${GITHUB_SHA}"
+          export LHCI_BUILD_CONTEXT__CURRENT_BRANCH="${GITHUB_REF#refs/heads/}"
+          export LHCI_EMULATE_FORM_FACTOR="mobile"
+          npx lhci autorun --config=.lighthouserc.mobile.json --upload.target=temporary-public-storage || \
+          (echo "LHCI failed, retrying once..." && sleep 10 && npx lhci autorun --config=.lighthouserc.mobile.json --upload.target=temporary-public-storage)
