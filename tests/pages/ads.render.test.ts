@@ -24,11 +24,15 @@ describe('ads SSR/Dev script injection', () => {
       },
     })
     process.env = { ...originalEnv }
+    // モジュールキャッシュをクリアしてプラグインが毎回新しく実行されるようにする
+    vi.resetModules()
   })
 
   it('SSR/Prod: injects adsbygoogle script', async () => {
     // @ts-expect-error: defineNuxtPlugin is not typed in this test context
     globalThis.import = { meta: { dev: false } }
+    // Prod環境を模擬
+    process.env.NODE_ENV = 'production'
     const mod = await import('../../plugins/ads')
     // useHeadが呼ばれるかを監視
     const spy = vi.fn()
@@ -56,6 +60,8 @@ describe('ads SSR/Dev script injection', () => {
   it('Dev: does not inject adsbygoogle script', async () => {
     // @ts-expect-error: useHead is not typed in this test context
     globalThis.import = { meta: { dev: true } }
+    // Dev環境を模擬（デフォルトで非production）
+    process.env.NODE_ENV = 'development'
     const mod = await import('../../plugins/ads')
     const spy = vi.fn()
     ;(globalThis as any).useHead = spy
