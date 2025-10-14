@@ -1,18 +1,31 @@
-param([ValidateSet('auto','patch','minor','major')][string]$bump='auto')
 
-$last = (git tag --list "v*" --sort=-v:refname | Select-Object -First 1); if (-not $last) { $last='v0.0.0' }
-$parts = $last.TrimStart('v') -split '\.'; [int]$maj=$parts[0]; [int]$min=$parts[1]; [int]$pat=$parts[2]
+Param(
+  [ValidateSet('patch','minor','major')]
+  [string]$bump = 'patch'
+)
 
-if ($bump -eq 'auto') {
-  $subj = git log -1 --pretty=%s
-  $body = git log -1 --pretty=%B
-  if ($subj -match '!' -or $body -match 'BREAKING CHANGE') { $bump='major' }
-  elseif ($subj -match '^(feat|perf)') { $bump='minor' }
-  else { $bump='patch' }
+function Get-NextVersion([string]$last, [string]$bump) {
+  if (-not $last) { $last = 'v0.0.0' }
+  $v = [Version]($last.TrimStart('v'))
+  switch ($bump) {
+    'major' { $v = [Version]::new($v.Major + 1, 0, 0) }
+    'minor' { $v = [Version]::new($v.Major, $v.Minor + 1, 0) }
+    default { $v = [Version]::new($v.Major, $v.Minor, $v.Build + 1) }
+  }
+  return "v$($v.Major).$($v.Minor).$($v.Build)"
 }
 
-switch ($bump) { 'major' {$maj++; $min=0; $pat=0}; 'minor' {$min++; $pat=0}; 'patch' {$pat++} }
-$next = "v$maj.$min.$pat"; $msg=(git log -1 --pretty=%s)
-Write-Host "Last: $last -> Next: $next (bump=$bump)"
-git tag -a $next -m $msg
-git push origin $next
+$LAST = (git describe --tags --abbrev=0 2>$null)
+$NEXT = Get-NextVersion $LAST $bump
+
+Write-Host "Last: $LAST -> Next: $NEXT (bump=$bump)"
+
+# 既存なら何もしない（冪等）
+if (git rev-parse -q --verify "refs/tags/$NEXT" 1>$null 2>$null) {
+  Write-Host "Tag $NEXT already exists; skipping."
+  exit 0
+}
+
+# Annotated tag を作成して push（※ -a が重要）
+git tag -a $NEXT -m "$NEXT"
+git push origin $NEXT
