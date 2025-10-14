@@ -1,20 +1,21 @@
 import { describe, it, expect } from 'vitest'
 import { ofetch } from 'ofetch'
-import fs from 'fs'
-import path from 'path'
 
-// 目的: /blog の既知=200・未知=404・白紙なし、かつパス揺れ禁止を継続検証
+/**
+ * /blog E2E 恒常テスト（正準: 1経路取得・doc?.body必須・白紙なし）
+ * 要件根拠:
+ *  - README: /blog 詳細は1経路・白紙禁止・テンプレ1行  ref: README.md L9-L15/L19-L21
+ *  - SPEC: /_path厳密一致→既存=200, 未知=404・doc.body必須  ref: PROJECT_SPEC.md L1-L8
+ */
 describe('blog route canonical and availability', () => {
-  const ORIGIN = process.env.E2E_ORIGIN ?? 'http://localhost:3000'
+  const ORIGIN =
+    process.env.E2E_ORIGIN ||
+    process.env.ORIGIN ||
+    process.env.NUXT_PUBLIC_SITE_URL ||
+    'http://localhost:3000'
 
-  // 既知 slug は /blog/hello-world を第一候補、無い場合は content/blog/*.md の先頭を使用
-  const blogDir = path.resolve(__dirname, '../../content/blog')
-  const mdFiles = fs.existsSync(blogDir)
-    ? fs.readdirSync(blogDir).filter(f => f.endsWith('.md'))
-    : []
-  const hasHelloWorld = mdFiles.includes('hello-world.md')
-  const fallback = mdFiles.find(f => !f.startsWith('_') && f.endsWith('.md')) || mdFiles[0]
-  const knownSlug = hasHelloWorld ? 'hello-world' : fallback ? fallback.replace(/\.md$/, '') : null
+  const KNOWN_SLUG = 'welcome' // 仕様での既知slug
+  const SSR_RELATIVE_URL_ERR = 'Only absolute URLs are supported'
 
   async function serverUp(): Promise<boolean> {
     try {
@@ -23,33 +24,87 @@ describe('blog route canonical and availability', () => {
     } catch (e: any) {
       const msg = String(e?.message || '')
       if (msg.includes('ECONNREFUSED') || msg.includes('fetch failed')) return false
-      // それ以外のエラーは一旦 false（テストをスキップ）
       return false
     }
   }
 
-  it('200 for an existing slug and not blank (rendered by <ContentRenderer>)', async () => {
-    if (!knownSlug) return
+  it('known slug returns 200 and renders non-blank article', async () => {
     if (!(await serverUp())) return
-    const html = await ofetch(`${ORIGIN}/blog/${knownSlug}`)
-    expect(typeof html).toBe('string')
-    // 白紙でないこと（最低限の長さ）
-    expect(html.length).toBeGreaterThan(80)
-    // SSR済み本文が存在することの簡易シグナル（既存テストと同じ観点）
-    expect(html).toMatch(/<main[\s\S]*?>[\s\S]*<article[\s\S]*?>/i)
+
+    let status = 0
+    let html = ''
+    try {
+      const res = await ofetch.raw(`${ORIGIN}/blog/${KNOWN_SLUG}`, {
+        responseType: 'text',
+        retry: 0,
+      })
+      status = res.status
+      html = String((res as any)._data ?? '')
+    } catch (e: any) {
+      status = e?.response?.status ?? 0
+      html = String(e?.response?._data ?? '')
+    }
+
+    expect(status).toBe(200)
+    expect(html.length).toBeGreaterThan(100)
+    // 本文ルート（<article ...>）が含まれること
+    expect(html).toMatch(/<article[\s>]/i)
+    // SSR 相対URL回帰（500時に出やすいメッセージ）の不在を確認
+    expect(html.includes(SSR_RELATIVE_URL_ERR)).toBe(false)
   })
 
-  it('404 for unknown slug', async () => {
+  it('unknown slug returns 404 and shows non-blank error template', async () => {
     if (!(await serverUp())) return
-    await expect(ofetch(`${ORIGIN}/blog/__unknown__`)).rejects.toThrow()
+
+    let status = 0
+    let html = ''
+    try {
+      const res = await ofetch.raw(`${ORIGIN}/blog/___missing___`, {
+        responseType: 'text',
+        retry: 0,
+      })
+      status = res.status
+      html = String((res as any)._data ?? '')
+    } catch (e: any) {
+      status = e?.response?.status ?? 0
+      html = String(e?.response?._data ?? '')
+    }
+
+    expect(status).toBe(404)
+    // 白紙ではない（h1などテンプレ要素が存在）
+    expect(html.length).toBeGreaterThan(50)
+    expect(/<h1[\s>]/i.test(html)).toBe(true)
+    // SSR 相対URL回帰の不在
+    expect(html.includes(SSR_RELATIVE_URL_ERR)).toBe(false)
   })
 
   it('rejects path variations (trailing slash and case changes)', async () => {
-    if (!knownSlug) return
     if (!(await serverUp())) return
-    // 末尾スラッシュ禁止
-    await expect(ofetch(`${ORIGIN}/blog/${knownSlug}/`)).rejects.toThrow()
-    // 大文字小文字の差異は 404
-    await expect(ofetch(`${ORIGIN}/blog/${knownSlug.toUpperCase()}`)).rejects.toThrow()
+
+    // 末尾スラッシュは 404
+    let trailingStatus = 0
+    try {
+      const res = await ofetch.raw(`${ORIGIN}/blog/${KNOWN_SLUG}/`, {
+        responseType: 'text',
+        retry: 0,
+      })
+      trailingStatus = res.status
+    } catch (e: any) {
+      trailingStatus = e?.response?.status ?? 0
+    }
+    expect(trailingStatus).toBe(404)
+
+    // 大文字化は 404
+    let upperStatus = 0
+    try {
+      const res = await ofetch.raw(`${ORIGIN}/blog/${KNOWN_SLUG.toUpperCase()}`, {
+        responseType: 'text',
+        retry: 0,
+      })
+      upperStatus = res.status
+    } catch (e: any) {
+      upperStatus = e?.response?.status ?? 0
+    }
+    expect(upperStatus).toBe(404)
   })
 })
