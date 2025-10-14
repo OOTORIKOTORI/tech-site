@@ -128,16 +128,14 @@ SFC（`pages/blog/[...slug].vue`）ではグローバル `queryContent` 利用�
 - プライバシーポリシー/クッキーポリシー/広告に関する記載（例: 第三者配信の Cookie 使用）を別ページに整備予定。
 - ads.txt の配置（後日導入時）。具体的な広告コードは本仕様からは除外し、運用手順のみ記載。
 
-最小 Ads 仕様（暫定）:
+最小 Ads 仕様（恒常運用）:
 
-- 本番/プレビューでのみ有効化: `NUXT_PUBLIC_ENABLE_ADS=1` かつ `NUXT_PUBLIC_ADSENSE_CLIENT=ca-pub-…` が揃ったときのみ（Dev は常に無効）。
-- ads.txt は `pub-…` を使用（`ca-pub-…` ではない）。
-- 確認の目安（暫定のデバッグ用プラグインあり）:
-  - ヘッダ: `X-Ads-Script: 1` が返る
-  - 本文: `<script src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-…">` が SSR に出力される
-- デバッグ用フックは暫定であり、審査通過後に削除/無効化（もしくは完全無効化）する。
-
-ads.txt の参照先: `/public/ads.txt`
+- 有効化は Production 限定: `NUXT_PUBLIC_ENABLE_ADS=1` かつ `NUXT_PUBLIC_ADSENSE_CLIENT=ca-pub-…` が揃った場合のみ。Preview/Dev は常に無効。
+- ドメインガード: `siteOrigin`（= `NUXT_PUBLIC_SITE_ORIGIN`）が本番ドメイン（`migakiexplorer.jp`）のときのみ挿入対象。
+- SSR の <head> に 1 本だけ自動挿入: `<script src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-…" async crossorigin="anonymous">` を `key: 'adsbygoogle'` で重複防止して出力。
+- デバッグフックは廃止: レビュー時の一時ヘッダ（例: `X-Ads-Script`）等は撤去済み。
+- CI ガード: `scripts/ci/guard-adsense.cjs` が Ads 有効時のみ `client` 形式（`ca-pub-…`）/プラグインの記述/SSR ビルド有無を検証。
+- ads.txt は `pub-…` を使用（`ca-pub-…` ではない）。管理場所は `/public/ads.txt`。
 
 ---
 

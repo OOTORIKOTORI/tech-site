@@ -213,7 +213,7 @@
 - Ops rules: 本HANDBOOKのルールに逸脱がないか。必要なら本書を最小更新。
 - Comms: PR本文に「Handover Summary（Done/Next/Ops/Checks）」を記載（テンプレ参照）。
 - Versioning: 変更内容に応じてSemVerを決定（feat=MINOR, fix/docs/ci=PATCH, 破壊的=MAJOR）。
-- Release: 手動で`git tag vX.Y.Z && git push --follow-tags`。ノートは簡潔に。
+- Release: 手動で`git tag vX.Y.Z && git push --follow-tags`。ノートは簡潔に。補助コマンド: `pnpm run tag:patch | tag:minor | tag:major`（annotated tag を作成・push）。
 - Optional: Manifest（`name`/`short_name`）のブランド準拠を確認（任意）。
 - Logging: 機密を出さない。`LOG_OG=1`は短時間スポットのみ。
 - /blog表示（>0件）確認と`blogv2`API（`/api/blogv2/list` `/api/blogv2/doc`）の暫定運用メモ確認（将来削除前提）。
@@ -244,7 +244,7 @@ Ops:
 
 Checks:
 
-- 環境変数で on/off：`NUXT_PUBLIC_ENABLE_ADS=1` と `NUXT_PUBLIC_ADSENSE_CLIENT=ca-pub-…` が揃ったときのみ Preview/Production で有効（Dev は常に無効）
+- Ads は Production 限定: `NUXT_PUBLIC_ENABLE_ADS=1` と `NUXT_PUBLIC_ADSENSE_CLIENT=ca-pub-…` が揃ったときのみ有効（Preview/Dev は常に無効）。SSR の <head> に 1 本だけ `adsbygoogle.js?client=` が出る。
 
 ```
 
