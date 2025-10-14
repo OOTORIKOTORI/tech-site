@@ -129,6 +129,7 @@ C:\website\tech-site
 ├── scripts
 |  ├── bump-tag.ps1
 |  ├── ci
+|  |  ├── guard-adsense.cjs
 |  |  ├── guard-content-import.cjs
 |  |  ├── guard-control-post.cjs
 |  |  ├── guard-markdown-shapes.cjs
@@ -153,7 +154,6 @@ C:\website\tech-site
 |  |  ├── feed.xml
 |  |  └── sitemap.xml
 |  ├── middleware
-|  |  ├── ads-debug.ts
 |  |  └── noindex-preview.ts
 |  ├── plugins
 |  |  ├── ads-check.ts

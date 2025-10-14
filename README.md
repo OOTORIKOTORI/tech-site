@@ -18,7 +18,7 @@
 - `pnpm run ops:rollback <tag>`で安定タグへスナップショット復元
 - /blog 詳細は**1 経路のみ取得・白紙禁止・テンプレ 1 行**（詳細は PROJECT_SPEC 参照）
 
-- Ads 有効化: Preview/Production で `NUXT_PUBLIC_ENABLE_ADS=1` ＋ `NUXT_PUBLIC_ADSENSE_CLIENT=ca-pub-…`。本文に `pagead/js/adsbygoogle.js?client=` が出ること。デバッグ用フック（`X-Ads-Script` 等）は**審査通過後に撤去/完全無効化**。
+- Ads 運用: **Production のみ `NUXT_PUBLIC_ENABLE_ADS=1`。Preview/Dev は 0**。審査/デバッグ時のみ `ENABLE_ADS_DEBUG=1` を一時使用。本文に `pagead/js/adsbygoogle.js?client=` が出ること。
 
 - クイック検証: `/api/og/hello.png` が **200 または 302** であること（smoke:og 合格基準）。
 

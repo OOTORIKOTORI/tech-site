@@ -25,8 +25,8 @@ export default defineNuxtPlugin(() => {
   const client = typeof pub?.adsenseClient === 'string' ? pub.adsenseClient.trim() : ''
   const origin = typeof pub?.siteOrigin === 'string' ? pub.siteOrigin : ''
 
-  // テスト/ローカル互換のための緩和: origin未設定 or localhost/127.0.0.1/migakiexplorer.jp を許可
-  const originOk = !origin || /migakiexplorer\.jp|localhost|127\.0\.0\.1/i.test(origin)
+  // 本番ドメインのみに制限
+  const originOk = !origin || /migakiexplorer\.jp/i.test(origin)
 
   if (!(isProd && enabled && client && originOk)) return
 
