@@ -145,7 +145,9 @@ SFC（`pages/blog/[...slug].vue`）ではグローバル `queryContent` 利用�
 - フッタ: **法務導線（/privacy, /terms, /ads）** を配置。
 - トップ `/`: ヒーロー＋ CTA（`/tools/cron-jst`, `/blog`）/ 最新 3 件を「Latest posts」で表示
 - ブログ詳細 `/blog/[slug]`: 本文＋ SEO メタ（title/description/canonical/og:url）
-- ツール: `/tools/cron-jst`, `/tools/jwt-decode`
+- ツール: `/tools/cron-jst`, `/tools/jwt-decode`, `/tools/top-analyzer`
+
+  - `/tools/top-analyzer`: Linux top コマンドのログをブラウザで解析・可視化。CSV エクスポート（英/日ヘッダ切替）、サンプルログ DL 機能あり。
 
 - （実装済み）ヘッダ最小ナビ＋ Skip リンク。ブログ一覧カードは日付 `YYYY-MM-DD` と a11y ラベルを付与。
 
@@ -285,10 +287,11 @@ Workflow 上での meta-check 用 ENV 注入手順（集約・正準）:
 8. ci:guards
 9. LHCI
 
-Lighthouse budgets:
+LHCI（Lighthouse） budgets:
 
 - Desktop: perf ≥ 90 / a11y ≥ 90 / best‑practices ≥ 100 / SEO ≥ 100
 - Mobile: perf ≥ 85 / a11y ≥ 90 / best‑practices ≥ 100 / SEO ≥ 100
+- `categories:best-practices` の minScore=0.70（暫定・AdSense 影響）を厳守。
 - Workflow では desktop のみ `preset: desktop`。mobile は formFactor/env 指定（`preset: mobile` は未使用）。
 
 Windows PowerShell tips:

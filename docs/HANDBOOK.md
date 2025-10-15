@@ -202,12 +202,17 @@
 
 - `doc.body` は AST（構造化ツリー）。`v-html` を使わず、`<ContentRenderer :value="doc" />` を利用するか、API 側で `renderContent` により HTML 文字列へ変換して返す。
 
+
 ## Handover Checklist（最新運用）
 
 - Dev検証は**Terminal B**（別ターミナル）で実施し、robots/SSR等は**検証ブロック**の手順で確認済み。
 - 既知=200／未知=404のE2Eを毎回確認。
 - Spec sync: `PROJECT_SPEC.md`（正）と`README.md`（要点）に差分がないか。必要なら最小追記。
-- Health checks: CI全緑（typecheck/lint/test/build/postbuild --check-only/smoke:og/ci:guards/LHCI≥90）。ORIGIN/プレビューnoindexも確認。
+ - Health checks: CI全緑（typecheck/lint/test/build/postbuild --check-only/smoke:og/ci:guards/LHCI≥90）。ORIGIN/プレビューnoindexも確認。
+   - LHCI収集条件: 本番トップ( / )が200になるまで待機し、**失敗時は1回だけリトライ**
+   - カテゴリ閾値: **Accessibility ≥ 90**
+   - カテゴリ閾値: **Best Practices ≥ 0.70（暫定・AdSense影響）**
+ - smoke:og: `/api/og/hello.png` が **200 または 302**。**301/308 は1回だけフォロー**（URLは `new URL()` で正規化）
 - sitemap/robots ホスト一致ログ OK（OK ログ例: `[gen-meta] OK sitemap/feed[/robots] host = <host>  （robots.txt は任意。無い場合は /robots なし）`）。
  - robots.txt はサーバールートで返せるため静的生成は任意。静的に出す場合は GENERATE_ROBOTS=1 を設定。
 - Ops rules: 本HANDBOOKのルールに逸脱がないか。必要なら本書を最小更新。
@@ -218,6 +223,7 @@
 - Logging: 機密を出さない。`LOG_OG=1`は短時間スポットのみ。
 - /blog表示（>0件）確認と`blogv2`API（`/api/blogv2/list` `/api/blogv2/doc`）の暫定運用メモ確認（将来削除前提）。
 - 既知slugで200・未知slugで404を確認。
+- `/tools/top-analyzer`（topログ可視化・CSVエクスポート・サンプルDL）を含む全ツールの動作・UI・E2E/ユニットテスト・README/Spec反映を確認。
 
 ### PR本文テンプレ（コピペ用）
 

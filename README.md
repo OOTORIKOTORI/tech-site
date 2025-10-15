@@ -20,6 +20,8 @@
 
 - Ads 運用: **Production のみ NUXT_PUBLIC_ENABLE_ADS=1。Preview/Dev は 0**。審査/デバッグ時のみ ENABLE_ADS_DEBUG=1 を一時使用。本文に pagead/js/adsbygoogle.js?client= が出ること。
 
+  - **ads.txt は `pub-…` 形式。配置は `/public/ads.txt`（詳細は PROJECT_SPEC を参照）**
+
 - クイック検証: `/api/og/hello.png` が **200 または 302** であること（smoke:og 合格基準）。
 
 * **smoke:og**: `https://<ORIGIN>/api/og/hello.png` に対し **200 または 302** なら合格。308/301 を踏む場合も **1 回のみ自動フォロー**して再判定（URL 結合は `new URL()` で正規化済み）。
@@ -249,4 +251,6 @@ yarn preview
 - **使い方例**:
   - サーバで `top -b -d 5 -n 1000 > top_YYYY-MM-DD.log` で収集
   - `/tools/top-analyzer` でファイルを選択し解析
+  - CSV エクスポート（英語/日本語ヘッダ切替対応）
+  - サンプルログのダウンロード機能
 - **導線**: トップページ・ツール一覧からアクセス可
