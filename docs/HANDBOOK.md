@@ -178,11 +178,19 @@
 - `install → typecheck → lint → test → build → postbuild(--check-only) → smoke:og → ci:guards → LHCI`
 - CI 失敗は出荷ブロック
 
-## 9. リリース/タグ
 
-- SemVer: feat=MINOR / fix|docs|ci=PATCH / 破壊的=MAJOR
-- 手動タグ `vX.Y.Z`、簡潔なリリースノート
- - CI Release ジョブは **タグ push 時のみ**実行。`gh release` ベースで **冪等（存在すれば更新・無ければ作成）**／**リトライ**／**非ブロッキング**。
+## Release Checklist（リリース手順）
+
+- タグ: **タグ push 時のみリリース**（SemVer 準拠: v0.10.0 など）
+- gh release: **冪等更新＋リトライ＋非ブロッキング**（存在すれば更新・無ければ作成）
+- LHCI: 本番 `/` が 200 になるまで待機→収集（**失敗時は1回だけリトライ**）
+- 閾値: **Accessibility ≥ 90**、**Best Practices ≥ 0.70（AdSense影響）**
+- smoke:og: `/api/og/hello.png` が **200/302**、**301/308は1回だけフォロー**
+- 手動チェック:
+  - トップ `/` 200
+  - `/blog/welcome` 200
+  - 未知slugで404
+  - Top Analyzer（サンプル→CSV）
 
 ## 10. ログ/秘密
 

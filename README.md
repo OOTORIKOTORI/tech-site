@@ -197,31 +197,9 @@ Nuxt グローバルスタブ指針:
 - BlogPosting の `publisher.logo` も出力済み。
 - BreadcrumbList JSON-LD を /blog /blog/[slug] に出力（詳細は `PROJECT_SPEC.md`）。
 
-タグの最新取得（SemVer 運用）:
+## リリース手順
 
-```powershell
-git describe --tags --abbrev=0
-```
-
-補足（yarn を使う場合）:
-
-```bash
-yarn install
-yarn dev
-yarn build
-yarn preview
-```
-
-ローカル検証は `pnpm run ci:local`
-
----
-
-## 参考リンク
-
-- 仕様詳細は `PROJECT_SPEC.md` を参照
-- Nuxt デプロイ: https://nuxt.com/docs/getting-started/deployment
-
----
+- リリース手順は [docs/HANDBOOK.md](docs/HANDBOOK.md#release-checklistリリース手順) を参照してください。
 
 ## 変更点サマリ（この更新）
 
