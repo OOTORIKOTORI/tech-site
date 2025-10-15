@@ -1,8 +1,14 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import type { TopSnapshot } from '@/types/top'
 
+
 const props = defineProps<{ snapshots: TopSnapshot[] }>()
+
+// 系列ごとの表示状態（初期は全てtrue）
+const showCpu = ref(true)
+const showLoad = ref(true)
+const showMem = ref(true)
 
 const rows = computed(() =>
   props.snapshots.map(s => ({
@@ -66,18 +72,24 @@ function rightLabel(scale: { pad: number; width: number; height: number }, text:
 
 <template>
   <div class="space-y-6">
-    <!-- CPU -->
+<!-- CPU -->
     <figure class="w-full rounded-2xl ring-1 ring-gray-200 p-3" aria-label="CPU usage chart">
       <figcaption class="flex items-baseline justify-between mb-1">
         <span class="text-xs text-gray-600">CPU Used (%)</span>
         <span class="text-[11px] text-gray-500">avg {{ cpuAgg.avg.toFixed(1) }} / max {{ cpuAgg.max.toFixed(1) }}</span>
+        <button type="button" class="ml-2 px-2 py-0.5 rounded text-xs border focus:outline-none focus-visible:ring"
+          :aria-pressed="showCpu" @click="showCpu = !showCpu">
+          <span v-if="showCpu">●</span><span v-else>○</span> CPU
+        </button>
       </figcaption>
       <svg viewBox="0 0 800 160" class="w-full h-40 text-gray-800" xmlns="http://www.w3.org/2000/svg" role="img">
         <g v-if="cpu.scale" v-html="gridLines(cpu.scale)"></g>
-        <path v-if="cpu.d" :d="cpu.d" fill="none" stroke="currentColor" stroke-width="2" />
-        <g v-if="cpu.scale && cpu.last !== undefined" v-html="rightLabel(cpu.scale, cpu.last.toFixed(1) + '%')"></g>
+        <path v-if="cpu.d && showCpu" :d="cpu.d" fill="none" stroke="currentColor" stroke-width="2" />
+        <g v-if="cpu.scale && cpu.last !== undefined && showCpu"
+          v-html="rightLabel(cpu.scale, cpu.last.toFixed(1) + '%')"></g>
       </svg>
     </figure>
+
 
     <!-- Load -->
     <figure class="w-full rounded-2xl ring-1 ring-gray-200 p-3" aria-label="Load average (1m) chart">
@@ -85,24 +97,35 @@ function rightLabel(scale: { pad: number; width: number; height: number }, text:
         <span class="text-xs text-gray-600">Load (1m)</span>
         <span class="text-[11px] text-gray-500">avg {{ loadAgg.avg.toFixed(2) }} / max {{ loadAgg.max.toFixed(2)
           }}</span>
+        <button type="button" class="ml-2 px-2 py-0.5 rounded text-xs border focus:outline-none focus-visible:ring"
+          :aria-pressed="showLoad" @click="showLoad = !showLoad">
+          <span v-if="showLoad">●</span><span v-else>○</span> Load
+        </button>
       </figcaption>
       <svg viewBox="0 0 800 160" class="w-full h-40 text-gray-800" xmlns="http://www.w3.org/2000/svg" role="img">
         <g v-if="load.scale" v-html="gridLines(load.scale)"></g>
-        <path v-if="load.d" :d="load.d" fill="none" stroke="currentColor" stroke-width="2" />
-        <g v-if="load.scale && load.last !== undefined" v-html="rightLabel(load.scale, load.last.toFixed(2))"></g>
+        <path v-if="load.d && showLoad" :d="load.d" fill="none" stroke="currentColor" stroke-width="2" />
+        <g v-if="load.scale && load.last !== undefined && showLoad"
+          v-html="rightLabel(load.scale, load.last.toFixed(2))"></g>
       </svg>
     </figure>
+
 
     <!-- Mem -->
     <figure class="w-full rounded-2xl ring-1 ring-gray-200 p-3" aria-label="Memory used chart">
       <figcaption class="flex items-baseline justify-between mb-1">
         <span class="text-xs text-gray-600">Mem Used (MiB)</span>
         <span class="text-[11px] text-gray-500">avg {{ memAgg.avg.toFixed(0) }} / max {{ memAgg.max.toFixed(0) }}</span>
+        <button type="button" class="ml-2 px-2 py-0.5 rounded text-xs border focus:outline-none focus-visible:ring"
+          :aria-pressed="showMem" @click="showMem = !showMem">
+          <span v-if="showMem">●</span><span v-else>○</span> Mem
+        </button>
       </figcaption>
       <svg viewBox="0 0 800 160" class="w-full h-40 text-gray-800" xmlns="http://www.w3.org/2000/svg" role="img">
         <g v-if="mem.scale" v-html="gridLines(mem.scale)"></g>
-        <path v-if="mem.d" :d="mem.d" fill="none" stroke="currentColor" stroke-width="2" />
-        <g v-if="mem.scale && mem.last !== undefined" v-html="rightLabel(mem.scale, mem.last.toFixed(0) + ' MiB')"></g>
+        <path v-if="mem.d && showMem" :d="mem.d" fill="none" stroke="currentColor" stroke-width="2" />
+        <g v-if="mem.scale && mem.last !== undefined && showMem"
+          v-html="rightLabel(mem.scale, mem.last.toFixed(0) + ' MiB')"></g>
       </svg>
     </figure>
   </div>
