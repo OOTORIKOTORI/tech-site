@@ -96,49 +96,49 @@ function rightLabel(scale: { pad: number; width: number; height: number }, text:
   return `<text x="${x}" y="${y}" font-size="11" fill="currentColor">${text}</text>`
 }
 
-function downloadChart(chart: 'cpu' | 'load' | 'mem') {
-  // 各SVG要素をrefで取得
-  const svgEl = document.getElementById(`topchart-svg-${chart}`) as SVGSVGElement | null
-  if (!svgEl) return
-  const serializer = new XMLSerializer()
-  const svgStr = serializer.serializeToString(svgEl)
-  const svgBlob = new Blob([svgStr], { type: 'image/svg+xml' })
-  const url = URL.createObjectURL(svgBlob)
-  const img = new window.Image()
-  img.onload = () => {
-    const canvas = document.createElement('canvas')
-    canvas.width = svgEl.width.baseVal.value || 800
-    canvas.height = svgEl.height.baseVal.value || 160
-    const ctx = canvas.getContext('2d')
-    if (ctx) {
-      ctx.fillStyle = '#fff'
-      ctx.fillRect(0, 0, canvas.width, canvas.height)
-      ctx.drawImage(img, 0, 0)
-      canvas.toBlob(blob => {
-        if (!blob) return
-        const now = new Date()
-        const pad = (n: number) => n.toString().padStart(2, '0')
-        const y = now.getFullYear()
-        const m = pad(now.getMonth() + 1)
-        const d = pad(now.getDate())
-        const h = pad(now.getHours())
-        const min = pad(now.getMinutes())
-        const s = pad(now.getSeconds())
-        const fname = `top-analyzer-${chart}-${y}${m}${d}-${h}${min}${s}.png`
-        const a = document.createElement('a')
-        a.href = URL.createObjectURL(blob)
-        a.download = fname
-        document.body.appendChild(a)
-        a.click()
-        setTimeout(() => {
-          document.body.removeChild(a)
-          URL.revokeObjectURL(a.href)
-          URL.revokeObjectURL(url)
-        }, 100)
-      }, 'image/png')
-    }
+// ファイル名生成
+const nowStamp = () => {
+  const d = new Date();
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}`;
+};
+
+function downloadDataUrl(dataUrl: string, filename: string) {
+  const a = document.createElement('a');
+  a.href = dataUrl;
+  a.download = filename;
+  a.click();
+  a.remove();
+}
+
+async function saveChartAsPng(kind: 'cpu' | 'load' | 'mem') {
+  const ts = nowStamp();
+  const filename = `top-analyzer-${kind}-${ts}.png`;
+
+  // 1) Canvas優先
+  const canvasEl = document.querySelector(`[data-chart="${kind}"] canvas`) as HTMLCanvasElement | null;
+  if (canvasEl && canvasEl.toDataURL) {
+    const dataUrl = canvasEl.toDataURL('image/png');
+    downloadDataUrl(dataUrl, filename);
+    return;
   }
-  img.src = url
+
+  // 2) SVG fallback
+  const svgEl = document.getElementById(`topchart-svg-${kind}`) as SVGSVGElement | null
+    || document.querySelector(`[data-chart="${kind}"] svg`) as SVGSVGElement | null;
+  if (svgEl) {
+    const xml = new XMLSerializer().serializeToString(svgEl);
+    const blob = new Blob([xml], { type: 'image/svg+xml;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename.replace(/\.png$/, '.svg');
+    a.click();
+    URL.revokeObjectURL(url);
+    a.remove();
+    return;
+  }
+  // 3) 見つからない場合は何もしない
 }
 </script>
 
@@ -146,12 +146,12 @@ function downloadChart(chart: 'cpu' | 'load' | 'mem') {
 <template>
   <div class="space-y-6">
     <!-- CPU -->
-    <figure class="w-full rounded-2xl ring-1 ring-gray-200 p-3" aria-label="CPU usage chart">
+    <figure class="w-full rounded-2xl ring-1 ring-gray-200 p-3" aria-label="CPU usage chart" :data-chart="'cpu'">
       <figcaption class="flex flex-col gap-1 mb-1">
         <div class="flex items-baseline justify-between">
           <span class="text-xs text-gray-600">CPU Used (%)</span>
           <span class="text-[11px] text-gray-500">avg {{ cpuAgg.avg.toFixed(1) }} / max {{ cpuAgg.max.toFixed(1)
-          }}</span>
+            }}</span>
           <button type="button" class="ml-2 px-2 py-0.5 rounded text-xs border focus:outline-none focus-visible:ring"
             :aria-pressed="showCpu" @click="showCpu = !showCpu">
             <span v-if="showCpu">●</span><span v-else>○</span> CPU
@@ -166,7 +166,7 @@ function downloadChart(chart: 'cpu' | 'load' | 'mem') {
         </div>
       </figcaption>
       <button type="button" class="ml-2 px-2 py-0.5 rounded text-xs border focus:outline-none focus-visible:ring"
-        @click="downloadChart('cpu')">
+        :aria-label="'CPUチャートをPNG保存'" @click="saveChartAsPng('cpu')">
         PNG保存
       </button>
       <svg :id="'topchart-svg-cpu'" viewBox="0 0 800 160" class="w-full h-40 text-gray-800"
@@ -182,12 +182,13 @@ function downloadChart(chart: 'cpu' | 'load' | 'mem') {
 
 
     <!-- Load -->
-    <figure class="w-full rounded-2xl ring-1 ring-gray-200 p-3" aria-label="Load average (1m) chart">
+    <figure class="w-full rounded-2xl ring-1 ring-gray-200 p-3" aria-label="Load average (1m) chart"
+      :data-chart="'load'">
       <figcaption class="flex flex-col gap-1 mb-1">
         <div class="flex items-baseline justify-between">
           <span class="text-xs text-gray-600">Load (1m)</span>
           <span class="text-[11px] text-gray-500">avg {{ loadAgg.avg.toFixed(2) }} / max {{ loadAgg.max.toFixed(2)
-          }}</span>
+            }}</span>
           <button type="button" class="ml-2 px-2 py-0.5 rounded text-xs border focus:outline-none focus-visible:ring"
             :aria-pressed="showLoad" @click="showLoad = !showLoad">
             <span v-if="showLoad">●</span><span v-else>○</span> Load
@@ -201,7 +202,7 @@ function downloadChart(chart: 'cpu' | 'load' | 'mem') {
         </div>
       </figcaption>
       <button type="button" class="ml-2 px-2 py-0.5 rounded text-xs border focus:outline-none focus-visible:ring"
-        @click="downloadChart('load')">
+        :aria-label="'LoadチャートをPNG保存'" @click="saveChartAsPng('load')">
         PNG保存
       </button>
       <svg :id="'topchart-svg-load'" viewBox="0 0 800 160" class="w-full h-40 text-gray-800"
@@ -217,12 +218,12 @@ function downloadChart(chart: 'cpu' | 'load' | 'mem') {
 
 
     <!-- Mem -->
-    <figure class="w-full rounded-2xl ring-1 ring-gray-200 p-3" aria-label="Memory used chart">
+    <figure class="w-full rounded-2xl ring-1 ring-gray-200 p-3" aria-label="Memory used chart" :data-chart="'mem'">
       <figcaption class="flex flex-col gap-1 mb-1">
         <div class="flex items-baseline justify-between">
           <span class="text-xs text-gray-600">Mem Used (MiB)</span>
           <span class="text-[11px] text-gray-500">avg {{ memAgg.avg.toFixed(0) }} / max {{ memAgg.max.toFixed(0)
-          }}</span>
+            }}</span>
           <button type="button" class="ml-2 px-2 py-0.5 rounded text-xs border focus:outline-none focus-visible:ring"
             :aria-pressed="showMem" @click="showMem = !showMem">
             <span v-if="showMem">●</span><span v-else>○</span> Mem
@@ -237,7 +238,7 @@ function downloadChart(chart: 'cpu' | 'load' | 'mem') {
         </div>
       </figcaption>
       <button type="button" class="ml-2 px-2 py-0.5 rounded text-xs border focus:outline-none focus-visible:ring"
-        @click="downloadChart('mem')">
+        :aria-label="'MemチャートをPNG保存'" @click="saveChartAsPng('mem')">
         PNG保存
       </button>
       <svg :id="'topchart-svg-mem'" viewBox="0 0 800 160" class="w-full h-40 text-gray-800"
