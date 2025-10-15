@@ -6,26 +6,26 @@
       <li class="border rounded-lg p-4 bg-white">
         <NuxtLink to="/tools/cron-jst" class="group block focus-ring">
           <h2 class="text-lg font-medium text-blue-600 group-hover:underline">Cron JST</h2>
-          <p class="text-gray-600">crontab を JST で試しやすく。</p>
         </NuxtLink>
+        <p class="text-sm text-gray-600 mt-1">サーバ運用や定時実行の確認に。crontab の式を <b>JST/UTC</b> で即座に検証、次回実行がひと目でわかる。</p>
       </li>
       <li class="border rounded-lg p-4 bg-white">
         <NuxtLink to="/tools/jwt-decode" class="group block focus-ring">
           <h2 class="text-lg font-medium text-blue-600 group-hover:underline">JWT Decode</h2>
-          <p class="text-gray-600">JWT をブラウザで安全にデコード。</p>
         </NuxtLink>
+        <p class="text-sm text-gray-600 mt-1">認証トークンの中身を<b>ローカルで</b>確認。ペイロードを安全に可視化（秘密鍵は不要）。</p>
       </li>
       <li class="border rounded-lg p-4 bg-white">
         <NuxtLink to="/tools/og-check" class="group block focus-ring">
           <h2 class="text-lg font-medium text-blue-600 group-hover:underline">OGプレビュー確認</h2>
-          <p class="text-gray-600">リダイレクト連鎖と最終URL/ステータスを確認</p>
         </NuxtLink>
+        <p class="text-sm text-gray-600 mt-1">共有時の<b>画像/タイトル</b>の状態と、最終URL・HTTPステータスを一発チェック。</p>
       </li>
       <li class="border rounded-lg p-4 bg-white">
         <NuxtLink to="/tools/site-check" class="group block focus-ring">
           <h2 class="text-lg font-medium text-blue-600 group-hover:underline">サイトマップ / robots チェッカー</h2>
-          <p class="text-gray-600">robots.txt と sitemap.xml のステータス/要約を確認</p>
         </NuxtLink>
+        <p class="text-sm text-gray-600 mt-1">/sitemap.xml と /robots.txt をまとめて確認。<b>掲載可否と到達性</b>を素早く点検。</p>
       </li>
     </ul>
   </section>

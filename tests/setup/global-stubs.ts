@@ -33,6 +33,9 @@ beforeAll(() => {
   vi.stubGlobal('dataLayer', [])
   vi.stubGlobal('__ADS__', { push: vi.fn() })
 
+  // Nuxt auto-imports
+  vi.stubGlobal('definePageMeta', vi.fn())
+
   // 観測系
   vi.stubGlobal('IntersectionObserver', IOStub as any)
   vi.stubGlobal('ResizeObserver', ROStub as any)

@@ -1,5 +1,7 @@
 ﻿<template>
   <div class="container mx-auto max-w-6xl py-8 px-4 space-y-6">
+    <ToolIntroBox audience="API/認証を扱う開発者" value="JWT のヘッダ/ペイロードをローカルで可視化（秘密鍵不要）" how="トークンを貼り付け → デコードを実行 → 中身を確認"
+      safety="貼り付けた文字列は保存されません" />
     <header class="space-y-2">
       <h1 class="text-2xl font-bold flex items-center gap-3">
         JWT ツール
@@ -194,9 +196,9 @@
               <div class="space-y-1">
                 <div v-for="e in sortedErrors" :key="e.code" class="text-xs flex gap-2">
                   <span class="inline-block px-2 py-0.5 rounded bg-red-100 text-red-700 font-semibold">{{ e.code
-                    }}</span>
+                  }}</span>
                   <span class="text-gray-800">{{ e.message }}<span v-if="e.hint" class="text-gray-500"> ({{ e.hint
-                      }})</span></span>
+                  }})</span></span>
                 </div>
               </div>
             </template>

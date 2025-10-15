@@ -27,7 +27,8 @@ C:\website\tech-site
 |  |  ├── Ref.vue
 |  |  └── Term.vue
 |  ├── GlobalNav.vue
-|  └── TagChip.vue
+|  ├── TagChip.vue
+|  └── ToolIntroBox.vue
 ├── composables
 |  ├── queryContent.reexport.ts
 |  ├── queryContent.ts
@@ -249,5 +250,5 @@ C:\website\tech-site
 ├── vercel.json
 └── vitest.config.ts
 
-directory: 59 file: 185 symboliclink: 34
+directory: 59 file: 186 symboliclink: 34
 

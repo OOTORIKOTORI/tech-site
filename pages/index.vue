@@ -1,32 +1,35 @@
 ﻿<template>
-  <main class="container" style="max-width: 56rem; margin: 0 auto; padding: 2.5rem 1rem;">
-    <section aria-labelledby="hero-title" style="text-align: left;">
-      <h1 id="hero-title" style="font-size: 2rem; font-weight: 800; margin: 0;">{{ display }}</h1>
-      <p style="margin:.5rem 0 1.25rem 0; color:#4b5563; font-size:1rem;">{{ tagline }}</p>
-      <div style="display:flex; gap:.75rem; flex-wrap: wrap;">
-        <NuxtLink to="/tools/cron-jst" aria-label="Open Cron Tool" class="btn-primary focus-ring">
-Open Cron Tool
+  <main class="mx-auto max-w-5xl px-6 py-12 space-y-10">
+    <!-- Hero -->
+    <section class="space-y-4">
+      <h1 data-testid="home-hero-heading" class="text-3xl md:text-4xl font-bold">
+        毎日の実務を、少し速く・確実に。
+      </h1>
+      <p class="text-gray-600">
+        ブラウザだけで使えるミニツールと、1〜3分で読めるチェックリスト。
+      </p>
+      <div class="flex flex-wrap gap-3 pt-2">
+        <NuxtLink to="/tools"
+          class="rounded-lg px-4 py-2 ring-1 ring-gray-300 hover:bg-gray-50 focus:outline-none focus-visible:ring-2">
+          ツールを探す
         </NuxtLink>
-        <NuxtLink to="/blog" aria-label="Open Blog" class="btn-secondary focus-ring">Open Blog</NuxtLink>
+        <NuxtLink to="/blog"
+          class="rounded-lg px-4 py-2 ring-1 ring-gray-200 text-gray-700 hover:bg-gray-50 focus:outline-none focus-visible:ring-2">
+          最新記事を見る
+        </NuxtLink>
       </div>
     </section>
 
-    <section v-if="posts.length" aria-labelledby="latest-title" style="margin-top: 2rem;">
-      <h2 id="latest-title" style="font-size:1.25rem; font-weight:700; margin:0 0 .75rem 0;">Latest posts</h2>
-      <ul style="list-style:none; padding:0; margin:0; display:grid; gap:.75rem;">
-        <li v-for="p in posts" :key="p._path"
-          style="border:1px solid #e5e7eb; border-radius:.5rem; padding:1rem; background:#fff;">
-          <article>
-            <h3 style="margin:0; font-size:1.05rem;">
-              <NuxtLink :to="p._path" class="focus-ring" style="text-decoration:none; color:inherit;">
-{{ p.title }}
-              </NuxtLink>
-            </h3>
-            <p style="margin:.25rem 0 0; color:#6b7280; font-size:.8rem;">{{ formatDateIso(p.date) }}</p>
-            <p v-if="p.description" style="margin:.5rem 0 0; color:#374151; font-size:.95rem;">{{ p.description }}</p>
-          </article>
-        </li>
-      </ul>
+    <!-- Featured Tools -->
+    <section v-if="featured.length" class="space-y-4">
+      <h2 class="text-xl font-semibold">注目のツール</h2>
+      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <NuxtLink v-for="item in featured" :key="item.href" :to="item.href"
+          class="block rounded-2xl p-4 ring-1 ring-gray-200 hover:bg-gray-50 focus:outline-none focus-visible:ring-2">
+          <div class="font-medium">{{ item.title }}</div>
+          <p class="text-sm text-gray-600 mt-1">{{ item.desc }}</p>
+        </NuxtLink>
+      </div>
     </section>
 
     <!-- Ad placeholder: top page single slot -->
@@ -37,23 +40,17 @@ Open Cron Tool
 </template>
 
 <script setup lang="ts">
-import { useAsyncData, useSeoMeta, useHead } from '#imports'
+
 import AdSlot from '@/components/AdSlot.vue'
-import { useSiteBrand } from '@/composables/useSiteBrand'
-import { siteUrl } from '@/utils/siteUrl'
-import { fetchPosts, type PostListItem } from '@/composables/usePosts'
-import { formatDateIso } from '@/utils/date'
+import { definePageMeta } from '#imports'
+definePageMeta({ title: 'Migaki Explorer' })
 
-const { data } = await useAsyncData('home-latest-posts', () => fetchPosts({ limit: 3 }))
-const posts = (data.value ?? []) as PostListItem[]
-const { display, tagline } = useSiteBrand()
-
-useHead({ link: [{ rel: 'canonical', href: siteUrl('/') }] })
-useSeoMeta({
-  title: `${display} — Tech Tools & Notes`,
-  ogTitle: `${display} — Tech Tools & Notes`,
-  ogUrl: siteUrl('/'),
-})
+const featured = [
+  { title: 'Cron JST', href: '/tools/cron-jst', desc: 'crontab式をJST/UTCで検証し、次回実行を即確認' },
+  { title: 'JWT Decode', href: '/tools/jwt-decode', desc: 'JWTのペイロードをローカルで可視化（秘密鍵不要）' },
+  { title: 'OGプレビュー確認', href: '/tools/og-check', desc: '共有時の画像/タイトルと最終URL・ステータスを確認' },
+  // { title: 'サイトマップ/robots', href: '/tools/sitemap-robots', desc: 'sitemap.xml と robots.txt の到達性・掲載可否を点検' },
+].filter(Boolean)
 </script>
 
 <style scoped>

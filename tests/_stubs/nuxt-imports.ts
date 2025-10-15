@@ -51,6 +51,8 @@ export const useRuntimeConfig: AnyFn = () =>
 export const useServerHead: AnyFn = (...args) =>
   g.useServerHead ? g.useServerHead(...args) : g.useHead?.(...args)
 
+export const definePageMeta: AnyFn = (...args) => g.definePageMeta?.(...args)
+
 // Expose queryContent via global to match page's access
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ;(globalThis as any).queryContent = (globalThis as any).queryContent

@@ -45,6 +45,8 @@ describe('pages/index.vue home', () => {
     globalThis.useHead = () => undefined
     // @ts-expect-error test stub
     globalThis.useSeoMeta = () => undefined
+    // @ts-expect-error test stub
+    globalThis.definePageMeta = () => undefined
   })
 
   it('renders CTA links and latest posts when present', async () => {
@@ -81,11 +83,16 @@ describe('pages/index.vue home', () => {
     await new Promise(r => setTimeout(r, 0))
 
     // CTA links
-    expect(wrapper.find('a[href="/tools/cron-jst"]').exists()).toBe(true)
+    expect(wrapper.find('a[href="/tools"]').exists()).toBe(true)
     expect(wrapper.find('a[href="/blog"]').exists()).toBe(true)
 
-    // Latest posts contains at least the blog link
-    const links = wrapper.findAll('a[href="/blog/first-cron-tz"]')
-    expect(links.length).toBeGreaterThanOrEqual(1)
+    // 注目のツールカードが表示されているか
+    expect(wrapper.find('h2').text()).toContain('注目のツール')
+    // Cron JSTカード
+    expect(wrapper.find('a[href="/tools/cron-jst"]').exists()).toBe(true)
+    // JWT Decodeカード
+    expect(wrapper.find('a[href="/tools/jwt-decode"]').exists()).toBe(true)
+    // OGプレビュー確認カード
+    expect(wrapper.find('a[href="/tools/og-check"]').exists()).toBe(true)
   })
 })

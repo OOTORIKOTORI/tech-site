@@ -1,5 +1,7 @@
 ﻿<template>
   <div class="container mx-auto max-w-3xl py-8 px-4 space-y-6">
+    <ToolIntroBox audience="サイト運用・開発者（定時バッチの確認）" value="crontab 式を JST/UTC で検証し、次回実行を即確認"
+      how="式を入力 → タイムゾーンを選択 → 次回実行を確認" safety="処理はブラウザ内のみ（データ送信なし）" />
     <h1 class="text-2xl font-bold">Cron JST 次回実行予測</h1>
     <div class="mt-2 text-sm">
       <NuxtLink to="/blog" class="text-blue-700 underline hover:text-blue-900 focus-ring">Tech Blogはこちら</NuxtLink>

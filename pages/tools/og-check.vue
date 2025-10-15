@@ -64,6 +64,8 @@ const doImgCheck = async () => {
 
 <template>
   <main class="mx-auto max-w-3xl p-6 space-y-6">
+    <ToolIntroBox audience="広報・編集・開発（SNS共有の見え方確認）" value="共有時の画像/タイトル、リダイレクト先とHTTPステータスを一発確認"
+      how="URLを入力 → チェック → 結果パネルで最終URL/画像/タグを確認" safety="フェッチは絶対URLで行い、結果は端末内にのみ表示" />
     <h1 class="text-2xl font-bold">OG プレビュー確認</h1>
     <form class="space-y-3" @submit.prevent="doCheck">
       <label class="block">
