@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen flex items-center justify-center p-6">
     <div class="max-w-xl w-full text-center space-y-4">
-      <h1 class="text-3xl font-bold">{{ title }}</h1>
+      <h1 class="text-3xl font-bold" data-testid="error-heading">{{ title }}</h1>
       <p class="opacity-80">
         <span v-if="is404">ページが見つかりませんでした。</span>
         <span v-else>エラーが発生しました。時間をおいて再度お試しください。</span>

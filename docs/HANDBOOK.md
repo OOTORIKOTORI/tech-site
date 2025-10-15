@@ -261,4 +261,12 @@ Checks:
 - `pages/blog/[...slug].vue`：`queryContent` はグローバル利用の場合、ESLint に `/* global queryContent */` を付記
 - `any` 禁止。必要なローカル型を定義する
 - コミットやステージングは行わない。チャット出力は**短い変更サマリ**のみ
+
+## /blog E2E契約・運用詳細
+
+- E2Eテストは `/blog` の既知slugで 200 + 本文レンダリング（`<article`）、未知slugで 404 + 白紙でない（`data-testid="error-heading"` のテンプレ見出し）を検証。
+- SSR相対URL回帰（"Only absolute URLs are supported"）の検知も含む。
+- ORIGIN解決順は `E2E_ORIGIN` → `ORIGIN` → `NUXT_PUBLIC_SITE_URL` → `http://localhost:3000`。
+- CI連鎖（typecheck → lint → test → build → postbuild(--check-only) → smoke:og → ci:guards → LHCI）の test フェーズで常時実行。
+- ブログ追加時は「既知=200」候補として1本は常時公開状態（draft: false）を保つこと。
 ```

@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0"><channel><title>磨きエクスプローラー Blog</title><link>https://migakiexplorer.jp/blog</link><description>磨きエクスプローラー Blog RSS</description>
+    <item><title>10月の開発メモ</title><link>https://migakiexplorer.jp/blog/nnn-dev-notes-oct</link><pubDate>Wed, 15 Oct 2025 00:00:00 GMT</pubDate><description>2025年10月の開発で得た小さな知見や運用改善のメモをまとめました。</description></item>
+    <item><title>LHCIグリーン維持のコツ</title><link>https://migakiexplorer.jp/blog/nnn-lhci-green-tips</link><pubDate>Wed, 15 Oct 2025 00:00:00 GMT</pubDate><description>Lighthouse CIで常にグリーンを保つための運用ポイントを簡潔にまとめました。</description></item>
+    <item><title>OGPチェックの小技</title><link>https://migakiexplorer.jp/blog/nnn-og-check-mini</link><pubDate>Wed, 15 Oct 2025 00:00:00 GMT</pubDate><description>OGP画像やタグの即時確認に便利なtipsを紹介。開発中のOGPトラブルを最小限に抑えるための実践メモ。</description></item>
     <item><title>リンクプレビュー（OG）が出ない時の最初の3手</title><link>https://migakiexplorer.jp/blog/blog_og_first_aid</link><pubDate>Wed, 08 Oct 2025 00:00:00 GMT</pubDate><description>「画像が出ない / タイトルが違う」を最短で切り分けるための超ミニチェックリスト。</description></item>
     <item><title>Welcome</title><link>https://migakiexplorer.jp/blog/welcome</link><pubDate>Wed, 08 Oct 2025 00:00:00 GMT</pubDate><description>このサイト（Migaki Explorer）の使い方と、このブログで読める内容のガイド。</description></item>
 </channel></rss>

@@ -38,6 +38,9 @@ C:\website\tech-site
 ├── content
 |  ├── blog
 |  |  ├── blog_og_first_aid.md
+|  |  ├── nnn-dev-notes-oct.md
+|  |  ├── nnn-lhci-green-tips.md
+|  |  ├── nnn-og-check-mini.md
 |  |  ├── welcome.md
 |  |  ├── _archive
 |  |  ├── _control.md
@@ -130,6 +133,7 @@ C:\website\tech-site
 |  ├── bump-tag.ps1
 |  ├── ci
 |  |  ├── guard-adsense.cjs
+|  |  ├── guard-blog-no-internal.cjs
 |  |  ├── guard-content-import.cjs
 |  |  ├── guard-control-post.cjs
 |  |  ├── guard-markdown-shapes.cjs
@@ -245,5 +249,5 @@ C:\website\tech-site
 ├── vercel.json
 └── vitest.config.ts
 
-directory: 59 file: 181 symboliclink: 34
+directory: 59 file: 185 symboliclink: 34
 

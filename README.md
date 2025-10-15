@@ -225,3 +225,16 @@ yarn preview
 
 - README を「要点＋参照」に整理（詳細は PROJECT_SPEC に集約）。
 - ブランド正式名/短縮名、ORIGIN/RSS/OGP/a11y/構造化データの指針を明記。
+
+## /blog E2E の契約（要点）
+
+- known slug: 200 + 本文レンダリング（例: `<article`）
+- missing slug: 404 + 白紙ではない（テンプレ見出しが出る / `data-testid="error-heading"`）
+- SSR 相対 URL 回帰の検知: レスポンスに `"Only absolute URLs are supported"` を含まないこと
+
+### E2E の ORIGIN 解決順
+
+1. `process.env.E2E_ORIGIN`
+2. `process.env.ORIGIN`
+3. `process.env.NUXT_PUBLIC_SITE_URL`
+4. `http://localhost:3000`

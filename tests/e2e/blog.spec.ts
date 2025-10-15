@@ -71,9 +71,9 @@ describe('blog route canonical and availability', () => {
     }
 
     expect(status).toBe(404)
-    // 白紙ではない（h1などテンプレ要素が存在）
+    // 白紙ではない（data-testid="error-heading" のh1が存在）
     expect(html.length).toBeGreaterThan(50)
-    expect(/<h1[\s>]/i.test(html)).toBe(true)
+    expect(html).toMatch(/data-testid=["']error-heading["']/i)
     // SSR 相対URL回帰の不在
     expect(html.includes(SSR_RELATIVE_URL_ERR)).toBe(false)
   })
