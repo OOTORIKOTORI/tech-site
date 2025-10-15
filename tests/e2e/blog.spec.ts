@@ -1,3 +1,13 @@
+// 非2xxでもstatus取得できる安全なfetch
+async function safeRaw(url: string) {
+  try {
+    return await ofetch.raw(url, { responseType: 'text', retry: 0 })
+  } catch (e: any) {
+    const resp = e?.response
+    if (resp) return resp
+    throw e
+  }
+}
 import { describe, it, expect } from 'vitest'
 import { ofetch } from 'ofetch'
 
@@ -31,19 +41,9 @@ describe('blog route canonical and availability', () => {
   it('known slug returns 200 and renders non-blank article', async () => {
     if (!(await serverUp())) return
 
-    let status = 0
-    let html = ''
-    try {
-      const res = await ofetch.raw(`${ORIGIN}/blog/${KNOWN_SLUG}`, {
-        responseType: 'text',
-        retry: 0,
-      })
-      status = res.status
-      html = String((res as any)._data ?? '')
-    } catch (e: any) {
-      status = e?.response?.status ?? 0
-      html = String(e?.response?._data ?? '')
-    }
+    const res = await safeRaw(`${ORIGIN}/blog/${KNOWN_SLUG}`)
+    const status = res.status
+    const html = String((res as any)._data ?? '')
 
     expect(status).toBe(200)
     expect(html.length).toBeGreaterThan(100)
@@ -56,19 +56,9 @@ describe('blog route canonical and availability', () => {
   it('unknown slug returns 404 and shows non-blank error template', async () => {
     if (!(await serverUp())) return
 
-    let status = 0
-    let html = ''
-    try {
-      const res = await ofetch.raw(`${ORIGIN}/blog/___missing___`, {
-        responseType: 'text',
-        retry: 0,
-      })
-      status = res.status
-      html = String((res as any)._data ?? '')
-    } catch (e: any) {
-      status = e?.response?.status ?? 0
-      html = String(e?.response?._data ?? '')
-    }
+    const res = await safeRaw(`${ORIGIN}/blog/___missing___`)
+    const status = res.status
+    const html = String((res as any)._data ?? '')
 
     expect(status).toBe(404)
     // 白紙ではない（data-testid="error-heading" のh1が存在）
@@ -82,29 +72,11 @@ describe('blog route canonical and availability', () => {
     if (!(await serverUp())) return
 
     // 末尾スラッシュは 404
-    let trailingStatus = 0
-    try {
-      const res = await ofetch.raw(`${ORIGIN}/blog/${KNOWN_SLUG}/`, {
-        responseType: 'text',
-        retry: 0,
-      })
-      trailingStatus = res.status
-    } catch (e: any) {
-      trailingStatus = e?.response?.status ?? 0
-    }
-    expect(trailingStatus).toBe(404)
+    const trailing = await safeRaw(`${ORIGIN}/blog/${KNOWN_SLUG}/`)
+    expect(trailing.status).toBe(404)
 
     // 大文字化は 404
-    let upperStatus = 0
-    try {
-      const res = await ofetch.raw(`${ORIGIN}/blog/${KNOWN_SLUG.toUpperCase()}`, {
-        responseType: 'text',
-        retry: 0,
-      })
-      upperStatus = res.status
-    } catch (e: any) {
-      upperStatus = e?.response?.status ?? 0
-    }
-    expect(upperStatus).toBe(404)
+    const upper = await safeRaw(`${ORIGIN}/blog/${KNOWN_SLUG.toUpperCase()}`)
+    expect(upper.status).toBe(404)
   })
 })

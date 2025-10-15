@@ -27,6 +27,15 @@
         </NuxtLink>
         <p class="text-sm text-gray-600 mt-1">/sitemap.xml と /robots.txt をまとめて確認。<b>掲載可否と到達性</b>を素早く点検。</p>
       </li>
+      <li class="border rounded-lg p-4 bg-white">
+        <NuxtLink to="/tools/top-analyzer" class="group block focus-ring">
+          <div class="text-sm text-gray-500">新規</div>
+          <h2 class="text-lg font-medium text-blue-600 group-hover:underline">Top Log Analyzer</h2>
+        </NuxtLink>
+        <p class="text-sm text-gray-600 mt-1">
+          top ログから CPU / Mem / Load を時系列で把握できる可視化ツール（ブラウザ内のみで解析）
+        </p>
+      </li>
     </ul>
   </section>
 </template>

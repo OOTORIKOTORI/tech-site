@@ -238,3 +238,15 @@ yarn preview
 2. `process.env.ORIGIN`
 3. `process.env.NUXT_PUBLIC_SITE_URL`
 4. `http://localhost:3000`
+
+---
+
+## `/tools/top-analyzer`（top ログ可視化ツール）
+
+- **対象**: SRE・運用・開発の初動調査向け
+- **できること**: top コマンドの CPU/Mem/Load を時系列グラフ化し、ピークや異常を素早く把握
+- **安全性**: ブラウザ内のみで完結（ファイルアップロードなし、プライバシー重視）
+- **使い方例**:
+  - サーバで `top -b -d 5 -n 1000 > top_YYYY-MM-DD.log` で収集
+  - `/tools/top-analyzer` でファイルを選択し解析
+- **導線**: トップページ・ツール一覧からアクセス可

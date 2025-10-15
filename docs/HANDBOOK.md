@@ -269,4 +269,13 @@ Checks:
 - ORIGIN解決順は `E2E_ORIGIN` → `ORIGIN` → `NUXT_PUBLIC_SITE_URL` → `http://localhost:3000`。
 - CI連鎖（typecheck → lint → test → build → postbuild(--check-only) → smoke:og → ci:guards → LHCI）の test フェーズで常時実行。
 - ブログ追加時は「既知=200」候補として1本は常時公開状態（draft: false）を保つこと。
+
+---
+
+### `/tools/top-analyzer`（topログ可視化ツール）
+- **SRE/運用/開発の初動調査向け**
+- topコマンドのCPU/Mem/Loadを時系列グラフ化し、ピークや異常を素早く把握
+- ブラウザ内のみで完結（ファイルアップロードなし、プライバシー重視）
+- サーバで `top -b -d 5 -n 1000 > top_YYYY-MM-DD.log` で収集→ページで解析
+- トップ・ツール一覧からアクセス可
 ```

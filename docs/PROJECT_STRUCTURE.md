@@ -28,7 +28,9 @@ C:\website\tech-site
 |  |  └── Term.vue
 |  ├── GlobalNav.vue
 |  ├── TagChip.vue
-|  └── ToolIntroBox.vue
+|  ├── ToolIntroBox.vue
+|  ├── TopCharts.vue
+|  └── TopSummary.vue
 ├── composables
 |  ├── queryContent.reexport.ts
 |  ├── queryContent.ts
@@ -104,7 +106,8 @@ C:\website\tech-site
 |  |  ├── index.vue
 |  |  ├── jwt-decode.vue
 |  |  ├── og-check.vue
-|  |  └── site-check.vue
+|  |  ├── site-check.vue
+|  |  └── top-analyzer.vue
 |  ├── tools.vue
 |  ├── [...path].vue
 |  └── __blog_v1
@@ -124,6 +127,8 @@ C:\website\tech-site
 |  ├── logo.png
 |  ├── manifest.webmanifest
 |  ├── og-default.png
+|  ├── samples
+|  |  └── top_sample.log
 |  ├── sitemap.xml
 |  └── sitemap.xml.83830664-79b1-429b-b611-c2e6184c5a76.tmp
 ├── README.md
@@ -189,7 +194,8 @@ C:\website\tech-site
 |  |  └── quality.blog.spec.ts
 |  ├── e2e
 |  |  ├── blog.detail.spec.ts
-|  |  └── blog.spec.ts
+|  |  ├── blog.spec.ts
+|  |  └── top-analyzer.http.spec.ts
 |  ├── pages
 |  |  ├── ads.render.test.ts
 |  |  ├── blog.index.date-format.test.ts
@@ -199,7 +205,8 @@ C:\website\tech-site
 |  |  ├── blog.slug.seo.test.ts
 |  |  ├── index.render.test.ts
 |  |  ├── privacy.render.test.ts
-|  |  └── terms.render.test.ts
+|  |  ├── terms.render.test.ts
+|  |  └── tools.render.test.ts
 |  ├── scripts
 |  |  ├── gen-meta.sitemap.test.ts
 |  |  └── gen-rss.feed.test.ts
@@ -214,7 +221,9 @@ C:\website\tech-site
 |  ├── unit
 |  |  ├── blogVisibility.spec.ts
 |  |  ├── frontmatter-visible.spec.ts
-|  |  └── frontmatter.spec.ts
+|  |  ├── frontmatter.spec.ts
+|  |  ├── top.csv.header.test.ts
+|  |  └── top.csv.test.ts
 |  ├── utils
 |  |  ├── cron.dom-dow.mode.test.ts
 |  |  ├── cron.extra.test.ts
@@ -236,7 +245,8 @@ C:\website\tech-site
 |  ├── shims-nuxt-content-server.d.ts
 |  ├── shims-nuxt-content.d.ts
 |  ├── shims-nuxt-imports.d.ts
-|  └── shims-vue.d.ts
+|  ├── shims-vue.d.ts
+|  └── top.ts
 ├── utils
 |  ├── cron.ts
 |  ├── date.ts
@@ -246,9 +256,14 @@ C:\website\tech-site
 |  ├── jwt.ts.bak_refactor
 |  ├── resolveBlogDocByRoute.ts
 |  ├── siteMeta.ts
-|  └── siteUrl.ts
+|  ├── siteUrl.ts
+|  └── top
+|     ├── csv.ts
+|     └── parse.ts
 ├── vercel.json
-└── vitest.config.ts
+├── vitest.config.ts
+└── workers
+   └── topParser.worker.ts
 
-directory: 59 file: 186 symboliclink: 34
+directory: 62 file: 198 symboliclink: 34
 
