@@ -151,7 +151,7 @@ async function saveChartAsPng(kind: 'cpu' | 'load' | 'mem') {
         <div class="flex items-baseline justify-between">
           <span class="text-xs text-gray-600">CPU Used (%)</span>
           <span class="text-[11px] text-gray-500">avg {{ cpuAgg.avg.toFixed(1) }} / max {{ cpuAgg.max.toFixed(1)
-            }}</span>
+          }}</span>
           <button type="button" class="ml-2 px-2 py-0.5 rounded text-xs border focus:outline-none focus-visible:ring"
             :aria-pressed="showCpu" @click="showCpu = !showCpu">
             <span v-if="showCpu">●</span><span v-else>○</span> CPU
@@ -159,10 +159,14 @@ async function saveChartAsPng(kind: 'cpu' | 'load' | 'mem') {
         </div>
         <div class="flex gap-2 items-center mt-1">
           <label class="text-xs" :for="'cpu-guide-0'">しきい値:</label>
-          <input v-for="i in 3" :id="'cpu-guide-' + (i - 1)" :key="i" v-model="cpuGuides[i - 1]"
-            :aria-label="'CPUしきい値' + i" type="number" step="any" class="w-16 px-1 py-0.5 border rounded text-xs"
-            :placeholder="i === 1 ? '例: 80' : ''" />
-          <span class="text-xs text-gray-400 ml-1">%</span>
+          <template v-for="i in 3" :key="i">
+            <div class="inline-flex items-center gap-1">
+              <input :id="'cpu-guide-' + (i - 1)" v-model="cpuGuides[i - 1]" :aria-label="'CPUしきい値' + i" type="number"
+                inputmode="numeric" pattern="[0-9]*" min="0" max="100" step="1"
+                class="w-16 px-1 py-0.5 border rounded text-xs" :placeholder="i === 1 ? '例: 80' : ''" />
+              <span aria-hidden="true" class="text-xs text-muted">%</span>
+            </div>
+          </template>
         </div>
       </figcaption>
       <button type="button" class="ml-2 px-2 py-0.5 rounded text-xs border focus:outline-none focus-visible:ring"
@@ -188,7 +192,7 @@ async function saveChartAsPng(kind: 'cpu' | 'load' | 'mem') {
         <div class="flex items-baseline justify-between">
           <span class="text-xs text-gray-600">Load (1m)</span>
           <span class="text-[11px] text-gray-500">avg {{ loadAgg.avg.toFixed(2) }} / max {{ loadAgg.max.toFixed(2)
-            }}</span>
+          }}</span>
           <button type="button" class="ml-2 px-2 py-0.5 rounded text-xs border focus:outline-none focus-visible:ring"
             :aria-pressed="showLoad" @click="showLoad = !showLoad">
             <span v-if="showLoad">●</span><span v-else>○</span> Load
@@ -196,9 +200,14 @@ async function saveChartAsPng(kind: 'cpu' | 'load' | 'mem') {
         </div>
         <div class="flex gap-2 items-center mt-1">
           <label class="text-xs" :for="'load-guide-0'">しきい値:</label>
-          <input v-for="i in 3" :id="'load-guide-' + (i - 1)" :key="i" v-model="loadGuides[i - 1]"
-            :aria-label="'Loadしきい値' + i" type="number" step="any" class="w-16 px-1 py-0.5 border rounded text-xs"
-            :placeholder="i === 1 ? '例: 4.0' : ''" />
+          <template v-for="i in 3" :key="i">
+            <div class="inline-flex items-center gap-1">
+              <input :id="'load-guide-' + (i - 1)" v-model="loadGuides[i - 1]" :aria-label="'Loadしきい値' + i"
+                type="number" inputmode="decimal" pattern="[0-9.]*" min="0" step="0.1"
+                class="w-16 px-1 py-0.5 border rounded text-xs" :placeholder="i === 1 ? '例: 4.0' : ''" />
+              <!-- Loadは単位なし -->
+            </div>
+          </template>
         </div>
       </figcaption>
       <button type="button" class="ml-2 px-2 py-0.5 rounded text-xs border focus:outline-none focus-visible:ring"
@@ -223,7 +232,7 @@ async function saveChartAsPng(kind: 'cpu' | 'load' | 'mem') {
         <div class="flex items-baseline justify-between">
           <span class="text-xs text-gray-600">Mem Used (MiB)</span>
           <span class="text-[11px] text-gray-500">avg {{ memAgg.avg.toFixed(0) }} / max {{ memAgg.max.toFixed(0)
-            }}</span>
+          }}</span>
           <button type="button" class="ml-2 px-2 py-0.5 rounded text-xs border focus:outline-none focus-visible:ring"
             :aria-pressed="showMem" @click="showMem = !showMem">
             <span v-if="showMem">●</span><span v-else>○</span> Mem
@@ -231,10 +240,14 @@ async function saveChartAsPng(kind: 'cpu' | 'load' | 'mem') {
         </div>
         <div class="flex gap-2 items-center mt-1">
           <label class="text-xs" :for="'mem-guide-0'">しきい値:</label>
-          <input v-for="i in 3" :id="'mem-guide-' + (i - 1)" :key="i" v-model="memGuides[i - 1]"
-            :aria-label="'Memしきい値' + i" type="number" step="any" class="w-16 px-1 py-0.5 border rounded text-xs"
-            :placeholder="i === 1 ? '例: 800' : ''" />
-          <span class="text-xs text-gray-400 ml-1">MiB</span>
+          <template v-for="i in 3" :key="i">
+            <div class="inline-flex items-center gap-1">
+              <input :id="'mem-guide-' + (i - 1)" v-model="memGuides[i - 1]" :aria-label="'Memしきい値' + i" type="number"
+                inputmode="numeric" pattern="[0-9]*" min="0" step="1" class="w-16 px-1 py-0.5 border rounded text-xs"
+                :placeholder="i === 1 ? '例: 800' : ''" />
+              <span aria-hidden="true" class="text-xs text-muted">MB</span>
+            </div>
+          </template>
         </div>
       </figcaption>
       <button type="button" class="ml-2 px-2 py-0.5 rounded text-xs border focus:outline-none focus-visible:ring"
