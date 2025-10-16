@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRuntimeConfig } from '#app'
+import AudienceNote from '@/components/AudienceNote.vue'
 const origin = useRuntimeConfig().public.siteOrigin
 const checking = ref(false)
 const err = ref<string | null>(null)
@@ -85,6 +86,7 @@ const doCheck = async () => {
     <ToolIntroBox audience="サイト運用者/SEO担当" value="sitemap.xml と robots.txt の到達性や掲載可否をまとめて点検"
       how="サイトのURLを入力 → それぞれの取得結果を確認" safety="URLは保存されず、結果は端末内で表示" />
     <h1 class="text-2xl font-bold">robots / sitemap / feed チェッカー</h1>
+    <AudienceNote who="サイト運用・SEO担当（到達性・掲載可否の点検）" />
     <div class="mb-2 text-sm text-gray-700">現在のORIGIN: <span class="font-mono">{{ origin }}</span></div>
     <button :disabled="checking" class="rounded-xl px-4 py-2 bg-blue-600 text-white focus-ring mb-4" @click="doCheck">
       {{ checking ? 'まとめてチェック中…' : 'まとめてチェック' }}
@@ -144,7 +146,7 @@ const doCheck = async () => {
           <li>URL件数: {{ feed?.count }}</li>
           <li>
             ORIGIN一致: <span :class="feed?.allOk ? 'text-green-700' : 'text-red-600'">{{ feed?.allOk ? 'OK' : 'NG'
-            }}</span>
+              }}</span>
           </li>
           <li>サンプル: <span v-if="feed?.sample?.length">{{ feed.sample.join(', ') }}</span><span v-else>なし</span></li>
         </ul>

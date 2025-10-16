@@ -32,6 +32,36 @@
       </div>
     </section>
 
+    <!-- ツール一覧（ダイジェスト） -->
+    <section class="space-y-4">
+      <div class="flex items-center justify-between">
+        <h2 class="text-xl font-semibold">ツール一覧</h2>
+        <NuxtLink to="/tools" class="text-sm text-blue-600 hover:underline focus-ring">すべて見る</NuxtLink>
+      </div>
+      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <NuxtLink v-for="t in toolDigest" :key="t.href" :to="t.href"
+          class="block rounded-2xl p-4 ring-1 ring-gray-200 hover:bg-gray-50 focus:outline-none focus-visible:ring-2">
+          <div class="font-medium">{{ t.title }}</div>
+          <p class="text-sm text-gray-600 mt-1">{{ t.desc }}</p>
+        </NuxtLink>
+      </div>
+    </section>
+
+    <!-- 学習記事一覧（新着） -->
+    <section class="space-y-4">
+      <div class="flex items-center justify-between">
+        <h2 class="text-xl font-semibold">学習記事一覧</h2>
+        <NuxtLink to="/blog" class="text-sm text-blue-600 hover:underline focus-ring">すべて見る</NuxtLink>
+      </div>
+      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <NuxtLink v-for="p in latestPosts" :key="p._path" :to="p._path"
+          class="block rounded-2xl p-4 ring-1 ring-gray-200 hover:bg-gray-50 focus:outline-none focus-visible:ring-2">
+          <div class="font-medium">{{ p.title }}</div>
+          <p v-if="p.description" class="text-sm text-gray-600 mt-1">{{ p.description }}</p>
+        </NuxtLink>
+      </div>
+    </section>
+
     <!-- Ad placeholder: top page single slot -->
     <section aria-label="ad-placeholder" style="margin-top: 2rem;">
       <AdSlot height="280px" label="広告（仮）" />
@@ -42,7 +72,8 @@
 <script setup lang="ts">
 
 import AdSlot from '@/components/AdSlot.vue'
-import { definePageMeta } from '#imports'
+import { definePageMeta, useAsyncData } from '#imports'
+import { fetchPosts } from '@/composables/usePosts'
 definePageMeta({ title: 'Migaki Explorer' })
 
 const featured = [
@@ -51,6 +82,17 @@ const featured = [
   { title: 'OGプレビュー確認', href: '/tools/og-check', desc: '共有時の画像/タイトルと最終URL・ステータスを確認' },
   // { title: 'サイトマップ/robots', href: '/tools/sitemap-robots', desc: 'sitemap.xml と robots.txt の到達性・掲載可否を点検' },
 ].filter(Boolean)
+
+// ツールのダイジェスト（上位4件）
+const toolDigest = [
+  { title: 'Cron JST', href: '/tools/cron-jst', desc: 'crontab式をJST/UTCで検証' },
+  { title: 'JWT Decode', href: '/tools/jwt-decode', desc: 'JWTのペイロードをローカルで可視化' },
+  { title: 'OGプレビュー確認', href: '/tools/og-check', desc: '共有時の画像/タイトルと最終URLを確認' },
+  { title: 'Top Log Analyzer', href: '/tools/top-analyzer', desc: 'topログを解析してCPU/Load/Memを可視化' },
+]
+
+// 新着記事 4件
+const { data: latestPosts } = await useAsyncData('home-latest-posts', () => fetchPosts({ limit: 4 }))
 </script>
 
 <style scoped>

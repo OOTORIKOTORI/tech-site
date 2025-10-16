@@ -5,11 +5,12 @@
     <header class="space-y-2">
       <h1 class="text-2xl font-bold flex items-center gap-3">
         JWT ツール
-        <span v-if="verifyState.valid === true"
-          class="inline-flex items-center text-xs font-semibold rounded bg-green-100 text-green-800 px-2 py-1">検証成功</span>
-        <span v-else-if="verifyState.valid === false"
-          class="inline-flex items-center text-xs font-semibold rounded bg-red-100 text-red-800 px-2 py-1">検証失敗</span>
       </h1>
+      <AudienceNote who="開発者（認証トークンの検証）" />
+      <span v-if="verifyState.valid === true"
+        class="inline-flex items-center text-xs font-semibold rounded bg-green-100 text-green-800 px-2 py-1">検証成功</span>
+      <span v-else-if="verifyState.valid === false"
+        class="inline-flex items-center text-xs font-semibold rounded bg-red-100 text-red-800 px-2 py-1">検証失敗</span>
       <p class="text-sm text-gray-600">ローカルのみで動作。トークン本文は送信されません。JWKS は明示許可時のみ取得。</p>
     </header>
 
@@ -196,9 +197,9 @@
               <div class="space-y-1">
                 <div v-for="e in sortedErrors" :key="e.code" class="text-xs flex gap-2">
                   <span class="inline-block px-2 py-0.5 rounded bg-red-100 text-red-700 font-semibold">{{ e.code
-                  }}</span>
+                    }}</span>
                   <span class="text-gray-800">{{ e.message }}<span v-if="e.hint" class="text-gray-500"> ({{ e.hint
-                  }})</span></span>
+                      }})</span></span>
                 </div>
               </div>
             </template>
@@ -237,6 +238,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, watch } from 'vue'
+import AudienceNote from '@/components/AudienceNote.vue'
 import { decodeBase64Url, verifyJwt, fetchJwks, findJwksRsaKeyByKid, buildRsaPemFromModExp } from '@/utils/jwt'
 
 // --- Types ---

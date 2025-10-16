@@ -18,6 +18,7 @@ C:\website\tech-site
 |  ├── AdSlot.vue
 |  ├── AppFooter.vue
 |  ├── AppHeader.vue
+|  ├── AudienceNote.vue
 |  ├── content
 |  |  ├── Footnote.vue
 |  |  ├── Footnotes.vue
@@ -27,6 +28,7 @@ C:\website\tech-site
 |  |  ├── Ref.vue
 |  |  └── Term.vue
 |  ├── GlobalNav.vue
+|  ├── RelatedList.vue
 |  ├── TagChip.vue
 |  ├── ToolIntroBox.vue
 |  ├── TopCharts.vue
@@ -41,9 +43,13 @@ C:\website\tech-site
 ├── content
 |  ├── blog
 |  |  ├── blog_og_first_aid.md
+|  |  ├── lighthouse-best-practices-070.md
+|  |  ├── linux-top-cheatsheet.md
 |  |  ├── nnn-dev-notes-oct.md
 |  |  ├── nnn-lhci-green-tips.md
 |  |  ├── nnn-og-check-mini.md
+|  |  ├── nuxt-ssr-absolute-url.md
+|  |  ├── pxe-boot-minimum.md
 |  |  ├── welcome.md
 |  |  ├── _archive
 |  |  ├── _control.md
@@ -104,8 +110,10 @@ C:\website\tech-site
 |  |  ├── cron-jst.vue
 |  |  ├── help.vue
 |  |  ├── index.vue
+|  |  ├── json-formatter.vue
 |  |  ├── jwt-decode.vue
 |  |  ├── og-check.vue
+|  |  ├── regex-tester.vue
 |  |  ├── site-check.vue
 |  |  └── top-analyzer.vue
 |  ├── tools.vue
@@ -265,5 +273,5 @@ C:\website\tech-site
 └── workers
    └── topParser.worker.ts
 
-directory: 62 file: 198 symboliclink: 34
+directory: 62 file: 206 symboliclink: 34
 

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { createError, useRoute, useFetch, useSeoMeta, useHead, useRuntimeConfig, computed } from '#imports'
 import AdSlot from '@/components/AdSlot.vue'
+import AudienceNote from '@/components/AudienceNote.vue'
 // Optional fallback for tests: queryContent when API stub is unavailable
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const queryContent: any = (globalThis as any).queryContent
@@ -28,6 +29,7 @@ type BlogDoc = {
   tags?: string[]
   robots?: string
   ogImage?: string | null
+  audience?: string | null
   body?: unknown
   bodyText?: string
   toc?: { links?: Array<{ id?: string; text?: string; depth?: number }> }
@@ -216,8 +218,10 @@ const related = computed(() => {
             <span>
               {{ typeof doc.title === 'string' ? doc.title : (typeof doc.path === 'string' ? doc.path : 'Untitled') }}
             </span>
-            <small class="text-sm opacity-70">（約 {{ minutes }} 分）</small>
+            <small class="text-sm opacity-70">
+              （約 {{ minutes }} 分）</small>
           </h1>
+          <AudienceNote v-if="doc?.audience" :who="(doc as any).audience" />
           <!-- テンプレ1行規則: 本文は ContentRenderer の1行で描画（v-if 付き） -->
           <ContentRenderer v-if="doc?.body" :value="doc" />
         </article>

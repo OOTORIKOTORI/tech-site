@@ -22,6 +22,10 @@
 
   - **ads.txt は `pub-…` 形式。配置は `/public/ads.txt`（詳細は PROJECT_SPEC を参照）**
 
+- **ツールカード統一**: `/tools` 一覧の各カードに「対象読者・所要時間・入出力例」の 3 項目を表示（無いツールは `—`）。
+- **RelatedList コンポーネント**: `components/RelatedList.vue` で tags ベースの関連記事 3 件を表示。ツール詳細ページ末尾に設置。
+- 新ツール: `/tools/json-formatter`（JSON 整形/最小化/検証）, `/tools/regex-tester`（正規表現の一致テスト）を追加。
+
 - クイック検証: `/api/og/hello.png` が **200 または 302** であること（smoke:og 合格基準）。
 
 * **smoke:og**: `https://<ORIGIN>/api/og/hello.png` に対し **200 または 302** なら合格。308/301 を踏む場合も **1 回のみ自動フォロー**して再判定（URL 結合は `new URL()` で正規化済み）。
@@ -117,9 +121,11 @@
 
 ## ブログ追加の手順
 
-1. `content/blog/*.md` を追加し、Frontmatter を付与: `title`, `description`, `date`, `tags`, `draft`, `canonical`。
+1. `content/blog/*.md` を追加し、Frontmatter を付与: `title`, `description`, `date`, `tags`, `draft`, `canonical`。必要に応じて `audience` を追加（タイトル直下に対象ブロックを表示）。
 2. 追加後は `/blog` 一覧・トップの「Latest posts」・サイトマップ・RSS に自動反映。
-3. 記事テンプレ／参考: DOM×DOW の OR/AND とタイムゾーンの落とし穴
+3. 記事テンプレ/参考: DOM×DOW の OR/AND とタイムゾーンの落とし穴
+
+- ブログは原則 結論 → 手順 → 補足 の順で簡潔に。frontmatter の `audience` があればタイトル直下に対象ブロック（AudienceNote）を表示します。
 
 **リセット時の状態**: welcome のみ公開 / アーカイブは internal タグで非露出
 

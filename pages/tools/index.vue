@@ -1,6 +1,12 @@
 <template>
   <section class="mx-auto max-w-6xl px-4 py-8">
-    <h1 class="text-3xl font-semibold text-gray-900 mb-6">Tools</h1>
+    <div class="flex items-center justify-between mb-6">
+      <h1 class="text-3xl font-semibold text-gray-900">Tools</h1>
+      <NuxtLink to="/tools/top-analyzer"
+        class="rounded-lg px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus-visible:ring-2">
+        サンプルで試す
+      </NuxtLink>
+    </div>
 
     <ul class="grid grid-cols-1 sm:grid-cols-2 gap-4" aria-label="Available tools">
       <li class="border rounded-lg p-4 bg-white">
@@ -8,24 +14,44 @@
           <h2 class="text-lg font-medium text-blue-600 group-hover:underline">Cron JST</h2>
         </NuxtLink>
         <p class="text-sm text-gray-600 mt-1">サーバ運用や定時実行の確認に。crontab の式を <b>JST/UTC</b> で即座に検証、次回実行がひと目でわかる。</p>
+        <div class="flex gap-4 text-xs text-gray-500 mt-2">
+          <span aria-label="対象読者">—</span>
+          <span aria-label="所要時間">—</span>
+          <span aria-label="入出力例">—</span>
+        </div>
       </li>
       <li class="border rounded-lg p-4 bg-white">
         <NuxtLink to="/tools/jwt-decode" class="group block focus-ring">
           <h2 class="text-lg font-medium text-blue-600 group-hover:underline">JWT Decode</h2>
         </NuxtLink>
         <p class="text-sm text-gray-600 mt-1">認証トークンの中身を<b>ローカルで</b>確認。ペイロードを安全に可視化（秘密鍵は不要）。</p>
+        <div class="flex gap-4 text-xs text-gray-500 mt-2">
+          <span aria-label="対象読者">—</span>
+          <span aria-label="所要時間">—</span>
+          <span aria-label="入出力例">—</span>
+        </div>
       </li>
       <li class="border rounded-lg p-4 bg-white">
         <NuxtLink to="/tools/og-check" class="group block focus-ring">
           <h2 class="text-lg font-medium text-blue-600 group-hover:underline">OGプレビュー確認</h2>
         </NuxtLink>
         <p class="text-sm text-gray-600 mt-1">共有時の<b>画像/タイトル</b>の状態と、最終URL・HTTPステータスを一発チェック。</p>
+        <div class="flex gap-4 text-xs text-gray-500 mt-2">
+          <span aria-label="対象読者">—</span>
+          <span aria-label="所要時間">—</span>
+          <span aria-label="入出力例">—</span>
+        </div>
       </li>
       <li class="border rounded-lg p-4 bg-white">
         <NuxtLink to="/tools/site-check" class="group block focus-ring">
           <h2 class="text-lg font-medium text-blue-600 group-hover:underline">サイトマップ / robots チェッカー</h2>
         </NuxtLink>
         <p class="text-sm text-gray-600 mt-1">/sitemap.xml と /robots.txt をまとめて確認。<b>掲載可否と到達性</b>を素早く点検。</p>
+        <div class="flex gap-4 text-xs text-gray-500 mt-2">
+          <span aria-label="対象読者">—</span>
+          <span aria-label="所要時間">—</span>
+          <span aria-label="入出力例">—</span>
+        </div>
       </li>
       <li class="border rounded-lg p-4 bg-white">
         <NuxtLink to="/tools/top-analyzer" class="group block focus-ring">
@@ -35,6 +61,35 @@
         <p class="text-sm text-gray-600 mt-1">
           top ログから CPU / Mem / Load を時系列で把握できる可視化ツール（ブラウザ内のみで解析）
         </p>
+        <div class="flex gap-4 text-xs text-gray-500 mt-2">
+          <span aria-label="対象読者">Linux/インフラ運用のSE/DevOps</span>
+          <span aria-label="所要時間">1–3分</span>
+          <span aria-label="入出力例">入力: topログ / 出力: グラフ＋CSV(英/日)</span>
+        </div>
+      </li>
+
+      <li class="border rounded-lg p-4 bg-white">
+        <NuxtLink to="/tools/json-formatter" class="group block focus-ring">
+          <h2 class="text-lg font-medium text-blue-600 group-hover:underline">JSON フォーマッタ</h2>
+        </NuxtLink>
+        <p class="text-sm text-gray-600 mt-1">JSON をブラウザ内で整形／最小化して検証。コピー／ダウンロード対応。</p>
+        <div class="flex gap-4 text-xs text-gray-500 mt-2">
+          <span aria-label="対象読者">—</span>
+          <span aria-label="所要時間">—</span>
+          <span aria-label="入出力例">入力: JSON 文字列 / 出力: 整形JSON</span>
+        </div>
+      </li>
+
+      <li class="border rounded-lg p-4 bg-white">
+        <NuxtLink to="/tools/regex-tester" class="group block focus-ring">
+          <h2 class="text-lg font-medium text-blue-600 group-hover:underline">正規表現テスター</h2>
+        </NuxtLink>
+        <p class="text-sm text-gray-600 mt-1">パターンとフラグで一致箇所をテスト。簡易ハイライトとコピーに対応。</p>
+        <div class="flex gap-4 text-xs text-gray-500 mt-2">
+          <span aria-label="対象読者">—</span>
+          <span aria-label="所要時間">—</span>
+          <span aria-label="入出力例">入力: テキスト / 出力: 一致リスト</span>
+        </div>
       </li>
     </ul>
   </section>

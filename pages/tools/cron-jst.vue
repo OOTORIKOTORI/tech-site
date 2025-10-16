@@ -3,6 +3,7 @@
     <ToolIntroBox audience="サイト運用・開発者（定時バッチの確認）" value="crontab 式を JST/UTC で検証し、次回実行を即確認"
       how="式を入力 → タイムゾーンを選択 → 次回実行を確認" safety="処理はブラウザ内のみ（データ送信なし）" />
     <h1 class="text-2xl font-bold">Cron JST 次回実行予測</h1>
+    <AudienceNote who="サイト運用・開発者（定時バッチの確認）" />
     <div class="mt-2 text-sm">
       <NuxtLink to="/blog" class="text-blue-700 underline hover:text-blue-900 focus-ring">Tech Blogはこちら</NuxtLink>
     </div>
@@ -120,6 +121,7 @@
 
 <script setup lang="ts">
 import { useHead } from '#imports'
+import AudienceNote from '@/components/AudienceNote.vue'
 
 const SITE_URL = (process.env.NUXT_PUBLIC_SITE_URL || 'https://tech-site-docs.com').replace(/\/$/, '')
 
@@ -470,10 +472,34 @@ onUnmounted(() => {
 
 <style scoped>
 .btn-primary {
-  @apply bg-blue-700 text-white px-4 py-1 rounded hover:bg-blue-800 transition outline-none focus:ring-2 focus:ring-blue-400;
+  background-color: rgb(29 78 216);
+  color: #fff;
+  padding: 0.25rem 1rem;
+  border-radius: 0.25rem;
+}
+
+.btn-primary:hover {
+  background-color: rgb(30 64 175);
+}
+
+.btn-primary:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, .5);
 }
 
 .btn-secondary {
-  @apply bg-gray-200 text-gray-900 px-3 py-1 rounded hover:bg-gray-300 transition outline-none focus:ring-2 focus:ring-blue-300;
+  background-color: rgb(229 231 235);
+  color: rgb(17 24 39);
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.25rem;
+}
+
+.btn-secondary:hover {
+  background-color: rgb(209 213 219);
+}
+
+.btn-secondary:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(147, 197, 253, .5);
 }
 </style>

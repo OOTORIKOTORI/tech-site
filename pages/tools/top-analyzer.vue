@@ -5,6 +5,7 @@ import { definePageMeta } from '#imports'
 import type { TopSnapshot } from '../../types/top'
 import TopSummary from '@/components/TopSummary.vue'
 import TopCharts from '@/components/TopCharts.vue'
+import AudienceNote from '@/components/AudienceNote.vue'
 
 definePageMeta({ title: 'Top Log Analyzer' })
 
@@ -55,6 +56,8 @@ async function analyze() {
 <template>
   <main class="mx-auto max-w-5xl p-6 space-y-6">
     <h1 class="text-2xl font-bold">Top Log Analyzer</h1>
+
+    <AudienceNote who="Linux/インフラ運用のSE/DevOps" />
 
     <ToolIntroBox audience="サーバ運用・SRE・開発（原因調査の初動を早くしたい方）" value="top のログから CPU/メモリ/ロードアベレージの時系列と、重いプロセスの傾向を可視化"
       how="ログファイルをドロップ/選択 → 解析 → ピークと該当プロセスを確認" safety="**ファイルはアップロードされません。処理はブラウザ内のみです。**" />
@@ -125,5 +128,7 @@ async function analyze() {
       <div v-if="!snapshots.length" class="text-gray-500 text-sm">CPU/Load/Mem のグラフはログ解析後に表示されます。</div>
       <TopCharts v-else :snapshots="snapshots" />
     </section>
+
+    <RelatedList :tags="['linux', 'infra', 'devops', 'tools']" />
   </main>
 </template>
