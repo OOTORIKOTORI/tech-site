@@ -48,16 +48,20 @@
     </section>
 
     <!-- 学習記事一覧（新着） -->
-    <section class="space-y-4">
+    <section aria-labelledby="home-learning" class="space-y-4">
       <div class="flex items-center justify-between">
-        <h2 class="text-xl font-semibold">学習記事一覧</h2>
+        <h2 id="home-learning" class="text-xl font-semibold">学習記事一覧</h2>
         <NuxtLink to="/blog" class="text-sm text-blue-600 hover:underline focus-ring">すべて見る</NuxtLink>
       </div>
-      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div v-if="!latestPosts?.length" class="mt-3 text-sm text-muted-foreground">
+        まだ学習記事はありません。更新をお待ちください。
+      </div>
+      <div v-else class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <NuxtLink v-for="p in latestPosts" :key="p._path" :to="p._path"
           class="block rounded-2xl p-4 ring-1 ring-gray-200 hover:bg-gray-50 focus:outline-none focus-visible:ring-2">
           <div class="font-medium">{{ p.title }}</div>
-          <p v-if="p.description" class="text-sm text-gray-600 mt-1">{{ p.description }}</p>
+          <p class="text-sm text-gray-600 mt-1">{{ p.description }}</p>
+          <p v-if="p.audience" class="mt-1 text-xs opacity-70">for: {{ p.audience }}</p>
         </NuxtLink>
       </div>
     </section>

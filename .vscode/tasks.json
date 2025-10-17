@@ -630,6 +630,17 @@
 				"--run"
 			],
 			"group": "test"
+		},
+		{
+			"label": "pnpm add -D glob gray-matter",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"add",
+				"-D",
+				"glob",
+				"gray-matter"
+			]
 		}
 	]
 }

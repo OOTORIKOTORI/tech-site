@@ -113,6 +113,11 @@
 
 ---
 
+## UI/情報設計（運用追記）
+
+- Top: 学習記事一覧は audience 不問で最新 6 件を表示。0 件時は空状態メッセージを表示。
+- Tools: 各ページ冒頭に <ToolIntro>（説明/使い方/例）を設置。
+
 ## 運用メモ（抜粋）
 
 - pre-push 例: `typecheck → lint → test → build → postbuild → smoke:og → ci:guards → LHCI`。

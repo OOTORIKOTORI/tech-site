@@ -5,6 +5,7 @@ export interface PostListItem {
   title?: string
   date?: string
   description?: string
+  audience?: string
   tags?: string[]
   draft?: boolean
   published?: boolean

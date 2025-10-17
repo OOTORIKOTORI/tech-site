@@ -1,11 +1,28 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import RelatedList from '@/components/RelatedList.vue'
-import AudienceNote from '@/components/AudienceNote.vue'
+
+
+import { useHead } from '#imports'
+useHead({
+  title: 'JSON Formatter | Migaki Explorer',
+  meta: [
+    { name: 'description', content: 'JSONを整形・最小化・検証できるオンラインツール。貼り付けてワンクリック。' },
+    { property: 'og:title', content: 'JSON Formatter | Migaki Explorer' },
+    { property: 'og:description', content: 'JSONを整形・最小化・検証できるオンラインツール。' },
+    // 画像は共通OGPでも可
+  ]
+})
 
 const input = ref('')
 const output = ref('')
 const error = ref('')
+
+// ToolIntro用サンプル文字列
+const exampleInput = '{ "hello": "world" }'
+const exampleOutput = `{
+  "hello": "world"
+}`
 
 function parseAndFormat(space = 2) {
   error.value = ''
@@ -48,9 +65,9 @@ function downloadJson() {
 
 <template>
   <main class="mx-auto max-w-6xl p-4 space-y-4">
-    <h1 class="text-2xl font-semibold">JSON フォーマッタ / バリデータ</h1>
-    <AudienceNote who="API/フロント/バックエンド開発者" />
-    <p class="text-sm text-gray-600">ペーストして整形 / 最小化。アップロード不要（ブラウザ内のみ）。</p>
+    <ToolIntro title="JSON Formatter" description="JSON 文字列を整形 / 最小化 / 検証します。"
+      usage="1) 入力欄にJSONを貼り付ける\n2) 「整形」または「最小化」をクリック" time="~10秒" audience="開発者・学習者" :example-input="exampleInput"
+      :example-output="exampleOutput" />
 
     <div class="grid gap-4 md:grid-cols-2">
       <div>
