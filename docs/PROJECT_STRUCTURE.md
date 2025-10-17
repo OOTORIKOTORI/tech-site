@@ -147,6 +147,7 @@ C:\website\tech-site
 |  ├── bump-tag.ps1
 |  ├── ci
 |  |  ├── guard-adsense.cjs
+|  |  ├── guard-audience.cjs
 |  |  ├── guard-blog-no-internal.cjs
 |  |  ├── guard-content-import.cjs
 |  |  ├── guard-control-post.cjs
@@ -226,6 +227,8 @@ C:\website\tech-site
 |  ├── setup
 |  |  ├── console-warn-filter.ts
 |  |  └── global-stubs.ts
+|  ├── top-analyzer
+|  |  └── export.spec.ts
 |  ├── unit
 |  |  ├── blogVisibility.spec.ts
 |  |  ├── frontmatter-visible.spec.ts
@@ -265,13 +268,14 @@ C:\website\tech-site
 |  ├── resolveBlogDocByRoute.ts
 |  ├── siteMeta.ts
 |  ├── siteUrl.ts
-|  └── top
-|     ├── csv.ts
-|     └── parse.ts
+|  ├── top
+|  |  ├── csv.ts
+|  |  └── parse.ts
+|  └── top-export.ts
 ├── vercel.json
 ├── vitest.config.ts
 └── workers
    └── topParser.worker.ts
 
-directory: 62 file: 206 symboliclink: 34
+directory: 63 file: 209 symboliclink: 34
 

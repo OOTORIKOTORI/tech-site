@@ -31,6 +31,13 @@ const updatedAt = new Date().toISOString()
         Google によるデータの取り扱いについては各社の案内をご参照ください。
 </p>
 
+        <!-- 追記: 運用に関する要点（ドラフト） -->
+        <ul>
+          <li>本番のみ有効: `NUXT_PUBLIC_ENABLE_ADS=1` かつ `NUXT_PUBLIC_ADSENSE_CLIENT=ca-pub-…` が揃ったとき SSR &lt;head&gt; に1本だけ挿入（Preview/Devは常時無効）。</li>
+          <li>ads.txt: ルート直下 `/ads.txt` に配置（準備中・運用時に追記）。</li>
+          <li>パーソナライズ設定: Googleの「広告設定」または “Ads by Google” のリンク先から無効化可能（サイトのプライバシー/クッキー方針も参照）。</li>
+        </ul>
+
       <h2>第三者配信の広告について</h2>
       <p>
 Migaki Explorer

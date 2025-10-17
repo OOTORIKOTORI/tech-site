@@ -59,7 +59,7 @@
 - OGP API: 既定は 302 で `/og-default.png` へフォールバック。`ENABLE_DYNAMIC_OG=1` で動的 PNG（失敗時は即 302）。`LOG_OG=1` で最小ログ。
 - CI 概要: install → typecheck → lint → test → build → postbuild（`--check-only`）→ smoke:og → ci:guards → LHCI（詳細は PROJECT_SPEC）。
   - LHCI は本番が **200 になるまで待機**してから収集し、失敗時は **1 回だけリトライ**。
-  - `categories:best-practices` の CI 失敗閾値は **minScore=0.70（暫定・AdSense 影響）**。
+  - CI 合否は `categories.best-practices ≥ 0.70` / `a11y ≥ 90` に従う。budgets は参考値。
 - （任意）Web App Manifest の `name`/`short_name` はブランド準拠。詳細は `PROJECT_SPEC.md` を参照。
 - /blog 詳細は**1 経路のみ取得・白紙禁止・テンプレ 1 行**（`<ContentRenderer v-if="doc?.body" :value="doc" />`）。詳細は[PROJECT_SPEC.md](./PROJECT_SPEC.md)参照。
 - `queryContent`の扱い統一: SFC（`pages/blog/[...slug].vue`）はグローバル許容（`/* global queryContent */`）、それ以外は **`#content` から import**。`#imports` は禁止。
@@ -101,6 +101,7 @@
 - 順序: install → typecheck → lint → test → build → postbuild（`--check-only`でホスト一致検証）→ smoke:og → ci:guards → LHCI。
 - meta-check では`NUXT_PUBLIC_SITE_ORIGIN=https://migakiexplorer.jp`を明示。
 - 詳細・閾値・テスト基盤は[PROJECT_SPEC.md](./PROJECT_SPEC.md)参照。
+- ※ LHCI の budgets は参考。CI の合否は Accessibility ≥ 90 / Best Practices ≥ 0.70 を採用。
 
 ---
 
@@ -121,7 +122,7 @@
 
 ## ブログ追加の手順
 
-1. `content/blog/*.md` を追加し、Frontmatter を付与: `title`, `description`, `date`, `tags`, `draft`, `canonical`。必要に応じて `audience` を追加（タイトル直下に対象ブロックを表示）。
+1. `content/blog/*.md` を追加し、Frontmatter を付与: `title`, `description`, `date`, `tags`, `draft`, `canonical`。**`audience` を原則必須**（タイトル直下に AudienceNote を表示）。
 2. 追加後は `/blog` 一覧・トップの「Latest posts」・サイトマップ・RSS に自動反映。
 3. 記事テンプレ/参考: DOM×DOW の OR/AND とタイムゾーンの落とし穴
 
@@ -232,6 +233,8 @@ Nuxt グローバルスタブ指針:
 - **対象**: SRE・運用・開発の初動調査向け
 - **できること**: top コマンドの CPU/Mem/Load を時系列グラフ化し、ピークや異常を素早く把握
   - 各グラフで凡例トグル可（系列の一時非表示）
+  - **SVG/PNG 保存** — SVG は viewBox に 12px 余白を付与してラベル/目盛りの欠けを防止、PNG は白背景で安定出力
+  - しきい値入力に**単位/桁ガイド（CPU% / Load / Mem MB）** を表示し入力を補助
 - **安全性**: ブラウザ内のみで完結（ファイルアップロードなし、プライバシー重視）
 - **使い方例**:
   - サーバで `top -b -d 5 -n 1000 > top_YYYY-MM-DD.log` で収集

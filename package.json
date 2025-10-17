@@ -28,7 +28,7 @@
     "tag:patch": "powershell -ExecutionPolicy Bypass -File ./scripts/bump-tag.ps1 patch",
     "tag:minor": "powershell -ExecutionPolicy Bypass -File ./scripts/bump-tag.ps1 minor",
     "tag:major": "powershell -ExecutionPolicy Bypass -File ./scripts/bump-tag.ps1 major",
-    "ci:guards": "node scripts/ci/guard-control-post.cjs && node scripts/ci/guard-relative-fetch.cjs && node scripts/ci/guard-content-import.cjs && node scripts/ci/guard-markdown-shapes.cjs && node scripts/ci/guard-adsense.cjs && node scripts/ci/guard-blog-no-internal.cjs",
+    "ci:guards": "node scripts/ci/guard-control-post.cjs && node scripts/ci/guard-relative-fetch.cjs && node scripts/ci/guard-content-import.cjs && node scripts/ci/guard-markdown-shapes.cjs && node scripts/ci/guard-adsense.cjs && node scripts/ci/guard-blog-no-internal.cjs && node scripts/ci/guard-audience.cjs",
     "ops:smoke": "node scripts/ops/smoke-control-seo.cjs",
     "ops:rollback": "powershell -ExecutionPolicy Bypass -File ./scripts/ops/rollback.ps1 -Tag",
     "docs:tree": "pnpm --package=tree-cli dlx tree -I \"node_modules,.git,.nuxt,.output,dist,coverage,.turbo,.cache,.vercel,.vscode\" -l 3 pages server components composables layouts plugins middleware types utils scripts tests public content assets -o docs/.tmp.PROJECT_STRUCTURE.md && node -e \"const fs=require('fs');const h='# Project Structure (generated, do not edit)\\n> Update with: `pnpm docs:tree`  / Deep: `pnpm docs:tree:deep`\\n\\n---\\n\\n';const b=fs.readFileSync('docs/.tmp.PROJECT_STRUCTURE.md','utf8');fs.writeFileSync('docs/PROJECT_STRUCTURE.md',h+b);fs.rmSync('docs/.tmp.PROJECT_STRUCTURE.md',{force:true});\"",

@@ -109,6 +109,7 @@ SFC（`pages/blog/[...slug].vue`）ではグローバル `queryContent` 利用�
   <ContentRenderer v-if="doc?.body" :value="doc" />
   ```
   （`v-else`は 404 専用。白紙描画は禁止）
+- frontmatter に **`audience` を原則必須**（タイトル直下に AudienceNote を表示）。
 
 ### サイト概要
 
@@ -148,6 +149,8 @@ SFC（`pages/blog/[...slug].vue`）ではグローバル `queryContent` 利用�
 - ツール: `/tools/cron-jst`, `/tools/jwt-decode`, `/tools/top-analyzer`
 
   - `/tools/top-analyzer`: Linux top コマンドのログをブラウザで解析・可視化。CSV エクスポート（英/日ヘッダ切替）、サンプルログ DL 機能あり。
+  - **SVG/PNG 保存** — SVG は viewBox に 12px 余白を付与してラベル/目盛りの欠けを防止、PNG は白背景で安定出力。
+  - しきい値入力に**単位/桁ガイド（CPU% / Load / Mem MB）** を表示し入力を補助。
 
 - （実装済み）ヘッダ最小ナビ＋ Skip リンク。ブログ一覧カードは日付 `YYYY-MM-DD` と a11y ラベルを付与。
 

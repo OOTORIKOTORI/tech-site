@@ -9,7 +9,7 @@
 - パス揺れ（末尾スラッシュ有無・大文字小文字・URL デコード差）は禁止。
 - SSR 実行パスでは相対 URL を使わない（`useFetch` か ORIGIN 由来の絶対 URL）。F5 リロード時の 500（Only absolute URLs...）を未然に防ぐ。
 - CI 失敗は出荷ブロック。
-- CI 失敗は出荷ブロック。LHCI は本番トップ（/）が **200 になるまで待機**してから収集し、失敗時は **1 回のみリトライ**。`categories:best-practices` の minScore は **0.70（暫定・AdSense 影響）**。
+- LHCI は本番トップ（/）が **200 になるまで待機**してから収集し、失敗時は **1 回のみリトライ**。`categories:best-practices` の minScore は **0.70（暫定・AdSense 影響）**。
 - ルール序列: 正準=PROJECT_SPEC / 要点=README / 規約=HANDBOOK
 - ブランド: 「磨きエクスプローラー（Migaki Explorer）」／短縮名「Migaki Explorer」
 - ORIGIN: https://migakiexplorer.jp
@@ -29,7 +29,7 @@
 
 - 初期公開記事「OG プレビューが出ない時の最初の 3 手」に倣い、短く読めるチェックリスト型を推奨スタイルとする。
 - 「関連ツール」は（準備中）を許容。公開後に当該記事へリンクを追記する運用。
-- 各ツール/記事の入口に対象ブロック（AudienceNote）を置く（frontmatter に audience がある場合のみ表示）。
+- 各ツール/記事の入口に対象ブロック（AudienceNote）を置く（frontmatter に **`audience` を原則必須**とする。未指定の場合は AudienceNote は表示されない）。
 
 ## Copilot 運用ガイド（最小差分）
 
@@ -177,7 +177,6 @@
 ## 8. CI パイプライン & ブロッカー
 
 - `install → typecheck → lint → test → build → postbuild(--check-only) → smoke:og → ci:guards → LHCI`
-- CI 失敗は出荷ブロック
 
 
 ## Release Checklist（リリース手順）
