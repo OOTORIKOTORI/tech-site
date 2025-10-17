@@ -103,42 +103,112 @@ const nowStamp = () => {
   return `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}`;
 };
 
-function downloadDataUrl(dataUrl: string, filename: string) {
-  const a = document.createElement('a');
-  a.href = dataUrl;
-  a.download = filename;
-  a.click();
-  a.remove();
+function filename(kind: 'cpu' | 'load' | 'mem', ext: 'svg' | 'png') {
+  return `top-analyzer-${kind}-${nowStamp()}.${ext}`
 }
 
-async function saveChartAsPng(kind: 'cpu' | 'load' | 'mem') {
-  const ts = nowStamp();
-  const filename = `top-analyzer-${kind}-${ts}.png`;
+function serializeSvgWithPadding(svg: SVGSVGElement, padding = 12): string {
+  // clone to avoid mutating rendered SVG
+  const cloned = svg.cloneNode(true) as SVGSVGElement
+  // compute bbox safely
+  let bbox: DOMRect
+  try {
+    bbox = svg.getBBox()
+  } catch (e) {
+    // fallback to viewBox or width/height
+    const vb = svg.viewBox?.baseVal
+    const w = vb?.width || parseFloat(svg.getAttribute('width') || '800') || 800
+    const h = vb?.height || parseFloat(svg.getAttribute('height') || '160') || 160
+    bbox = new DOMRect(0, 0, w, h)
+  }
+  const w = Math.ceil(bbox.width + padding * 2)
+  const h = Math.ceil(bbox.height + padding * 2)
+  const minX = Math.floor((bbox.x ?? 0) - padding)
+  const minY = Math.floor((bbox.y ?? 0) - padding)
 
-  // 1) Canvas優先
-  const canvasEl = document.querySelector(`[data-chart="${kind}"] canvas`) as HTMLCanvasElement | null;
-  if (canvasEl && canvasEl.toDataURL) {
-    const dataUrl = canvasEl.toDataURL('image/png');
-    downloadDataUrl(dataUrl, filename);
-    return;
+  cloned.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
+  cloned.setAttribute('version', '1.1')
+  cloned.setAttribute('width', String(w))
+  cloned.setAttribute('height', String(h))
+  cloned.setAttribute('viewBox', `${minX} ${minY} ${w} ${h}`)
+  cloned.setAttribute('overflow', 'visible')
+
+  // white background
+  const bg = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
+  bg.setAttribute('x', String(minX))
+  bg.setAttribute('y', String(minY))
+  bg.setAttribute('width', String(w))
+  bg.setAttribute('height', String(h))
+  bg.setAttribute('fill', 'white')
+  cloned.insertBefore(bg, cloned.firstChild)
+
+  return new XMLSerializer().serializeToString(cloned)
+}
+
+async function exportChart(kind: 'cpu' | 'load' | 'mem', format: 'svg' | 'png') {
+  if (typeof document === 'undefined') return
+  const root = document.querySelector(`[data-chart="${kind}"]`) as HTMLElement | null
+  if (!root) return
+  const svgEl = root.querySelector('svg') as SVGSVGElement | null
+  const canvasEl = root.querySelector('canvas') as HTMLCanvasElement | null
+
+  if (format === 'svg' && svgEl) {
+    const xml = serializeSvgWithPadding(svgEl, 12)
+    const blob = new Blob([xml], { type: 'image/svg+xml;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = filename(kind, 'svg')
+    a.click()
+    URL.revokeObjectURL(url)
+    a.remove()
+    return
   }
 
-  // 2) SVG fallback
-  const svgEl = document.getElementById(`topchart-svg-${kind}`) as SVGSVGElement | null
-    || document.querySelector(`[data-chart="${kind}"] svg`) as SVGSVGElement | null;
+  // PNG path
+  if (canvasEl) {
+    const tmp = document.createElement('canvas')
+    tmp.width = canvasEl.width
+    tmp.height = canvasEl.height
+    const ctx = tmp.getContext('2d')
+    if (!ctx) return
+    ctx.fillStyle = '#fff'
+    ctx.fillRect(0, 0, tmp.width, tmp.height)
+    ctx.drawImage(canvasEl, 0, 0)
+    const dataUrl = tmp.toDataURL('image/png')
+    const a = document.createElement('a')
+    a.href = dataUrl
+    a.download = filename(kind, 'png')
+    a.click()
+    a.remove()
+    return
+  }
+
   if (svgEl) {
-    const xml = new XMLSerializer().serializeToString(svgEl);
-    const blob = new Blob([xml], { type: 'image/svg+xml;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename.replace(/\.png$/, '.svg');
-    a.click();
-    URL.revokeObjectURL(url);
-    a.remove();
-    return;
+    const xml = serializeSvgWithPadding(svgEl, 12)
+    const svgUrl = URL.createObjectURL(new Blob([xml], { type: 'image/svg+xml;charset=utf-8' }))
+    await new Promise<void>((resolve) => {
+      const img = new window.Image()
+      img.onload = () => {
+        const c = document.createElement('canvas')
+        c.width = img.width
+        c.height = img.height
+        const ctx = c.getContext('2d')!
+        ctx.fillStyle = '#fff'
+        ctx.fillRect(0, 0, c.width, c.height)
+        ctx.drawImage(img, 0, 0)
+        const url = c.toDataURL('image/png')
+        const a = document.createElement('a')
+        a.href = url
+        a.download = filename(kind, 'png')
+        a.click()
+        a.remove()
+        URL.revokeObjectURL(svgUrl)
+        resolve()
+      }
+      img.src = svgUrl
+    })
   }
-  // 3) 見つからない場合は何もしない
 }
 </script>
 
@@ -169,10 +239,16 @@ async function saveChartAsPng(kind: 'cpu' | 'load' | 'mem') {
           </template>
         </div>
       </figcaption>
-      <button type="button" class="ml-2 px-2 py-0.5 rounded text-xs border focus:outline-none focus-visible:ring"
-        :aria-label="'CPUチャートをPNG保存'" @click="saveChartAsPng('cpu')">
-        PNG保存
-      </button>
+      <div class="flex gap-2 mt-1">
+        <button type="button" class="px-2 py-0.5 rounded text-xs border focus:outline-none focus-visible:ring"
+          :aria-label="'CPUチャートをSVG保存'" @click="exportChart('cpu', 'svg')">
+          SVG保存
+        </button>
+        <button type="button" class="px-2 py-0.5 rounded text-xs border focus:outline-none focus-visible:ring"
+          :aria-label="'CPUチャートをPNG保存'" @click="exportChart('cpu', 'png')">
+          PNG保存
+        </button>
+      </div>
       <svg :id="'topchart-svg-cpu'" viewBox="0 0 800 160" class="w-full h-40 text-gray-800"
         xmlns="http://www.w3.org/2000/svg" role="img">
         <g v-if="cpu.scale" v-html="gridLines(cpu.scale)"></g>
@@ -210,10 +286,16 @@ async function saveChartAsPng(kind: 'cpu' | 'load' | 'mem') {
           </template>
         </div>
       </figcaption>
-      <button type="button" class="ml-2 px-2 py-0.5 rounded text-xs border focus:outline-none focus-visible:ring"
-        :aria-label="'LoadチャートをPNG保存'" @click="saveChartAsPng('load')">
-        PNG保存
-      </button>
+      <div class="flex gap-2 mt-1">
+        <button type="button" class="px-2 py-0.5 rounded text-xs border focus:outline-none focus-visible:ring"
+          :aria-label="'LoadチャートをSVG保存'" @click="exportChart('load', 'svg')">
+          SVG保存
+        </button>
+        <button type="button" class="px-2 py-0.5 rounded text-xs border focus:outline-none focus-visible:ring"
+          :aria-label="'LoadチャートをPNG保存'" @click="exportChart('load', 'png')">
+          PNG保存
+        </button>
+      </div>
       <svg :id="'topchart-svg-load'" viewBox="0 0 800 160" class="w-full h-40 text-gray-800"
         xmlns="http://www.w3.org/2000/svg" role="img">
         <g v-if="load.scale" v-html="gridLines(load.scale)"></g>
@@ -250,10 +332,16 @@ async function saveChartAsPng(kind: 'cpu' | 'load' | 'mem') {
           </template>
         </div>
       </figcaption>
-      <button type="button" class="ml-2 px-2 py-0.5 rounded text-xs border focus:outline-none focus-visible:ring"
-        :aria-label="'MemチャートをPNG保存'" @click="saveChartAsPng('mem')">
-        PNG保存
-      </button>
+      <div class="flex gap-2 mt-1">
+        <button type="button" class="px-2 py-0.5 rounded text-xs border focus:outline-none focus-visible:ring"
+          :aria-label="'MemチャートをSVG保存'" @click="exportChart('mem', 'svg')">
+          SVG保存
+        </button>
+        <button type="button" class="px-2 py-0.5 rounded text-xs border focus:outline-none focus-visible:ring"
+          :aria-label="'MemチャートをPNG保存'" @click="exportChart('mem', 'png')">
+          PNG保存
+        </button>
+      </div>
       <svg :id="'topchart-svg-mem'" viewBox="0 0 800 160" class="w-full h-40 text-gray-800"
         xmlns="http://www.w3.org/2000/svg" role="img">
         <g v-if="mem.scale" v-html="gridLines(mem.scale)"></g>

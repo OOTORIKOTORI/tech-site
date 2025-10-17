@@ -2,6 +2,7 @@
 title: Welcome
 description: このサイト（Migaki Explorer）の使い方と、このブログで読める内容のガイド。
 date: 2025-10-08
+audience: '初めての方向け（サイト方針・使い方の案内）'
 tags:
   - お知らせ
   - ガイド

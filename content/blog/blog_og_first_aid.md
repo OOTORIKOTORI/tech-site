@@ -2,6 +2,7 @@
 title: リンクプレビュー（OG）が出ない時の最初の3手
 description: 「画像が出ない / タイトルが違う」を最短で切り分けるための超ミニチェックリスト。
 date: 2025-10-08
+audience: 'コンテンツ担当・開発者（リンクプレビューの不具合を直したい人）'
 tags: [チェックリスト, OG, 運用]
 published: true
 draft: false

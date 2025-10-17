@@ -7,6 +7,7 @@ published: true
 tags: [internal, control]
 robots: 'noindex,follow'
 canonical:
+audience: 'サイト運用・開発者（まずは最短で直したい人）'
 ---
 
 この投稿は、/blog 詳細ページの **1 経路取得**・**`doc?.body` の存在**・**`<ContentRenderer :value="doc" />` の固定描画**を検証するための制御記事です。

@@ -7,6 +7,7 @@ date: '2025-10-15'
 tags:
   - 'devlog'
 canonical: ''
+audience: 'サイト運用・開発者（まずは最短で直したい人）'
 ---
 
 > **この記事はこんな人向け**: CI で Lighthouse の best-practices を安定して通したい人
