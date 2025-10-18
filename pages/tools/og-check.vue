@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRuntimeConfig } from '#app'
+import { useHead } from '#imports'
 import AudienceNote from '@/components/AudienceNote.vue'
 const config = useRuntimeConfig()
 const siteOrigin = config.public.siteOrigin
@@ -15,6 +16,19 @@ const result = ref<any | null>(null)
 const err = ref<string | null>(null)
 const imgStatus = ref<'none' | 'ok' | 'fail' | 'checking'>('none')
 const imgResp = ref<any | null>(null)
+
+// ToolIntro 用 例示
+const exampleInput = 'https://example.com/article'
+const exampleOutput = 'og:title / og:description / og:image を取得しプレビュー'
+
+useHead({
+  title: 'OG Checker | Migaki Explorer',
+  meta: [
+    { name: 'description', content: 'URL の OGP メタ情報を取得してプレビュー表示。' },
+    { property: 'og:title', content: 'OG Checker | Migaki Explorer' },
+    { property: 'og:description', content: 'URL の OGP メタ情報を取得してプレビュー表示。' }
+  ]
+})
 
 const doCheck = async () => {
   err.value = null
@@ -65,6 +79,8 @@ const doImgCheck = async () => {
 
 <template>
   <main class="mx-auto max-w-3xl p-6 space-y-6">
+    <ToolIntro title="OG Checker" description="URL の OGP メタ情報を取得してプレビュー表示。" usage="1) URL を入力\n2) 取得をクリック" time="~10秒"
+      audience="ブロガー・開発" :example-input="exampleInput" :example-output="exampleOutput" />
     <ToolIntroBox audience="広報・編集・開発（SNS共有の見え方確認）" value="共有時の画像/タイトル、リダイレクト先とHTTPステータスを一発確認"
       how="URLを入力 → チェック → 結果パネルで最終URL/画像/タグを確認" safety="フェッチは絶対URLで行い、結果は端末内にのみ表示" />
     <h1 class="text-2xl font-bold">OG プレビュー確認</h1>

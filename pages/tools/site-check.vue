@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRuntimeConfig } from '#app'
+import { useHead } from '#imports'
 import AudienceNote from '@/components/AudienceNote.vue'
 const origin = useRuntimeConfig().public.siteOrigin
 const checking = ref(false)
@@ -9,6 +10,19 @@ const robots = ref<any>(null)
 const sitemap = ref<any>(null)
 const feed = ref<any>(null)
 const showRaw = ref({ robots: false, sitemap: false, feed: false })
+
+// ToolIntro 用 例示
+const exampleInput = 'https://example.com'
+const exampleOutput = 'HTTP ステータス / ヘッダー / リダイレクト を表示'
+
+useHead({
+  title: 'Site Checker | Migaki Explorer',
+  meta: [
+    { name: 'description', content: 'サイトのHTTPレスポンスを確認（ステータス/ヘッダー/リダイレクト）。' },
+    { property: 'og:title', content: 'Site Checker | Migaki Explorer' },
+    { property: 'og:description', content: 'サイトのHTTPレスポンスを確認（ステータス/ヘッダー/リダイレクト）。' }
+  ]
+})
 
 const badge = (ok: boolean | null) => ok === null ? 'N/A' : ok ? 'Pass' : 'Fail'
 const badgeClass = (ok: boolean | null) => ok === null ? 'bg-gray-300 text-gray-700' : ok ? 'bg-green-600 text-white' : 'bg-red-600 text-white'
@@ -83,6 +97,8 @@ const doCheck = async () => {
 
 <template>
   <main class="mx-auto max-w-3xl p-6 space-y-6">
+    <ToolIntro title="Site Checker" description="サイトのHTTPレスポンスを確認（ステータス/ヘッダー/リダイレクト）。" usage="1) URL を入力\n2) チェックを実行"
+      time="~10秒" audience="開発・運用" :example-input="exampleInput" :example-output="exampleOutput" />
     <ToolIntroBox audience="サイト運用者/SEO担当" value="sitemap.xml と robots.txt の到達性や掲載可否をまとめて点検"
       how="サイトのURLを入力 → それぞれの取得結果を確認" safety="URLは保存されず、結果は端末内で表示" />
     <h1 class="text-2xl font-bold">robots / sitemap / feed チェッカー</h1>
@@ -146,7 +162,7 @@ const doCheck = async () => {
           <li>URL件数: {{ feed?.count }}</li>
           <li>
             ORIGIN一致: <span :class="feed?.allOk ? 'text-green-700' : 'text-red-600'">{{ feed?.allOk ? 'OK' : 'NG'
-              }}</span>
+            }}</span>
           </li>
           <li>サンプル: <span v-if="feed?.sample?.length">{{ feed.sample.join(', ') }}</span><span v-else>なし</span></li>
         </ul>

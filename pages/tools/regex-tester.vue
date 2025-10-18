@@ -1,7 +1,21 @@
 <script setup lang="ts">
 import { ref, computed, nextTick } from 'vue'
+import { useHead } from '#imports'
 import RelatedList from '@/components/RelatedList.vue'
 import AudienceNote from '@/components/AudienceNote.vue'
+
+// ToolIntro 用 例示
+const exampleInput = 'abc123\nxyz'
+const exampleOutput = 'パターン /\\d+/ → 一致: 123'
+
+useHead({
+  title: 'Regex Tester | Migaki Explorer',
+  meta: [
+    { name: 'description', content: '正規表現の一致・フラグ・キャプチャを確認。' },
+    { property: 'og:title', content: 'Regex Tester | Migaki Explorer' },
+    { property: 'og:description', content: '正規表現の一致・フラグ・キャプチャを確認。' }
+  ]
+})
 
 const pattern = ref('')
 const flags = ref<{ [k: string]: boolean }>({ i: true, g: true, m: false, s: false, u: false, y: false })
@@ -59,9 +73,11 @@ function clearAll() {
 
 <template>
   <main class="mx-auto max-w-6xl p-4 space-y-4">
+    <ToolIntro title="Regex Tester" description="正規表現の一致・フラグ・キャプチャを確認。" usage="1) パターンとテキストを入力\n2) フラグを選択してテスト"
+      time="~30秒" audience="開発・学習" :example-input="exampleInput" :example-output="exampleOutput" />
     <h1 class="text-2xl font-semibold">
       正規表現テスター
-</h1>
+    </h1>
     <AudienceNote who="フロント/バックエンド開発者・QA（テキスト処理/バリデーション）" />
     <p class="text-sm text-gray-600">パターンとフラグを指定して一致箇所を確認。巨大テキストはReDoS回避のため入力を控えてください。</p>
 

@@ -1,5 +1,8 @@
 ﻿<template>
   <div class="container mx-auto max-w-3xl py-8 px-4 space-y-6">
+    <ToolIntro title="CRON ⇄ JST/UTC 変換" description="CRON式の次回発火時刻を JST/UTC で確認。式の整合性チェックにも。"
+      usage="1) CRON式を入力\n2) 変換/次回発火を確認" time="~10秒" audience="開発・運用" :example-input="exampleInput"
+      :example-output="exampleOutput" />
     <ToolIntroBox audience="サイト運用・開発者（定時バッチの確認）" value="crontab 式を JST/UTC で検証し、次回実行を即確認"
       how="式を入力 → タイムゾーンを選択 → 次回実行を確認" safety="処理はブラウザ内のみ（データ送信なし）" />
     <h1 class="text-2xl font-bold">Cron JST 次回実行予測</h1>
@@ -158,6 +161,10 @@ useHead({
 import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
 import { useRoute } from '#imports'
 import { parseCron, nextRuns } from '~/utils/cron'
+
+// ToolIntro 用 例示
+const exampleInput = '*/5 * * * *'
+const exampleOutput = '次回発火: 2025-10-18 09:00 JST / 00:00 UTC ...'
 
 const input = ref('')
 const error = ref('')

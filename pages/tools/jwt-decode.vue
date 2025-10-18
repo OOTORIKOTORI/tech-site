@@ -1,5 +1,8 @@
 ﻿<template>
   <div class="container mx-auto max-w-6xl py-8 px-4 space-y-6">
+    <ToolIntro title="JWT Decoder" description="JWT をオフラインでデコード（署名検証なし）。ヘッダー/ペイロードを整形表示。"
+      usage="1) JWT を貼り付け\n2) Decode をクリック" time="~10秒" audience="開発・学習" :example-input="exampleInput"
+      :example-output="exampleOutput" />
     <ToolIntroBox audience="API/認証を扱う開発者" value="JWT のヘッダ/ペイロードをローカルで可視化（秘密鍵不要）" how="トークンを貼り付け → デコードを実行 → 中身を確認"
       safety="貼り付けた文字列は保存されません" />
     <header class="space-y-2">
@@ -197,9 +200,9 @@
               <div class="space-y-1">
                 <div v-for="e in sortedErrors" :key="e.code" class="text-xs flex gap-2">
                   <span class="inline-block px-2 py-0.5 rounded bg-red-100 text-red-700 font-semibold">{{ e.code
-                    }}</span>
+                  }}</span>
                   <span class="text-gray-800">{{ e.message }}<span v-if="e.hint" class="text-gray-500"> ({{ e.hint
-                      }})</span></span>
+                  }})</span></span>
                 </div>
               </div>
             </template>
@@ -238,8 +241,23 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, watch } from 'vue'
+import { useHead } from '#imports'
 import AudienceNote from '@/components/AudienceNote.vue'
 import { decodeBase64Url, verifyJwt, fetchJwks, findJwksRsaKeyByKid, buildRsaPemFromModExp } from '@/utils/jwt'
+
+// ToolIntro 用 例示
+const exampleInput = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0In0.signature'
+const exampleOutput = '{\n  "alg": "HS256", ...\n}\n{\n  "sub": "1234"\n}'
+
+// Meta
+useHead({
+  title: 'JWT Decoder | Migaki Explorer',
+  meta: [
+    { name: 'description', content: 'JWT をデコードしてヘッダー/ペイロードを確認。' },
+    { property: 'og:title', content: 'JWT Decoder | Migaki Explorer' },
+    { property: 'og:description', content: 'JWT をデコードしてヘッダー/ペイロードを確認。' }
+  ]
+})
 
 // --- Types ---
 type JwtHeader = {

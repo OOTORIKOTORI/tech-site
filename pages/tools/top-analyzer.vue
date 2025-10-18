@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { downloadCSV, TOP_COLUMNS, type HeaderLang } from '@/utils/top/csv'
-import { definePageMeta } from '#imports'
+import { definePageMeta, useHead } from '#imports'
 import type { TopSnapshot } from '../../types/top'
 import TopSummary from '@/components/TopSummary.vue'
 import TopCharts from '@/components/TopCharts.vue'
@@ -9,6 +9,18 @@ import AudienceNote from '@/components/AudienceNote.vue'
 
 definePageMeta({ title: 'Top Log Analyzer' })
 
+// ToolIntro 用 例示
+const exampleInput = 'timestamp,cpu,load,mem\n10:00,23,0.58,1024 ...'
+const exampleOutput = 'CPU/Load/Mem の折れ線グラフと SVG/PNG 保存'
+
+useHead({
+  title: 'Top Analyzer | Migaki Explorer',
+  meta: [
+    { name: 'description', content: 'top の CSV を可視化。CPU/Load/Mem を比較し、SVG/PNGで保存可能。' },
+    { property: 'og:title', content: 'Top Analyzer | Migaki Explorer' },
+    { property: 'og:description', content: 'top の CSV を可視化。CPU/Load/Mem を比較し、SVG/PNGで保存可能。' }
+  ]
+})
 
 
 const file = ref<File | null>(null)
@@ -55,6 +67,9 @@ async function analyze() {
 
 <template>
   <main class="mx-auto max-w-5xl p-6 space-y-6">
+    <ToolIntro title="Top Analyzer" description="top の CSV を可視化。CPU/Load/Mem を比較し、SVG/PNGで保存可能。"
+      usage="1) CSV を貼り付け/選択\n2) グラフ化→保存（SVG/PNG）" time="~30秒" audience="運用・調査" :example-input="exampleInput"
+      :example-output="exampleOutput" />
     <h1 class="text-2xl font-bold">Top Log Analyzer</h1>
 
     <AudienceNote who="Linux/インフラ運用のSE/DevOps" />

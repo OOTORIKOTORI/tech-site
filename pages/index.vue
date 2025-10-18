@@ -53,7 +53,8 @@
         <h2 id="home-learning" class="text-xl font-semibold">学習記事一覧</h2>
         <NuxtLink to="/blog" class="text-sm text-blue-600 hover:underline focus-ring">すべて見る</NuxtLink>
       </div>
-      <div v-if="!latestPosts?.length" class="mt-3 text-sm text-muted-foreground">
+      <div v-if="pending" class="mt-3 text-sm text-muted-foreground">読み込み中…</div>
+      <div v-else-if="!latestPosts?.length" class="mt-3 text-sm text-muted-foreground">
         まだ学習記事はありません。更新をお待ちください。
       </div>
       <div v-else class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -95,8 +96,8 @@ const toolDigest = [
   { title: 'Top Log Analyzer', href: '/tools/top-analyzer', desc: 'topログを解析してCPU/Load/Memを可視化' },
 ]
 
-// 新着記事 4件
-const { data: latestPosts } = await useAsyncData('home-latest-posts', () => fetchPosts({ limit: 4 }))
+// 新着記事 6件（pending 分岐で“チラつき”を抑制）
+const { data: latestPosts, pending } = await useAsyncData('home-latest-posts', () => fetchPosts({ limit: 6 }))
 </script>
 
 <style scoped>
