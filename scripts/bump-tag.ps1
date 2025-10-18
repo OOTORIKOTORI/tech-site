@@ -12,20 +12,26 @@ function Get-NextVersion([string]$last, [string]$bump) {
   if ($last -notmatch '^v(?<maj>\d+)\.(?<min>\d+)\.(?<patch>\d+)$') {
     throw "Last tag '$last' is not semver (vX.Y.Z)"
   }
-  $M = [int]$Matches.maj
-  $m = [int]$Matches.min
-  $p = [int]$Matches.patch
+  $major = [int]$Matches.maj
+  $minor = [int]$Matches.min
+  $patch = [int]$Matches.patch
   switch ($bump) {
-    'major' { $M++; $m = 0; $p = 0 }
-    'minor' { $m++; $p = 0 }
-    default { $p++ }
+    'major' { $major++; $minor = 0; $patch = 0 }
+    'minor' { $minor++; $patch = 0 }
+    default { $patch++ }
   }
-  return "v$M.$m.$p"
+  return "v$major.$minor.$patch"
 }
 
-# Get last tag (if none, treat as v0.0.0)
-$LAST = (git describe --tags --abbrev=0 2>$null)
-if (-not $LAST) { $LAST = 'v0.0.0' }
+
+$tags = git tag --list "v*.*.*"
+Write-Host "[DEBUG] tags: $tags"
+if ($tags) {
+  $latest = $tags | Sort-Object { [version]($_ -replace '^v','') } -Descending | Select-Object -First 1
+  $LAST = $latest
+} else {
+  $LAST = 'v0.0.0'
+}
 $NEXT = Get-NextVersion $LAST $bump
 
 Write-Host "Last: $LAST -> Next: $NEXT (bump=$bump)"

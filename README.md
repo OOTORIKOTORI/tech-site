@@ -113,15 +113,12 @@
 
 ---
 
-## UI/情報設計（運用追記）
-
-- Top: 学習記事一覧は audience 不問で最新 6 件を表示。0 件時は空状態メッセージを表示。
-- Tools: 各ページ冒頭に <ToolIntro>（説明/使い方/例）を設置。
+## UI/情報設計(運用追記)
 
 - Top: 学習記事一覧は audience 不問で最新 6 件を表示。pending→ 空 → 表示の順で分岐。
-- Tools: 各ページ冒頭に <ToolIntro>（説明/使い方/例）を設置。主要ツールには page 個別の useHead を付与。
+- Tools: 各ページ冒頭に <ToolIntro>(説明/使い方/例)を設置。主要ツールには page 個別の useHead を付与。
 
-## 運用メモ（抜粋）
+## 運用メモ(抜粋)
 
 - pre-push 例: `typecheck → lint → test → build → postbuild → smoke:og → ci:guards → LHCI`。
 - 主要リンクの `focus-visible` は `.focus-ring` を適用し視認性を統一。

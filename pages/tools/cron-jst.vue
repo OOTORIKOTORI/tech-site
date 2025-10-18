@@ -123,41 +123,10 @@
 </template>
 
 <script setup lang="ts">
+
 import { useHead } from '#imports'
 import AudienceNote from '@/components/AudienceNote.vue'
 
-const SITE_URL = (process.env.NUXT_PUBLIC_SITE_URL || 'https://tech-site-docs.com').replace(/\/$/, '')
-
-useHead({
-  title: 'Cron JST 次回実行予測',
-  meta: [
-    { name: 'description', content: 'crontab形式のスケジュールから日本時間・UTCで次回実行時刻を予測。共有リンク・プリセット・CSVダウンロード対応。全処理ローカル。' },
-    { property: 'og:title', content: 'Cron JST 次回実行予測' },
-    { property: 'og:description', content: 'crontab形式のスケジュールから日本時間・UTCで次回実行時刻を予測。共有リンク・プリセット・CSVダウンロード対応。全処理ローカル。' },
-    { property: 'og:type', content: 'website' },
-    { property: 'og:url', content: SITE_URL + '/tools/cron-jst' },
-    { property: 'og:image', content: SITE_URL + '/favicon.ico' },
-    { name: 'twitter:card', content: 'summary' },
-    { name: 'twitter:title', content: 'Cron JST 次回実行予測' },
-    { name: 'twitter:description', content: 'crontab形式のスケジュールから日本時間・UTCで次回実行時刻を予測。共有リンク・プリセット・CSVダウンロード対応。全処理ローカル。' }
-  ],
-  script: [
-    {
-      type: 'application/ld+json',
-      innerHTML: JSON.stringify({
-        '@context': 'https://schema.org',
-        '@type': 'SoftwareApplication',
-        name: 'Cron JST 次回実行予測',
-        url: SITE_URL + '/tools/cron-jst',
-        applicationCategory: 'DeveloperApplication',
-        operatingSystem: 'All',
-        offers: { '@type': 'Offer', price: '0', priceCurrency: 'JPY' },
-        description: 'crontab形式のスケジュールから日本時間・UTCで次回実行時刻を予測。共有リンク・プリセット・CSVダウンロード対応。全処理ローカル。',
-        image: SITE_URL + '/favicon.ico'
-      })
-    }
-  ]
-})
 import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
 import { useRoute } from '#imports'
 import { parseCron, nextRuns } from '~/utils/cron'
@@ -165,6 +134,15 @@ import { parseCron, nextRuns } from '~/utils/cron'
 // ToolIntro 用 例示
 const exampleInput = '*/5 * * * *'
 const exampleOutput = '次回発火: 2025-10-18 09:00 JST / 00:00 UTC ...'
+
+useHead({
+  title: 'CRON ⇄ JST/UTC 変換 | Migaki Explorer',
+  meta: [
+    { name: 'description', content: 'CRON式の次回発火時刻を JST/UTC で確認。式の整合性チェックにも。' },
+    { property: 'og:title', content: 'CRON ⇄ JST/UTC 変換 | Migaki Explorer' },
+    { property: 'og:description', content: 'CRON式の次回発火時刻を JST/UTC で確認。式の整合性チェックにも。' }
+  ]
+})
 
 const input = ref('')
 const error = ref('')
