@@ -107,7 +107,7 @@ function clearAll() {
       </div>
       <div>
         <label class="block text-sm font-medium">結果</label>
-        <div class="mt-1 rounded border bg-gray-50 p-2">
+        <div class="mt-1 rounded border border-zinc-200 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-900 p-2">
           <div class="prose prose-sm max-w-none" v-html="highlighted"></div>
           <pre v-if="matches.length" class="mt-2 text-xs overflow-x-auto"><code>{{ matches }}</code></pre>
         </div>

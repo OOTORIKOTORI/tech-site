@@ -1,4 +1,6 @@
 ---
+benefits: ""
+for: ""
 title: 'Lighthouse Best Practices 0.70を守るコツ（AdSenseと共存）'
 description: '広告を入れつつBest Practices >= 0.70を安定させるための最小ルールと落とし穴。'
 tags: [lighthouse, adsense, webperf]
@@ -6,6 +8,9 @@ date: 2025-10-15
 draft: true
 audience: 'サイト運用・開発者（広告と品質スコアを両立したい人）'
 ---
+> **この記事はこういう人におすすめ**: （for）
+> **この記事で得られること**: （benefits）
+
 
 ## 結論（最短）
 

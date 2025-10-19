@@ -1,6 +1,6 @@
 <template>
   <main class="mx-auto max-w-3xl px-4 py-10">
-    <h1 class="text-3xl font-semibold mb-6">Blog</h1>
+    <h1 class="page-title text-3xl font-semibold mb-6">Blog</h1>
     <p class="mb-4">
       <NuxtLink to="/blog/" class="sr-only">Blog</NuxtLink>
     </p>

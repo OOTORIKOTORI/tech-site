@@ -1,0 +1,42 @@
+@layer components {
+  /* フォーム要素のライト/ダーク切替（ベース） */
+  input[type='text'],
+  input[type='email'],
+  input[type='url'],
+  input[type='search'],
+  input[type='password'],
+  input[type='number'],
+  input[type='tel'],
+  input[type='datetime-local'],
+  input[type='date'],
+  input[type='month'],
+  input[type='week'],
+  input[type='time'],
+  select,
+  textarea {
+    @apply bg-white text-zinc-900 border border-zinc-300 placeholder-zinc-400 rounded-md;
+  }
+  .dark input[type='text'],
+  .dark input[type='email'],
+  .dark input[type='url'],
+  .dark input[type='search'],
+  .dark input[type='password'],
+  .dark input[type='number'],
+  .dark input[type='tel'],
+  .dark input[type='datetime-local'],
+  .dark input[type='date'],
+  .dark input[type='month'],
+  .dark input[type='week'],
+  .dark input[type='time'],
+  .dark select,
+  .dark textarea {
+    @apply bg-zinc-900 text-zinc-100 border-zinc-700 placeholder-zinc-500;
+  }
+
+  /* フォーカス表現の統一 */
+  input:focus,
+  select:focus,
+  textarea:focus {
+    @apply ring-2 ring-blue-500 outline-none border-transparent;
+  }
+}

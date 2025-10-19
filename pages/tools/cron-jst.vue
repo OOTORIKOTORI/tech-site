@@ -11,7 +11,8 @@
       <NuxtLink to="/blog" class="text-blue-700 underline hover:text-blue-900 focus-ring">Tech Blogはこちら</NuxtLink>
     </div>
 
-    <div class="rounded-md bg-blue-50 text-blue-900 text-sm p-3" role="status" aria-live="polite">
+    <div class="rounded-md bg-blue-50 dark:bg-blue-950 text-blue-900 dark:text-blue-100 text-sm p-3" role="status"
+      aria-live="polite">
       入力はローカルでのみ処理されます。サーバーへ送信されることはありません。
     </div>
 

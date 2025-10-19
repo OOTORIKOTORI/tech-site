@@ -1,0 +1,26 @@
+@layer components {
+  .prose {
+    @apply max-w-none;
+  }
+  .prose :where(p, li) {
+    @apply text-zinc-800;
+  }
+  .dark .prose :where(p, li) {
+    @apply text-zinc-200;
+  }
+  .prose a {
+    @apply underline decoration-1;
+  }
+  .dark .prose a {
+    @apply underline;
+  }
+}
+
+@layer components {
+  .prose :where(h1, h2, h3) {
+    @apply font-semibold;
+  }
+  .prose blockquote {
+    @apply border-l-4 pl-4;
+  }
+}

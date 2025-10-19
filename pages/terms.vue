@@ -24,7 +24,7 @@ const updatedAt = new Date().toISOString()
 <template>
   <main>
     <article class="prose max-w-3xl mx-auto p-6">
-      <h1>利用規約</h1>
+      <h1 class="page-title">利用規約</h1>
       <h2>免責</h2>
       <p>コンテンツおよびツールは現状有姿（AS IS）で提供します。利用に伴う結果は自己責任でお願いします。</p>
       <h2>禁止事項</h2>

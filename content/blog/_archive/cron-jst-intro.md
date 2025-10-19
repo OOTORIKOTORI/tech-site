@@ -1,4 +1,12 @@
 ---
+benefits: ""
+for: ""
+audience: ["初心者","中級者"]
+title: ""
+description: ""
+publishedAt: "2025-10-18"
+---
+---
 title: CronとJSTの落とし穴入門
 date: 2025-09-01
 author: site-admin

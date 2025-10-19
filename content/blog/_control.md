@@ -1,4 +1,6 @@
 ---
+benefits: ""
+for: ""
 title: Internal Control (Renderer/Body/Route)
 description: 常時検証用の制御記事（一覧/詳細の健全性チェックに使用）
 date: 2025-01-01
@@ -9,6 +11,9 @@ robots: 'noindex,follow'
 canonical:
 audience: 'サイト運用・開発者（まずは最短で直したい人）'
 ---
+> **この記事はこういう人におすすめ**: （for）
+> **この記事で得られること**: （benefits）
+
 
 この投稿は、/blog 詳細ページの **1 経路取得**・**`doc?.body` の存在**・**`<ContentRenderer :value="doc" />` の固定描画**を検証するための制御記事です。
 

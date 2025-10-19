@@ -151,7 +151,7 @@
 
 ## 3. ドキュメント権威
 
-- 正: `PROJECT_SPEC.md` ／ 要点: `README.md` ／ 恒久規約: `docs/HANDBOOK.md`
+- 正準: `PROJECT_SPEC.md` ／ 要点: `README.md` ／ 恒久規約: `docs/HANDBOOK.md`
 - 見出し・アンカー維持、文面は必要最小限のみ変更
 
 ## 4. ORIGIN/公開

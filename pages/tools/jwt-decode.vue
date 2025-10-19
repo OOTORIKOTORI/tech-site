@@ -65,7 +65,7 @@
     <!-- Decode Panel -->
     <section v-show="activeTab === 'Decode'" class="space-y-6">
       <div class="grid md:grid-cols-2 gap-4">
-        <div class="rounded border bg-gray-50">
+        <div class="rounded border border-zinc-200 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-900">
           <header class="flex items-center justify-between px-3 py-2 border-b">
             <h2 class="font-semibold text-sm">Header</h2>
             <button class="text-xs text-blue-600 hover:underline focus-ring"
@@ -76,7 +76,7 @@
           <pre v-show="!collapsed.header"
             class="text-[11px] md:text-xs p-3 overflow-auto"><code>{{ pretty(header) }}</code></pre>
         </div>
-        <div class="rounded border bg-gray-50">
+        <div class="rounded border border-zinc-200 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-900">
           <header class="flex items-center justify-between px-3 py-2 border-b">
             <h2 class="font-semibold text-sm">Payload</h2>
             <button class="text-xs text-blue-600 hover:underline focus-ring"
@@ -191,7 +191,7 @@
         <div class="space-y-4">
           <div
             :class="['rounded border p-3 min-h-[160px] transition-colors',
-              verifyState.valid === true ? 'bg-green-50 border-green-300' : verifyState.valid === false && verifyState.errors.length ? 'bg-red-50 border-red-300' : 'bg-white']">
+              verifyState.valid === true ? 'bg-green-50 border-green-300' : verifyState.valid === false && verifyState.errors.length ? 'bg-red-50 border-red-300' : 'bg-white dark:bg-zinc-900']">
             <h3 class="font-semibold text-sm mb-2 flex items-center gap-2">
               結果
               <span v-if="verifying" class="text-[10px] text-gray-500">(検証中)</span>
@@ -200,9 +200,9 @@
               <div class="space-y-1">
                 <div v-for="e in sortedErrors" :key="e.code" class="text-xs flex gap-2">
                   <span class="inline-block px-2 py-0.5 rounded bg-red-100 text-red-700 font-semibold">{{ e.code
-                  }}</span>
+                    }}</span>
                   <span class="text-gray-800">{{ e.message }}<span v-if="e.hint" class="text-gray-500"> ({{ e.hint
-                  }})</span></span>
+                      }})</span></span>
                 </div>
               </div>
             </template>
@@ -213,7 +213,8 @@
               <div class="text-xs text-gray-500">検証結果はここに表示されます</div>
             </template>
           </div>
-          <div v-if="verifyState.valid === true && verifyState.header" class="rounded border p-3 bg-gray-50 space-y-2">
+          <div v-if="verifyState.valid === true && verifyState.header"
+            class="rounded border border-zinc-200 dark:border-zinc-800 p-3 bg-gray-50 dark:bg-zinc-900 space-y-2">
             <div class="flex items-center justify-between">
               <h3 class="font-semibold text-sm">Header</h3>
               <button class="btn-secondary text-[10px] px-2 py-0.5 focus-ring" aria-label="Headerコピー"
@@ -223,7 +224,8 @@
             </div>
             <pre class="text-[11px] md:text-xs overflow-auto"><code>{{ pretty(verifyState.header) }}</code></pre>
           </div>
-          <div v-if="verifyState.valid === true && verifyState.payload" class="rounded border p-3 bg-gray-50 space-y-2">
+          <div v-if="verifyState.valid === true && verifyState.payload"
+            class="rounded border border-zinc-200 dark:border-zinc-800 p-3 bg-gray-50 dark:bg-zinc-900 space-y-2">
             <div class="flex items-center justify-between">
               <h3 class="font-semibold text-sm">Payload</h3>
               <button class="btn-secondary text-[10px] px-2 py-0.5 focus-ring" aria-label="Payloadコピー"

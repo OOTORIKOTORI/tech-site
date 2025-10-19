@@ -641,6 +641,39 @@
 				"glob",
 				"gray-matter"
 			]
+		},
+		{
+			"label": "Typecheck, Lint, Test, Build, CI (Phase-3)",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"-s",
+				"typecheck",
+				";",
+				"pnpm",
+				"-s",
+				"lint",
+				";",
+				"pnpm",
+				"-s",
+				"test",
+				"--",
+				"--run",
+				";",
+				"pnpm",
+				"-s",
+				"build",
+				";",
+				"pnpm",
+				"-s",
+				"run",
+				"ci:local"
+			],
+			"problemMatcher": [
+				"$tsc",
+				"$eslint-stylish"
+			],
+			"group": "test"
 		}
 	]
 }

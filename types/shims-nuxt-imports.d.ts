@@ -1,3 +1,10 @@
+// --- useColorMode 型補完 ---
+declare module '#imports' {
+  export function useColorMode(): {
+    value: 'light' | 'dark' | 'system'
+    preference: string
+  }
+}
 // --- useStorage 型補完 ---
 declare module '#imports' {
   import type { Storage } from 'unstorage'

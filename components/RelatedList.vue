@@ -41,10 +41,10 @@ const { data: related } = await useAsyncData(
   <section v-if="related && related.length > 0" class="mt-8 border-t pt-6">
     <h2 class="text-xl font-semibold mb-4">関連記事</h2>
     <ul class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      <li v-for="item in related" :key="item._path" class="border rounded-lg p-4 bg-white hover:shadow-md transition">
+      <li v-for="item in related" :key="item._path" class="surface p-4 hover:shadow-md transition">
         <NuxtLink :to="item._path" class="group block focus-ring">
           <h3 class="text-base font-medium text-blue-600 group-hover:underline">{{ item.title }}</h3>
-          <p v-if="item.description" class="text-sm text-gray-600 mt-1">{{ item.description }}</p>
+          <p v-if="item.description" class="text-sm muted mt-1">{{ item.description }}</p>
         </NuxtLink>
       </li>
     </ul>

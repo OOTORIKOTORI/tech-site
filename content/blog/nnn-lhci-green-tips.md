@@ -1,4 +1,6 @@
 ---
+benefits: ""
+for: ""
 title: 'LHCIグリーン維持のコツ'
 description: 'Lighthouse CIで常にグリーンを保つための運用ポイントを簡潔にまとめました。'
 published: true
@@ -9,6 +11,9 @@ tags:
 canonical: ''
 audience: 'サイト運用・開発者（まずは最短で直したい人）'
 ---
+> **この記事はこういう人におすすめ**: （for）
+> **この記事で得られること**: （benefits）
+
 
 > **この記事はこんな人向け**: CI で Lighthouse の best-practices を安定して通したい人
 > **この記事でわかること**: すぐ効く 5 つのチェックと、ローカル短時間チェックのコツ

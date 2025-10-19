@@ -59,7 +59,7 @@
 - OGP API: 既定は 302 で `/og-default.png` へフォールバック。`ENABLE_DYNAMIC_OG=1` で動的 PNG（失敗時は即 302）。`LOG_OG=1` で最小ログ。
 - CI 概要: install → typecheck → lint → test → build → postbuild（`--check-only`）→ smoke:og → ci:guards → LHCI（詳細は PROJECT_SPEC）。
   - LHCI は本番が **200 になるまで待機**してから収集し、失敗時は **1 回だけリトライ**。
-  - CI 合否は `categories.best-practices ≥ 0.70` / `a11y ≥ 90` に従う。budgets は参考値。
+  - budgets は参考値であり、CI の合否は Accessibility ≥ 90 / Best Practices ≥ 0.70 のアサートに従う。
 - （任意）Web App Manifest の `name`/`short_name` はブランド準拠。詳細は `PROJECT_SPEC.md` を参照。
 - /blog 詳細は**1 経路のみ取得・白紙禁止・テンプレ 1 行**（`<ContentRenderer v-if="doc?.body" :value="doc" />`）。詳細は[PROJECT_SPEC.md](./PROJECT_SPEC.md)参照。
 - `queryContent`の扱い統一: SFC（`pages/blog/[...slug].vue`）はグローバル許容（`/* global queryContent */`）、それ以外は **`#content` から import**。`#imports` は禁止。
@@ -116,7 +116,7 @@
 ## UI/情報設計(運用追記)
 
 - Top: 学習記事一覧は audience 不問で最新 6 件を表示。pending→ 空 → 表示の順で分岐。
-- Tools: 各ページ冒頭に <ToolIntro>(説明/使い方/例)を設置。主要ツールには page 個別の useHead を付与。
+- Tools: 各ページ冒頭に `<ToolIntro>`(説明/使い方/例)を設置。主要ツールには page 個別の useHead を付与。
 
 ## 運用メモ(抜粋)
 
@@ -211,7 +211,7 @@ Nuxt グローバルスタブ指針:
 
 ## リリース手順
 
-- リリース手順は [docs/HANDBOOK.md](docs/HANDBOOK.md#release-checklistリリース手順) を参照してください。
+- 実運用の詳細な手順は [docs/HANDBOOK.md の Release Checklist](docs/HANDBOOK.md#release-checklistリリース手順) を参照（README では要点のみ）。
 
 ## 変更点サマリ（この更新）
 

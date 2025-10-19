@@ -1,4 +1,7 @@
 ---
+benefits: ""
+for: ""
+audience: ["初心者","中級者"]
 title: JWT基礎と安全な検証のポイント
 date: 2025-09-05
 author: site-admin

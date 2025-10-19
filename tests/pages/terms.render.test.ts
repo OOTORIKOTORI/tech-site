@@ -21,7 +21,7 @@ describe('pages/terms.vue', () => {
     const mod = await import('@/pages/terms.vue')
     const wrapper = mount(mod.default as any)
     const html = wrapper.html()
-    expect(html).toContain('<h1>利用規約</h1>')
+    expect(html).toMatch(/<h1[^>]*>利用規約<\/h1>/)
     expect(html).toContain('禁止事項')
   })
 })

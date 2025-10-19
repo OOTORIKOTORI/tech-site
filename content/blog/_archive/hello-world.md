@@ -1,4 +1,7 @@
 ---
+benefits: ""
+for: ""
+audience: ["初心者","中級者"]
 title: 'Hello World'
 date: '2025-09-16'
 published: false

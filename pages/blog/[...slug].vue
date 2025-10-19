@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { createError, useRoute, useFetch, useSeoMeta, useHead, useRuntimeConfig, computed } from '#imports'
 import AdSlot from '@/components/AdSlot.vue'
-import AudienceNote from '@/components/AudienceNote.vue'
+import Article from '@/components/blog/Article.vue'
 // Optional fallback for tests: queryContent when API stub is unavailable
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const queryContent: any = (globalThis as any).queryContent
@@ -133,11 +133,6 @@ if (import.meta.dev) {
   })
 }
 
-// 読了目安（1分=約400文字）
-const minutes = computed(() =>
-  Math.max(1, Math.round(((doc.value as any)?.bodyText?.length || 0) / 400))
-)
-
 // 前後記事ナビ: 一覧取得し date 降順で現在の前後を特定
 type BlogItem = { path: string; date: string | null }
 let blogList: BlogItem[] = []
@@ -196,71 +191,44 @@ const related = computed(() => {
 
 <template>
   <main class="container mx-auto px-4 py-6">
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-      <!-- ToC -->
-      <aside v-if="doc?.toc?.links?.length" class="lg:col-span-3 sticky top-24 self-start text-sm">
-        <p class="mb-2 font-medium opacity-80">目次</p>
-        <nav>
-          <ul>
-            <li v-for="(l, i) in (doc.toc.links || [])" :key="i"
-              :class="['my-1', l.depth ? `ml-${(l.depth - 1) * 2}` : '']">
-              <a class="hover:underline" :href="l.id ? ('#' + l.id) : undefined">{{ l.text }}</a>
-            </li>
-          </ul>
-        </nav>
-      </aside>
+    <div v-if="doc?.body">
+      <!-- 本文（Articleコンポーネントで描画） -->
+      <Article :doc="doc" />
 
-      <!-- 本文 -->
-      <div class="lg:col-span-9">
-        <article v-if="doc?.body"
-          class="prose prose-slate max-w-none opacity-100 prose-a:underline-offset-2 hover:prose-a:underline prose-a:font-medium prose-ul:ml-6 prose-ol:ml-6 prose-li:my-1">
-          <h1 class="flex items-baseline gap-3">
-            <span>
-              {{ typeof doc.title === 'string' ? doc.title : (typeof doc.path === 'string' ? doc.path : 'Untitled') }}
-            </span>
-            <small class="text-sm opacity-70">
-              （約 {{ minutes }} 分）</small>
-          </h1>
-          <AudienceNote v-if="doc?.audience" :who="(doc as any).audience" />
-          <!-- テンプレ1行規則: 本文は ContentRenderer の1行で描画（v-if 付き） -->
-          <ContentRenderer v-if="doc?.body" :value="doc" />
-        </article>
+      <!-- 記事下の広告プレースホルダ（noindexの制御ページは除外） -->
+      <section v-if="doc?.path !== '/blog/_control'" aria-label="ad-placeholder" class="mt-8">
+        <AdSlot height="280px" label="広告（仮）" />
+      </section>
 
-        <div v-else class="max-w-prose mx-auto text-center py-16">
-          <p class="text-lg">記事が見つかりませんでした。</p>
-          <p class="mt-4">
-            <NuxtLink to="/blog/" class="underline">記事一覧へ戻る</NuxtLink>
-          </p>
-        </div>
+      <!-- 前後記事ナビ -->
+      <nav v-if="hasPrevNext" class="mt-10 flex justify-between text-sm opacity-80 hover:opacity-100">
+        <span>
+          <NuxtLink v-if="prevNext?.prev" :to="prevNext?.prev?.path">← 前の記事</NuxtLink>
+        </span>
+        <span>
+          <NuxtLink v-if="prevNext?.next" :to="prevNext?.next?.path">次の記事 →</NuxtLink>
+        </span>
+      </nav>
 
-        <!-- 記事下の広告プレースホルダ（noindexの制御ページは除外） -->
-        <section v-if="doc?.body && doc?.path !== '/blog/_control'" aria-label="ad-placeholder" class="mt-8">
-          <AdSlot height="280px" label="広告（仮）" />
-        </section>
+      <!-- 関連記事 -->
+      <section v-if="related && related.length" aria-labelledby="related-heading" class="mt-12 border-t pt-6">
+        <h2 id="related-heading" class="text-base font-semibold opacity-80">関連記事</h2>
+        <ul role="list" class="mt-4 grid gap-3">
+          <li v-for="p in related" :key="p.path">
+            <NuxtLink :to="p.path" class="block hover:underline">
+              <span class="font-medium">{{ p.title }}</span>
+              <span v-if="p.tags?.length" class="ml-2 text-xs opacity-70">#{{ p.tags.slice(0, 3).join(' #') }}</span>
+            </NuxtLink>
+          </li>
+        </ul>
+      </section>
+    </div>
 
-        <!-- 前後記事ナビ -->
-        <nav v-if="hasPrevNext" class="mt-10 flex justify-between text-sm opacity-80 hover:opacity-100">
-          <span>
-            <NuxtLink v-if="prevNext?.prev" :to="prevNext?.prev?.path">← 前の記事</NuxtLink>
-          </span>
-          <span>
-            <NuxtLink v-if="prevNext?.next" :to="prevNext?.next?.path">次の記事 →</NuxtLink>
-          </span>
-        </nav>
-
-        <!-- 関連記事 -->
-        <section v-if="related && related.length" aria-labelledby="related-heading" class="mt-12 border-t pt-6">
-          <h2 id="related-heading" class="text-base font-semibold opacity-80">関連記事</h2>
-          <ul role="list" class="mt-4 grid gap-3">
-            <li v-for="p in related" :key="p.path">
-              <NuxtLink :to="p.path" class="block hover:underline">
-                <span class="font-medium">{{ p.title }}</span>
-                <span v-if="p.tags?.length" class="ml-2 text-xs opacity-70">#{{ p.tags.slice(0, 3).join(' #') }}</span>
-              </NuxtLink>
-            </li>
-          </ul>
-        </section>
-      </div>
+    <div v-else class="max-w-prose mx-auto text-center py-16">
+      <p class="text-lg">記事が見つかりませんでした。</p>
+      <p class="mt-4">
+        <NuxtLink to="/blog/" class="underline">記事一覧へ戻る</NuxtLink>
+      </p>
     </div>
   </main>
 </template>

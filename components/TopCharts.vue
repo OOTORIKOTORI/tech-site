@@ -210,7 +210,7 @@ async function exportChart(kind: 'cpu' | 'load' | 'mem', format: 'svg' | 'png') 
         <div class="flex items-baseline justify-between">
           <span class="text-xs text-gray-600">CPU Used (%)</span>
           <span class="text-[11px] text-gray-500">avg {{ cpuAgg.avg.toFixed(1) }} / max {{ cpuAgg.max.toFixed(1)
-            }}</span>
+          }}</span>
           <button type="button" class="ml-2 px-2 py-0.5 rounded text-xs border focus:outline-none focus-visible:ring"
             :aria-pressed="showCpu" @click="showCpu = !showCpu">
             <span v-if="showCpu">●</span><span v-else>○</span> CPU
@@ -237,7 +237,7 @@ async function exportChart(kind: 'cpu' | 'load' | 'mem', format: 'svg' | 'png') 
             保存
           </button>
           <ul v-if="openMenuCpu" ref="cpuMenu" tabindex="-1" role="menu"
-            class="absolute z-10 mt-1 right-0 bg-white border rounded shadow text-xs min-w-[80px] focus:outline-none"
+            class="absolute z-10 mt-1 right-0 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded shadow text-xs min-w-[80px] focus:outline-none"
             @blur="openMenuCpu = false">
             <li>
               <button type="button" role="menuitem"
@@ -275,7 +275,7 @@ async function exportChart(kind: 'cpu' | 'load' | 'mem', format: 'svg' | 'png') 
         <div class="flex items-baseline justify-between">
           <span class="text-xs text-gray-600">Load (1m)</span>
           <span class="text-[11px] text-gray-500">avg {{ loadAgg.avg.toFixed(2) }} / max {{ loadAgg.max.toFixed(2)
-            }}</span>
+          }}</span>
           <button type="button" class="ml-2 px-2 py-0.5 rounded text-xs border focus:outline-none focus-visible:ring"
             :aria-pressed="showLoad" @click="showLoad = !showLoad">
             <span v-if="showLoad">●</span><span v-else>○</span> Load
@@ -302,7 +302,7 @@ async function exportChart(kind: 'cpu' | 'load' | 'mem', format: 'svg' | 'png') 
             保存
           </button>
           <ul v-if="openMenuLoad" ref="loadMenu" tabindex="-1" role="menu"
-            class="absolute z-10 mt-1 right-0 bg-white border rounded shadow text-xs min-w-[80px] focus:outline-none"
+            class="absolute z-10 mt-1 right-0 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded shadow text-xs min-w-[80px] focus:outline-none"
             @blur="openMenuLoad = false">
             <li>
               <button type="button" role="menuitem"
@@ -339,7 +339,7 @@ async function exportChart(kind: 'cpu' | 'load' | 'mem', format: 'svg' | 'png') 
         <div class="flex items-baseline justify-between">
           <span class="text-xs text-gray-600">Mem Used (MiB)</span>
           <span class="text-[11px] text-gray-500">avg {{ memAgg.avg.toFixed(0) }} / max {{ memAgg.max.toFixed(0)
-            }}</span>
+          }}</span>
           <button type="button" class="ml-2 px-2 py-0.5 rounded text-xs border focus:outline-none focus-visible:ring"
             :aria-pressed="showMem" @click="showMem = !showMem">
             <span v-if="showMem">●</span><span v-else>○</span> Mem
@@ -366,7 +366,7 @@ async function exportChart(kind: 'cpu' | 'load' | 'mem', format: 'svg' | 'png') 
             保存
           </button>
           <ul v-if="openMenuMem" ref="memMenu" tabindex="-1" role="menu"
-            class="absolute z-10 mt-1 right-0 bg-white border rounded shadow text-xs min-w-[80px] focus:outline-none"
+            class="absolute z-10 mt-1 right-0 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded shadow text-xs min-w-[80px] focus:outline-none"
             @blur="openMenuMem = false">
             <li>
               <button type="button" role="menuitem"

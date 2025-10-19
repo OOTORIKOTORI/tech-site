@@ -1,4 +1,6 @@
 ---
+benefits: ""
+for: ""
 title: Welcome
 description: このサイト（Migaki Explorer）の使い方と、このブログで読める内容のガイド。
 date: 2025-10-08
@@ -9,6 +11,9 @@ tags:
 published: true
 draft: false
 ---
+> **この記事はこういう人におすすめ**: （for）
+> **この記事で得られること**: （benefits）
+
 
 ここは **Migaki Explorer** のブログです。
 「日々の作業をちょっとだけ速く・確実にする**小さなツール**」と、その使い方や背景をまとめた**読み物**を置いていきます。

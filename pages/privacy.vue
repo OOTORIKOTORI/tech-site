@@ -24,10 +24,10 @@ const updatedAt = new Date().toISOString()
 <template>
   <main>
     <article class="prose max-w-3xl mx-auto p-6">
-      <h1>Privacy Policy</h1>
+      <h1 class="page-title">Privacy Policy</h1>
 
       <p>
-本サイトでは、アクセス解析や広告配信(将来的な運用を含む)に関連して、Cookie
+        本サイトでは、アクセス解析や広告配信(将来的な運用を含む)に関連して、Cookie
         等の技術を利用して一定の情報を取得する場合があります。取得した情報はサイトの品質改善、セキュリティの確保、コンテンツの最適化のために用いられ、法令および各サービスのポリシーに従って適切に取り扱います。具体的な項目・保存期間・第三者提供の有無などの詳細は、後日、本ページに追記します。
       </p>
 

@@ -1,0 +1,43 @@
+@layer components {
+  button,
+  [type='button'],
+  [type='submit'],
+  a[role='button'],
+  .btn {
+    @apply font-bold text-zinc-900 dark:text-zinc-100;
+    letter-spacing: 0.01em;
+  }
+  /* primary: 青系背景に白文字 */
+  .btn-primary,
+  button.btn-primary,
+  a.btn-primary[role='button'] {
+    @apply bg-blue-600 text-white dark:bg-blue-500 dark:text-white font-bold;
+  }
+  .btn-primary:hover,
+  button.btn-primary:hover,
+  a.btn-primary[role='button']:hover {
+    @apply bg-blue-700 dark:bg-blue-400 text-white dark:text-white;
+  }
+  /* outline/ghost: 枠と文字色をダーク対応 */
+  .btn-outline,
+  button.btn-outline,
+  a.btn-outline[role='button'] {
+    @apply border border-zinc-300 text-zinc-900 dark:border-zinc-600 dark:text-zinc-100 bg-transparent;
+  }
+  .btn-outline:hover,
+  button.btn-outline:hover,
+  a.btn-outline[role='button']:hover {
+    @apply border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400 bg-blue-50 dark:bg-zinc-900;
+  }
+  /* gray系ボタンの沈み防止 */
+  .btn-gray,
+  button.btn-gray,
+  a.btn-gray[role='button'] {
+    @apply bg-zinc-200 text-zinc-900 dark:bg-zinc-700 dark:text-zinc-100;
+  }
+  .btn-gray:hover,
+  button.btn-gray:hover,
+  a.btn-gray[role='button']:hover {
+    @apply bg-zinc-300 dark:bg-zinc-600;
+  }
+}

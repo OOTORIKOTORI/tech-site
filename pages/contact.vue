@@ -1,11 +1,12 @@
 <template>
-  <div class="contact-page mx-auto max-w-md py-12 px-4">
-    <h1 class="text-2xl font-bold mb-6">お問い合わせ</h1>
+  <div class="mx-auto max-w-lg surface p-6">
+    <h1 class="page-title text-2xl font-bold mb-6">お問い合わせ</h1>
     <div class="mb-4 flex items-center">
       <span id="contact-email" class="font-mono text-lg select-all">
         {{ user }}@{{ domain }}
       </span>
-      <button id="copy-btn" class="ml-2 px-2 py-1 rounded bg-gray-200 hover:bg-gray-300 text-sm border border-gray-300"
+      <button id="copy-btn"
+        class="ml-2 px-3 py-1.5 rounded btn-outline font-semibold text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
         @click="copy">
         コピー
       </button>
@@ -16,7 +17,7 @@
       </button>
     </div>
     <div v-if="toast" class="mt-2 text-green-600 text-sm">コピーしました</div>
-    <p class="text-gray-500 text-sm mt-6">
+    <p class="muted text-sm mt-6">
       ※ メールアドレスはスパム対策のため分割表示しています。
     </p>
   </div>
@@ -47,11 +48,3 @@ function openMailto(e: Event) {
   e.preventDefault()
 }
 </script>
-
-<style scoped>
-.contact-page {
-  background: #fff;
-  border-radius: 0.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-}
-</style>

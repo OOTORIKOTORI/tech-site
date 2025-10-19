@@ -1,0 +1,30 @@
+/* btn-outline: コントラスト強化 + focusリング */
+.btn-outline {
+  color: #222 !important;
+  border: 2px solid #888 !important;
+  background: transparent !important;
+  font-weight: 600;
+  box-shadow: none;
+  transition: border-color 0.2s, color 0.2s;
+}
+.btn-outline:hover,
+.btn-outline:focus {
+  color: #fff !important;
+  background: #222 !important;
+  border-color: #222 !important;
+  outline: 2px solid #222 !important;
+  outline-offset: 2px;
+}
+@media (prefers-color-scheme: dark) {
+  .btn-outline {
+    color: #fff !important;
+    border-color: #fff !important;
+  }
+  .btn-outline:hover,
+  .btn-outline:focus {
+    color: #222 !important;
+    background: #fff !important;
+    border-color: #fff !important;
+    outline: 2px solid #fff !important;
+  }
+}

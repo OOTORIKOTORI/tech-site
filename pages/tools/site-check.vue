@@ -110,7 +110,7 @@ const doCheck = async () => {
     <p v-if="err" class="text-red-600">{{ err }}</p>
     <section class="space-y-6">
       <!-- robots.txt -->
-      <div class="border rounded p-4">
+      <div class="border border-zinc-200 dark:border-zinc-800 rounded p-4">
         <div class="flex items-center gap-2 mb-2">
           <h2 class="font-semibold">robots.txt</h2>
           <span :class="'px-2 py-0.5 rounded text-xs ' + badgeClass(robots?.ok)">{{ badge(robots?.ok) }}</span>
@@ -131,7 +131,7 @@ const doCheck = async () => {
           class="whitespace-pre-wrap text-xs bg-gray-100 rounded p-2 mt-1">{{ robots?.raw }}</pre>
       </div>
       <!-- sitemap.xml -->
-      <div class="border rounded p-4">
+      <div class="border border-zinc-200 dark:border-zinc-800 rounded p-4">
         <div class="flex items-center gap-2 mb-2">
           <h2 class="font-semibold">sitemap.xml</h2>
           <span :class="'px-2 py-0.5 rounded text-xs ' + badgeClass(sitemap?.ok)">{{ badge(sitemap?.ok) }}</span>
@@ -152,7 +152,7 @@ const doCheck = async () => {
           class="whitespace-pre-wrap text-xs bg-gray-100 rounded p-2 mt-1">{{ sitemap?.raw }}</pre>
       </div>
       <!-- feed.xml -->
-      <div class="border rounded p-4">
+      <div class="border border-zinc-200 dark:border-zinc-800 rounded p-4">
         <div class="flex items-center gap-2 mb-2">
           <h2 class="font-semibold">feed.xml</h2>
           <span :class="'px-2 py-0.5 rounded text-xs ' + badgeClass(feed?.ok)">{{ badge(feed?.ok) }}</span>
@@ -162,7 +162,7 @@ const doCheck = async () => {
           <li>URL件数: {{ feed?.count }}</li>
           <li>
             ORIGIN一致: <span :class="feed?.allOk ? 'text-green-700' : 'text-red-600'">{{ feed?.allOk ? 'OK' : 'NG'
-            }}</span>
+              }}</span>
           </li>
           <li>サンプル: <span v-if="feed?.sample?.length">{{ feed.sample.join(', ') }}</span><span v-else>なし</span></li>
         </ul>

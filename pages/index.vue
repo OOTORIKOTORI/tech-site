@@ -2,7 +2,7 @@
   <main class="mx-auto max-w-5xl px-6 py-12 space-y-10">
     <!-- Hero -->
     <section class="space-y-4">
-      <h1 data-testid="home-hero-heading" class="text-3xl md:text-4xl font-bold">
+      <h1 data-testid="home-hero-heading" class="page-title text-3xl md:text-4xl font-bold">
         毎日の実務を、少し速く・確実に。
       </h1>
       <p class="text-gray-600">
@@ -10,11 +10,11 @@
       </p>
       <div class="flex flex-wrap gap-3 pt-2">
         <NuxtLink to="/tools"
-          class="rounded-lg px-4 py-2 ring-1 ring-gray-300 hover:bg-gray-50 focus:outline-none focus-visible:ring-2">
+          class="rounded-lg px-4 py-2 ring-1 ring-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-900 focus:outline-none focus-visible:ring-2">
           ツールを探す
         </NuxtLink>
         <NuxtLink to="/blog"
-          class="rounded-lg px-4 py-2 ring-1 ring-gray-200 text-gray-700 hover:bg-gray-50 focus:outline-none focus-visible:ring-2">
+          class="rounded-lg px-4 py-2 ring-1 ring-gray-200 dark:ring-zinc-800 text-gray-700 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-zinc-900 focus:outline-none focus-visible:ring-2">
           最新記事を見る
         </NuxtLink>
       </div>
@@ -25,7 +25,7 @@
       <h2 class="text-xl font-semibold">注目のツール</h2>
       <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <NuxtLink v-for="item in featured" :key="item.href" :to="item.href"
-          class="block rounded-2xl p-4 ring-1 ring-gray-200 hover:bg-gray-50 focus:outline-none focus-visible:ring-2">
+          class="block rounded-2xl p-4 ring-1 ring-gray-200 dark:ring-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-900 focus:outline-none focus-visible:ring-2">
           <div class="font-medium">{{ item.title }}</div>
           <p class="text-sm text-gray-600 mt-1">{{ item.desc }}</p>
         </NuxtLink>
@@ -40,7 +40,7 @@
       </div>
       <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <NuxtLink v-for="t in toolDigest" :key="t.href" :to="t.href"
-          class="block rounded-2xl p-4 ring-1 ring-gray-200 hover:bg-gray-50 focus:outline-none focus-visible:ring-2">
+          class="block rounded-2xl p-4 ring-1 ring-gray-200 dark:ring-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-900 focus:outline-none focus-visible:ring-2">
           <div class="font-medium">{{ t.title }}</div>
           <p class="text-sm text-gray-600 mt-1">{{ t.desc }}</p>
         </NuxtLink>
@@ -59,7 +59,7 @@
       </div>
       <div v-else class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <NuxtLink v-for="p in latestPosts" :key="p._path" :to="p._path"
-          class="block rounded-2xl p-4 ring-1 ring-gray-200 hover:bg-gray-50 focus:outline-none focus-visible:ring-2">
+          class="block rounded-2xl p-4 ring-1 ring-gray-200 dark:ring-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-900 focus:outline-none focus-visible:ring-2">
           <div class="font-medium">{{ p.title }}</div>
           <p class="text-sm text-gray-600 mt-1">{{ p.description }}</p>
           <p v-if="p.audience" class="mt-1 text-xs opacity-70">for: {{ p.audience }}</p>

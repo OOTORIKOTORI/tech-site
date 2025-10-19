@@ -1,4 +1,6 @@
 ---
+benefits: ""
+for: ""
 title: 'Linux topの読み方：現場チートシート'
 description: 'Load, CPU%, Mem/Swap を最短で読むための実務メモ。'
 tags: [linux, top, ops]
@@ -6,6 +8,9 @@ date: 2025-10-15
 draft: true
 audience: 'Linuxサーバの運用担当・SRE（topで一次切り分けしたい人）'
 ---
+> **この記事はこういう人におすすめ**: （for）
+> **この記事で得られること**: （benefits）
+
 
 ## まずは見る場所
 

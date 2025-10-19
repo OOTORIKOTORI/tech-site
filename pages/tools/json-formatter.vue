@@ -89,7 +89,8 @@ function downloadJson() {
       </div>
       <div>
         <label class="block text-sm font-medium">出力</label>
-        <div aria-live="polite" class="mt-1 min-h-[3rem] rounded border bg-gray-50 p-2">
+        <div aria-live="polite"
+          class="mt-1 min-h-[3rem] rounded border border-zinc-200 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-900 p-2">
           <pre v-if="output" class="overflow-x-auto text-sm"><code>{{ output }}</code></pre>
           <p v-else class="text-sm text-gray-400">整形結果がここに表示されます。</p>
         </div>

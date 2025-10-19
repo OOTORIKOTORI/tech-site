@@ -100,7 +100,8 @@ async function analyze() {
     <section class="space-y-2">
       <div class="flex items-center gap-3 justify-end">
         <label class="text-xs text-gray-600">CSVヘッダー</label>
-        <select v-model="headerLang" class="rounded-md ring-1 ring-gray-300 text-sm px-2 py-1 bg-white">
+        <select v-model="headerLang"
+          class="rounded-md ring-1 ring-gray-300 text-sm px-2 py-1 bg-white dark:bg-zinc-900">
           <option value="en">英語</option>
           <option value="ja">日本語</option>
         </select>
@@ -125,7 +126,7 @@ async function analyze() {
     </section>
     <!-- 項目の見方 -->
     <section class="space-y-2">
-      <details class="rounded-xl ring-1 ring-gray-200 p-3 bg-white/60">
+      <details class="rounded-xl ring-1 ring-gray-200 dark:ring-zinc-800 p-3 bg-white/60 dark:bg-zinc-900/60">
         <summary class="cursor-pointer font-medium">項目の見方（クリックで開く）</summary>
         <div class="mt-3 grid gap-2 sm:grid-cols-2">
           <div v-for="c in TOP_COLUMNS" :key="c.key" class="text-sm">

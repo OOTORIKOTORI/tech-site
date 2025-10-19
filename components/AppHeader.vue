@@ -1,13 +1,13 @@
 <template>
   <!-- Skip link should be the very first focusable element -->
   <a href="#main"
-    class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:bg-white focus:text-blue-700 focus:ring-2 focus:ring-blue-600 focus:px-3 focus:py-2 rounded">
+    class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:bg-white dark:focus:bg-zinc-900 focus:text-blue-700 focus:ring-2 focus:ring-blue-600 focus:px-3 focus:py-2 rounded">
     本文へスキップ
   </a>
 
-  <header class="border-b bg-white">
+  <header class="border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
     <nav aria-label="Primary" class="mx-auto max-w-6xl px-4">
-      <ul class="flex items-center gap-6 py-3 text-gray-700">
+      <ul class="flex items-center gap-6 py-3 text-gray-700 dark:text-zinc-300">
         <li>
           <NuxtLink to="/" :aria-current="isHome ? 'page' : undefined" class="text-blue-600 hover:underline focus-ring">
             Home

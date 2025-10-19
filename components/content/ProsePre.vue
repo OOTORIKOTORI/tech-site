@@ -1,7 +1,7 @@
 <template>
   <div class="relative group">
     <button type="button"
-      class="absolute right-2 top-2 z-10 rounded-md bg-white/80 px-2 py-1 text-xs text-gray-700 shadow hover:bg-white focus:outline-none focus:ring-2 focus:ring-slate-500"
+      class="absolute right-2 top-2 z-10 rounded-md bg-white/80 dark:bg-zinc-800/80 px-2 py-1 text-xs text-gray-700 dark:text-zinc-200 shadow hover:bg-white dark:hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-slate-500"
       :aria-label="copied ? 'Copied' : 'Copy code'" @click="copyCode">
       {{ copied ? 'Copied' : 'Copy' }}
     </button>

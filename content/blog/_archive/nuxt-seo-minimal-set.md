@@ -1,4 +1,7 @@
 ---
+benefits: ""
+for: ""
+audience: ["初心者","中級者"]
 title: 'Nuxt + @nuxt/contentで"土台SEO"を最短構築する最小セット'
 description: 'canonical/JSON-LD/robots/sitemap/feedを最小のコードで。プレビューnoindexとCIチェックまで。'
 slug: 'nuxt-seo-minimal-set'
@@ -13,7 +16,11 @@ tags:
   - internal
   - archived
 draft: false
----: 'Nuxt + @nuxt/contentで“土台SEO”を最短構築する最小セット'
+---
+> **この記事はこういう人におすすめ**: （for）
+> **この記事で得られること**: （benefits）
+
+: 'Nuxt + @nuxt/contentで“土台SEO”を最短構築する最小セット'
 description: 'canonical/JSON-LD/robots/sitemap/feedを最小のコードで。プレビューnoindexとCIチェックまで。'
 slug: 'nuxt-seo-minimal-set'
 date: '2025-09-23'

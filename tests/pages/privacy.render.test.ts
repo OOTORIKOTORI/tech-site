@@ -21,7 +21,7 @@ describe('pages/privacy.vue', () => {
     const mod = await import('@/pages/privacy.vue')
     const wrapper = mount(mod.default as any)
     const html = wrapper.html()
-    expect(html).toContain('<h1>Privacy Policy</h1>')
+    expect(html).toMatch(/<h1[^>]*>Privacy Policy<\/h1>/)
     expect(html).toContain('個人情報を適切に取り扱い')
   })
 })

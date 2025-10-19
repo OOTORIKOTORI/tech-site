@@ -12,13 +12,25 @@ C:\website\tech-site
 ├── app.vue
 ├── assets
 |  └── css
-|     └── tailwind.css
+|     ├── buttons-contrast-override.css
+|     ├── buttons-contrast.css
+|     ├── forms-dark.css
+|     ├── sections.css
+|     ├── surface.css
+|     ├── tailwind.css
+|     ├── typography-boost.css
+|     └── typography-overrides.css
 ├── check-status.txt
 ├── components
 |  ├── AdSlot.vue
 |  ├── AppFooter.vue
 |  ├── AppHeader.vue
 |  ├── AudienceNote.vue
+|  ├── blog
+|  |  ├── Article.vue
+|  |  ├── BlogToc.vue
+|  |  ├── GlossaryTerm.vue
+|  |  └── SeriesNav.vue
 |  ├── content
 |  |  ├── Footnote.vue
 |  |  ├── Footnotes.vue
@@ -30,6 +42,7 @@ C:\website\tech-site
 |  ├── GlobalNav.vue
 |  ├── RelatedList.vue
 |  ├── TagChip.vue
+|  ├── ThemeToggle.vue
 |  ├── ToolIntro.vue
 |  ├── ToolIntroBox.vue
 |  ├── TopCharts.vue
@@ -60,7 +73,8 @@ C:\website\tech-site
 |  ├── tools
 |  |  └── help.md
 |  └── _templates
-|     └── blog.md
+|     ├── blog.md
+|     └── post.md
 ├── content.config.ts
 ├── content.config.ts.bak
 ├── count-blog-links.ps1
@@ -156,6 +170,7 @@ C:\website\tech-site
 |  |  └── guard-relative-fetch.cjs
 |  ├── ci-local.ps1
 |  ├── gen-meta.mjs
+|  ├── migrate-blog-template.cjs
 |  ├── ops
 |  |  ├── rollback.ps1
 |  |  └── smoke-control-seo.cjs
@@ -278,5 +293,5 @@ C:\website\tech-site
 └── workers
    └── topParser.worker.ts
 
-directory: 63 file: 210 symboliclink: 36
+directory: 64 file: 224 symboliclink: 37
 

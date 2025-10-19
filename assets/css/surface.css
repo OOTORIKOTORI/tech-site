@@ -1,0 +1,17 @@
+@layer components {
+  /* カード/ボックス共通の面 */
+  .surface {
+    @apply bg-white text-zinc-900 border border-zinc-200 rounded-xl;
+  }
+  .dark .surface {
+    @apply bg-zinc-900 text-zinc-100 border-zinc-800;
+  }
+
+  /* 補助: 薄めテキスト（説明など） */
+  .muted {
+    @apply text-zinc-600;
+  }
+  .dark .muted {
+    @apply text-zinc-400;
+  }
+}

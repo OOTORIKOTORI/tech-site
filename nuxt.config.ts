@@ -1,7 +1,7 @@
 ﻿import { defineNuxtConfig } from 'nuxt/config'
 
 export default defineNuxtConfig({
-  modules: ['@nuxt/content', '@nuxtjs/tailwindcss'],
+  modules: ['@nuxt/content', '@nuxtjs/tailwindcss', '@nuxtjs/color-mode'],
   plugins: ['~/plugins/meta-defaults.client.ts', '~/plugins/consent.client.ts'],
   css: ['@@/assets/css/tailwind.css'],
   pages: true,
@@ -142,6 +142,11 @@ export default defineNuxtConfig({
       // そのため dataLayer 初期化は plugins/consent.client.ts 側で実施しています（head.script での ID 設定は未対応のまま）。
       // 実運用で ID を設定する際は、外部 JS として提供するか CSP を調整してください。
     },
+  },
+  colorMode: {
+    preference: 'system',
+    fallback: 'light',
+    classSuffix: '',
   },
   vite: { resolve: { alias: { '#content/server': '@nuxt/content/nitro' } } },
 })
