@@ -81,9 +81,11 @@ SFC（`pages/blog/[...slug].vue`）ではグローバル `queryContent` 利用�
 
 ### CI/品質ゲート・運用ルール
 
-- **pre-push フックは `.husky/.env` を POSIX sh で読み込む（機密は含めない）**。ORIGIN はここで固定し、CI/ローカル差を無くす。
+- **pre-push フックは `.husky/.env` を POSIX sh で読み込む(機密は含めない)**。ORIGIN はここで固定し、CI/ローカル差を無くす。
 - **`scripts/smoke-og.mjs` は `new URL(path, origin)` で URL を正規化**し、**301/308 は単発フォロー**→ **200/302 到達を PASS** とする。
   - ORIGIN の末尾スラッシュ有無は不問（`new URL` により正規化）。
+- CI の合否は Accessibility ≥ 90 / Best Practices ≥ 0.70 のアサートに従う（budgets は参考値）。
+- OGP API の既定動作（`/og-default.png` への 302 フォールバック、`ENABLE_DYNAMIC_OG=1` で動的生成など）は README の「要点」を参照。
 
 ## Troubleshooting: /blog 詳細（補足・最小）
 
@@ -110,6 +112,7 @@ SFC（`pages/blog/[...slug].vue`）ではグローバル `queryContent` 利用�
   ```
   （`v-else`は 404 専用。白紙描画は禁止）
 - frontmatter に **`audience` を原則必須**（タイトル直下に AudienceNote を表示）。
+- CI の guards で `/blog` の frontmatter に `audience` が存在するかを静的検査する。
 
 ### サイト概要
 

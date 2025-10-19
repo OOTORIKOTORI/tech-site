@@ -121,6 +121,8 @@
 ## 運用メモ(抜粋)
 
 - pre-push 例: `typecheck → lint → test → build → postbuild → smoke:og → ci:guards → LHCI`。
+  - 備考: `ci:guards` には `guard-audience`（ブログ記事の frontmatter に audience を要求）が含まれます。
+    - ローカル実行: `pnpm run ci:guards`（すべてのガードを一括実行）
 - 主要リンクの `focus-visible` は `.focus-ring` を適用し視認性を統一。
 
 ---
@@ -132,6 +134,31 @@
 3. 記事テンプレ/参考: DOM×DOW の OR/AND とタイムゾーンの落とし穴
 
 - ブログは原則 結論 → 手順 → 補足 の順で簡潔に。frontmatter の `audience` があればタイトル直下に対象ブロック（AudienceNote）を表示します。
+
+### Tips: 差分限定の pre-commit（guard-audience のみ）
+
+`content/` 配下に変更があるコミットだけ、軽量に `guard-audience` を走らせたい場合の例です（フック本体は変更不要・任意）。
+
+- Bash（`.husky/pre-commit` など）:
+
+```bash
+changed=$(git diff --cached --name-only | grep -E '^content/')
+if [ -n "$changed" ]; then
+  node scripts/ci/guard-audience.cjs || exit 1
+fi
+```
+
+- PowerShell（Windows 環境でローカルチェックしたい場合の例）:
+
+```powershell
+$changed = git diff --cached --name-only | Select-String '^content/'
+if ($changed) {
+  node .\scripts\ci\guard-audience.cjs
+  if ($LASTEXITCODE -ne 0) { exit 1 }
+}
+```
+
+上記はあくまで Tips であり、CI 本番では `ci:guards` の一部として `guard-audience` が実行されます。
 
 **リセット時の状態**: welcome のみ公開 / アーカイブは internal タグで非露出
 

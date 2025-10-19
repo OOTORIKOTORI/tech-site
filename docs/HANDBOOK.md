@@ -10,6 +10,7 @@
 - SSR 実行パスでは相対 URL を使わない（`useFetch` か ORIGIN 由来の絶対 URL）。F5 リロード時の 500（Only absolute URLs...）を未然に防ぐ。
 - CI 失敗は出荷ブロック。
 - LHCI は本番トップ（/）が **200 になるまで待機**してから収集し、失敗時は **1 回のみリトライ**。`categories:best-practices` の minScore は **0.70（暫定・AdSense 影響）**。
+- CI の合否は Accessibility ≥ 90 / Best Practices ≥ 0.70 のアサートで判定する（budgets は参考）。
 - ルール序列: 正準=PROJECT_SPEC / 要点=README / 規約=HANDBOOK
 - ブランド: 「磨きエクスプローラー（Migaki Explorer）」／短縮名「Migaki Explorer」
 - ORIGIN: https://migakiexplorer.jp

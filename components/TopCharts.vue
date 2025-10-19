@@ -25,6 +25,30 @@ const cpuMenu = ref<HTMLUListElement | null>(null)
 const loadMenu = ref<HTMLUListElement | null>(null)
 const memMenu = ref<HTMLUListElement | null>(null)
 
+// Export format (remembered in localStorage)
+const EXPORT_FORMAT_KEY = 'top-analyzer-export-format'
+const exportFormat = ref<'svg' | 'png'>('png')
+const ariaLiveMessage = ref('')
+
+onMounted(() => {
+  if (typeof window !== 'undefined') {
+    const v = window.localStorage.getItem(EXPORT_FORMAT_KEY)
+    if (v === 'svg' || v === 'png') exportFormat.value = v
+  }
+})
+
+function setExportFormat(f: 'svg' | 'png') {
+  exportFormat.value = f
+  if (typeof window !== 'undefined') window.localStorage.setItem(EXPORT_FORMAT_KEY, f)
+}
+
+function announce(msg: string) {
+  ariaLiveMessage.value = msg
+  setTimeout(() => {
+    ariaLiveMessage.value = ''
+  }, 1500)
+}
+
 // メニュー外クリックで全メニューを閉じる
 const onBodyClick = (e: MouseEvent) => {
   const t = e.target as HTMLElement | null
@@ -151,6 +175,7 @@ async function exportChart(kind: 'cpu' | 'load' | 'mem', format: 'svg' | 'png') 
     a.click()
     URL.revokeObjectURL(url)
     a.remove()
+    announce(`Saved ${kind} as SVG`)
     return
   }
 
@@ -170,6 +195,7 @@ async function exportChart(kind: 'cpu' | 'load' | 'mem', format: 'svg' | 'png') 
     a.download = filename(kind, 'png')
     a.click()
     a.remove()
+    announce(`Saved ${kind} as PNG`)
     return
   }
 
@@ -197,6 +223,7 @@ async function exportChart(kind: 'cpu' | 'load' | 'mem', format: 'svg' | 'png') 
       }
       img.src = svgUrl
     })
+    announce(`Saved ${kind} as PNG`)
   }
 }
 </script>
@@ -210,7 +237,7 @@ async function exportChart(kind: 'cpu' | 'load' | 'mem', format: 'svg' | 'png') 
         <div class="flex items-baseline justify-between">
           <span class="text-xs text-gray-600">CPU Used (%)</span>
           <span class="text-[11px] text-gray-500">avg {{ cpuAgg.avg.toFixed(1) }} / max {{ cpuAgg.max.toFixed(1)
-          }}</span>
+            }}</span>
           <button type="button" class="ml-2 px-2 py-0.5 rounded text-xs border focus:outline-none focus-visible:ring"
             :aria-pressed="showCpu" @click="showCpu = !showCpu">
             <span v-if="showCpu">●</span><span v-else>○</span> CPU
@@ -228,29 +255,37 @@ async function exportChart(kind: 'cpu' | 'load' | 'mem', format: 'svg' | 'png') 
           </template>
         </div>
       </figcaption>
-      <div class="flex gap-2 mt-1">
+      <div class="flex gap-2 mt-1 items-center">
         <div class="relative" data-save-menu @keydown.esc="openMenuCpu = false">
-          <button type="button" class="px-2 py-0.5 rounded text-xs border focus:outline-none focus-visible:ring"
-            aria-haspopup="menu" :aria-expanded="openMenuCpu ? 'true' : 'false'" aria-label="CPUチャートを保存メニュー表示"
-            @click="openMenuCpu = !openMenuCpu"
-            @keydown.down.prevent="(openMenuCpu = true, nextTick(() => cpuMenu?.focus()))">
-            保存
-          </button>
+          <div class="inline-flex rounded-md shadow-sm" role="group" aria-label="CPU保存">
+            <button type="button"
+              class="px-3 py-0.5 text-sm rounded-l border border-r-0 focus:outline-none focus-visible:ring"
+              :aria-label="`保存（${exportFormat}）`" @click="exportChart('cpu', exportFormat)">
+              保存
+            </button>
+            <button type="button" class="px-2 py-0.5 text-sm rounded-r border focus:outline-none focus-visible:ring"
+              aria-haspopup="menu" :aria-expanded="openMenuCpu ? 'true' : 'false'" aria-label="保存形式を切替"
+              @click="(openMenuCpu = !openMenuCpu)"
+              @keydown.down.prevent="(openMenuCpu = true, nextTick(() => cpuMenu?.querySelector('button')?.focus()))">
+              ▾
+            </button>
+          </div>
+
           <ul v-if="openMenuCpu" ref="cpuMenu" tabindex="-1" role="menu"
-            class="absolute z-10 mt-1 right-0 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded shadow text-xs min-w-[80px] focus:outline-none"
+            class="absolute z-10 mt-1 right-0 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded shadow text-xs min-w-[120px] focus:outline-none"
             @blur="openMenuCpu = false">
             <li>
-              <button type="button" role="menuitem"
-                class="w-full text-left px-3 py-1 hover:bg-gray-100 focus:bg-gray-100" aria-label="CPUチャートをSVGで保存"
-                @click="exportChart('cpu', 'svg'); openMenuCpu = false">
-                SVGで保存
+              <button type="button" role="menuitemradio" :aria-checked="exportFormat === 'svg'"
+                class="w-full text-left px-3 py-1 hover:bg-gray-100 focus:bg-gray-100" aria-label="SVGを選択"
+                @click="(setExportFormat('svg'), openMenuCpu = false)">
+                SVG を選択
               </button>
             </li>
             <li>
-              <button type="button" role="menuitem"
-                class="w-full text-left px-3 py-1 hover:bg-gray-100 focus:bg-gray-100" aria-label="CPUチャートをPNGで保存"
-                @click="exportChart('cpu', 'png'); openMenuCpu = false">
-                PNGで保存
+              <button type="button" role="menuitemradio" :aria-checked="exportFormat === 'png'"
+                class="w-full text-left px-3 py-1 hover:bg-gray-100 focus:bg-gray-100" aria-label="PNGを選択"
+                @click="(setExportFormat('png'), openMenuCpu = false)">
+                PNG を選択
               </button>
             </li>
           </ul>
@@ -275,7 +310,7 @@ async function exportChart(kind: 'cpu' | 'load' | 'mem', format: 'svg' | 'png') 
         <div class="flex items-baseline justify-between">
           <span class="text-xs text-gray-600">Load (1m)</span>
           <span class="text-[11px] text-gray-500">avg {{ loadAgg.avg.toFixed(2) }} / max {{ loadAgg.max.toFixed(2)
-          }}</span>
+            }}</span>
           <button type="button" class="ml-2 px-2 py-0.5 rounded text-xs border focus:outline-none focus-visible:ring"
             :aria-pressed="showLoad" @click="showLoad = !showLoad">
             <span v-if="showLoad">●</span><span v-else>○</span> Load
@@ -293,29 +328,37 @@ async function exportChart(kind: 'cpu' | 'load' | 'mem', format: 'svg' | 'png') 
           </template>
         </div>
       </figcaption>
-      <div class="flex gap-2 mt-1">
+      <div class="flex gap-2 mt-1 items-center">
         <div class="relative" data-save-menu @keydown.esc="openMenuLoad = false">
-          <button type="button" class="px-2 py-0.5 rounded text-xs border focus:outline-none focus-visible:ring"
-            aria-haspopup="menu" :aria-expanded="openMenuLoad ? 'true' : 'false'" aria-label="Loadチャートを保存メニュー表示"
-            @click="openMenuLoad = !openMenuLoad"
-            @keydown.down.prevent="(openMenuLoad = true, nextTick(() => loadMenu?.focus()))">
-            保存
-          </button>
+          <div class="inline-flex rounded-md shadow-sm" role="group" aria-label="Load保存">
+            <button type="button"
+              class="px-3 py-0.5 text-sm rounded-l border border-r-0 focus:outline-none focus-visible:ring"
+              :aria-label="`保存（${exportFormat}）`" @click="exportChart('load', exportFormat)">
+              保存
+            </button>
+            <button type="button" class="px-2 py-0.5 text-sm rounded-r border focus:outline-none focus-visible:ring"
+              aria-haspopup="menu" :aria-expanded="openMenuLoad ? 'true' : 'false'" aria-label="保存形式を切替"
+              @click="(openMenuLoad = !openMenuLoad)"
+              @keydown.down.prevent="(openMenuLoad = true, nextTick(() => loadMenu?.querySelector('button')?.focus()))">
+              ▾
+            </button>
+          </div>
+
           <ul v-if="openMenuLoad" ref="loadMenu" tabindex="-1" role="menu"
-            class="absolute z-10 mt-1 right-0 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded shadow text-xs min-w-[80px] focus:outline-none"
+            class="absolute z-10 mt-1 right-0 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded shadow text-xs min-w-[120px] focus:outline-none"
             @blur="openMenuLoad = false">
             <li>
-              <button type="button" role="menuitem"
-                class="w-full text-left px-3 py-1 hover:bg-gray-100 focus:bg-gray-100" aria-label="LoadチャートをSVGで保存"
-                @click="exportChart('load', 'svg'); openMenuLoad = false">
-                SVGで保存
+              <button type="button" role="menuitemradio" :aria-checked="exportFormat === 'svg'"
+                class="w-full text-left px-3 py-1 hover:bg-gray-100 focus:bg-gray-100" aria-label="SVGを選択"
+                @click="(setExportFormat('svg'), openMenuLoad = false)">
+                SVG を選択
               </button>
             </li>
             <li>
-              <button type="button" role="menuitem"
-                class="w-full text-left px-3 py-1 hover:bg-gray-100 focus:bg-gray-100" aria-label="LoadチャートをPNGで保存"
-                @click="exportChart('load', 'png'); openMenuLoad = false">
-                PNGで保存
+              <button type="button" role="menuitemradio" :aria-checked="exportFormat === 'png'"
+                class="w-full text-left px-3 py-1 hover:bg-gray-100 focus:bg-gray-100" aria-label="PNGを選択"
+                @click="(setExportFormat('png'), openMenuLoad = false)">
+                PNG を選択
               </button>
             </li>
           </ul>
@@ -339,7 +382,7 @@ async function exportChart(kind: 'cpu' | 'load' | 'mem', format: 'svg' | 'png') 
         <div class="flex items-baseline justify-between">
           <span class="text-xs text-gray-600">Mem Used (MiB)</span>
           <span class="text-[11px] text-gray-500">avg {{ memAgg.avg.toFixed(0) }} / max {{ memAgg.max.toFixed(0)
-          }}</span>
+            }}</span>
           <button type="button" class="ml-2 px-2 py-0.5 rounded text-xs border focus:outline-none focus-visible:ring"
             :aria-pressed="showMem" @click="showMem = !showMem">
             <span v-if="showMem">●</span><span v-else>○</span> Mem
@@ -357,29 +400,37 @@ async function exportChart(kind: 'cpu' | 'load' | 'mem', format: 'svg' | 'png') 
           </template>
         </div>
       </figcaption>
-      <div class="flex gap-2 mt-1">
+      <div class="flex gap-2 mt-1 items-center">
         <div class="relative" data-save-menu @keydown.esc="openMenuMem = false">
-          <button type="button" class="px-2 py-0.5 rounded text-xs border focus:outline-none focus-visible:ring"
-            aria-haspopup="menu" :aria-expanded="openMenuMem ? 'true' : 'false'" aria-label="Memチャートを保存メニュー表示"
-            @click="openMenuMem = !openMenuMem"
-            @keydown.down.prevent="(openMenuMem = true, nextTick(() => memMenu?.focus()))">
-            保存
-          </button>
+          <div class="inline-flex rounded-md shadow-sm" role="group" aria-label="Mem保存">
+            <button type="button"
+              class="px-3 py-0.5 text-sm rounded-l border border-r-0 focus:outline-none focus-visible:ring"
+              :aria-label="`保存（${exportFormat}）`" @click="exportChart('mem', exportFormat)">
+              保存
+            </button>
+            <button type="button" class="px-2 py-0.5 text-sm rounded-r border focus:outline-none focus-visible:ring"
+              aria-haspopup="menu" :aria-expanded="openMenuMem ? 'true' : 'false'" aria-label="保存形式を切替"
+              @click="(openMenuMem = !openMenuMem)"
+              @keydown.down.prevent="(openMenuMem = true, nextTick(() => memMenu?.querySelector('button')?.focus()))">
+              ▾
+            </button>
+          </div>
+
           <ul v-if="openMenuMem" ref="memMenu" tabindex="-1" role="menu"
-            class="absolute z-10 mt-1 right-0 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded shadow text-xs min-w-[80px] focus:outline-none"
+            class="absolute z-10 mt-1 right-0 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded shadow text-xs min-w-[120px] focus:outline-none"
             @blur="openMenuMem = false">
             <li>
-              <button type="button" role="menuitem"
-                class="w-full text-left px-3 py-1 hover:bg-gray-100 focus:bg-gray-100" aria-label="MemチャートをSVGで保存"
-                @click="exportChart('mem', 'svg'); openMenuMem = false">
-                SVGで保存
+              <button type="button" role="menuitemradio" :aria-checked="exportFormat === 'svg'"
+                class="w-full text-left px-3 py-1 hover:bg-gray-100 focus:bg-gray-100" aria-label="SVGを選択"
+                @click="(setExportFormat('svg'), openMenuMem = false)">
+                SVG を選択
               </button>
             </li>
             <li>
-              <button type="button" role="menuitem"
-                class="w-full text-left px-3 py-1 hover:bg-gray-100 focus:bg-gray-100" aria-label="MemチャートをPNGで保存"
-                @click="exportChart('mem', 'png'); openMenuMem = false">
-                PNGで保存
+              <button type="button" role="menuitemradio" :aria-checked="exportFormat === 'png'"
+                class="w-full text-left px-3 py-1 hover:bg-gray-100 focus:bg-gray-100" aria-label="PNGを選択"
+                @click="(setExportFormat('png'), openMenuMem = false)">
+                PNG を選択
               </button>
             </li>
           </ul>
@@ -395,4 +446,6 @@ async function exportChart(kind: 'cpu' | 'load' | 'mem', format: 'svg' | 'png') 
       </svg>
     </figure>
   </div>
+  <!-- aria-live for screen readers -->
+  <div aria-live="polite" class="sr-only">{{ ariaLiveMessage }}</div>
 </template>
