@@ -16,6 +16,7 @@
 </template>
 
 <script setup lang="ts">
+
 import { computed, useAsyncData } from '#imports'
 
 const props = defineProps<{ doc: any }>()

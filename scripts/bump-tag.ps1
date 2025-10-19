@@ -36,13 +36,33 @@ $NEXT = Get-NextVersion $LAST $bump
 
 Write-Host "Last: $LAST -> Next: $NEXT (bump=$bump)"
 
-# Skip if tag already exists
+# Skip if tag already exists locally
 $null = git rev-parse -q --verify "refs/tags/$NEXT" 2>$null
 if ($LASTEXITCODE -eq 0) {
-  Write-Host "Tag $NEXT already exists; skipping."
+  Write-Host "Tag $NEXT already exists locally; skipping."
   exit 0
 }
 
-# Create annotated tag and push only that tag
+# Create annotated tag
 git tag -a $NEXT -m "$NEXT"
+if ($LASTEXITCODE -ne 0) {
+  Write-Host "Failed to create tag $NEXT" -ForegroundColor Red
+  exit 1
+}
+
+# Check if tag already exists on remote
+$null = git ls-remote --tags origin "refs/tags/$NEXT" 2>$null
+if ($LASTEXITCODE -eq 0) {
+  Write-Host "Tag $NEXT already exists on remote; skipping push."
+  Write-Host "✓ Tag created locally: $NEXT" -ForegroundColor Green
+  exit 0
+}
+
+# Push only that tag
 git push origin $NEXT
+if ($LASTEXITCODE -eq 0) {
+  Write-Host "✓ Created and pushed tag: $NEXT" -ForegroundColor Green
+} else {
+  Write-Host "Failed to push tag $NEXT" -ForegroundColor Red
+  exit 1
+}

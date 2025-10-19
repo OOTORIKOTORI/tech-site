@@ -62,7 +62,7 @@ const updatedDate = computed(() => props.doc?.updatedAt || props.doc?.updated)
 useHead(() => {
   const title = props.doc?.title || 'Blog'
   const desc = props.doc?.description || ''
-  const img = absolute(props.doc?.ogImage || props.doc?.hero || '/ogp/default.png')
+  const img = absolute(props.doc?.ogImage || props.doc?.hero || '/og-default.png')
   const url = absolute(props.doc?._path || props.doc?.path || '/')
   return {
     title,
