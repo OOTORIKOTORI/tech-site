@@ -1,14 +1,26 @@
 ﻿<template>
   <div class="container mx-auto max-w-3xl py-8 px-4 space-y-6">
     <ToolIntro title="CRON ⇄ JST/UTC 変換" description="CRON式の次回発火時刻を JST/UTC で確認。式の整合性チェックにも。"
-      usage="1) CRON式を入力\n2) 変換/次回発火を確認" time="~10秒" audience="開発・運用" :example-input="exampleInput"
-      :example-output="exampleOutput" />
+      usage="1) CRON式を入力\n2) タイムゾーンを選択\n3) 次回発火を確認" time="~10秒" audience="初心者・開発・運用" :example-input="exampleInput"
+      :example-output="exampleOutput">
+      <template #extra>
+        <p class="text-sm mt-2">
+          これは何？どんな時に使う？がまだ不安な方は、
+          <NuxtLink to="/blog/cron-basics" class="text-blue-700 underline hover:text-blue-900 focus-ring">
+基礎ガイドを読む
+          </NuxtLink>
+          からスタートしてください。
+        </p>
+      </template>
+    </ToolIntro>
     <ToolIntroBox audience="サイト運用・開発者（定時バッチの確認）" value="crontab 式を JST/UTC で検証し、次回実行を即確認"
       how="式を入力 → タイムゾーンを選択 → 次回実行を確認" safety="処理はブラウザ内のみ（データ送信なし）" />
     <h1 class="text-2xl font-bold">Cron JST 次回実行予測</h1>
     <AudienceNote who="サイト運用・開発者（定時バッチの確認）" />
     <div class="mt-2 text-sm">
-      <NuxtLink to="/blog" class="text-blue-700 underline hover:text-blue-900 focus-ring">Tech Blogはこちら</NuxtLink>
+      <NuxtLink to="/blog/cron-basics" class="text-blue-700 underline hover:text-blue-900 focus-ring">
+CRON入門（基礎ガイド）を読む
+      </NuxtLink>
     </div>
 
     <div class="rounded-md bg-blue-50 dark:bg-blue-950 text-blue-900 dark:text-blue-100 text-sm p-3" role="status"
@@ -101,6 +113,12 @@
         <span class="text-xs text-gray-500 ml-2">表示中: {{ displayed.length }} / {{ MAX_TOTAL }} 件</span>
       </h2>
 
+      <p class="text-sm text-gray-600 -mt-1">
+        CRON式の基礎は
+        <NuxtLink to="/blog/cron-basics" class="text-blue-700 underline hover:text-blue-900 focus-ring">基礎ガイド</NuxtLink>
+        で解説しています。
+      </p>
+
       <ul class="list-disc pl-6 space-y-1">
         <li v-for="dt in displayed" :key="dt.toISOString()" class="font-mono">
           {{ format(dt, tzDisp) }}
@@ -172,6 +190,7 @@ function onPreset(e: Event) {
 const tzDisp = ref<'Asia/Tokyo' | 'UTC'>('Asia/Tokyo')
 const count = ref(5)
 const copied = ref(false)
+let copyTo: ReturnType<typeof setTimeout> | null = null
 const baseInput = ref('') // datetime-local の値
 const baseFrom = ref<Date | null>(null) // UTC基準の瞬間
 
@@ -304,7 +323,8 @@ async function copyLink() {
       document.body.removeChild(textarea)
     }
     copied.value = true
-    setTimeout(() => (copied.value = false), 1200)
+    if (copyTo) { clearTimeout(copyTo); copyTo = null }
+    copyTo = setTimeout(() => { copied.value = false; copyTo = null }, 1200)
   } catch {
     copied.value = false
     alert('クリップボードへのコピーに失敗しました')
@@ -453,6 +473,7 @@ onMounted(() => {
 onUnmounted(() => {
   if (nowTo) { clearTimeout(nowTo); nowTo = null }
   if (nowIv) { clearInterval(nowIv); nowIv = null }
+  if (copyTo) { clearTimeout(copyTo); copyTo = null }
 })
 </script>
 

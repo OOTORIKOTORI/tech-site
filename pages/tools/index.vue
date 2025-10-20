@@ -1,11 +1,7 @@
 <template>
   <section class="mx-auto max-w-6xl px-4 py-8">
     <div class="flex items-center justify-between mb-6">
-      <h1 class="text-3xl font-semibold text-blue-500 dark:text-blue-400 title-stroke-white title-strong">Tools</h1>
-      <NuxtLink to="/tools/top-analyzer"
-        class="rounded-lg px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus-visible:ring-2">
-        サンプルで試す
-      </NuxtLink>
+      <h1 class="text-3xl font-semibold text-foreground">Tools</h1>
     </div>
 
     <ul class="grid grid-cols-1 sm:grid-cols-2 gap-4" aria-label="Available tools">

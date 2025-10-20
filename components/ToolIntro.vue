@@ -27,6 +27,7 @@
         </div>
       </details>
     </div>
+    <slot name="extra" />
   </section>
 </template>
 
