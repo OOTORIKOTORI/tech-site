@@ -24,6 +24,34 @@ class ROStub {
   disconnect() {}
 }
 
+type MockFn = ReturnType<typeof vi.fn>
+
+type CanvasRenderingContext2DMock = {
+  canvas: HTMLCanvasElement
+  fillStyle: string
+  fillRect: MockFn
+  drawImage: MockFn
+  clearRect: MockFn
+  save: MockFn
+  restore: MockFn
+  globalCompositeOperation: string
+}
+
+const originalCanvasGetContext =
+  typeof HTMLCanvasElement !== 'undefined' ? HTMLCanvasElement.prototype.getContext : undefined
+const originalCanvasToDataURL =
+  typeof HTMLCanvasElement !== 'undefined' ? HTMLCanvasElement.prototype.toDataURL : undefined
+
+const canvasContextMap =
+  typeof WeakMap !== 'undefined'
+    ? new WeakMap<HTMLCanvasElement, CanvasRenderingContext2DMock>()
+    : (new Map() as unknown as WeakMap<HTMLCanvasElement, CanvasRenderingContext2DMock>)
+
+const canvasContextRecords: Array<{
+  canvas: HTMLCanvasElement
+  ctx: CanvasRenderingContext2DMock
+}> = []
+
 const fixedNow = 1735689600000 /* 2025-01-01T00:00:00.000Z 相当 */
 const fixedRandom = 0.123456789
 
@@ -57,6 +85,46 @@ beforeAll(() => {
     setTimeout(() => cb(globalThis?.performance?.now?.() ?? 0), 0)
   )
 
+  if (typeof HTMLCanvasElement !== 'undefined') {
+    const proto = HTMLCanvasElement.prototype as any
+
+    const ensureContext = (canvas: HTMLCanvasElement): CanvasRenderingContext2DMock => {
+      const cached = canvasContextMap.get(canvas)
+      if (cached) return cached
+      const ctx: CanvasRenderingContext2DMock = {
+        canvas,
+        fillStyle: '',
+        fillRect: vi.fn(),
+        drawImage: vi.fn(),
+        clearRect: vi.fn(),
+        save: vi.fn(),
+        restore: vi.fn(),
+        globalCompositeOperation: 'source-over',
+      }
+      canvasContextMap.set(canvas, ctx)
+      canvasContextRecords.push({ canvas, ctx })
+      return ctx
+    }
+
+    proto.getContext = vi.fn(function (this: HTMLCanvasElement, type: string) {
+      if (type !== '2d') {
+        return originalCanvasGetContext ? originalCanvasGetContext.call(this, type) : null
+      }
+      return ensureContext(this)
+    }) as any
+
+    const pngDataUrl = `data:image/png;base64,${
+      typeof Buffer !== 'undefined' ? Buffer.from('dummy').toString('base64') : 'ZHVtbXk='
+    }`
+
+    proto.toDataURL = vi.fn(function (this: HTMLCanvasElement, type?: string) {
+      void type
+      return pngDataUrl
+    }) as any
+
+    vi.stubGlobal('__canvas2dMockRecords', canvasContextRecords)
+  }
+
   // 非決定的を固定
   vi.spyOn(Date, 'now').mockImplementation(() => fixedNow)
   vi.spyOn(Math, 'random').mockReturnValue(fixedRandom)
@@ -88,5 +156,18 @@ beforeAll(() => {
 })
 
 afterAll(() => {
+  if (typeof HTMLCanvasElement !== 'undefined') {
+    if (originalCanvasGetContext) {
+      HTMLCanvasElement.prototype.getContext = originalCanvasGetContext
+    } else {
+      delete (HTMLCanvasElement.prototype as any).getContext
+    }
+    if (originalCanvasToDataURL) {
+      HTMLCanvasElement.prototype.toDataURL = originalCanvasToDataURL
+    } else {
+      delete (HTMLCanvasElement.prototype as any).toDataURL
+    }
+    delete (globalThis as any).__canvas2dMockRecords
+  }
   vi.restoreAllMocks()
 })
