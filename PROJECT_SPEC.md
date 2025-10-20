@@ -145,9 +145,10 @@ SFC（`pages/blog/[...slug].vue`）ではグローバル `queryContent` 利用�
 
 ### ナビゲーション / ページ
 
-- ヘッダ: **Home / Tools / Blog**（現状）。
+- ヘッダ: **Home / Tools / Blog**（現状)。
 - フッタ: **法務導線（/privacy, /terms, /ads）** を配置。
-- トップ `/`: ヒーロー＋ CTA（`/tools/cron-jst`, `/blog`）/ 最新 3 件を「Latest posts」で表示
+- トップ `/`: ヒーロー＋ CTA（`/tools/cron-jst`, `/blog`）/ 最新 4 件を「最新記事」で表示
+- Top の「最新記事」セクションは **/blog の新着 4 件**を表示し、`audience`必須・`draft !== true`・`published !== false` を満たすもののみを採用する（スケルトン → 空 → 表示の 3 分岐、末尾に /blog への「すべて見る」リンク）。
 - ブログ詳細 `/blog/[slug]`: 本文＋ SEO メタ（title/description/canonical/og:url）
 - ツール: `/tools/cron-jst`, `/tools/jwt-decode`, `/tools/top-analyzer`
 

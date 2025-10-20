@@ -115,7 +115,7 @@
 
 ## UI/情報設計(運用追記)
 
-- Top: 学習記事一覧は audience 不問で最新 6 件を表示。pending→ 空 → 表示の順で分岐。
+- Top: 「最新記事」として **/blog の新着 4 件** を表示（`audience` 必須、`draft !== true`, `published !== false`）。スケルトン → 空 → 表示の 3 分岐を維持し、末尾に「すべて見る」→ /blog。
 - Tools: 各ページ冒頭に `<ToolIntro>`(説明/使い方/例)を設置。主要ツールには page 個別の useHead を付与。
 
 ## 運用メモ(抜粋)
