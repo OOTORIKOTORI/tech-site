@@ -58,6 +58,7 @@ C:\website\tech-site
 |  ├── blog
 |  |  ├── blog_og_first_aid.md
 |  |  ├── cron-basics.md
+|  |  ├── jwt-decode-basics.md
 |  |  ├── lighthouse-best-practices-070.md
 |  |  ├── linux-top-cheatsheet.md
 |  |  ├── nnn-dev-notes-oct.md
@@ -232,6 +233,7 @@ C:\website\tech-site
 |  |  ├── index.render.test.ts
 |  |  ├── privacy.render.test.ts
 |  |  ├── terms.render.test.ts
+|  |  ├── tools.jwt-decode.learnlink.test.ts
 |  |  └── tools.render.test.ts
 |  ├── scripts
 |  |  ├── gen-meta.sitemap.test.ts
@@ -295,5 +297,5 @@ C:\website\tech-site
 └── workers
    └── topParser.worker.ts
 
-directory: 64 file: 226 symboliclink: 37
+directory: 64 file: 228 symboliclink: 37
 

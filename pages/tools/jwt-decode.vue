@@ -10,6 +10,11 @@
         JWT ツール
       </h1>
       <AudienceNote who="開発者（認証トークンの検証）" />
+      <div class="mt-2 text-sm">
+        <NuxtLink to="/blog/jwt-decode-basics" class="text-blue-700 underline hover:text-blue-900 focus-ring">
+          JWTデコード入門（基礎ガイド）を読む
+        </NuxtLink>
+      </div>
       <span v-if="verifyState.valid === true"
         class="inline-flex items-center text-xs font-semibold rounded bg-green-100 text-green-800 px-2 py-1">検証成功</span>
       <span v-else-if="verifyState.valid === false"
@@ -200,9 +205,9 @@
               <div class="space-y-1">
                 <div v-for="e in sortedErrors" :key="e.code" class="text-xs flex gap-2">
                   <span class="inline-block px-2 py-0.5 rounded bg-red-100 text-red-700 font-semibold">{{ e.code
-                    }}</span>
+                  }}</span>
                   <span class="text-gray-800">{{ e.message }}<span v-if="e.hint" class="text-gray-500"> ({{ e.hint
-                      }})</span></span>
+                  }})</span></span>
                 </div>
               </div>
             </template>
