@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
+import { defineComponent, h } from 'vue'
 
 describe('ads SSR/Dev script injection', () => {
   const originalEnv = process.env
@@ -74,5 +75,60 @@ describe('ads SSR/Dev script injection', () => {
       },
     } as any)
     expect(spy).not.toHaveBeenCalled()
+  })
+})
+
+describe('pages/ads.vue', () => {
+  beforeEach(() => {
+    // @ts-expect-error test stub
+    globalThis.useHead = () => undefined
+    // @ts-expect-error test stub
+    globalThis.useSeoMeta = () => undefined
+    // @ts-expect-error test stub
+    globalThis.useRequestURL = () => ({ origin: 'https://kotorilab.jp' })
+    // @ts-expect-error test stub
+    globalThis.useRoute = () => ({ fullPath: '/ads' })
+    // @ts-expect-error test stub
+    globalThis.useRuntimeConfig = () => ({
+      public: { siteOrigin: 'https://migakiexplorer.jp', siteName: '磨きエクスプローラー' },
+    })
+  })
+
+  it('renders h1 and required policy links', async () => {
+    const mod = await import('@/pages/ads.vue')
+    const wrapper = mount(mod.default as any, {
+      global: {
+        stubs: {
+          NuxtLink: defineComponent({
+            props: { to: { type: String, required: false } },
+            setup:
+              (p, { slots }) =>
+              () =>
+                h('a', { href: (p as any).to }, slots.default?.()),
+          }),
+        },
+      },
+    })
+
+    const html = wrapper.html()
+
+    // H1
+    expect(html).toMatch(/<h1[^>]*>広告について<\/h1>/)
+
+    // /ads.txt へのリンクが 1 件以上
+    const adsTxtLinks = wrapper
+      .findAll('a')
+      .filter(a => (a.attributes('href') || '').includes('/ads.txt'))
+    expect(adsTxtLinks.length).toBeGreaterThanOrEqual(1)
+
+    // adssettings.google.com へのリンクが 1 件以上
+    const settingsLinks = wrapper
+      .findAll('a')
+      .filter(a => (a.attributes('href') || '').includes('adssettings.google.com'))
+    expect(settingsLinks.length).toBeGreaterThanOrEqual(1)
+
+    // /privacy と /contact へのリンク
+    expect(wrapper.find('a[href="/privacy"]').exists()).toBe(true)
+    expect(wrapper.find('a[href="/contact"]').exists()).toBe(true)
   })
 })
