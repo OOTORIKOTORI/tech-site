@@ -47,7 +47,7 @@ SNS はページ取得時にこれらの meta タグを読み取り、プレビ�
 
 コード例:
 
-```html
+```
 <meta property="og:title" content="記事タイトル" />
 <meta property="og:description" content="要約テキスト" />
 <meta property="og:image" content="https://example.com/ogp.jpg" />
