@@ -50,6 +50,7 @@ export const useRuntimeConfig: AnyFn = () =>
   g.useRuntimeConfig ? g.useRuntimeConfig() : { public: {} }
 export const useServerHead: AnyFn = (...args) =>
   g.useServerHead ? g.useServerHead(...args) : g.useHead?.(...args)
+export const useStorage: AnyFn = (...args) => g.useStorage?.(...args)
 
 export const definePageMeta: AnyFn = (...args) => g.definePageMeta?.(...args)
 

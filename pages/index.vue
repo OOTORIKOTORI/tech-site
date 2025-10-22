@@ -54,15 +54,12 @@
         <NuxtLink to="/blog" class="text-sm text-blue-600 hover:underline focus-ring">すべて見る</NuxtLink>
       </div>
       <div v-if="pending" class="mt-3 text-sm text-muted-foreground">読み込み中…</div>
-      <div v-else-if="!latestPosts?.length" class="mt-3 text-sm text-muted-foreground">
-        まだ学習記事はありません。更新をお待ちください。
-      </div>
       <div v-else class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <NuxtLink v-for="p in latestPosts" :key="p._path" :to="p._path"
+        <NuxtLink v-for="card in displayCards" :key="card.href" :to="card.href"
           class="block rounded-2xl p-4 ring-1 ring-gray-200 dark:ring-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-900 focus:outline-none focus-visible:ring-2">
-          <div class="font-medium">{{ p.title }}</div>
-          <p class="text-sm text-gray-600 mt-1">{{ p.description }}</p>
-          <p v-if="p.audience" class="mt-1 text-xs opacity-70">for: {{ p.audience }}</p>
+          <div class="font-medium">{{ card.title }}</div>
+          <p v-if="card.description" class="text-sm text-gray-600 mt-1">{{ card.description }}</p>
+          <p v-if="hasLatestPosts && card.audience" class="mt-1 text-xs opacity-70">for: {{ card.audience }}</p>
         </NuxtLink>
       </div>
     </section>
@@ -78,6 +75,7 @@
 
 import AdSlot from '@/components/AdSlot.vue'
 import { definePageMeta, useAsyncData } from '#imports'
+import { computed } from 'vue'
 import { fetchPosts } from '@/composables/usePosts'
 definePageMeta({ title: 'Migaki Explorer' })
 
@@ -97,7 +95,30 @@ const toolDigest = [
 ]
 
 // ブログ最新 4 件（audience 必須 / draft != true / published != false）
-type HomePost = { _path: string; title?: string; description?: string; date?: string; audience?: string; draft?: boolean; published?: boolean }
+type HomePost = {
+  _path: string
+  title?: string
+  description?: string
+  date?: string
+  audience?: string
+  draft?: boolean
+  published?: boolean
+}
+type DisplayCard = { href: string; title: string; description?: string; audience?: string }
+
+const fallbackCards: DisplayCard[] = [
+  {
+    href: '/blog',
+    title: 'ブログトップで更新情報を確認',
+    description: '公開準備中の記事は順次追加されます。まずはブログ一覧をご覧ください。',
+  },
+  {
+    href: '/tools',
+    title: '人気ツールをチェック',
+    description: '新着記事が揃うまで、実務支援ツールで作業を効率化できます。',
+  },
+]
+
 const { data: latestPosts, pending } = await useAsyncData<HomePost[]>('home-latest-posts', async () => {
   // Fetch more than needed, then filter/slice for robustness
   const posts = await fetchPosts({ limit: 12 })
@@ -106,6 +127,21 @@ const { data: latestPosts, pending } = await useAsyncData<HomePost[]>('home-late
     .sort((a, b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime())
     .slice(0, 4)
   return filtered
+})
+
+const hasLatestPosts = computed(() => Array.isArray(latestPosts.value) && latestPosts.value.length > 0)
+
+const displayCards = computed<DisplayCard[]>(() => {
+  if (hasLatestPosts.value) {
+    const posts = Array.isArray(latestPosts.value) ? latestPosts.value : []
+    return posts.map(post => ({
+      href: post._path,
+      title: post.title ?? 'タイトル準備中',
+      description: post.description,
+      audience: post.audience,
+    }))
+  }
+  return fallbackCards
 })
 </script>
 

@@ -1,70 +1,43 @@
-// Lightweight consent mode receiver (scaffold before integrating a real CMP)
-// - Activates only when runtime flag enableConsentMode is true
-// - Initializes Consent Mode v2 defaults to 'denied' for ads and analytics
-// - Listens for window.postMessage('cmp-consent', { ads, analytics }) to update
-// - Designed so the postMessage sender can be swapped with a real CMP later
-
-type ConsentVal = 'granted' | 'denied'
-type ConsentPayload = { ads?: ConsentVal; analytics?: ConsentVal }
-type ConsentUpdate = Partial<Record<'ad_storage' | 'analytics_storage', ConsentVal>>
+type ConsentState = 'granted' | 'denied'
 
 declare global {
   interface Window {
     dataLayer?: unknown[]
     gtag?: (...args: unknown[]) => void
-    __consentListenerInstalled?: boolean
+    __consentModeDefaultApplied?: boolean
   }
 }
 
-export default defineNuxtPlugin(() => {
-  const config = useRuntimeConfig()
-  const pub = config.public as typeof config.public & {
-    enableConsentMode?: boolean
-    cmpRegionFilter?: string
-  }
+export default defineNuxtPlugin({
+  name: 'consent-mode-v2',
+  enforce: 'pre',
+  setup() {
+    if (process.server) return
 
-  // Guard: feature flag must be true
-  if (!pub.enableConsentMode) {
-    return
-  }
+    const win = window as Window & {
+      dataLayer: unknown[]
+      gtag: (...args: unknown[]) => void
+      __consentModeDefaultApplied?: boolean
+    }
 
-  // Optional: region filter gating (EEA/UK/CH only)
-  // Current placeholder: enable for all regions when flag is true.
-  // When region detection is added, check pub.cmpRegionFilter and user geolocation.
+    win.dataLayer = win.dataLayer || []
+    if (typeof win.gtag !== 'function') {
+      // Minimal gtag stub so Consent Mode calls succeed before gtag.js loads
+      // Use rest parameters instead of `arguments` to satisfy ESLint prefer-rest-params
+      win.gtag = function gtag(...args: unknown[]) {
+        (win.dataLayer as unknown[]).push(args)
+      }
+    }
 
-  // Initialize dataLayer lazily to avoid CSP inline script
-  if (process.client) {
-    if (!window.dataLayer) window.dataLayer = []
-
-    window.gtag =
-      window.gtag ||
-      ((...args: unknown[]) => {
-        window.dataLayer!.push(args)
+    if (!win.__consentModeDefaultApplied) {
+      const denied: ConsentState = 'denied'
+      win.gtag('consent', 'default', {
+        ad_storage: denied,
+        analytics_storage: denied,
+        ad_user_data: denied,
+        ad_personalization: denied,
       })
-
-    // Consent Mode v2 default to denied
-    // Reference keys: ad_storage, analytics_storage
-    window.gtag('consent', 'default', {
-      ad_storage: 'denied',
-      analytics_storage: 'denied',
-    })
-
-    // Listen for synthetic consent events via postMessage
-
-    const onMessage = (ev: MessageEvent<unknown>) => {
-      if (!ev || typeof ev.data !== 'object' || ev.data === null) return
-      const { type, payload } = ev.data as { type?: string; payload?: ConsentPayload }
-      if (type !== 'cmp-consent') return
-      const update: ConsentUpdate = {}
-      if (payload?.ads) update.ad_storage = payload.ads
-      if (payload?.analytics) update.analytics_storage = payload.analytics
-      if (Object.keys(update).length) window.gtag?.('consent', 'update', update)
+      win.__consentModeDefaultApplied = true
     }
-
-    // Idempotent listener installation to play nice with HMR
-    if (!window.__consentListenerInstalled) {
-      window.addEventListener('message', onMessage)
-      window.__consentListenerInstalled = true
-    }
-  }
+  },
 })

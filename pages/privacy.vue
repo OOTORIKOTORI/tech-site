@@ -38,8 +38,34 @@ const updatedAt = new Date().toISOString()
       <p>アクセスログ、Cookie 等の技術情報を取得する場合があります。</p>
       <h2>利用目的</h2>
       <p>品質向上、セキュリティ確保、統計的分析のために用います。</p>
+
+      <h2>Google AdSense に関する情報</h2>
+      <p>
+        当サイトでは、第三者配信事業者である <strong>Google</strong> を含む第三者ベンダーが Cookie を使用して、
+        ユーザーの当サイトや他サイトへの過去のアクセスに基づいて広告を配信する場合があります。
+        Google の広告 Cookie により、Google およびそのパートナーは、当サイトや他サイトへのアクセス情報に基づいて
+        ユーザーに適切な広告を表示できます。
+      </p>
+      <p>
+        ユーザーは
+        <strong><a href="https://adssettings.google.com/" target="_blank" rel="noopener">Google の広告設定 (Ads
+            Settings)</a></strong>
+        でパーソナライズ広告を無効にできます。
+        または <strong><a href="https://www.aboutads.info/choices/" target="_blank"
+            rel="noopener">aboutads.info</a></strong>
+        にアクセスして、第三者配信事業者の Cookie の使用を無効にすることもできます。
+      </p>
+      <p>
+        Cookie の詳細や Google におけるデータの取り扱いについては、
+        <strong><a href="https://policies.google.com/technologies/ads" target="_blank" rel="noopener">Google
+            のテクノロジーに関するプライバシーポリシー</a></strong> をご参照ください。
+      </p>
+
       <h2>問い合わせ先</h2>
-      <p>お問い合わせ: <a href="/contact" class="text-blue-600 hover:underline">ootorikotori981@gmail.com</a></p>
+      <p>
+        お問い合わせ: <a href="mailto:contact@migakiexplorer.jp"
+          class="text-blue-600 hover:underline">contact@migakiexplorer.jp</a>
+      </p>
       <p>最終更新日: <time :datetime="updatedAt">{{ updatedAt }}</time></p>
     </article>
   </main>

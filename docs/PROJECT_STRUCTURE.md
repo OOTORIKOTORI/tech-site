@@ -39,6 +39,7 @@ C:\website\tech-site
 |  |  ├── ProseTable.vue
 |  |  ├── Ref.vue
 |  |  └── Term.vue
+|  ├── CookieConsent.vue
 |  ├── GlobalNav.vue
 |  ├── RelatedList.vue
 |  ├── TagChip.vue
@@ -214,7 +215,8 @@ C:\website\tech-site
 ├── tests
 |  ├── api
 |  |  ├── blogv2.list.spec.ts
-|  |  └── og.spec.ts
+|  |  ├── og.spec.ts
+|  |  └── static-xml.spec.ts
 |  ├── app.footer.render.test.ts
 |  ├── app.header.nav.test.ts
 |  ├── app.rss-link.test.ts
@@ -302,5 +304,5 @@ C:\website\tech-site
 └── workers
    └── topParser.worker.ts
 
-directory: 64 file: 233 symboliclink: 37
+directory: 64 file: 235 symboliclink: 37
 

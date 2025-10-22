@@ -21,6 +21,7 @@
 - Ads 運用: **Production のみ NUXT_PUBLIC_ENABLE_ADS=1。Preview/Dev は 0**。審査/デバッグ時のみ ENABLE_ADS_DEBUG=1 を一時使用。本文に pagead/js/adsbygoogle.js?client= が出ること。
 
   - **ads.txt は `pub-…` 形式。配置は `/public/ads.txt`（詳細は PROJECT_SPEC を参照）**
+  - プライバシーポリシーに AdSense 必須記載（第三者ベンダー/Cookie/Ads Settings リンク）を維持する
 
 - **ツールカード統一**: `/tools` 一覧の各カードに「対象読者・所要時間・入出力例」の 3 項目を表示（無いツールは `—`）。
 - **RelatedList コンポーネント**: `components/RelatedList.vue` で tags ベースの関連記事 3 件を表示。ツール詳細ページ末尾に設置。

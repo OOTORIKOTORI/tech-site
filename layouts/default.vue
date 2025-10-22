@@ -5,6 +5,9 @@
       <NuxtPage />
     </main>
     <AppFooter />
+    <ClientOnly>
+      <CookieConsent />
+    </ClientOnly>
   </div>
 </template>
 

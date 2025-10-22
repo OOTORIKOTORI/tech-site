@@ -14,6 +14,7 @@
 - ルール序列: 正準=PROJECT_SPEC / 要点=README / 規約=HANDBOOK
 - ブランド: 「磨きエクスプローラー（Migaki Explorer）」／短縮名「Migaki Explorer」
 - ORIGIN: https://migakiexplorer.jp
+- プライバシーポリシー（/privacy）は AdSense 必須記載（第三者ベンダー/Cookie/Ads Settings リンク）を保持する
 
 ### pre-push の環境と OGP スモーク（運用固定）
 
