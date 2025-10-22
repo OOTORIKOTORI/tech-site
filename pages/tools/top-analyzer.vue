@@ -70,6 +70,9 @@ async function analyze() {
     <ToolIntro title="Top Analyzer" description="top の CSV を可視化。CPU/Load/Mem を比較し、SVG/PNGで保存可能。"
       usage="1) CSV を貼り付け/選択\n2) グラフ化→保存（SVG/PNG）" time="~30秒" audience="運用・調査" :example-input="exampleInput"
       :example-output="exampleOutput" />
+    <ToolIntroBox>
+      <p>このツールの使い方や基本概念は <NuxtLink to="/blog/top-analyzer-basics">こちらの記事</NuxtLink> を参照。</p>
+    </ToolIntroBox>
     <h1 class="text-2xl font-bold">Top Log Analyzer</h1>
 
     <AudienceNote who="Linux/インフラ運用のSE/DevOps" />

@@ -101,6 +101,9 @@ const doCheck = async () => {
       time="~10秒" audience="開発・運用" :example-input="exampleInput" :example-output="exampleOutput" />
     <ToolIntroBox audience="サイト運用者/SEO担当" value="sitemap.xml と robots.txt の到達性や掲載可否をまとめて点検"
       how="サイトのURLを入力 → それぞれの取得結果を確認" safety="URLは保存されず、結果は端末内で表示" />
+    <ToolIntroBox>
+      <p>このツールの使い方や基本概念は <NuxtLink to="/blog/site-check-basics">こちらの記事</NuxtLink> を参照。</p>
+    </ToolIntroBox>
     <h1 class="text-2xl font-bold">robots / sitemap / feed チェッカー</h1>
     <AudienceNote who="サイト運用・SEO担当（到達性・掲載可否の点検）" />
     <div class="mb-2 text-sm text-gray-700">現在のORIGIN: <span class="font-mono">{{ origin }}</span></div>
@@ -162,7 +165,7 @@ const doCheck = async () => {
           <li>URL件数: {{ feed?.count }}</li>
           <li>
             ORIGIN一致: <span :class="feed?.allOk ? 'text-green-700' : 'text-red-600'">{{ feed?.allOk ? 'OK' : 'NG'
-              }}</span>
+            }}</span>
           </li>
           <li>サンプル: <span v-if="feed?.sample?.length">{{ feed.sample.join(', ') }}</span><span v-else>なし</span></li>
         </ul>

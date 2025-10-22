@@ -83,6 +83,9 @@ const doImgCheck = async () => {
       audience="ブロガー・開発" :example-input="exampleInput" :example-output="exampleOutput" />
     <ToolIntroBox audience="広報・編集・開発（SNS共有の見え方確認）" value="共有時の画像/タイトル、リダイレクト先とHTTPステータスを一発確認"
       how="URLを入力 → チェック → 結果パネルで最終URL/画像/タグを確認" safety="フェッチは絶対URLで行い、結果は端末内にのみ表示" />
+    <ToolIntroBox>
+      <p>このツールの使い方や基本概念は <NuxtLink to="/blog/og-check-basics">こちらの記事</NuxtLink> を参照。</p>
+    </ToolIntroBox>
     <h1 class="text-2xl font-bold">OG プレビュー確認</h1>
     <AudienceNote who="コンテンツ担当・開発者（共有プレビュー確認）" />
     <form class="space-y-3" @submit.prevent="doCheck">
