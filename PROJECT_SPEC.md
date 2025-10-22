@@ -57,6 +57,10 @@ SFC（`pages/blog/[...slug].vue`）ではグローバル `queryContent` 利用�
   - LHCI は本番トップ（/）が **200 になるまで待機**してから収集し、失敗時は **1 回のみリトライ**。
   - `categories:best-practices` のアサートは **minScore=0.70（暫定・AdSense 影響）**。budgets は参考、CI 失敗条件はアサートに従う。
 
+### ツール仕様（抜粋）
+
+- Cron JST ツールは「人間可読の説明（JST/UTC）」「次回実行件数の簡易切替（5/10/25）」「6 フィールド（秒）入力と `@hourly` 等エイリアス」をサポートし、既存 UI を壊さない最小差分で実装する。
+
 ## ブログ追加手順（運用）
 
 ### 制御記事（常時検証用）
@@ -130,8 +134,8 @@ SFC（`pages/blog/[...slug].vue`）ではグローバル `queryContent` 利用�
 
 ### 法務/ポリシー（骨子）
 
-- プライバシーポリシー/クッキーポリシー/広告に関する記載（例: 第三者配信の Cookie 使用）を別ページに整備予定。
-- ads.txt の配置（後日導入時）。具体的な広告コードは本仕様からは除外し、運用手順のみ記載。
+- プライバシーポリシー/クッキーポリシー/広告に関する記載（例: 第三者配信の Cookie 使用）は **別ページに整備済み**（維持運用）。
+- **ads.txt は配置済み**。具体的な広告コードは本仕様からは除外し、運用手順のみ記載。
 
 最小 Ads 仕様（恒常運用）:
 
@@ -151,13 +155,13 @@ SFC（`pages/blog/[...slug].vue`）ではグローバル `queryContent` 利用�
 - トップ `/`: ヒーロー＋ CTA（`/tools/cron-jst`, `/blog`）/ 最新 4 件を「最新記事」で表示
 - Top の「最新記事」セクションは **/blog の新着 4 件**を表示し、`audience`必須・`draft !== true`・`published !== false` を満たすもののみを採用する（スケルトン → 空 → 表示の 3 分岐、末尾に /blog への「すべて見る」リンク）。
 - ブログ詳細 `/blog/[slug]`: 本文＋ SEO メタ（title/description/canonical/og:url）
-- ツール: `/tools/cron-jst`, `/tools/jwt-decode`, `/tools/top-analyzer`, `/tools/json-formatter`, `/tools/regex-tester`
+- ツール: `/tools/cron-jst`, `/tools/jwt-decode`, `/tools/top-analyzer`, `/tools/json-formatter`, `/tools/regex-tester`, `/tools/og-check`, `/tools/site-check`
 
-  - `/tools/top-analyzer`: Linux top コマンドのログをブラウザで解析・可視化。CSV エクスポート（英/日ヘッダ切替）、サンプルログ DL 機能あり。
-  - **SVG/PNG 保存** — SVG は viewBox に 12px 余白を付与してラベル/目盛りの欠けを防止、PNG は白背景で安定出力。
-  - しきい値入力に**単位/桁ガイド（CPU% / Load / Mem MB）** を表示し入力を補助。
-  - `/tools/json-formatter`: JSON の整形/最小化/検証をブラウザ内で実行。入出力はローカル完結（アップロード不要）。主要操作: 整形（indent 指定）/ 最小化 / validate（構文エラー位置表示）。
-  - `/tools/regex-tester`: 正規表現のマッチ/グループ/フラグを即時確認。入力テキストとパターンを分離し、`g/m/i/s/u` フラグを切替。結果は一致ハイライト＋キャプチャ一覧。
+- `/tools/top-analyzer`: Linux top コマンドのログをブラウザで解析・可視化。CSV エクスポート（英/日ヘッダ切替）、サンプルログ DL 機能あり。
+- **SVG/PNG 保存** — SVG は viewBox に 12px 余白を付与してラベル/目盛りの欠けを防止、PNG は白背景で安定出力。
+- しきい値入力に**単位/桁ガイド（CPU% / Load / Mem MB）** を表示し入力を補助。
+- `/tools/json-formatter`: JSON の整形/最小化/検証をブラウザ内で実行。入出力はローカル完結（アップロード不要）。主要操作: 整形（indent 指定）/ 最小化 / validate（構文エラー位置表示）。
+- `/tools/regex-tester`: 正規表現のマッチ/グループ/フラグを即時確認。入力テキストとパターンを分離し、`g/m/i/s/u` フラグを切替。結果は一致ハイライト＋キャプチャ一覧。
 
 - （実装済み）ヘッダ最小ナビ＋ Skip リンク。ブログ一覧カードは日付 `YYYY-MM-DD` と a11y ラベルを付与。
 

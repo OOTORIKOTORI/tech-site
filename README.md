@@ -14,7 +14,7 @@
 
 - `queryContent`の扱い: SFC（`pages/blog/[...slug].vue`）ではグローバル利用を許容（先頭に `/* global queryContent */` を付記）。ランタイム/サーバ/コンポーザブルでは **`#content` から import**。`#imports` からの import は禁止。
 - Markdown 形状ガードは`_archive`を**除外**
-- Related（関連記事）は `/blog/**` のみ取得（`/blog/_archive/**` は除外）。`draft===true`/`published===false` は除外し、`body` が必須。
+- Related（関連記事）は `/blog/**` のみ取得（`/blog/_archive/**` は除外）。`draft===true`/`published===false` は除外し、`body` が必須。**絞り込みタグは `tool:<tool-id>` を必須**（入門記事の frontmatter に付与する）。
 - `pnpm run ops:rollback <tag>`で安定タグへスナップショット復元
 - /blog 詳細は**1 経路のみ取得・白紙禁止・テンプレ 1 行**（詳細は PROJECT_SPEC 参照）
 
@@ -24,7 +24,7 @@
   - プライバシーポリシーに AdSense 必須記載（第三者ベンダー/Cookie/Ads Settings リンク）を維持する
 
 - **ツールカード統一**: `/tools` 一覧の各カードに「対象読者・所要時間・入出力例」の 3 項目を表示（無いツールは `—`）。
-- **RelatedList コンポーネント**: `components/RelatedList.vue` で tags ベースの関連記事 3 件を表示。ツール詳細ページ末尾に設置。
+- **RelatedList コンポーネント**: `components/RelatedList.vue` で tags ベースの関連記事 3 件を表示。ツール詳細ページ末尾に設置。**相互リンク方針**: ツール側は導入直下に「入門記事へのリンク」、入門記事側は冒頭/末尾に「関連ツール: /tools/<id>」を明記。
 - 新ツール: `/tools/json-formatter`（JSON 整形/最小化/検証）, `/tools/regex-tester`（正規表現の一致テスト）を追加。
 
 - クイック検証: `/api/og/hello.png` が **200 または 302** であること（smoke:og 合格基準）。
@@ -170,6 +170,7 @@ if ($changed) {
 ## 既知の仕様（Cron / JWT 抜粋）
 
 - Cron: `dowDomMode` は `'OR'|'AND'`。`'*'` の解釈は OR=unrestricted / AND=always‑true。`dow` は 0–6（0=Sun、7 非対応）。
+- Cron JST ツール: 人間可読の説明表示（JST/UTC）、次回実行の件数切替（5/10/25）、6 フィールド（秒）と `@hourly` 等エイリアスをサポート。
 - Auto-reload: `configVersion` / `settingsUpdatedAt` 変更時は次 tick（10s）で再読込（進行中は継続）。
 - JWT/ES256: DER ↔ JOSE 相互変換、Claims 境界、`alg`/`kid` の異常系テストが green。
 

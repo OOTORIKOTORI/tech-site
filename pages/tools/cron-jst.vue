@@ -37,6 +37,14 @@ CRON入門（基礎ガイド）を読む
         例: <code>*/5 9-18 * * 1-5</code>（平日9-18時に5分毎） / 曜日は 0-6（0=Sun）。7 は非対応。
       </div>
 
+      <div v-if="humanized" class="rounded bg-gray-50 dark:bg-gray-900 border text-sm p-2" role="status" aria-live="polite">
+        <div class="font-semibold">説明</div>
+        <div class="font-mono">
+          <div>{{ humanized.jst }}</div>
+          <div>{{ humanized.utc }}</div>
+        </div>
+      </div>
+
       <div class="flex flex-wrap items-center gap-3">
         <button type="submit" class="btn-primary focus-ring" aria-label="cron式をチェック">
           今すぐチェック
@@ -87,6 +95,11 @@ CRON入門（基礎ガイド）を読む
           <label for="count" class="text-sm">件数:</label>
           <input id="count" v-model.number="count" type="number" min="1" :max="MAX_TOTAL"
             class="w-20 border rounded p-1" aria-label="表示件数" />
+          <div class="inline-flex overflow-hidden rounded-md border" role="tablist" aria-label="件数のクイック切替">
+            <button type="button" class="px-2 py-1 text-sm focus-ring" :aria-selected="countClamped===5" role="tab" @click="count=5">5</button>
+            <button type="button" class="px-2 py-1 text-sm focus-ring border-l" :aria-selected="countClamped===10" role="tab" @click="count=10">10</button>
+            <button type="button" class="px-2 py-1 text-sm focus-ring border-l" :aria-selected="countClamped===25" role="tab" @click="count=25">25</button>
+          </div>
         </div>
 
         <div class="flex flex-col gap-1 w-full max-w-xs">
@@ -148,7 +161,7 @@ import AudienceNote from '@/components/AudienceNote.vue'
 
 import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
 import { useRoute } from '#imports'
-import { parseCron, nextRuns } from '~/utils/cron'
+import { parseCron, nextRuns, humanizeCron } from '~/utils/cron'
 
 // ToolIntro 用 例示
 const exampleInput = '*/5 * * * *'
@@ -166,6 +179,7 @@ useHead({
 const input = ref('')
 const error = ref('')
 const results = ref<Date[]>([])
+const humanized = ref<{ jst: string; utc: string } | null>(null)
 
 // プリセット定義
 const presets = [
@@ -184,6 +198,7 @@ function onPreset(e: Event) {
     input.value = val
     error.value = ''
     results.value = []
+    updateHumanize()
     onCheck()
   }
 }
@@ -235,6 +250,7 @@ function onCheck() {
   try {
     const spec = parseCron(input.value.trim())
     lastSpec.value = spec
+    updateHumanize(spec)
 
     // 入力があれば優先、未入力/不正なら「今」で初期化
     const parsed = baseInput.value ? fromInputValue(baseInput.value, tzDisp.value) : null
@@ -254,6 +270,7 @@ function onCheck() {
     recompute(countClamped.value)
   } catch (e: unknown) {
     error.value = (e instanceof Error ? e.message : String(e)) || '不明なエラーが発生しました'
+    humanized.value = null
   }
 }
 
@@ -264,6 +281,7 @@ function onClear() {
   lastSpec.value = null
   baseFrom.value = null
   baseInput.value = ''
+  humanized.value = null
 }
 
 
@@ -395,6 +413,20 @@ function setBaseNow() {
 }
 
 // watchers
+function updateHumanize(specArg?: ReturnType<typeof parseCron> | null) {
+  try {
+    const spec = specArg ?? parseCron(input.value.trim())
+    const text = humanizeCron(spec)
+    humanized.value = { jst: `JST: ${text}`, utc: `UTC: ${text}` }
+  } catch {
+    humanized.value = null
+  }
+}
+
+watch(input, () => {
+  updateHumanize()
+})
+
 watch(baseInput, (v) => {
   if (relMode.value !== 'base' || !v) return
   const parsed = fromInputValue(v, tzDisp.value)
@@ -449,11 +481,14 @@ onMounted(() => {
     try {
       q = decodeURIComponent(q.replace(/\+/g, ' '))
       input.value = q
+      updateHumanize()
     } catch {
       input.value = ''
+      humanized.value = null
     }
   } else {
     input.value = ''
+    humanized.value = null
   }
   const n = Number(route.query?.n)
   if (Number.isFinite(n) && n >= 1) count.value = Math.min(n, MAX_TOTAL)
@@ -466,6 +501,7 @@ onMounted(() => {
     tzDisp.value = 'Asia/Tokyo'
     relMode.value = 'now'
     setBaseNow()
+    updateHumanize()
     onCheck()
   }
 })

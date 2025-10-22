@@ -18,6 +18,8 @@ export type CronField = { values: number[]; star: boolean }
  * - 基準の秒・ミリ秒があるときは“次の分”に切り上げ。ちょうど分なら包括開始。
  */
 export type CronSpec = {
+  /** 秒（6フィールド版サポート: 省略時は 0 固定） */
+  second: CronField
   minute: CronField
   hour: CronField
   dom: CronField
@@ -27,6 +29,8 @@ export type CronSpec = {
    * DOM×DOW 判定モード: 'OR'|'AND'（未指定は 'OR'）
    */
   dowDomMode: 'OR' | 'AND'
+  /** 入力が6フィールド（秒あり）だったかのフラグ */
+  hasSeconds: boolean
 }
 
 function expandField(src: string, min: number, max: number): number[] {
@@ -144,9 +148,16 @@ function mapNamedTokens(src: string, dict: Record<string, number>): string {
  * - 0 0 1 JAN *
  */
 export function parseCron(expr: string, opts?: { dowDomMode?: 'OR' | 'AND' }): CronSpec {
-  const fields = expr.trim().split(/\s+/)
-  if (fields.length !== 5) throw new Error('Cron expression must have exactly 5 fields')
-  const [m, h, dom, mon, dow] = fields as [string, string, string, string, string]
+  const norm = normalizeAlias(expr.trim())
+  const tokens = norm.split(/\s+/)
+  if (tokens.length !== 5 && tokens.length !== 6) {
+    throw new Error('Cron expression must have 5 or 6 fields')
+  }
+  const hasSeconds = tokens.length === 6
+  const [s, m, h, dom, mon, dow] = hasSeconds
+    ? (tokens as [string, string, string, string, string, string])
+    : (['0', ...tokens] as [string, string, string, string, string, string])
+  const second = makeField(s, 0, 59)
   const minute = makeField(m, 0, 59)
   const hour = makeField(h, 0, 23)
   const d = makeField(dom, 1, 31)
@@ -166,12 +177,13 @@ export function parseCron(expr: string, opts?: { dowDomMode?: 'OR' | 'AND' }): C
   ) {
     console.info(`[cron] dowDomMode: ${mode}`)
   }
-  return { minute, hour, dom: d, month: mo, dow: dw, dowDomMode: mode }
+  return { second, minute, hour, dom: d, month: mo, dow: dw, dowDomMode: mode, hasSeconds }
 }
 
 function partsInTZ(date: Date, tz: 'Asia/Tokyo' | 'UTC') {
   if (tz === 'UTC') {
     return {
+      second: date.getUTCSeconds(),
       minute: date.getUTCMinutes(),
       hour: date.getUTCHours(),
       dom: date.getUTCDate(),
@@ -182,6 +194,7 @@ function partsInTZ(date: Date, tz: 'Asia/Tokyo' | 'UTC') {
     const jstMs = date.getTime() + 9 * 3600000
     const jst = new Date(jstMs)
     return {
+      second: jst.getUTCSeconds(),
       minute: jst.getUTCMinutes(),
       hour: jst.getUTCHours(),
       dom: jst.getUTCDate(),
@@ -193,12 +206,17 @@ function partsInTZ(date: Date, tz: 'Asia/Tokyo' | 'UTC') {
 
 function matchesParts(
   spec: CronSpec,
-  p: { minute: number; hour: number; dom: number; month: number; dow: number }
+  p: { second: number; minute: number; hour: number; dom: number; month: number; dow: number }
 ): boolean {
   const inSet = (f: CronField, v: number) => f.star || f.values.includes(v)
 
   // 基本フィールドチェック
-  if (!inSet(spec.minute, p.minute) || !inSet(spec.hour, p.hour) || !inSet(spec.month, p.month)) {
+  if (
+    !inSet(spec.second, p.second) ||
+    !inSet(spec.minute, p.minute) ||
+    !inSet(spec.hour, p.hour) ||
+    !inSet(spec.month, p.month)
+  ) {
     return false
   }
 
@@ -226,11 +244,12 @@ function matchesParts(
 }
 
 function buildDateInTZ(
-  parts: { y: number; mon: number; dom: number; hour: number; min: number },
+  parts: { y: number; mon: number; dom: number; hour: number; min: number; sec: number },
   tz: 'Asia/Tokyo' | 'UTC'
 ): Date {
   const offsetMs = tz === 'Asia/Tokyo' ? 9 * 3600000 : 0
-  const ms = Date.UTC(parts.y, parts.mon - 1, parts.dom, parts.hour, parts.min, 0, 0) - offsetMs
+  const ms =
+    Date.UTC(parts.y, parts.mon - 1, parts.dom, parts.hour, parts.min, parts.sec, 0) - offsetMs
   return new Date(ms)
 }
 
@@ -243,7 +262,14 @@ function yearInTZ(date: Date, tz: 'Asia/Tokyo' | 'UTC'): number {
 function setInTZ(
   base: Date,
   tz: 'Asia/Tokyo' | 'UTC',
-  patch: Partial<{ y: number; month: number; dom: number; hour: number; minute: number }>
+  patch: Partial<{
+    y: number
+    month: number
+    dom: number
+    hour: number
+    minute: number
+    second: number
+  }>
 ): Date {
   const p = partsInTZ(base, tz)
   const y = yearInTZ(base, tz)
@@ -254,6 +280,7 @@ function setInTZ(
       dom: patch.dom ?? p.dom,
       hour: patch.hour ?? p.hour,
       min: patch.minute ?? p.minute,
+      sec: patch.second ?? p.second,
     },
     tz
   )
@@ -267,14 +294,27 @@ export function nextRuns(
 ): Date[] {
   const out: Date[] = []
   let cur = new Date(baseFrom.getTime())
-  if (cur.getSeconds() !== 0 || cur.getMilliseconds() !== 0) {
-    const p0 = partsInTZ(cur, tz)
-    cur = setInTZ(cur, tz, { minute: p0.minute + 1 })
-    cur.setUTCSeconds(0, 0)
+  if (spec.hasSeconds) {
+    // 秒指定あり: ミリ秒があれば次の秒、なければその秒から包括開始
+    if (cur.getMilliseconds() !== 0) {
+      const p0 = partsInTZ(cur, tz)
+      cur = setInTZ(cur, tz, { second: p0.second + 1 })
+      cur.setUTCMilliseconds(0)
+    } else {
+      cur.setUTCMilliseconds(0)
+    }
   } else {
-    cur.setUTCSeconds(0, 0)
+    // 従来通り: 秒・ミリ秒があれば次の分に切り上げ、分ちょうどは包括
+    if (cur.getSeconds() !== 0 || cur.getMilliseconds() !== 0) {
+      const p0 = partsInTZ(cur, tz)
+      cur = setInTZ(cur, tz, { minute: p0.minute + 1, second: 0 })
+      cur.setUTCMilliseconds(0)
+    } else {
+      cur.setUTCSeconds(0, 0)
+    }
   }
 
+  const secFirst = spec.second.values[0] ?? 0
   const minFirst = spec.minute.values[0] ?? 0
   const hourFirst = spec.hour.values[0] ?? 0
   const guardLimit = 5 * 366
@@ -287,7 +327,10 @@ export function nextRuns(
       const nextMon = spec.month.values.find(v => v >= p.month) ?? spec.month.values[0]!
       let y = yearInTZ(cur, tz)
       if (nextMon < p.month) y += 1
-      cur = buildDateInTZ({ y, mon: nextMon, dom: 1, hour: hourFirst, min: minFirst }, tz)
+      cur = buildDateInTZ(
+        { y, mon: nextMon, dom: 1, hour: hourFirst, min: minFirst, sec: secFirst },
+        tz
+      )
       p = partsInTZ(cur, tz)
     }
 
@@ -321,13 +364,18 @@ export function nextRuns(
     }
     let ok = domDowOk(p)
     if (!ok) {
-      cur = setInTZ(cur, tz, { hour: hourFirst, minute: minFirst })
+      cur = setInTZ(cur, tz, { hour: hourFirst, minute: minFirst, second: secFirst })
       const maxSteps =
         spec.dow.star && !spec.dom.star ? 62 : spec.dom.star && !spec.dow.star ? 7 : 31
       let steps = 0
       while (!ok && steps < maxSteps && dayGuard < guardLimit) {
         const pp = partsInTZ(cur, tz)
-        cur = setInTZ(cur, tz, { dom: pp.dom + 1, hour: hourFirst, minute: minFirst })
+        cur = setInTZ(cur, tz, {
+          dom: pp.dom + 1,
+          hour: hourFirst,
+          minute: minFirst,
+          second: secFirst,
+        })
         dayGuard++
         steps++
         p = partsInTZ(cur, tz)
@@ -340,36 +388,170 @@ export function nextRuns(
     p = partsInTZ(cur, tz)
     const nextHour = spec.hour.values.find(v => v >= p.hour)
     if (nextHour === undefined) {
-      cur = setInTZ(cur, tz, { dom: p.dom + 1, hour: hourFirst, minute: minFirst })
+      cur = setInTZ(cur, tz, {
+        dom: p.dom + 1,
+        hour: hourFirst,
+        minute: minFirst,
+        second: secFirst,
+      })
       dayGuard++
       continue
     }
-    if (nextHour !== p.hour) cur = setInTZ(cur, tz, { hour: nextHour, minute: minFirst })
+    if (nextHour !== p.hour)
+      cur = setInTZ(cur, tz, { hour: nextHour, minute: minFirst, second: secFirst })
 
     // 分
     p = partsInTZ(cur, tz)
     const nextMin = spec.minute.values.find(v => v >= p.minute)
     if (nextMin === undefined) {
       const nh = spec.hour.values.find(v => v >= p.hour + 1)
-      if (nh !== undefined) cur = setInTZ(cur, tz, { hour: nh, minute: minFirst })
+      if (nh !== undefined) cur = setInTZ(cur, tz, { hour: nh, minute: minFirst, second: secFirst })
       else {
-        cur = setInTZ(cur, tz, { dom: p.dom + 1, hour: hourFirst, minute: minFirst })
+        cur = setInTZ(cur, tz, {
+          dom: p.dom + 1,
+          hour: hourFirst,
+          minute: minFirst,
+          second: secFirst,
+        })
         dayGuard++
       }
       continue
     }
-    if (nextMin !== p.minute) cur = setInTZ(cur, tz, { minute: nextMin })
+    if (nextMin !== p.minute) cur = setInTZ(cur, tz, { minute: nextMin, second: secFirst })
+    p = partsInTZ(cur, tz)
+
+    // 秒（6フィールド対応）
+    const nextSec = spec.second.values.find(v => v >= p.second)
+    if (nextSec === undefined) {
+      // 次の分へ
+      const nm = spec.minute.values.find(v => v >= p.minute + 1)
+      if (nm !== undefined) cur = setInTZ(cur, tz, { minute: nm, second: secFirst })
+      else {
+        const nh = spec.hour.values.find(v => v >= p.hour + 1)
+        if (nh !== undefined)
+          cur = setInTZ(cur, tz, { hour: nh, minute: minFirst, second: secFirst })
+        else {
+          cur = setInTZ(cur, tz, {
+            dom: p.dom + 1,
+            hour: hourFirst,
+            minute: minFirst,
+            second: secFirst,
+          })
+          dayGuard++
+        }
+      }
+      continue
+    }
+    if (nextSec !== p.second) cur = setInTZ(cur, tz, { second: nextSec })
     p = partsInTZ(cur, tz)
 
     if (matchesParts(spec, p)) {
       out.push(new Date(cur.getTime()))
-      cur = setInTZ(cur, tz, { minute: p.minute + 1 })
-      cur.setUTCSeconds(0, 0)
+      if (spec.hasSeconds) {
+        // 次の秒へ
+        cur = setInTZ(cur, tz, { second: p.second + 1 })
+      } else {
+        // 次の分へ
+        cur = setInTZ(cur, tz, { minute: p.minute + 1, second: 0 })
+      }
     } else {
-      cur = setInTZ(cur, tz, { minute: p.minute + 1 })
+      if (spec.hasSeconds) {
+        cur = setInTZ(cur, tz, { second: p.second + 1 })
+      } else {
+        cur = setInTZ(cur, tz, { minute: p.minute + 1, second: 0 })
+      }
     }
   }
 
   // 最終的に重複排除（getTimeで一意化）
   return Array.from(new Map(out.map(d => [d.getTime(), d])).values())
+}
+
+// --- エイリアスの正規化（@hourly など） ---
+function normalizeAlias(expr: string): string {
+  if (!expr.startsWith('@')) return expr
+  const k = expr.toLowerCase()
+  switch (k) {
+    case '@yearly':
+    case '@annually':
+      return '0 0 1 1 *'
+    case '@monthly':
+      return '0 0 1 * *'
+    case '@weekly':
+      return '0 0 * * 0'
+    case '@daily':
+    case '@midnight':
+      return '0 0 * * *'
+    case '@hourly':
+      return '0 * * * *'
+    case '@minutely':
+      return '* * * * *'
+    default:
+      throw new Error(`Unsupported alias: ${expr}`)
+  }
+}
+
+// --- 簡易 humanize（日本語） ---
+function toTimeLabel(spec: CronSpec): string {
+  const mm = spec.minute.values
+  const hh = spec.hour.values
+  const ss = spec.second.values
+  const isSingle = (arr: number[]) => arr.length === 1
+  if (isSingle(hh) && isSingle(mm) && isSingle(ss)) {
+    return `${hh[0]!}:${String(mm[0]!).padStart(2, '0')}:${String(ss[0]!).padStart(2, '0')}`
+  }
+  if (isSingle(hh) && isSingle(mm)) {
+    return `${hh[0]!}:${String(mm[0]!).padStart(2, '0')}`
+  }
+  if (isSingle(hh) && mm.length > 1 && mm[0] === 0 && mm[mm.length - 1] === 55) {
+    // 毎分相当
+    return `${hh[0]!}時台 毎分`
+  }
+  // 分ステップの検出（*/n）
+  const stepMin = detectStep(mm)
+  if (isSingle(hh) && stepMin) {
+    return `${hh[0]!}時台 の毎${stepMin}分`
+  }
+  if (hh.length > 1 && stepMin) {
+    return `${hh[0]}-${hh[hh.length - 1]}時 の毎${stepMin}分`
+  }
+  return 'スケジュール'
+}
+
+function detectStep(values: number[]): number | null {
+  if (values.length < 2) return null
+  const step = values[1]! - values[0]!
+  for (let i = 2; i < values.length; i++) {
+    if (values[i]! - values[i - 1]! !== step) return null
+  }
+  return step > 0 ? step : null
+}
+
+function dowLabel(spec: CronSpec): string {
+  const v = spec.dow
+  if (v.star) return ''
+  const vals = v.values
+  if (vals.length === 5 && vals.join(',') === '1,2,3,4,5') return '平日'
+  if (vals.length === 2 && vals.join(',') === '0,6') return '週末'
+  if (vals.length === 1) return ['日曜', '月曜', '火曜', '水曜', '木曜', '金曜', '土曜'][vals[0]!]!
+  return `${vals.map(n => ['日', '月', '火', '水', '木', '金', '土'][n] + '曜').join('・')}`
+}
+
+/**
+ * 人間可読の日本語説明（タイムゾーン非依存の表現）。
+ */
+export function humanizeCron(spec: CronSpec): string {
+  const dayPart = (() => {
+    if (!spec.dom.star && spec.dow.star) {
+      // 毎月X日
+      const vs = spec.dom.values
+      if (vs.length === 1) return `毎月${vs[0]}日`
+      return `毎月 ${vs.join('・')}日`
+    }
+    const dlab = dowLabel(spec)
+    if (dlab) return dlab
+    return '毎日'
+  })()
+  const t = toTimeLabel(spec)
+  return `${dayPart} ${t}`.trim()
 }
