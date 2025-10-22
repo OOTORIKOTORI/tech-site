@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0"><channel><title>磨きエクスプローラー Blog</title><link>https://migakiexplorer.jp/blog</link><description>磨きエクスプローラー Blog RSS</description>
-    <item><title>JWTデコード入門 — 署名は検証しよう</title><link>https://migakiexplorer.jp/blog/jwt-decode-basics</link><pubDate>Wed, 22 Oct 2025 00:00:00 GMT</pubDate><description>ツールでJWTのヘッダー/ペイロードを瞬時に可視化。だが署名の検証は別物 — 『見える化』と『真正性』の違いを最小の手順で理解する。</description></item>
-    <item><title>CRON入門：式の読み方とよくある落とし穴</title><link>https://migakiexplorer.jp/blog/cron-basics</link><pubDate>Mon, 20 Oct 2025 00:00:00 GMT</pubDate><description>crontab式の基本、JST/UTCの考え方、次回実行の確かめ方を初心者向けに解説。</description></item>
+    <item><title>JWT入門：デコードと検証の違いを5分で理解</title><link>https://migakiexplorer.jp/blog/jwt-decode-basics</link><pubDate>Wed, 22 Oct 2025 00:00:00 GMT</pubDate><description>そもそもJWTって何？デコードと検証は何が違うの？認証トークンの構造から安全な扱い方まで、初心者向けにわかりやすく解説します。</description></item>
+    <item><title>CRON入門：スケジュール表記を人間の言葉で理解する</title><link>https://migakiexplorer.jp/blog/cron-basics</link><pubDate>Mon, 20 Oct 2025 00:00:00 GMT</pubDate><description>そもそもCRONって何？「0 9 * * 1-5」は何時に動く？JST/UTCの違いは？cron構文の読み方から次回実行の確認方法まで、初心者向けにわかりやすく解説します。</description></item>
     <item><title>Lighthouse Best Practices 0.70を守るコツ（AdSenseと共存）</title><link>https://migakiexplorer.jp/blog/lighthouse-best-practices-070</link><pubDate>Wed, 15 Oct 2025 00:00:00 GMT</pubDate><description>広告を入れつつBest Practices &gt;= 0.70を安定させるための最小ルールと落とし穴。</description></item>
     <item><title>Linux topの読み方：現場チートシート</title><link>https://migakiexplorer.jp/blog/linux-top-cheatsheet</link><pubDate>Wed, 15 Oct 2025 00:00:00 GMT</pubDate><description>Load, CPU%, Mem/Swap を最短で読むための実務メモ。</description></item>
     <item><title>10月の開発メモ</title><link>https://migakiexplorer.jp/blog/nnn-dev-notes-oct</link><pubDate>Wed, 15 Oct 2025 00:00:00 GMT</pubDate><description>2025年10月の開発で得た小さな知見や運用改善のメモをまとめました。</description></item>

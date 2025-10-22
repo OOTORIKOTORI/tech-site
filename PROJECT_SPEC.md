@@ -46,6 +46,7 @@ SFC（`pages/blog/[...slug].vue`）ではグローバル `queryContent` 利用�
 - 取得対象は `/blog/**` のみ（`/blog/_archive/**` は除外）。
 - 可視条件は「落とす条件だけ厳格」: `draft === true`/`'true'` を除外、`published === false`/`'false'` を除外。
 - `doc.body` は必須（本文なしは非表示）。
+- `RelatedList` は **tags ベース**で `/blog/**` のみを取得。各入門記事には `tool:<tool-id>` タグを必須とし、ツール末尾の `RelatedList` で 3 件表示（不足時は 0〜2 件を許容）。
 
 ## テスト方針
 
@@ -150,15 +151,21 @@ SFC（`pages/blog/[...slug].vue`）ではグローバル `queryContent` 利用�
 - トップ `/`: ヒーロー＋ CTA（`/tools/cron-jst`, `/blog`）/ 最新 4 件を「最新記事」で表示
 - Top の「最新記事」セクションは **/blog の新着 4 件**を表示し、`audience`必須・`draft !== true`・`published !== false` を満たすもののみを採用する（スケルトン → 空 → 表示の 3 分岐、末尾に /blog への「すべて見る」リンク）。
 - ブログ詳細 `/blog/[slug]`: 本文＋ SEO メタ（title/description/canonical/og:url）
-- ツール: `/tools/cron-jst`, `/tools/jwt-decode`, `/tools/top-analyzer`
+- ツール: `/tools/cron-jst`, `/tools/jwt-decode`, `/tools/top-analyzer`, `/tools/json-formatter`, `/tools/regex-tester`
 
   - `/tools/top-analyzer`: Linux top コマンドのログをブラウザで解析・可視化。CSV エクスポート（英/日ヘッダ切替）、サンプルログ DL 機能あり。
   - **SVG/PNG 保存** — SVG は viewBox に 12px 余白を付与してラベル/目盛りの欠けを防止、PNG は白背景で安定出力。
   - しきい値入力に**単位/桁ガイド（CPU% / Load / Mem MB）** を表示し入力を補助。
+  - `/tools/json-formatter`: JSON の整形/最小化/検証をブラウザ内で実行。入出力はローカル完結（アップロード不要）。主要操作: 整形（indent 指定）/ 最小化 / validate（構文エラー位置表示）。
+  - `/tools/regex-tester`: 正規表現のマッチ/グループ/フラグを即時確認。入力テキストとパターンを分離し、`g/m/i/s/u` フラグを切替。結果は一致ハイライト＋キャプチャ一覧。
 
 - （実装済み）ヘッダ最小ナビ＋ Skip リンク。ブログ一覧カードは日付 `YYYY-MM-DD` と a11y ラベルを付与。
 
 ---
+
+## ツールと入門記事の相互リンク（正準）
+
+各ツールには入門記事（/blog）を 1 本以上持たせ、相互に明示リンクを設置する。ツール側は導入ブロック直下に「入門記事へのリンク」を配置し、記事側は冒頭または末尾に「関連ツール: /tools/<id>」の行を置く。これにより学習導線と回遊を一貫化する（Cron JST / JWT Decode 実装に準拠）。
 
 ## 🚀 クイックスタート
 
