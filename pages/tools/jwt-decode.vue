@@ -19,7 +19,7 @@
         class="inline-flex items-center text-xs font-semibold rounded bg-green-100 text-green-800 px-2 py-1">検証成功</span>
       <span v-else-if="verifyState.valid === false"
         class="inline-flex items-center text-xs font-semibold rounded bg-red-100 text-red-800 px-2 py-1">検証失敗</span>
-  <p class="text-sm text-gray-600">デフォルトはデコードのみ。入力値は保存しません。JWKS は明示許可時のみ取得します。</p>
+      <p class="text-sm text-gray-600">デフォルトはデコードのみ。入力値は保存しません。JWKS は明示許可時のみ取得します。</p>
     </header>
 
     <div class="rounded-md bg-blue-50 text-blue-900 text-xs md:text-sm p-3 leading-relaxed">
@@ -116,8 +116,14 @@
                 </span>
               </td>
               <td v-if="c.key === 'exp'" class="text-xs text-gray-500 pl-2">{{ relativeExp(c.value as number) }}</td>
-              <td v-else-if="c.key === 'nbf'" class="text-xs text-gray-500 pl-2">{{ relativeGeneric(c.value as number) }}</td>
-              <td v-else-if="c.key === 'iat'" class="text-xs text-gray-500 pl-2">{{ relativeGeneric(c.value as number) }}</td>
+              <td v-else-if="c.key === 'nbf'" class="text-xs text-gray-500 pl-2">
+{{ relativeGeneric(c.value as number)
+                }}
+</td>
+              <td v-else-if="c.key === 'iat'" class="text-xs text-gray-500 pl-2">
+{{ relativeGeneric(c.value as number)
+                }}
+</td>
             </tr>
           </tbody>
         </table>
@@ -213,9 +219,9 @@
               <div class="space-y-1">
                 <div v-for="e in sortedErrors" :key="e.code" class="text-xs flex gap-2">
                   <span class="inline-block px-2 py-0.5 rounded bg-red-100 text-red-700 font-semibold">{{ e.code
-                  }}</span>
+                    }}</span>
                   <span class="text-gray-800">{{ e.message }}<span v-if="e.hint" class="text-gray-500"> ({{ e.hint
-                  }})</span></span>
+                      }})</span></span>
                 </div>
               </div>
             </template>

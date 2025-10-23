@@ -173,7 +173,7 @@ if ($changed) {
 - Cron JST ツール: 人間可読の説明表示（JST/UTC）、次回実行の件数切替（5/10/25）、6 フィールド（秒）と `@hourly` 等エイリアスをサポート。
 - Auto-reload: `configVersion` / `settingsUpdatedAt` 変更時は次 tick（10s）で再読込（進行中は継続）。
 - JWT/ES256: DER ↔ JOSE 相互変換、Claims 境界、`alg`/`kid` の異常系テストが green。
-- JWT Decoder: 既定はデコードのみ、任意で Verify(HS256/RS256/JWKS) をON可。`exp/nbf/iat` のバッジ表示（OK/警告/エラー）に対応。
+- JWT Decoder: 既定はデコードのみ、任意で Verify(HS256/RS256/JWKS) を ON 可。`exp/nbf/iat` のバッジ表示（OK/警告/エラー）に対応。
 
 ---
 

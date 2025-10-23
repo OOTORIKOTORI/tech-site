@@ -297,16 +297,32 @@ export function findJwksRsaKeyByKid(
 export function buildRsaPemFromModExp(nBase64Url: string, eBase64Url: string): string {
   const n = decodeBase64Url(nBase64Url)
   const e = decodeBase64Url(eBase64Url)
-  const derInt = (buf: Uint8Array) => {
-    const pref = buf[0]! & 0x80 ? new Uint8Array([0, ...buf]) : buf
-    return new Uint8Array([0x02, pref.length, ...pref])
+  function derLen(len: number): Uint8Array {
+    if (len < 128) return new Uint8Array([len])
+    const bytes: number[] = []
+    let v = len
+    while (v > 0) {
+      bytes.unshift(v & 0xff)
+      v >>= 8
+    }
+    return new Uint8Array([0x80 | bytes.length, ...bytes])
   }
-  const seq = (b: Uint8Array) => new Uint8Array([0x30, b.length, ...b])
-  const bit = (b: Uint8Array) => new Uint8Array([0x03, b.length + 1, 0x00, ...b])
+  const derInt = (buf: Uint8Array) => {
+    // Ensure positive integer (prepend 0x00 if MSB set)
+    const needsPad = (buf[0]! & 0x80) !== 0
+    const val = needsPad ? new Uint8Array([0x00, ...buf]) : buf
+    const len = derLen(val.length)
+    return new Uint8Array([0x02, ...len, ...val])
+  }
+  const seq = (b: Uint8Array) => new Uint8Array([0x30, ...derLen(b.length), ...b])
+  const bit = (b: Uint8Array) => new Uint8Array([0x03, ...derLen(b.length + 1), 0x00, ...b])
+  // RSAPublicKey ::= SEQUENCE { modulus INTEGER, publicExponent INTEGER }
   const rsaPub = seq(new Uint8Array([...derInt(n), ...derInt(e)]))
+  // AlgorithmIdentifier for rsaEncryption: 1.2.840.113549.1.1.1 with NULL params
   const oid = new Uint8Array([0x06, 0x09, 0x2a, 0x86, 0x48, 0x86, 0xf7, 0x0d, 0x01, 0x01, 0x01])
   const nul = new Uint8Array([0x05, 0x00])
   const alg = seq(new Uint8Array([...oid, ...nul]))
+  // SubjectPublicKeyInfo ::= SEQUENCE { algorithm AlgorithmIdentifier, subjectPublicKey BIT STRING }
   const spki = seq(new Uint8Array([...alg, ...bit(rsaPub)]))
   const b64 = _u8ToB64(spki)
   const body = b64.match(/.{1,64}/g)?.join('\n') || b64
