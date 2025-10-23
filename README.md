@@ -49,7 +49,7 @@
 
 ## 要点（実装済みの方針・抜粋）
 
-- `/tools/og-check` で OG タグ/OG 画像の 200/302 を即確認（SSR でも絶対 URL 運用）
+- `/tools/og-check` で OG タグ/OG 画像の 200/302 を即確認（SSR でも絶対 URL 運用）。必須(og:title/og:description/og:image)と推奨(og:url/twitter:card)の網羅チェック、画像の到達性と寸法（可能時のみ、失敗は非ブロッキング）を表示。主要 SNS デバッガー（Facebook/X/LinkedIn）へのワンクリック導線付き。
 - `/tools/site-check` で robots/sitemap/feed をまとめて取得・ORIGIN 一致の簡易検証に加え、最終 URL を 1 回だけフェッチして meta/canonical/JSON‑LD/基本セキュリティヘッダ（CSP/HSTS 等）の有無を概況表示（JSON‑LD は型/件数/主要プロパティのみを抜粋）
 
 - 生成物の表記を統一: `robots.txt` / `sitemap.xml` / `feed.xml`（postbuild で生成）。

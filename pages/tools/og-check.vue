@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useRuntimeConfig } from '#app'
 import { useHead } from '#imports'
 import AudienceNote from '@/components/AudienceNote.vue'
+import { analyzeSite, type SiteMetaAnalysis } from '@/utils/site-check'
 const config = useRuntimeConfig()
 const siteOrigin = config.public.siteOrigin
 const presets = [
@@ -16,6 +17,36 @@ const result = ref<any | null>(null)
 const err = ref<string | null>(null)
 const imgStatus = ref<'none' | 'ok' | 'fail' | 'checking'>('none')
 const imgResp = ref<any | null>(null)
+const analysis = ref<SiteMetaAnalysis | null>(null)
+const imgSize = ref<{ width: number; height: number } | null>(null)
+const imgWarnings = ref<string[]>([])
+
+const requiredChecks = computed(() => {
+  const a = analysis.value
+  if (!a) return []
+  return [
+    { key: 'og:title', ok: !!a.meta.og.title },
+    { key: 'og:description', ok: !!a.meta.og.description },
+    { key: 'og:image', ok: !!a.meta.og.image },
+  ]
+})
+const recommendedChecks = computed(() => {
+  const a = analysis.value
+  if (!a) return []
+  return [
+    { key: 'og:url', ok: !!a.meta.og.url },
+    { key: 'twitter:card', ok: !!a.meta.twitter.card },
+  ]
+})
+
+const snsLinks = computed(() => {
+  const target = encodeURIComponent(analysis.value?.finalUrl || result.value?.finalUrl || url.value)
+  return [
+    { name: 'Facebook Sharing Debugger', href: `https://developers.facebook.com/tools/debug/?q=${target}` },
+    { name: 'X Card Validator', href: 'https://cards-dev.twitter.com/validator' },
+    { name: 'LinkedIn Post Inspector', href: `https://www.linkedin.com/post-inspector/inspect/${target}` },
+  ]
+})
 
 // ToolIntro 用 例示
 const exampleInput = 'https://example.com/article'
@@ -34,15 +65,22 @@ const doCheck = async () => {
   err.value = null
   result.value = null
   checking.value = true
+  analysis.value = null
+  imgSize.value = null
+  imgWarnings.value = []
   try {
-    // SSR/CSR両対応の絶対URL
+    // SSR/CSR両対応の絶対URL（GET with query）
     const absApi = new URL('/api/ogcheck', siteOrigin).toString()
     const { $fetch } = await import('ofetch')
     const data = await $fetch(absApi, {
-      method: 'POST',
-      body: { url: url.value, max: max.value },
+      method: 'GET',
+      query: { url: url.value, max: max.value },
     })
     result.value = data
+    if (data?.html) {
+      const headersObj: Record<string, string> = data?.headers || {}
+      analysis.value = analyzeSite(String(data.html), String(data.finalUrl || url.value), headersObj)
+    }
   } catch (e: any) {
     err.value = e?.statusMessage || e?.message || 'Error'
   } finally {
@@ -53,23 +91,56 @@ const doCheck = async () => {
 const doImgCheck = async () => {
   imgStatus.value = 'checking'
   imgResp.value = null
+  imgSize.value = null
+  imgWarnings.value = []
   try {
     let imgUrl = ''
     // 結果からOG画像URLを抽出
-    if (result.value) {
-      imgUrl = result.value['og:image'] || result.value['twitter:image'] || ''
+    if (analysis.value) {
+      imgUrl = analysis.value.meta.og.image || ''
     }
     if (!imgUrl) throw new Error('OG画像URLが見つかりません')
-    const { $fetch } = await import('ofetch')
-    // HEAD優先、失敗時GET
-    let resp
+    // HEAD優先、失敗時GET（最小情報のみ保持）
+    let status = 0
+    let contentType = ''
     try {
-      resp = await $fetch(imgUrl, { method: 'HEAD', redirect: 'follow' })
+      const controller = new AbortController()
+      const timeout = setTimeout(() => controller.abort(), 8000)
+      const resp = await fetch(imgUrl, { method: 'HEAD', redirect: 'follow', signal: controller.signal })
+      clearTimeout(timeout)
+      status = resp.status
+      contentType = resp.headers.get('content-type') || ''
+      if (status === 405) {
+        const controller2 = new AbortController()
+        const timeout2 = setTimeout(() => controller2.abort(), 8000)
+        const resp2 = await fetch(imgUrl, { method: 'GET', redirect: 'follow', signal: controller2.signal })
+        clearTimeout(timeout2)
+        status = resp2.status
+        contentType = resp2.headers.get('content-type') || ''
+      }
     } catch {
-      resp = await $fetch(imgUrl, { method: 'GET', redirect: 'follow' })
+      // ignore network errors, will be treated as unreachable below
     }
-    imgResp.value = resp
-    imgStatus.value = 'ok'
+    imgResp.value = { status, contentType }
+    // 画像寸法: ブラウザ Image オブジェクトで到達時のみ測定（CORS非依存）
+    const size = await new Promise<{ width: number; height: number } | null>((resolve) => {
+      const im = new Image()
+      im.onload = () => resolve({ width: im.naturalWidth, height: im.naturalHeight })
+      im.onerror = () => resolve(null)
+      // Cache-busting to avoid stale
+      const sep = imgUrl.includes('?') ? '&' : '?'
+      im.src = imgUrl + sep + '_ogchk=' + Date.now()
+    })
+    if (size) {
+      imgSize.value = size
+      // 推奨: 1200x630 以上、縦横比 ~1.91:1（±10%）
+      const warnings: string[] = []
+      if (size.width < 600 || size.height < 315) warnings.push('画像寸法が小さい可能性（推奨: 幅>=1200, 高さ>=630）')
+      const ratio = size.width / Math.max(1, size.height)
+      if (Math.abs(ratio - 1.91) / 1.91 > 0.1) warnings.push('画像アスペクト比が推奨(1.91:1)から外れています')
+      imgWarnings.value = warnings
+    }
+    imgStatus.value = status && status < 400 ? 'ok' : 'fail'
   } catch (e) {
     imgStatus.value = 'fail'
     imgResp.value = e
@@ -121,6 +192,10 @@ const doImgCheck = async () => {
           :class="{ 'text-green-700': [200, 302].includes(result.status), 'text-red-600': ![200, 302].includes(result.status) }">{{
             result.status }}</span>) — リダイレクト: {{ result.hops }}回
       </p>
+      <div class="flex flex-wrap gap-2 text-xs mb-2">
+        <a v-for="link in snsLinks" :key="link.name" :href="link.href" target="_blank" rel="noopener"
+          class="underline focus-ring">{{ link.name }}</a>
+      </div>
       <div class="overflow-x-auto">
         <table class="w-full text-sm">
           <caption class="text-left text-xs text-gray-500">リダイレクトチェーン</caption>
@@ -146,6 +221,26 @@ const doImgCheck = async () => {
           </tbody>
         </table>
       </div>
+      <div v-if="analysis" class="mt-4">
+        <h3 class="font-semibold">必須/推奨タグチェック</h3>
+        <ul class="text-sm list-disc pl-5">
+          <li v-for="it in requiredChecks" :key="it.key">
+            {{ it.key }}
+            <span
+              :class="'ml-2 text-xs px-2 py-0.5 rounded ' + (it.ok ? 'bg-green-600 text-white' : 'bg-red-600 text-white')">{{
+                it.ok ? 'Pass' : 'Missing' }}</span>
+          </li>
+          <li v-for="it in recommendedChecks" :key="it.key">
+            {{ it.key }}
+            <span
+              :class="'ml-2 text-xs px-2 py-0.5 rounded ' + (it.ok ? 'bg-green-600 text-white' : 'bg-orange-600 text-white')">{{
+                it.ok ? 'OK' : 'Recommended' }}</span>
+          </li>
+        </ul>
+        <div v-if="analysis.meta.warnings.length" class="mt-2 text-xs text-orange-700">
+          警告: {{ analysis.meta.warnings.join(' / ') }}
+        </div>
+      </div>
       <div class="overflow-x-auto mt-4">
         <table class="w-full text-sm border">
           <caption class="text-left text-xs text-gray-500">OG/Twitterタグ・未知キー含む</caption>
@@ -156,14 +251,13 @@ const doImgCheck = async () => {
             </tr>
           </thead>
           <tbody>
-            <tr v-for="entry in Object.entries(result).filter(([k]) => k.startsWith('og:') || k.startsWith('twitter:'))"
-              :key="'og-' + entry[0]">
-              <th scope="row" class="py-1 pr-4 break-all">{{ entry[0] }}</th>
-              <td class="py-1 pr-4 break-all">{{ entry[1] }}</td>
-            </tr>
-            <tr
-              v-for="entry in Object.entries(result).filter(([k]) => !k.startsWith('og:') && !k.startsWith('twitter:') && !['finalUrl', 'status', 'hops', 'chain'].includes(k))"
-              :key="'other-' + entry[0]">
+            <tr v-for="entry in (analysis ? Object.entries({
+              'og:title': analysis.meta.og.title,
+              'og:description': analysis.meta.og.description,
+              'og:image': analysis.meta.og.image,
+              'og:url': analysis.meta.og.url,
+              'twitter:card': analysis.meta.twitter.card,
+            }) : [])" :key="'og-' + entry[0]">
               <th scope="row" class="py-1 pr-4 break-all">{{ entry[0] }}</th>
               <td class="py-1 pr-4 break-all">{{ entry[1] }}</td>
             </tr>
@@ -179,9 +273,11 @@ const doImgCheck = async () => {
             <template v-else>Checking…</template>
           </span>
         </p>
-        <div v-if="imgResp && typeof imgResp === 'object'">
-          <pre class="bg-gray-100 rounded p-2 text-xs overflow-x-auto">{{ imgResp }}</pre>
+        <div v-if="imgResp && typeof imgResp === 'object'" class="text-xs text-gray-700">
+          status: {{ imgResp.status }} / type: {{ imgResp.contentType || '—' }}
         </div>
+        <div v-if="imgSize" class="text-xs text-gray-700">寸法: {{ imgSize.width }}×{{ imgSize.height }}</div>
+        <div v-if="imgWarnings.length" class="text-xs text-orange-700">注意: {{ imgWarnings.join(' / ') }}</div>
       </div>
     </section>
   </main>

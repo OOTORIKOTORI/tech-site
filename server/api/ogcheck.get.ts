@@ -29,13 +29,33 @@ export default defineEventHandler(async event => {
 
   // HEAD → 405/denied時は最小GET（Range: bytes=0-0）にフォールバック
   const headOrLiteGet = async (url: string) => {
-    const tryHead = await fetch(url, { method: 'HEAD', redirect: 'manual' })
-    if (tryHead.status !== 405) return tryHead
-    return fetch(url, {
-      method: 'GET',
-      headers: { Range: 'bytes=0-0' },
-      redirect: 'manual',
-    })
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), 8000)
+    try {
+      const tryHead = await fetch(url, {
+        method: 'HEAD',
+        redirect: 'manual',
+        signal: controller.signal,
+      })
+      clearTimeout(timeout)
+      if (tryHead.status !== 405) return tryHead
+    } catch {
+      // fallthrough to lite GET
+      clearTimeout(timeout)
+    }
+    const controller2 = new AbortController()
+    const timeout2 = setTimeout(() => controller2.abort(), 8000)
+    try {
+      const resp = await fetch(url, {
+        method: 'GET',
+        headers: { Range: 'bytes=0-0' },
+        redirect: 'manual',
+        signal: controller2.signal,
+      })
+      return resp
+    } finally {
+      clearTimeout(timeout2)
+    }
   }
 
   for (let i = 0; i < max; i++) {
@@ -59,6 +79,48 @@ export default defineEventHandler(async event => {
     break
   }
 
+  // 最終URLのHTMLを最小取得（text/htmlのみ、最大 ~200KB、失敗は非ブロッキング）
+  let html = ''
+  const headers: Record<string, string> = {}
+  try {
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), 10000)
+    const res = await fetch(finalUrl, {
+      method: 'GET',
+      redirect: 'follow',
+      signal: controller.signal,
+    })
+    const ct = res.headers.get('content-type') || ''
+    // ヘッダーを収集
+    res.headers.forEach((v, k) => (headers[k] = v))
+    if (/text\/html/i.test(ct)) {
+      // 200KBに制限
+      const reader = res.body?.getReader()
+      if (reader) {
+        const chunks: Uint8Array[] = []
+        let received = 0
+        const cap = 200 * 1024
+        for (;;) {
+          const { done, value } = await reader.read()
+          if (done) break
+          if (value) {
+            const next = Math.min(value.byteLength, Math.max(0, cap - received))
+            if (next > 0) chunks.push(value.subarray(0, next))
+            received += next
+            if (received >= cap) break
+          }
+        }
+        html = Buffer.concat(chunks).toString('utf8')
+      } else {
+        // フォールバック: 全文（環境によっては small）
+        html = await res.text()
+      }
+    }
+    clearTimeout(timeout)
+  } catch {
+    // ignore
+  }
+
   return {
     ok: true,
     input: raw,
@@ -66,5 +128,7 @@ export default defineEventHandler(async event => {
     status,
     hops: hops.length,
     chain: hops,
+    html,
+    headers,
   }
 })

@@ -190,6 +190,12 @@ export function analyzeSite(
 
   if (!title) warnings.push('title が欠落しています')
   if (!description) warnings.push('meta description が欠落しています')
+  // OGP 必須/推奨
+  if (!ogTitle) warnings.push('og:title が欠落しています（必須）')
+  if (!ogDesc) warnings.push('og:description が欠落しています（必須）')
+  if (!ogImage) warnings.push('og:image が欠落しています（必須）')
+  if (!ogUrl) warnings.push('og:url が欠落しています（推奨）')
+  if (!twitterCard) warnings.push('twitter:card が欠落しています（推奨）')
 
   // JSON-LD
   const scripts = Array.from(doc.querySelectorAll('script[type="application/ld+json"]'))

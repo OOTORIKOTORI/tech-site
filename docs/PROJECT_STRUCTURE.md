@@ -260,6 +260,7 @@ C:\website\tech-site
 |  |  ├── blogVisibility.spec.ts
 |  |  ├── frontmatter-visible.spec.ts
 |  |  ├── frontmatter.spec.ts
+|  |  ├── og.image.reach.test.ts
 |  |  ├── site-check.analyze.test.ts
 |  |  ├── top.csv.header.test.ts
 |  |  └── top.csv.test.ts
@@ -296,6 +297,7 @@ C:\website\tech-site
 |  ├── isVisiblePost.ts
 |  ├── jwt.ts
 |  ├── jwt.ts.bak_refactor
+|  ├── og.ts
 |  ├── resolveBlogDocByRoute.ts
 |  ├── site-check.ts
 |  ├── siteMeta.ts
@@ -309,5 +311,5 @@ C:\website\tech-site
 └── workers
    └── topParser.worker.ts
 
-directory: 65 file: 239 symboliclink: 37
+directory: 65 file: 241 symboliclink: 37
 

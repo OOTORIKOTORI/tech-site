@@ -68,4 +68,20 @@ describe('analyzeSite (meta/canonical/json-ld & security headers)', () => {
     // og:url is different by query but normalized comparison should ignore query -> mismatch
     expect(res.meta.checks.ogUrlMatches).toBe(false)
   })
+
+  it('required OGP missing: missing og:title/og:description/og:image -> warnings', () => {
+    const finalUrl = 'https://example.com/page2'
+    const html = `<!doctype html><html><head>
+      <title>T</title>
+      <link rel="canonical" href="https://example.com/page2" />
+      <meta property="og:url" content="https://example.com/page2" />
+    </head><body></body></html>`
+    const res = analyzeSite(html, finalUrl, {})
+    const ws = res.meta.warnings.join(' | ')
+    expect(/og:title.*欠落/.test(ws)).toBe(true)
+    expect(/og:description.*欠落/.test(ws)).toBe(true)
+    expect(/og:image.*欠落/.test(ws)).toBe(true)
+    // recommended
+    expect(/twitter:card.*欠落/.test(ws)).toBe(true)
+  })
 })
