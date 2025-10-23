@@ -50,12 +50,35 @@ if ($LASTEXITCODE -ne 0) {
   exit 1
 }
 
-# Check if tag already exists on remote
-$null = git ls-remote --tags origin "refs/tags/$NEXT" 2>$null
-if ($LASTEXITCODE -eq 0) {
-  Write-Host "Tag $NEXT already exists on remote; skipping push."
-  Write-Host "✓ Tag created locally: $NEXT" -ForegroundColor Green
-  exit 0
+# Check if tag already exists on remote (ls-remote exits 0 even when not found, so check output)
+$remoteMatch = git ls-remote --tags origin "refs/tags/$NEXT" 2>$null
+if ($remoteMatch) {
+  Write-Host "Tag $NEXT already exists on remote; resolving collision..."
+  # Try bumping patch until a free tag is found within the same major/minor
+  if ($NEXT -notmatch '^v(?<maj>\d+)\.(?<min>\d+)\.(?<pat>\d+)$') {
+    Write-Host "Unexpected tag format for NEXT: $NEXT" -ForegroundColor Red
+    exit 1
+  }
+  $maj = [int]$Matches.maj
+  $min = [int]$Matches.min
+  $pat = [int]$Matches.pat
+  for ($i = 0; $i -lt 100; $i++) {
+    $pat++
+    $candidate = "v$maj.$min.$pat"
+    $localExists = $false
+    $null = git rev-parse -q --verify "refs/tags/$candidate" 2>$null
+    if ($LASTEXITCODE -eq 0) { $localExists = $true }
+    $remoteExists = [bool](git ls-remote --tags origin "refs/tags/$candidate" 2>$null)
+    if (-not $localExists -and -not $remoteExists) {
+      Write-Host "→ Using next available tag: $candidate" -ForegroundColor Yellow
+      $NEXT = $candidate
+      break
+    }
+  }
+  if ($NEXT -match '^v\d+\.\d+\.\d+$' -and $remoteMatch -and $NEXT -eq [string]$Matches.OriginalString) {
+    Write-Host "Failed to resolve tag collision for $NEXT" -ForegroundColor Red
+    exit 1
+  }
 }
 
 # Push only that tag

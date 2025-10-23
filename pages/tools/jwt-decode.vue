@@ -1,7 +1,7 @@
 ﻿<template>
   <div class="container mx-auto max-w-6xl py-8 px-4 space-y-6">
-    <ToolIntro title="JWT Decoder" description="JWT をオフラインでデコード（署名検証なし）。ヘッダー/ペイロードを整形表示。"
-      usage="1) JWT を貼り付け\n2) Decode をクリック" time="~10秒" audience="開発・学習" :example-input="exampleInput"
+    <ToolIntro title="JWT Decoder" description="基本はローカルデコードのみ、任意で署名検証（HS256/RS256/JWKS）を有効化できます。"
+      usage="1) JWT を貼り付け\n2) Decode\n3) 必要に応じ Verify タブで検証" time="~10秒" audience="開発・学習" :example-input="exampleInput"
       :example-output="exampleOutput" />
     <ToolIntroBox audience="API/認証を扱う開発者" value="JWT のヘッダ/ペイロードをローカルで可視化（秘密鍵不要）" how="トークンを貼り付け → デコードを実行 → 中身を確認"
       safety="貼り付けた文字列は保存されません" />
@@ -19,7 +19,7 @@
         class="inline-flex items-center text-xs font-semibold rounded bg-green-100 text-green-800 px-2 py-1">検証成功</span>
       <span v-else-if="verifyState.valid === false"
         class="inline-flex items-center text-xs font-semibold rounded bg-red-100 text-red-800 px-2 py-1">検証失敗</span>
-      <p class="text-sm text-gray-600">ローカルのみで動作。トークン本文は送信されません。JWKS は明示許可時のみ取得。</p>
+  <p class="text-sm text-gray-600">デフォルトはデコードのみ。入力値は保存しません。JWKS は明示許可時のみ取得します。</p>
     </header>
 
     <div class="rounded-md bg-blue-50 text-blue-900 text-xs md:text-sm p-3 leading-relaxed">
@@ -101,15 +101,23 @@
             <tr v-for="c in visibleClaims" :key="c.key">
               <th class="text-left pr-4 align-top">{{ c.key }}</th>
               <td class="font-mono break-all">{{ formatClaim(c.key, c.value) }}</td>
+              <td class="pl-2 align-top whitespace-nowrap">
+                <span v-if="c.key === 'exp' && typeof c.value === 'number'"
+                  :class="['inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold', badgeClass(claimBadge('exp', c.value))]">
+                  {{ badgeLabel(claimBadge('exp', c.value)) }}
+                </span>
+                <span v-else-if="c.key === 'nbf' && typeof c.value === 'number'"
+                  :class="['inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold', badgeClass(claimBadge('nbf', c.value))]">
+                  {{ badgeLabel(claimBadge('nbf', c.value)) }}
+                </span>
+                <span v-else-if="c.key === 'iat' && typeof c.value === 'number'"
+                  :class="['inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold', badgeClass(claimBadge('iat', c.value))]">
+                  {{ badgeLabel(claimBadge('iat', c.value)) }}
+                </span>
+              </td>
               <td v-if="c.key === 'exp'" class="text-xs text-gray-500 pl-2">{{ relativeExp(c.value as number) }}</td>
-              <td v-else-if="c.key === 'nbf'" class="text-xs text-gray-500 pl-2">
-                {{ relativeGeneric(c.value as number)
-                }}
-              </td>
-              <td v-else-if="c.key === 'iat'" class="text-xs text-gray-500 pl-2">
-                {{ relativeGeneric(c.value as number)
-                }}
-              </td>
+              <td v-else-if="c.key === 'nbf'" class="text-xs text-gray-500 pl-2">{{ relativeGeneric(c.value as number) }}</td>
+              <td v-else-if="c.key === 'iat'" class="text-xs text-gray-500 pl-2">{{ relativeGeneric(c.value as number) }}</td>
             </tr>
           </tbody>
         </table>
@@ -258,11 +266,11 @@ const exampleOutput = '{\n  "alg": "HS256", ...\n}\n{\n  "sub": "1234"\n}'
 
 // Meta
 useHead({
-  title: 'JWT Decoder | Migaki Explorer',
+  title: 'JWT Decoder (Verify対応) | Migaki Explorer',
   meta: [
-    { name: 'description', content: 'JWT をデコードしてヘッダー/ペイロードを確認。' },
-    { property: 'og:title', content: 'JWT Decoder | Migaki Explorer' },
-    { property: 'og:description', content: 'JWT をデコードしてヘッダー/ペイロードを確認。' }
+    { name: 'description', content: 'JWT をデコード（既定）＋任意で署名検証（HS256/RS256/JWKS）。' },
+    { property: 'og:title', content: 'JWT Decoder (Verify対応) | Migaki Explorer' },
+    { property: 'og:description', content: 'JWT をデコード（既定）＋任意で署名検証（HS256/RS256/JWKS）。' }
   ]
 })
 
@@ -315,6 +323,32 @@ function formatClaim(key: string, val: unknown) { if (['exp', 'nbf', 'iat'].incl
 function relativeGeneric(sec: number) { const diff = sec * 1000 - Date.now(); return diff >= 0 ? `あと${fmtDuration(diff)}` : `${fmtDuration(-diff)}前` }
 function relativeExp(sec: number) { const diff = sec * 1000 - Date.now(); return diff >= 0 ? `有効:あと${fmtDuration(diff)}` : `期限切れ:${fmtDuration(-diff)}経過` }
 function fmtDuration(ms: number) { const s = Math.floor(ms / 1000); if (s < 60) return s + '秒'; const m = Math.floor(s / 60); if (m < 60) return m + '分'; const h = Math.floor(m / 60); if (h < 24) return h + '時間'; const d = Math.floor(h / 24); return d + '日' }
+
+// Badge: exp/nbf/iat（OK/警告/エラー）
+type BadgeLevel = 'ok' | 'warn' | 'error'
+function claimBadge(kind: 'exp' | 'nbf' | 'iat', sec: number): BadgeLevel {
+  const now = Math.floor(Date.now() / 1000)
+  const leeway = Number.isFinite(verifyInput.leewaySec) ? verifyInput.leewaySec : 0
+  if (kind === 'exp') {
+    if (now > sec + 0) return 'error'
+    // 期限が近い（10分以内）
+    if (sec - now <= 600) return 'warn'
+    return 'ok'
+  }
+  if (kind === 'nbf') {
+    if (now + leeway < sec) return 'error' // まだ有効でない
+    return 'ok'
+  }
+  // iat: 未来発行は注意（leeway超過で error）
+  if (now + leeway < sec) return 'error'
+  return 'ok'
+}
+function badgeClass(lv: BadgeLevel) {
+  if (lv === 'ok') return 'bg-green-100 text-green-800'
+  if (lv === 'warn') return 'bg-yellow-100 text-yellow-800'
+  return 'bg-red-100 text-red-800'
+}
+function badgeLabel(lv: BadgeLevel) { return lv === 'ok' ? 'OK' : lv === 'warn' ? '警告' : 'エラー' }
 
 // --- Verify logic ---
 interface VerifyInput { expectedAlg: string | ''; key: string; leewaySec: number; nowOverride?: number }
