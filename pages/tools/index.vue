@@ -6,6 +6,18 @@
 
     <ul class="grid grid-cols-1 sm:grid-cols-2 gap-4" aria-label="Available tools">
       <li class="surface p-4">
+        <NuxtLink to="/tools/timestamp" class="group block focus-ring">
+          <div class="text-sm text-gray-500">新規</div>
+          <h2 class="text-lg font-medium text-blue-600 group-hover:underline">Epoch Timestamp Converter</h2>
+        </NuxtLink>
+        <p class="text-sm muted mt-1">Epoch ⇄ 日時（<b>JST/UTC</b>）を双方向変換。<b>秒/ミリ秒</b>は自動判定または手動指定。</p>
+        <div class="flex gap-4 text-xs muted mt-2">
+          <span aria-label="対象読者">開発・運用</span>
+          <span aria-label="所要時間">~10秒</span>
+          <span aria-label="入出力例">入力: 1700000000 / 出力: JST/UTC</span>
+        </div>
+      </li>
+      <li class="surface p-4">
         <NuxtLink to="/tools/cron-jst" class="group block focus-ring">
           <h2 class="text-lg font-medium text-blue-600 group-hover:underline">Cron JST</h2>
         </NuxtLink>
