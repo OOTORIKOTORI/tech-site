@@ -7,7 +7,7 @@
         <p class="text-sm mt-2">
           これは何？どんな時に使う？がまだ不安な方は、
           <NuxtLink to="/blog/cron-basics" class="text-blue-700 underline hover:text-blue-900 focus-ring">
-基礎ガイドを読む
+            基礎ガイドを読む
           </NuxtLink>
           からスタートしてください。
         </p>
@@ -19,7 +19,7 @@
     <AudienceNote who="サイト運用・開発者（定時バッチの確認）" />
     <div class="mt-2 text-sm">
       <NuxtLink to="/blog/cron-basics" class="text-blue-700 underline hover:text-blue-900 focus-ring">
-CRON入門（基礎ガイド）を読む
+        CRON入門（基礎ガイド）を読む
       </NuxtLink>
     </div>
 
@@ -36,8 +36,15 @@ CRON入門（基礎ガイド）を読む
       <div id="cron-help" class="text-xs text-gray-500">
         例: <code>*/5 9-18 * * 1-5</code>（平日9-18時に5分毎） / 曜日は 0-6（0=Sun）。7 は非対応。
       </div>
+      <div class="text-xs text-gray-500 mt-1">
+        6フィールド例: <code>0 0 9 * * *</code>
+      </div>
+      <p class="text-xs text-gray-600 mt-1">
+        ※ 秒付き6フィールド（例: <code>0 0 9 * * *</code>）や <code>@hourly</code> 等のエイリアスも入力可（自動認識）。
+      </p>
 
-      <div v-if="humanized" class="rounded bg-gray-50 dark:bg-gray-900 border text-sm p-2" role="status" aria-live="polite">
+      <div v-if="humanized" class="rounded bg-gray-50 dark:bg-gray-900 border text-sm p-2" role="status"
+        aria-live="polite">
         <div class="font-semibold">説明</div>
         <div class="font-mono">
           <div>{{ humanized.jst }}</div>
@@ -96,9 +103,18 @@ CRON入門（基礎ガイド）を読む
           <input id="count" v-model.number="count" type="number" min="1" :max="MAX_TOTAL"
             class="w-20 border rounded p-1" aria-label="表示件数" />
           <div class="inline-flex overflow-hidden rounded-md border" role="tablist" aria-label="件数のクイック切替">
-            <button type="button" class="px-2 py-1 text-sm focus-ring" :aria-selected="countClamped===5" role="tab" @click="count=5">5</button>
-            <button type="button" class="px-2 py-1 text-sm focus-ring border-l" :aria-selected="countClamped===10" role="tab" @click="count=10">10</button>
-            <button type="button" class="px-2 py-1 text-sm focus-ring border-l" :aria-selected="countClamped===25" role="tab" @click="count=25">25</button>
+            <button type="button" class="px-2 py-1 text-sm focus-ring" :aria-selected="countClamped === 5" role="tab"
+              @click="count = 5">
+5
+</button>
+            <button type="button" class="px-2 py-1 text-sm focus-ring border-l" :aria-selected="countClamped === 10"
+              role="tab" @click="count = 10">
+10
+</button>
+            <button type="button" class="px-2 py-1 text-sm focus-ring border-l" :aria-selected="countClamped === 25"
+              role="tab" @click="count = 25">
+25
+</button>
           </div>
         </div>
 

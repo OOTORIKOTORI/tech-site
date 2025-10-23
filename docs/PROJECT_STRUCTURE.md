@@ -223,7 +223,10 @@ C:\website\tech-site
 |  ├── app.header.nav.test.ts
 |  ├── app.rss-link.test.ts
 |  ├── components
-|  |  └── app.footer.legal-links.test.ts
+|  |  ├── app.footer.legal-links.test.ts
+|  |  ├── cron-jst.spec.ts
+|  |  ├── og-check.spec.ts
+|  |  └── site-check.spec.ts
 |  ├── content
 |  |  ├── blog.content.test.ts
 |  |  ├── blog.listing.filter.test.ts
@@ -242,8 +245,11 @@ C:\website\tech-site
 |  |  ├── index.render.test.ts
 |  |  ├── privacy.render.test.ts
 |  |  ├── terms.render.test.ts
+|  |  ├── tools.cron-jst.copy.test.ts
 |  |  ├── tools.jwt-decode.learnlink.test.ts
-|  |  └── tools.render.test.ts
+|  |  ├── tools.og-check.copy.test.ts
+|  |  ├── tools.render.test.ts
+|  |  └── tools.site-check.copy.test.ts
 |  ├── scripts
 |  |  ├── gen-meta.sitemap.test.ts
 |  |  └── gen-rss.feed.test.ts
@@ -315,5 +321,5 @@ C:\website\tech-site
 └── workers
    └── topParser.worker.ts
 
-directory: 65 file: 245 symboliclink: 37
+directory: 65 file: 251 symboliclink: 37
 

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { useRuntimeConfig } from '#app'
+import { useRuntimeConfig } from '#imports'
 import { useHead } from '#imports'
 import AudienceNote from '@/components/AudienceNote.vue'
 import { analyzeSite, type SiteMetaAnalysis } from '@/utils/site-check'
@@ -157,6 +157,10 @@ const doImgCheck = async () => {
     <ToolIntroBox>
       <p>このツールの使い方や基本概念は <NuxtLink to="/blog/og-check-basics">こちらの記事</NuxtLink> を参照。</p>
     </ToolIntroBox>
+    <p class="text-sm text-gray-700">
+      必須: <code>og:title</code> <code>og:type</code> <code>og:image</code> <code>og:url</code>／推奨:
+      <code>og:description</code> <code>og:site_name</code> <code>og:image:alt</code> を評価します。
+    </p>
     <h1 class="text-2xl font-bold">OG プレビュー確認</h1>
     <AudienceNote who="コンテンツ担当・開発者（共有プレビュー確認）" />
     <form class="space-y-3" @submit.prevent="doCheck">

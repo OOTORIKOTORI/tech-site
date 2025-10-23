@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useRuntimeConfig } from '#app'
+import { useRuntimeConfig } from '#imports'
 import { useHead } from '#imports'
 import AudienceNote from '@/components/AudienceNote.vue'
 import { analyzeSite, type SiteMetaAnalysis } from '@/utils/site-check'
@@ -136,9 +136,9 @@ const doCheck = async () => {
         </div>
         <template v-if="metaInfo">
           <div class="text-sm text-gray-600 mb-2">
-最終URL: <span class="font-mono break-all">{{ metaInfo.finalUrl
+            最終URL: <span class="font-mono break-all">{{ metaInfo.finalUrl
               }}</span>
-</div>
+          </div>
           <ul class="list-disc pl-5 text-sm space-y-1">
             <li>title: <span class="font-mono">{{ metaInfo.meta.title || '—' }}</span></li>
             <li>description: <span class="font-mono">{{ metaInfo.meta.description || '—' }}</span></li>
@@ -154,14 +154,14 @@ const doCheck = async () => {
               </span>
             </li>
             <li>
-og:url: <span class="font-mono break-all">{{ metaInfo.meta.og.url || '—' }}</span>
+              og:url: <span class="font-mono break-all">{{ metaInfo.meta.og.url || '—' }}</span>
               <span class="ml-2 text-xs"
                 :class="metaInfo.meta.checks.ogUrlMatches === false ? 'text-orange-600' : 'text-gray-500'">
                 {{ metaInfo.meta.checks.ogUrlMatches === false ? '最終URLと不一致' : '' }}
               </span>
             </li>
             <li>
-og:image: <span class="font-mono break-all">{{ metaInfo.meta.og.image || '—' }}</span>
+              og:image: <span class="font-mono break-all">{{ metaInfo.meta.og.image || '—' }}</span>
               <span class="ml-2 text-xs"
                 :class="metaInfo.meta.checks.ogImageAbsolute === false ? 'text-red-600' : 'text-gray-500'">
                 {{ metaInfo.meta.checks.ogImageAbsolute === false ? '相対URL' : '' }}
@@ -179,9 +179,9 @@ og:image: <span class="font-mono break-all">{{ metaInfo.meta.og.image || '—' }
               <span class="text-xs text-gray-600">件数: {{ metaInfo.jsonld.count }}</span>
             </div>
             <div class="text-sm">
-major type: <span class="font-mono">{{ metaInfo.jsonld.types.join(', ') || '—'
+              major type: <span class="font-mono">{{ metaInfo.jsonld.types.join(', ') || '—'
                 }}</span>
-</div>
+            </div>
             <ul v-if="metaInfo.jsonld.samples.length" class="mt-1 text-xs list-disc pl-5">
               <li v-for="(s, i) in metaInfo.jsonld.samples" :key="i">{{ s.type }} — {{ JSON.stringify(s.props) }}</li>
             </ul>
@@ -251,6 +251,13 @@ major type: <span class="font-mono">{{ metaInfo.jsonld.types.join(', ') || '—'
         <template v-else>
           <div class="text-sm text-gray-600">未取得（「まとめてチェック」を実行）</div>
         </template>
+        <div class="mt-4 flex flex-wrap gap-2">
+          <a href="https://search.google.com/test/rich-results" target="_blank" rel="noopener"
+            class="rounded-md border px-2 py-1 text-sm bg-gray-100 hover:bg-gray-200 focus-ring">Rich Results Test</a>
+          <a href="https://validator.schema.org/" target="_blank" rel="noopener"
+            class="rounded-md border px-2 py-1 text-sm bg-gray-100 hover:bg-gray-200 focus-ring">Schema Markup
+            Validator</a>
+        </div>
       </div>
       <!-- robots.txt -->
       <div class="border border-zinc-200 dark:border-zinc-800 rounded p-4">
