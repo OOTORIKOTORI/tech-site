@@ -152,8 +152,8 @@ const doImgCheck = async () => {
   <main class="mx-auto max-w-3xl p-6 space-y-6">
     <ToolIntro title="OG Checker" description="URL の OGP メタ情報を取得してプレビュー表示。" usage="1) URL を入力\n2) 取得をクリック" time="~10秒"
       audience="ブロガー・開発" :example-input="exampleInput" :example-output="exampleOutput" />
-    <ToolIntroBox audience="広報・編集・開発（SNS共有の見え方確認）" value="共有時の画像/タイトル、リダイレクト先とHTTPステータスを一発確認"
-      how="URLを入力 → チェック → 結果パネルで最終URL/画像/タグを確認" safety="フェッチは絶対URLで行い、結果は端末内にのみ表示" />
+    <ToolIntroBox audience="広報・編集・開発（SNS共有の見え方確認）" value="URLを入力して、共有時の画像/タイトルと最終URL・ステータスをすぐ確認できます。"
+      how="1) URLを入力 → 2) チェックを実行 → 3) 結果パネルを確認" safety="画像取得は失敗する場合があります（到達不可/タイムアウト）。" />
     <ToolIntroBox>
       <p>このツールの使い方や基本概念は <NuxtLink to="/blog/og-check-basics">こちらの記事</NuxtLink> を参照。</p>
     </ToolIntroBox>

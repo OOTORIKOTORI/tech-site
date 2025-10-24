@@ -75,6 +75,7 @@ function clearAll() {
   <main class="mx-auto max-w-6xl p-4 space-y-4">
     <ToolIntro title="Regex Tester" description="正規表現の一致・フラグ・キャプチャを確認。" usage="1) パターンとテキストを入力\n2) フラグを選択してテスト"
       time="~30秒" audience="開発・学習" :example-input="exampleInput" :example-output="exampleOutput" />
+    <ToolIntroBox value="正規表現を即時テストできます（フラグ/改行/グループ対応）。" how="1) パターン入力 → 2) フラグ設定 → 3) テキストで結果を確認" />
     <ToolIntroBox>
       <p>このツールの使い方や基本概念は <NuxtLink to="/blog/regex-tester-basics">こちらの記事</NuxtLink> を参照。</p>
     </ToolIntroBox>

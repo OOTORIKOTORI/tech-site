@@ -13,8 +13,9 @@
         </p>
       </template>
     </ToolIntro>
-    <ToolIntroBox audience="サイト運用・開発者（定時バッチの確認）" value="crontab 式を JST/UTC で検証し、次回実行を即確認"
-      how="式を入力 → タイムゾーンを選択 → 次回実行を確認" safety="処理はブラウザ内のみ（データ送信なし）" />
+    <ToolIntroBox audience="サイト運用・開発者（定時バッチの確認）" value="Cron式の次回実行を JST/UTC で確認できます。"
+      how="1) 式を入力 → 2) タイムゾーン選択 → 3) 次回N件（5/10/25）を表示"
+      safety="<strong>6フィールド（秒）</strong>や <strong>@hourly 等エイリアス</strong>も入力可（自動認識）。" />
     <h1 class="text-2xl font-bold">Cron JST 次回実行予測</h1>
     <AudienceNote who="サイト運用・開発者（定時バッチの確認）" />
     <div class="mt-2 text-sm">
@@ -105,16 +106,16 @@
           <div class="inline-flex overflow-hidden rounded-md border" role="tablist" aria-label="件数のクイック切替">
             <button type="button" class="px-2 py-1 text-sm focus-ring" :aria-selected="countClamped === 5" role="tab"
               @click="count = 5">
-5
-</button>
+              5
+            </button>
             <button type="button" class="px-2 py-1 text-sm focus-ring border-l" :aria-selected="countClamped === 10"
               role="tab" @click="count = 10">
-10
-</button>
+              10
+            </button>
             <button type="button" class="px-2 py-1 text-sm focus-ring border-l" :aria-selected="countClamped === 25"
               role="tab" @click="count = 25">
-25
-</button>
+              25
+            </button>
           </div>
         </div>
 

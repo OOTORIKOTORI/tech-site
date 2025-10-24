@@ -1,15 +1,13 @@
 ---
-title: 'JWT署名検証入門：デコード≠検証を5分で理解'
-description: 'Base64URLデコードと署名検証の違い、exp/nbf/iatの読み方、HS/RS/JWKSでの検証手順を速習。'
+title: 'JWT 署名検証入門：デコード ≠ 検証を 5 分で理解'
+description: '課題: デコード＝検証だと誤解して真正性判断を誤る。得られること: 署名検証の手順・期限系の扱い。'
 date: '2025-10-24'
 tags:
   - 'tool:jwt-decoder'
   - '入門'
   - 'security'
-audience: 'Web/APIエンジニア'
+audience: 'Web/API エンジニア'
 ---
-
-> 関連ツール: /tools/jwt-decoder
 
 ## 1. 導入
 

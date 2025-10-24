@@ -1,0 +1,18 @@
+# Directories to ignore
+node_modules/
+.nuxt/
+.output/
+dist/
+coverage/
+.turbo/
+.cache/
+.vercel/
+.vscode/
+
+# Generated/public assets
+public/
+assets/
+
+# CI artifacts and reports
+reports/
+docs/.tmp*

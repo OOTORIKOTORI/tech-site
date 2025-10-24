@@ -2,8 +2,16 @@ import { config } from '@vue/test-utils'
 import { vi, beforeAll, afterAll } from 'vitest'
 
 config.global.stubs = {
+  // Nuxt layout/page shell
   NuxtPage: { template: '<div><slot /></div>' },
   NuxtLayout: { template: '<div><slot /></div>' },
+
+  // Router/links
+  NuxtLink: { props: ['to'], template: '<a :href="to"><slot /></a>' },
+
+  // Site-specific presentational components used in tests
+  ToolIntro: { template: '<div class="stub-ToolIntro"><slot /></div>' },
+  ToolIntroBox: { template: '<div class="stub-ToolIntroBox"><slot /></div>' },
 }
 
 class IOStub {

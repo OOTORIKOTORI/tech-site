@@ -1,13 +1,12 @@
 ---
-title: 'Linux top入門：負荷を読み解くための指標ガイド'
-description: 'topの見方（load average / CPU% / MEM% / IOWAIT）を整理し、実務で役立つ読み解き方を解説。'
+title: 'Linux top 入門：負荷を読み解くための指標ガイド'
+description: '課題: top の指標の意味が曖昧で原因に辿り着けない。得られること: 指標の読み方・初動の当たりの付け方。'
 date: 2025-10-22
 published: true
-audience: ['初学者', 'Webエンジニア']
+audience: ['初学者', 'Web エンジニア']
 tags: ['tool:top-analyzer', 'linux', 'infra', 'performance']
----
 
-> 関連ツール: [/tools/top-analyzer](/tools/top-analyzer)
+---
 
 サーバが「重い」と感じたとき、まず開くのが `top`。でも数字の意味が曖昧だと、原因に辿り着けません。
 本記事では、`top`の主要指標の意味と、初動の当たりを付ける読み方をまとめます。
@@ -72,7 +71,7 @@ tags: ['tool:top-analyzer', 'linux', 'infra', 'performance']
 
 ---
 
-## 8. 3 分クイズ or ミニまとめ
+## 8. 3 分クイズ
 
 - load average が高い時、まず疑うのは？ → CPU or I/O の待ち
 - `us` と `wa` の違いは？ → 前者は計算、後者は I/O 待ち

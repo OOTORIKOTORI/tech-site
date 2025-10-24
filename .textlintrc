@@ -1,0 +1,12 @@
+{
+  "filters": {},
+  "rules": {
+    "preset-jtf-style": {
+      "severity": "warning",
+      "1.1.1.本文": true,
+      "2.1.2.全角と半角の使い分け": true,
+      "3.1.1.ですます調": true,
+      "3.2.カタカナ語の表記": false
+    }
+  }
+}

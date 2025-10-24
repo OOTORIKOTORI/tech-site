@@ -1,13 +1,12 @@
 ---
-title: 'サイトチェッカー入門：metaタグと構造化データの健康診断'
-description: 'meta / robots / canonical / JSON-LD を中心に、サイトの健全性を点検する観点をまとめました。'
+title: 'サイトチェッカー入門：meta タグと構造化データの健康診断'
+description: '課題: meta/canonical/JSON-LD/robots/sitemap/feed の健全性が分からない。得られること: 点検観点・一括確認手順。'
 date: 2025-10-22
 published: true
-audience: ['初学者', 'Webエンジニア']
+audience: ['初学者', 'Web エンジニア']
 tags: ['tool:site-check', 'seo', 'meta', 'json-ld']
----
 
-> 関連ツール: [/tools/site-check](/tools/site-check)
+---
 
 「SEO の健康診断って何を見るの？」という疑問に、まず押さえたい項目をコンパクトにまとめます。
 
@@ -74,7 +73,7 @@ tags: ['tool:site-check', 'seo', 'meta', 'json-ld']
 
 ---
 
-## 8. 3 分クイズ or ミニまとめ
+## 8. 3 分クイズ
 
 - canonical の役割は？ → 重複 URL の統一
 - JSON-LD は何のため？ → 構造化データで検索結果の理解とリッチ表示に寄与

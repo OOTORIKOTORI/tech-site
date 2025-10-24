@@ -3,8 +3,9 @@
     <ToolIntro title="JWT Decoder" description="基本はローカルデコードのみ、任意で署名検証（HS256/RS256/JWKS）を有効化できます。"
       usage="1) JWT を貼り付け\n2) Decode\n3) 必要に応じ Verify タブで検証" time="~10秒" audience="開発・学習" :example-input="exampleInput"
       :example-output="exampleOutput" />
-    <ToolIntroBox audience="API/認証を扱う開発者" value="JWT のヘッダ/ペイロードをローカルで可視化（秘密鍵不要）" how="トークンを貼り付け → デコードを実行 → 中身を確認"
-      safety="貼り付けた文字列は保存されません" />
+    <ToolIntroBox audience="API/認証を扱う開発者" value="JWT をデコードして中身を確認し、任意で署名検証（HS/RS/JWKS）を実行できます。"
+      how="1) トークン貼付 → 2)（任意）検証をON → 3) 結果/exp等のバッジを確認"
+      safety="貼り付けたトークンや鍵は<strong>ブラウザ内で処理</strong>されます。ネットワークは（ON時の）JWKS取得のみ。" />
     <header class="space-y-2">
       <h1 class="text-2xl font-bold flex items-center gap-3">
         JWT ツール
@@ -226,9 +227,9 @@
               <div class="space-y-1">
                 <div v-for="e in sortedErrors" :key="e.code" class="text-xs flex gap-2">
                   <span class="inline-block px-2 py-0.5 rounded bg-red-100 text-red-700 font-semibold">{{ e.code
-                    }}</span>
+                  }}</span>
                   <span class="text-gray-800">{{ e.message }}<span v-if="e.hint" class="text-gray-500"> ({{ e.hint
-                      }})</span></span>
+                  }})</span></span>
                 </div>
               </div>
             </template>

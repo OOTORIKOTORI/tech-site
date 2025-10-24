@@ -70,6 +70,8 @@ async function analyze() {
     <ToolIntro title="Top Analyzer" description="top の CSV を可視化。CPU/Load/Mem を比較し、SVG/PNGで保存可能。"
       usage="1) CSV を貼り付け/選択\n2) グラフ化→保存（SVG/PNG）" time="~30秒" audience="運用・調査" :example-input="exampleInput"
       :example-output="exampleOutput" />
+    <ToolIntroBox value="Linux top のログをグラフ化して CPU/Load の傾向を把握できます。" how="1) ログをアップロード → 2) 解析を実行 → 3) グラフを確認/保存"
+      safety="ファイルは<strong>ブラウザ内で処理</strong>され、サーバーに送信されません。" />
     <ToolIntroBox>
       <p>このツールの使い方や基本概念は <NuxtLink to="/blog/top-analyzer-basics">こちらの記事</NuxtLink> を参照。</p>
     </ToolIntroBox>

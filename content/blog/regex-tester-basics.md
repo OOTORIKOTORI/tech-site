@@ -1,13 +1,12 @@
 ---
 title: '正規表現入門：パターンで文字列を操る基本'
-description: '正規表現とは何か、メタ文字とエスケープの基礎、よく使うパターンを初心者向けに整理。'
+description: '課題: パターンが取り過ぎる/読みにくい。得られること: メタ文字・最短一致の基本と実用パターン。'
 date: 2025-10-22
 published: true
-audience: ['初学者', 'Webエンジニア']
+audience: ['初学者', 'Web エンジニア']
 tags: ['tool:regex-tester', 'regex', 'string', 'validation']
----
 
-> 関連ツール: [/tools/regex-tester](/tools/regex-tester)
+---
 
 ログ抽出・入力チェック・置換…**正規表現（Regular Expression）**はテキスト処理の万能ナイフです。
 ここでは最低限のルールと、実務でよく使うパターンを紹介します。
@@ -73,7 +72,7 @@ tags: ['tool:regex-tester', 'regex', 'string', 'validation']
 
 ---
 
-## 8. 3 分クイズ or ミニまとめ
+## 8. 3 分クイズ
 
 - 最短一致の書き方は？ → `*?` `+?`
 - 行頭/行末に一致させるには？ → `^` `$`

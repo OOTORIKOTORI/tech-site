@@ -68,6 +68,8 @@ function downloadJson() {
     <ToolIntro title="JSON Formatter" description="JSON 文字列を整形 / 最小化 / 検証します。"
       usage="1) 入力欄にJSONを貼り付ける\n2) 「整形」または「最小化」をクリック" time="~10秒" audience="開発者・学習者" :example-input="exampleInput"
       :example-output="exampleOutput" />
+    <ToolIntroBox value="JSON を整形/検証/コピー/ダウンロードできます。" how="1) JSONを貼付 → 2) 整形/ミニファイ → 3) 必要に応じてコピー/保存"
+      safety="貼り付けたJSONは<strong>ブラウザ内で処理</strong>されます。" />
     <ToolIntroBox>
       <p>このツールの使い方や基本概念は <NuxtLink to="/blog/json-formatter-basics">こちらの記事</NuxtLink> を参照。</p>
     </ToolIntroBox>

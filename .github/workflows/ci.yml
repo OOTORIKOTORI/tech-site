@@ -30,6 +30,9 @@ jobs:
         run: pnpm typecheck
       - name: Lint
         run: pnpm lint
+      - name: Textlint (soft-fail)
+        run: pnpm run lint:text
+        continue-on-error: true
       - name: Test
         run: pnpm test -- --run
       # optional:

@@ -239,6 +239,14 @@
 - 既知slugで200・未知slugで404を確認。
 - `/tools/top-analyzer`（topログ可視化・CSVエクスポート・サンプルDL）を含む全ツールの動作・UI・E2E/ユニットテスト・README/Spec反映を確認。
 
+### PR の 1 分チェック（レビュー用）
+
+- 文体は敬体で統一／1 文 40 字目安／能動・具体／成果語を含む／「！」や絵文字の多用は禁止
+- 記事が「ツール導入の型」または「入門記事の見出し型」に合致（詳細は PROJECT_SPEC の Writing Style）
+- （該当時）「ブラウザ内処理」などプライバシー注意を明記（外部取得時はレート/保存有無も）
+- CI 手順は既存どおり（Typecheck → Lint → Test → Build → Postbuild --check-only → smoke:og → ci:guards → LHCI）
+- textlint は任意（別 PR で導入可能）。本 PR では必須としない
+
 ### PR本文テンプレ（コピペ用）
 
 ```

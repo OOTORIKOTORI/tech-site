@@ -114,8 +114,8 @@ const doCheck = async () => {
   <main class="mx-auto max-w-3xl p-6 space-y-6">
     <ToolIntro title="Site Checker" description="サイトのHTTPレスポンスを確認（ステータス/ヘッダー/リダイレクト）。" usage="1) URL を入力\n2) チェックを実行"
       time="~10秒" audience="開発・運用" :example-input="exampleInput" :example-output="exampleOutput" />
-    <ToolIntroBox audience="サイト運用者/SEO担当" value="sitemap.xml と robots.txt の到達性や掲載可否をまとめて点検"
-      how="サイトのURLを入力 → それぞれの取得結果を確認" safety="URLは保存されず、結果は端末内で表示" />
+    <ToolIntroBox audience="サイト運用者/SEO担当" value="meta/canonical/JSON-LD/robots/sitemap/feed をまとめて確認できます。"
+      how="1) ORIGINを入力 → 2) まとめてチェック → 3) 結果を確認" safety="最終URLのHTML/ヘッダ取得に時間がかかる場合があります。" />
     <ToolIntroBox>
       <p>このツールの使い方や基本概念は <NuxtLink to="/blog/site-check-basics">こちらの記事</NuxtLink> を参照。</p>
     </ToolIntroBox>
@@ -137,7 +137,7 @@ const doCheck = async () => {
         <template v-if="metaInfo">
           <div class="text-sm text-gray-600 mb-2">
             最終URL: <span class="font-mono break-all">{{ metaInfo.finalUrl
-              }}</span>
+            }}</span>
           </div>
           <ul class="list-disc pl-5 text-sm space-y-1">
             <li>title: <span class="font-mono">{{ metaInfo.meta.title || '—' }}</span></li>
@@ -180,7 +180,7 @@ const doCheck = async () => {
             </div>
             <div class="text-sm">
               major type: <span class="font-mono">{{ metaInfo.jsonld.types.join(', ') || '—'
-                }}</span>
+              }}</span>
             </div>
             <ul v-if="metaInfo.jsonld.samples.length" class="mt-1 text-xs list-disc pl-5">
               <li v-for="(s, i) in metaInfo.jsonld.samples" :key="i">{{ s.type }} — {{ JSON.stringify(s.props) }}</li>
@@ -312,7 +312,7 @@ const doCheck = async () => {
           <li>URL件数: {{ feed?.count }}</li>
           <li>
             ORIGIN一致: <span :class="feed?.allOk ? 'text-green-700' : 'text-red-600'">{{ feed?.allOk ? 'OK' : 'NG'
-              }}</span>
+            }}</span>
           </li>
           <li>サンプル: <span v-if="feed?.sample?.length">{{ feed.sample.join(', ') }}</span><span v-else>なし</span></li>
         </ul>

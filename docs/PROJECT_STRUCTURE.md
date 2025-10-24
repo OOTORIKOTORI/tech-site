@@ -181,6 +181,8 @@ C:\website\tech-site
 |  |  ├── guard-markdown-shapes.cjs
 |  |  └── guard-relative-fetch.cjs
 |  ├── ci-local.ps1
+|  ├── fix-frontmatter-open.cjs
+|  ├── fix-frontmatter-open.js
 |  ├── gen-meta.mjs
 |  ├── migrate-blog-template.cjs
 |  ├── ops
@@ -232,6 +234,7 @@ C:\website\tech-site
 |  ├── content
 |  |  ├── blog.content.test.ts
 |  |  ├── blog.listing.filter.test.ts
+|  |  ├── frontmatter.spec.ts
 |  |  └── quality.blog.spec.ts
 |  ├── e2e
 |  |  ├── blog.detail.spec.ts
@@ -323,5 +326,5 @@ C:\website\tech-site
 └── workers
    └── topParser.worker.ts
 
-directory: 65 file: 253 symboliclink: 37
+directory: 65 file: 256 symboliclink: 39
 

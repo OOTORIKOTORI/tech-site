@@ -58,7 +58,8 @@ const exampleOutput = 'JST: 2023/11/14 22:13:20, UTC: 2023/11/14 13:13:20 (例)'
     <ToolIntro title="Epoch Timestamp Converter" description="Epoch ⇄ 日時（JST/UTC）の双方向変換。秒/ミリ秒は自動判定または手動指定。"
       usage="1) Epoch値を入力して日時を確認、または 2) 日時を入力してEpochを取得" time="~10秒" audience="開発・運用" :example-input="exampleInput"
       :example-output="exampleOutput" />
-    <ToolIntroBox how="Epochか日時を入力 → タイムゾーンを選択 → 即時変換" safety="処理はブラウザ内のみ（送信なし）" />
+    <ToolIntroBox value="Epoch（秒/ミリ秒）と日時（JST/UTC）を相互に変換できます。" how="1) Epochまたは日時を入力 → 2) 単位/タイムゾーンを選択 → 3) 結果をコピー"
+      safety="桁数で秒/ミリ秒を自動判定できます（手動切替も可）。" />
 
     <p class="text-sm">
       入門記事: <NuxtLink class="link" to="/blog/timestamp-basics">/blog/timestamp-basics</NuxtLink>
