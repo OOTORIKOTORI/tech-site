@@ -61,6 +61,7 @@ C:\website\tech-site
 |  |  ├── cron-basics.md
 |  |  ├── json-formatter-basics.md
 |  |  ├── jwt-decode-basics.md
+|  |  ├── jwt-verify-basics.md
 |  |  ├── lighthouse-best-practices-070.md
 |  |  ├── linux-top-cheatsheet.md
 |  |  ├── nnn-dev-notes-oct.md
@@ -71,6 +72,7 @@ C:\website\tech-site
 |  |  ├── pxe-boot-minimum.md
 |  |  ├── regex-tester-basics.md
 |  |  ├── site-check-basics.md
+|  |  ├── timestamp-basics.md
 |  |  ├── timestamp-converter-basics.md
 |  |  ├── top-analyzer-basics.md
 |  |  ├── welcome.md
@@ -321,5 +323,5 @@ C:\website\tech-site
 └── workers
    └── topParser.worker.ts
 
-directory: 65 file: 251 symboliclink: 37
+directory: 65 file: 253 symboliclink: 37
 

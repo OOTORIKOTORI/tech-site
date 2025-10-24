@@ -60,6 +60,10 @@ const exampleOutput = 'JST: 2023/11/14 22:13:20, UTC: 2023/11/14 13:13:20 (例)'
       :example-output="exampleOutput" />
     <ToolIntroBox how="Epochか日時を入力 → タイムゾーンを選択 → 即時変換" safety="処理はブラウザ内のみ（送信なし）" />
 
+    <p class="text-sm">
+      入門記事: <NuxtLink class="link" to="/blog/timestamp-basics">/blog/timestamp-basics</NuxtLink>
+    </p>
+
     <section aria-labelledby="epoch2date" class="surface p-4 space-y-3">
       <h2 id="epoch2date" class="text-lg font-semibold">Epoch → 日時</h2>
       <div class="grid gap-3 sm:grid-cols-[1fr_auto] items-end">
@@ -137,7 +141,7 @@ const exampleOutput = 'JST: 2023/11/14 22:13:20, UTC: 2023/11/14 13:13:20 (例)'
       <p v-if="dateResult.error" class="text-sm text-red-600" aria-live="assertive">{{ dateResult.error }}</p>
     </section>
 
-    <RelatedList :tags="['epoch', 'timestamp', 'date', 'timezone', 'utc', 'jst', 'tools']" />
+    <RelatedList :tags="['tool:timestamp', 'epoch', 'timestamp', 'date', 'timezone', 'utc', 'jst', 'tools']" />
   </main>
 </template>
 

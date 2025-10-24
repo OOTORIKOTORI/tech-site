@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0"><channel><title>磨きエクスプローラー Blog</title><link>https://migakiexplorer.jp/blog</link><description>磨きエクスプローラー Blog RSS</description>
+    <item><title>JWT署名検証入門：デコード≠検証を5分で理解</title><link>https://migakiexplorer.jp/blog/jwt-verify-basics</link><pubDate>Fri, 24 Oct 2025 00:00:00 GMT</pubDate><description>Base64URLデコードと署名検証の違い、exp/nbf/iatの読み方、HS/RS/JWKSでの検証手順を速習。</description></item>
+    <item><title>タイムスタンプ入門：Epoch秒/ミリ秒とJST/UTCを5分で理解</title><link>https://migakiexplorer.jp/blog/timestamp-basics</link><pubDate>Thu, 23 Oct 2025 00:00:00 GMT</pubDate><description>Epoch秒/ミリ秒の違い、UTCとJSTの換算、ログ解析とスケジューリングでの実務ポイントを速習。</description></item>
     <item><title>JSON入門：整形と構造を理解する</title><link>https://migakiexplorer.jp/blog/json-formatter-basics</link><pubDate>Wed, 22 Oct 2025 00:00:00 GMT</pubDate><description>JSONの基本構造・よくある構文エラー・整形（フォーマット）と検証の違いを初心者向けに解説。</description></item>
     <item><title>JWT入門：デコードと検証の違いを5分で理解</title><link>https://migakiexplorer.jp/blog/jwt-decode-basics</link><pubDate>Wed, 22 Oct 2025 00:00:00 GMT</pubDate><description>そもそもJWTって何？デコードと検証は何が違うの？認証トークンの構造から安全な扱い方まで、初心者向けにわかりやすく解説します。</description></item>
     <item><title>OGP入門：SNSで正しく表示されるための基本</title><link>https://migakiexplorer.jp/blog/og-check-basics</link><pubDate>Wed, 22 Oct 2025 00:00:00 GMT</pubDate><description>OGPとは何か、SNSプレビューが崩れる典型パターン、確認手順と対策を初心者向けに解説。</description></item>

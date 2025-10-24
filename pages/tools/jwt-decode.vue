@@ -14,7 +14,14 @@
         <NuxtLink to="/blog/jwt-decode-basics" class="text-blue-700 underline hover:text-blue-900 focus-ring">
           JWTデコード入門（基礎ガイド）を読む
         </NuxtLink>
+        <span class="mx-2 text-gray-400">/</span>
+        <NuxtLink to="/blog/jwt-verify-basics" class="text-blue-700 underline hover:text-blue-900 focus-ring">
+          JWT署名検証入門（Verifyの実践）を読む
+        </NuxtLink>
       </div>
+      <p class="text-sm">
+        入門記事: <NuxtLink class="link" to="/blog/jwt-verify-basics">/blog/jwt-verify-basics</NuxtLink>
+      </p>
       <span v-if="verifyState.valid === true"
         class="inline-flex items-center text-xs font-semibold rounded bg-green-100 text-green-800 px-2 py-1">検証成功</span>
       <span v-else-if="verifyState.valid === false"
@@ -117,13 +124,13 @@
               </td>
               <td v-if="c.key === 'exp'" class="text-xs text-gray-500 pl-2">{{ relativeExp(c.value as number) }}</td>
               <td v-else-if="c.key === 'nbf'" class="text-xs text-gray-500 pl-2">
-{{ relativeGeneric(c.value as number)
+                {{ relativeGeneric(c.value as number)
                 }}
-</td>
+              </td>
               <td v-else-if="c.key === 'iat'" class="text-xs text-gray-500 pl-2">
-{{ relativeGeneric(c.value as number)
+                {{ relativeGeneric(c.value as number)
                 }}
-</td>
+              </td>
             </tr>
           </tbody>
         </table>

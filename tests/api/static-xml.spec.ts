@@ -45,6 +45,7 @@ async function stopServer() {
 }
 
 describe('static XML routes', () => {
+  // CI で import/初期化が遅延することがあるため余裕を持たせる
   beforeAll(async () => {
     const serverDir = resolve(process.cwd(), 'server/assets')
     const publicDir = resolve(process.cwd(), 'public')
@@ -64,7 +65,7 @@ describe('static XML routes', () => {
 
     process.env.NUXT_PUBLIC_SITE_ORIGIN = 'https://migakiexplorer.jp'
     await startServer()
-  })
+  }, 30000)
 
   afterAll(async () => {
     await stopServer()
