@@ -33,16 +33,13 @@ describe('scripts/gen-meta.mjs sitemap', () => {
     }
   }
 
-  it('includes blog welcome route after reset', async () => {
+  it('excludes blog welcome route (primer+tools only)', async () => {
     const xml = await waitForSitemap(sitemapPath)
-    expect(xml).toContain('<loc>https://migakiexplorer.jp/blog/welcome</loc>')
-    const m = xml.match(
-      /<url>\s*<loc>https:\/\/migakiexplorer\.jp\/blog\/welcome<\/loc>[\s\S]*?<lastmod>([^<]+)<\/lastmod>[\s\S]*?<\/url>/
-    )
-    expect(m && typeof m[1] === 'string').toBeTruthy()
-    const lastmod = m && m[1] ? m[1] : ''
-    // ISO 8601 datetime check (rough)
-    expect(new Date(lastmod).toString()).not.toBe('Invalid Date')
+    // ensure welcome is not listed in sitemap
+    expect(xml).not.toContain('<loc>https://migakiexplorer.jp/blog/welcome</loc>')
+    // sanity: sitemap xml is valid-ish and contains at least one tools or blog route
+    expect(xml).toContain('<urlset')
+    expect(/<loc>https:\/\/migakiexplorer\.jp\/(tools|blog)\//.test(xml)).toBe(true)
   })
 
   it('check-only still passes host validation', () => {

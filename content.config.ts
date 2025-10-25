@@ -18,10 +18,10 @@ export default defineContentConfig({
         draft: z.boolean().optional(),
         canonical: z.string().optional(),
         // New frontmatter fields (tools-first pivot)
-        type: z.enum(['primer', 'note', 'memo']).optional(),
+        type: z.enum(['primer', 'guide', 'reference', 'news']).optional(),
         tool: z.string().optional(),
         audience: z.string().optional(),
-        visibility: z.enum(['featured', 'default', 'hidden', 'archive']).optional(),
+        visibility: z.enum(['primer', 'archive', 'hidden']).optional(),
         robots: z.string().optional(),
       }),
     }),

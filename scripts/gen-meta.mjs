@@ -37,8 +37,6 @@ function readToolRoutes() {
   return slugs.map(s => `/tools/${s}`)
 }
 
-const ALWAYS_INCLUDE_BLOG = new Set(['welcome'])
-
 function readBlogRoutes() {
   const dir = 'content/blog'
   if (!existsSync(dir)) return []
@@ -60,7 +58,6 @@ function readBlogRoutes() {
       const robotsStr = extractYamlScalar('robots', fmMatch[0]) || ''
       const visibility = (extractYamlScalar('visibility', fmMatch[0]) || '').toLowerCase()
       const type = (extractYamlScalar('type', fmMatch[0]) || '').toLowerCase()
-      if (ALWAYS_INCLUDE_BLOG.has(slug)) return true
       if (!tagsStr) return false
       try {
         // Handle YAML array format: [internal, control]
