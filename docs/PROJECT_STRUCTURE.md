@@ -94,6 +94,7 @@ C:\website\tech-site
 ├── debug.js
 ├── docs
 |  ├── HANDBOOK.md
+|  ├── ops_smoke_checklist.md
 |  ├── PROJECT_STRUCTURE.md
 |  ├── robots.txt
 |  └── sitemap.xml
@@ -326,5 +327,5 @@ C:\website\tech-site
 └── workers
    └── topParser.worker.ts
 
-directory: 65 file: 256 symboliclink: 39
+directory: 65 file: 257 symboliclink: 39
 

@@ -58,6 +58,8 @@
 
 - `/tools/og-check` で OG タグ/OG 画像の 200/302 を即確認（SSR でも絶対 URL 運用）。必須(og:title/og:description/og:image)と推奨(og:url/twitter:card)の網羅チェック、画像の到達性と寸法（可能時のみ、失敗は非ブロッキング）を表示。主要 SNS デバッガー（Facebook/X/LinkedIn）へのワンクリック導線付き。
 - `/tools/site-check` で robots/sitemap/feed をまとめて取得・ORIGIN 一致の簡易検証に加え、最終 URL を 1 回だけフェッチして meta/canonical/JSON‑LD/基本セキュリティヘッダ（CSP/HSTS 等）の有無を概況表示（JSON‑LD は型/件数/主要プロパティのみを抜粋）
+- `/tools/timestamp` — Epoch 秒/ミリ秒 ⇄ 日時（JST/UTC）の相互変換。入門記事と相互リンク（frontmatter: `tool:timestamp`）。
+- JWT Decoder の入門記事（frontmatter: `tool:jwt-decoder`）との相互リンクが機能中（ツール導入直下と記事側の冒頭/末尾に相互リンクを設置）。
 
 - 生成物の表記を統一: `robots.txt` / `sitemap.xml` / `feed.xml`（postbuild で生成）。
 - ORIGIN 基準の一元化: `NUXT_PUBLIC_SITE_ORIGIN` を canonical / og:url / robots / sitemap / RSS の基点に使用。

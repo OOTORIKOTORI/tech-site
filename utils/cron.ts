@@ -286,19 +286,122 @@ function setInTZ(
   )
 }
 
-export function nextRuns(
-  spec: CronSpec,
-  baseFrom: Date,
-  tz: 'UTC' | 'Asia/Tokyo',
-  count: number
-): Date[] {
+// --- Timezone helpers (generic IANA TZ support) ---
+function tzOffsetMinutes(date: Date, tz: string): number {
+  // Derive tz offset by comparing formatted local parts vs actual epoch
+  const fmt = new Intl.DateTimeFormat('en-US', {
+    timeZone: tz,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+  })
+  const parts = fmt.formatToParts(date)
+  const get = (t: Intl.DateTimeFormatPartTypes) => parts.find(p => p.type === t)?.value || '0'
+  const y = Number(get('year'))
+  const mo = Number(get('month'))
+  const da = Number(get('day'))
+  const hh = Number(get('hour'))
+  const mi = Number(get('minute'))
+  const ss = Number(get('second'))
+  const asUTC = Date.UTC(y, mo - 1, da, hh, mi, ss)
+  const diffMs = asUTC - date.getTime()
+  return Math.round(diffMs / 60000) // minutes
+}
+
+function partsInAnyTZ(date: Date, tz: string) {
+  if (tz === 'UTC' || tz === 'Asia/Tokyo') return partsInTZ(date, tz as 'UTC' | 'Asia/Tokyo')
+  const offMin = tzOffsetMinutes(date, tz)
+  const local = new Date(date.getTime() + offMin * 60000)
+  return {
+    second: local.getUTCSeconds(),
+    minute: local.getUTCMinutes(),
+    hour: local.getUTCHours(),
+    dom: local.getUTCDate(),
+    month: local.getUTCMonth() + 1,
+    dow: local.getUTCDay(),
+  }
+}
+
+function yearInAnyTZ(date: Date, tz: string): number {
+  if (tz === 'UTC' || tz === 'Asia/Tokyo') return yearInTZ(date, tz as 'UTC' | 'Asia/Tokyo')
+  const offMin = tzOffsetMinutes(date, tz)
+  const local = new Date(date.getTime() + offMin * 60000)
+  return local.getUTCFullYear()
+}
+
+function buildDateInAnyTZ(
+  parts: { y: number; mon: number; dom: number; hour: number; min: number; sec: number },
+  tz: string
+): Date {
+  if (tz === 'UTC' || tz === 'Asia/Tokyo') return buildDateInTZ(parts, tz as 'UTC' | 'Asia/Tokyo')
+  // Initial naive guess: as if tz offset were 0
+  const guessMs0 = Date.UTC(parts.y, parts.mon - 1, parts.dom, parts.hour, parts.min, parts.sec, 0)
+  // Compute offset at guess and adjust
+  let off = tzOffsetMinutes(new Date(guessMs0), tz)
+  let ms = guessMs0 - off * 60000
+  // Re-evaluate once in case crossing DST boundary changed offset
+  const off2 = tzOffsetMinutes(new Date(ms), tz)
+  if (off2 !== off) {
+    off = off2
+    ms = guessMs0 - off * 60000
+  }
+  // As a safety, if parts don't match (DST gaps), nudge forward by 1h up to 2 steps
+  for (let i = 0; i < 2; i++) {
+    const p = partsInAnyTZ(new Date(ms), tz)
+    if (
+      p.month === parts.mon &&
+      p.dom === parts.dom &&
+      p.hour === parts.hour &&
+      p.minute === parts.min &&
+      p.second === parts.sec
+    ) {
+      break
+    }
+    ms += 3600000
+  }
+  return new Date(ms)
+}
+
+function setInAnyTZ(
+  base: Date,
+  tz: string,
+  patch: Partial<{
+    y: number
+    month: number
+    dom: number
+    hour: number
+    minute: number
+    second: number
+  }>
+): Date {
+  if (tz === 'UTC' || tz === 'Asia/Tokyo') return setInTZ(base, tz as 'UTC' | 'Asia/Tokyo', patch)
+  const p = partsInAnyTZ(base, tz)
+  const y = yearInAnyTZ(base, tz)
+  return buildDateInAnyTZ(
+    {
+      y: patch.y ?? y,
+      mon: patch.month ?? p.month,
+      dom: patch.dom ?? p.dom,
+      hour: patch.hour ?? p.hour,
+      min: patch.minute ?? p.minute,
+      sec: patch.second ?? p.second,
+    },
+    tz
+  )
+}
+
+export function nextRuns(spec: CronSpec, baseFrom: Date, tz: string, count: number): Date[] {
   const out: Date[] = []
   let cur = new Date(baseFrom.getTime())
   if (spec.hasSeconds) {
     // 秒指定あり: ミリ秒があれば次の秒、なければその秒から包括開始
     if (cur.getMilliseconds() !== 0) {
-      const p0 = partsInTZ(cur, tz)
-      cur = setInTZ(cur, tz, { second: p0.second + 1 })
+      const p0 = partsInAnyTZ(cur, tz)
+      cur = setInAnyTZ(cur, tz, { second: p0.second + 1 })
       cur.setUTCMilliseconds(0)
     } else {
       cur.setUTCMilliseconds(0)
@@ -306,8 +409,8 @@ export function nextRuns(
   } else {
     // 従来通り: 秒・ミリ秒があれば次の分に切り上げ、分ちょうどは包括
     if (cur.getSeconds() !== 0 || cur.getMilliseconds() !== 0) {
-      const p0 = partsInTZ(cur, tz)
-      cur = setInTZ(cur, tz, { minute: p0.minute + 1, second: 0 })
+      const p0 = partsInAnyTZ(cur, tz)
+      cur = setInAnyTZ(cur, tz, { minute: p0.minute + 1, second: 0 })
       cur.setUTCMilliseconds(0)
     } else {
       cur.setUTCSeconds(0, 0)
@@ -322,24 +425,24 @@ export function nextRuns(
 
   while (out.length < count && dayGuard < guardLimit) {
     // 月そろえ
-    let p = partsInTZ(cur, tz)
+    let p = partsInAnyTZ(cur, tz)
     if (!spec.month.star && !spec.month.values.includes(p.month)) {
       const nextMon = spec.month.values.find(v => v >= p.month) ?? spec.month.values[0]!
-      let y = yearInTZ(cur, tz)
+      let y = yearInAnyTZ(cur, tz)
       if (nextMon < p.month) y += 1
-      cur = buildDateInTZ(
+      cur = buildDateInAnyTZ(
         { y, mon: nextMon, dom: 1, hour: hourFirst, min: minFirst, sec: secFirst },
         tz
       )
-      p = partsInTZ(cur, tz)
+      p = partsInAnyTZ(cur, tz)
     }
 
     // 日（DOM×DOW）: dowDomMode に応じて判定
     const inSet = (f: CronField, v: number) => f.star || f.values.includes(v)
     const domDowOk = (pp: { dom: number; dow: number }) => {
       // 実在日チェック: 日付が存在しない場合は false
-      const pFull = partsInTZ(cur, tz)
-      const actualDate = new Date(yearInTZ(cur, tz), pFull.month - 1, pp.dom)
+      const pFull = partsInAnyTZ(cur, tz)
+      const actualDate = new Date(yearInAnyTZ(cur, tz), pFull.month - 1, pp.dom)
       if (actualDate.getDate() !== pp.dom) return false
 
       const mode = spec.dowDomMode === 'AND' ? 'AND' : 'OR'
@@ -364,13 +467,13 @@ export function nextRuns(
     }
     let ok = domDowOk(p)
     if (!ok) {
-      cur = setInTZ(cur, tz, { hour: hourFirst, minute: minFirst, second: secFirst })
+      cur = setInAnyTZ(cur, tz, { hour: hourFirst, minute: minFirst, second: secFirst })
       const maxSteps =
         spec.dow.star && !spec.dom.star ? 62 : spec.dom.star && !spec.dow.star ? 7 : 31
       let steps = 0
       while (!ok && steps < maxSteps && dayGuard < guardLimit) {
-        const pp = partsInTZ(cur, tz)
-        cur = setInTZ(cur, tz, {
+        const pp = partsInAnyTZ(cur, tz)
+        cur = setInAnyTZ(cur, tz, {
           dom: pp.dom + 1,
           hour: hourFirst,
           minute: minFirst,
@@ -378,17 +481,17 @@ export function nextRuns(
         })
         dayGuard++
         steps++
-        p = partsInTZ(cur, tz)
+        p = partsInAnyTZ(cur, tz)
         ok = domDowOk(p)
       }
       if (!ok) continue
     }
 
     // 時
-    p = partsInTZ(cur, tz)
+    p = partsInAnyTZ(cur, tz)
     const nextHour = spec.hour.values.find(v => v >= p.hour)
     if (nextHour === undefined) {
-      cur = setInTZ(cur, tz, {
+      cur = setInAnyTZ(cur, tz, {
         dom: p.dom + 1,
         hour: hourFirst,
         minute: minFirst,
@@ -398,16 +501,17 @@ export function nextRuns(
       continue
     }
     if (nextHour !== p.hour)
-      cur = setInTZ(cur, tz, { hour: nextHour, minute: minFirst, second: secFirst })
+      cur = setInAnyTZ(cur, tz, { hour: nextHour, minute: minFirst, second: secFirst })
 
     // 分
-    p = partsInTZ(cur, tz)
+    p = partsInAnyTZ(cur, tz)
     const nextMin = spec.minute.values.find(v => v >= p.minute)
     if (nextMin === undefined) {
       const nh = spec.hour.values.find(v => v >= p.hour + 1)
-      if (nh !== undefined) cur = setInTZ(cur, tz, { hour: nh, minute: minFirst, second: secFirst })
+      if (nh !== undefined)
+        cur = setInAnyTZ(cur, tz, { hour: nh, minute: minFirst, second: secFirst })
       else {
-        cur = setInTZ(cur, tz, {
+        cur = setInAnyTZ(cur, tz, {
           dom: p.dom + 1,
           hour: hourFirst,
           minute: minFirst,
@@ -417,21 +521,21 @@ export function nextRuns(
       }
       continue
     }
-    if (nextMin !== p.minute) cur = setInTZ(cur, tz, { minute: nextMin, second: secFirst })
-    p = partsInTZ(cur, tz)
+    if (nextMin !== p.minute) cur = setInAnyTZ(cur, tz, { minute: nextMin, second: secFirst })
+    p = partsInAnyTZ(cur, tz)
 
     // 秒（6フィールド対応）
     const nextSec = spec.second.values.find(v => v >= p.second)
     if (nextSec === undefined) {
       // 次の分へ
       const nm = spec.minute.values.find(v => v >= p.minute + 1)
-      if (nm !== undefined) cur = setInTZ(cur, tz, { minute: nm, second: secFirst })
+      if (nm !== undefined) cur = setInAnyTZ(cur, tz, { minute: nm, second: secFirst })
       else {
         const nh = spec.hour.values.find(v => v >= p.hour + 1)
         if (nh !== undefined)
-          cur = setInTZ(cur, tz, { hour: nh, minute: minFirst, second: secFirst })
+          cur = setInAnyTZ(cur, tz, { hour: nh, minute: minFirst, second: secFirst })
         else {
-          cur = setInTZ(cur, tz, {
+          cur = setInAnyTZ(cur, tz, {
             dom: p.dom + 1,
             hour: hourFirst,
             minute: minFirst,
@@ -442,23 +546,23 @@ export function nextRuns(
       }
       continue
     }
-    if (nextSec !== p.second) cur = setInTZ(cur, tz, { second: nextSec })
-    p = partsInTZ(cur, tz)
+    if (nextSec !== p.second) cur = setInAnyTZ(cur, tz, { second: nextSec })
+    p = partsInAnyTZ(cur, tz)
 
     if (matchesParts(spec, p)) {
       out.push(new Date(cur.getTime()))
       if (spec.hasSeconds) {
         // 次の秒へ
-        cur = setInTZ(cur, tz, { second: p.second + 1 })
+        cur = setInAnyTZ(cur, tz, { second: p.second + 1 })
       } else {
         // 次の分へ
-        cur = setInTZ(cur, tz, { minute: p.minute + 1, second: 0 })
+        cur = setInAnyTZ(cur, tz, { minute: p.minute + 1, second: 0 })
       }
     } else {
       if (spec.hasSeconds) {
-        cur = setInTZ(cur, tz, { second: p.second + 1 })
+        cur = setInAnyTZ(cur, tz, { second: p.second + 1 })
       } else {
-        cur = setInTZ(cur, tz, { minute: p.minute + 1, second: 0 })
+        cur = setInAnyTZ(cur, tz, { minute: p.minute + 1, second: 0 })
       }
     }
   }
@@ -540,7 +644,15 @@ function dowLabel(spec: CronSpec): string {
 /**
  * 人間可読の日本語説明（タイムゾーン非依存の表現）。
  */
-export function humanizeCron(spec: CronSpec): string {
+export function humanizeCron(spec: CronSpec): string
+export function humanizeCron(spec: CronSpec, opts?: { tz?: string }): string
+export function humanizeCron(expr: string): string
+export function humanizeCron(expr: string, opts?: { tz?: string }): string
+export function humanizeCron(specOrExpr: CronSpec | string, opts?: { tz?: string }): string {
+  const spec = typeof specOrExpr === 'string' ? parseCron(specOrExpr) : specOrExpr
+  // Keep API surface (opts.tz) without changing legacy output semantics
+  // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+  void opts?.tz
   const dayPart = (() => {
     if (!spec.dom.star && spec.dow.star) {
       // 毎月X日
@@ -553,5 +665,6 @@ export function humanizeCron(spec: CronSpec): string {
     return '毎日'
   })()
   const t = toTimeLabel(spec)
+  // 既定は従来互換（tz指定があっても表示には影響させない：最小差分）
   return `${dayPart} ${t}`.trim()
 }

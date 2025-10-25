@@ -44,12 +44,26 @@
         ※ 秒付き6フィールド（例: <code>0 0 9 * * *</code>）や <code>@hourly</code> 等のエイリアスも入力可（自動認識）。
       </p>
 
+      <!-- IANA TZ 選択（自由入力 + datalist） -->
+      <div class="mt-3">
+        <label for="tz-input" class="block text-sm font-medium">タイムゾーン（IANA形式）</label>
+        <input id="tz-input" v-model="tzInput" list="tz-list" class="w-full max-w-sm border rounded p-2 font-mono"
+          aria-describedby="tz-hint" placeholder="例: Asia/Tokyo" />
+        <datalist id="tz-list">
+          <option value="Asia/Tokyo" />
+          <option value="UTC" />
+          <option value="America/Los_Angeles" />
+          <option value="Europe/London" />
+        </datalist>
+        <small id="tz-hint" class="text-xs text-gray-500">IANA 形式（例: Asia/Tokyo）。無効な場合は UTC で計算。</small>
+      </div>
+
       <div v-if="humanized" class="rounded bg-gray-50 dark:bg-gray-900 border text-sm p-2" role="status"
         aria-live="polite">
         <div class="font-semibold">説明</div>
         <div class="font-mono">
-          <div>{{ humanized.jst }}</div>
-          <div>{{ humanized.utc }}</div>
+          <div>Selected TZ: {{ humanized.sel }}</div>
+          <div>UTC: {{ humanized.utc }}</div>
         </div>
       </div>
 
@@ -137,10 +151,11 @@
       <div v-if="error" class="text-red-600 font-semibold" role="alert" aria-live="assertive">{{ error }}</div>
     </form>
 
-    <div v-if="displayed.length" class="space-y-3">
+    <div v-if="displayedSel.length || displayedUTC.length" class="space-y-3">
       <h2 class="font-semibold">
-        次回実行予定（{{ tzDisp === 'UTC' ? 'UTC' : 'JST' }}表示）
-        <span class="text-xs text-gray-500 ml-2">表示中: {{ displayed.length }} / {{ MAX_TOTAL }} 件</span>
+        次回実行予定
+        <span class="text-xs text-gray-500 ml-2">表示中: {{ Math.max(displayedSel.length, displayedUTC.length) }} / {{
+          MAX_TOTAL }} 件</span>
       </h2>
 
       <p class="text-sm text-gray-600 -mt-1">
@@ -149,12 +164,26 @@
         で解説しています。
       </p>
 
-      <ul class="list-disc pl-6 space-y-1">
-        <li v-for="dt in displayed" :key="dt.toISOString()" class="font-mono">
-          {{ format(dt, tzDisp) }}
-          <span class="text-gray-500 ml-2">（{{ relative(dt) }}）</span>
-        </li>
-      </ul>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <h3 class="font-semibold mb-1 text-sm">Selected TZ（{{ tzCalc }}）</h3>
+          <ul class="list-disc pl-6 space-y-1">
+            <li v-for="dt in displayedSel" :key="'sel-' + dt.toISOString()" class="font-mono">
+              {{ format(dt, tzCalc) }}
+              <span class="text-gray-500 ml-2">（{{ relative(dt) }}）</span>
+            </li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="font-semibold mb-1 text-sm">UTC</h3>
+          <ul class="list-disc pl-6 space-y-1">
+            <li v-for="dt in displayedUTC" :key="'utc-' + dt.toISOString()" class="font-mono">
+              {{ format(dt, 'UTC') }}
+              <span class="text-gray-500 ml-2">（{{ relative(dt) }}）</span>
+            </li>
+          </ul>
+        </div>
+      </div>
 
       <div class="flex items-center gap-3 pt-2">
         <button v-if="canLoadMore" type="button" class="btn-secondary focus-ring" @click="loadMore">
@@ -162,8 +191,8 @@
         </button>
         <span v-else class="text-xs text-gray-500">これ以上は表示できません（最大 {{ MAX_TOTAL }} 件）</span>
 
-        <button type="button" class="btn-primary focus-ring" aria-label="CSVでダウンロード" :disabled="!displayed.length"
-          @click="downloadCsv">
+        <button type="button" class="btn-primary focus-ring" aria-label="CSVでダウンロード"
+          :disabled="!displayedSel.length && !displayedUTC.length" @click="downloadCsv">
           CSV でダウンロード
         </button>
       </div>
@@ -195,8 +224,9 @@ useHead({
 
 const input = ref('')
 const error = ref('')
-const results = ref<Date[]>([])
-const humanized = ref<{ jst: string; utc: string } | null>(null)
+const resultsSel = ref<Date[]>([])
+const resultsUTC = ref<Date[]>([])
+const humanized = ref<{ sel: string; utc: string } | null>(null)
 
 // プリセット定義
 const presets = [
@@ -214,12 +244,20 @@ function onPreset(e: Event) {
   if (val) {
     input.value = val
     error.value = ''
-    results.value = []
+    resultsSel.value = []
+    resultsUTC.value = []
     updateHumanize()
     onCheck()
   }
 }
 const tzDisp = ref<'Asia/Tokyo' | 'UTC'>('Asia/Tokyo')
+// 計算に使う IANA TZ（自由入力）
+const tzInput = ref<string>('Asia/Tokyo')
+function isValidTimeZone(tz?: string): tz is string {
+  if (!tz) return false
+  try { new Intl.DateTimeFormat('en-US', { timeZone: tz }).format(); return true } catch { return false }
+}
+const tzCalc = computed<string>(() => (isValidTimeZone(tzInput.value) ? tzInput.value : 'UTC'))
 const count = ref(5)
 const copied = ref(false)
 let copyTo: ReturnType<typeof setTimeout> | null = null
@@ -241,8 +279,9 @@ const countClamped = computed(() =>
   Math.max(1, Math.min(Number(count.value ?? 5), MAX_TOTAL))
 )
 
-// 画面表示用（results は常に countClamped 件に揃えるけど一応 slice 保険）
-const displayed = computed(() => results.value.slice(0, countClamped.value))
+// 画面表示用
+const displayedSel = computed(() => resultsSel.value.slice(0, countClamped.value))
+const displayedUTC = computed(() => resultsUTC.value.slice(0, countClamped.value))
 
 // 直近の spec と「基準時刻」（今すぐチェック押下時の時刻）
 const lastSpec = ref<ReturnType<typeof parseCron> | null>(null)
@@ -258,12 +297,14 @@ const relMode = ref<'now' | 'base'>('now')
 // 基準時刻 from から n 件を丸ごと作り直す
 function recompute(n: number) {
   if (!lastSpec.value || !baseFrom.value) return
-  results.value = nextRuns(lastSpec.value, baseFrom.value, 'Asia/Tokyo', n)
+  resultsSel.value = nextRuns(lastSpec.value, baseFrom.value, tzCalc.value, n)
+  resultsUTC.value = nextRuns(lastSpec.value, baseFrom.value, 'UTC', n)
 }
 
 function onCheck() {
   error.value = ''
-  results.value = []
+  resultsSel.value = []
+  resultsUTC.value = []
   try {
     const spec = parseCron(input.value.trim())
     lastSpec.value = spec
@@ -294,7 +335,8 @@ function onCheck() {
 function onClear() {
   input.value = ''
   error.value = ''
-  results.value = []
+  resultsSel.value = []
+  resultsUTC.value = []
   lastSpec.value = null
   baseFrom.value = null
   baseInput.value = ''
@@ -303,7 +345,7 @@ function onClear() {
 
 
 
-function format(dt: Date, tz: 'Asia/Tokyo' | 'UTC') {
+function format(dt: Date, tz: string) {
   return dt.toLocaleString('ja-JP', {
     timeZone: tz, year: 'numeric', month: 'numeric', day: 'numeric',
     hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
@@ -338,6 +380,7 @@ async function copyLink() {
   url.searchParams.set('expr', encodeURIComponent(input.value.trim()).replace(/%20/g, '+'))
   url.searchParams.set('n', String(countClamped.value))
   url.searchParams.set('tz', tzDisp.value)
+  url.searchParams.set('calcTz', tzInput.value)
   url.searchParams.set('rel', relMode.value)
   if (relMode.value === 'base' && baseInput.value) {
     url.searchParams.set('from', baseInput.value)
@@ -376,15 +419,20 @@ watch(countClamped, n => recompute(n))
 
 // CSV（現在表示ぶん）
 function downloadCsv() {
-  const rows = displayed.value.map((dt, i) => [
-    i + 1,
-    dt.toISOString(),
-    format(dt, 'Asia/Tokyo'),
-    format(dt, 'UTC'),
-    relative(dt)
-  ])
-  const header = ['#', 'ISO', 'JST', 'UTC', 'relative']
-  const csv = [header, ...rows].map(r => r.map(v =>
+  const len = Math.max(displayedSel.value.length, displayedUTC.value.length)
+  const rows = Array.from({ length: len }).map((_v, i) => {
+    const dtSel = displayedSel.value[i]
+    const dtUtc = displayedUTC.value[i]
+    return [
+      i + 1,
+      dtSel ? dtSel.toISOString() : '',
+      dtSel ? format(dtSel, tzCalc.value) : '',
+      dtUtc ? dtUtc.toISOString() : '',
+      dtUtc ? format(dtUtc, 'UTC') : '',
+    ]
+  })
+  const header = ['#', 'ISO (Selected)', `Selected (${tzCalc.value})`, 'ISO (UTC)', 'UTC']
+  const csv = [header, ...rows].map(r => r.map((v: unknown) =>
     String(v).includes(',') || String(v).includes('"')
       ? `"${String(v).replace(/"/g, '""')}"` : String(v)
   ).join(',')).join('\r\n')
@@ -433,8 +481,9 @@ function setBaseNow() {
 function updateHumanize(specArg?: ReturnType<typeof parseCron> | null) {
   try {
     const spec = specArg ?? parseCron(input.value.trim())
-    const text = humanizeCron(spec)
-    humanized.value = { jst: `JST: ${text}`, utc: `UTC: ${text}` }
+    const textSel = humanizeCron(spec, { tz: tzCalc.value })
+    const textUtc = humanizeCron(spec, { tz: 'UTC' })
+    humanized.value = { sel: textSel, utc: textUtc }
   } catch {
     humanized.value = null
   }
@@ -456,6 +505,11 @@ watch(tzDisp, (tz) => {
   if (relMode.value === 'base' && baseFrom.value) {
     baseInput.value = toInputValue(baseFrom.value, tz)
   }
+})
+// 計算TZが変わったら再計算
+watch(tzInput, () => {
+  recompute(countClamped.value)
+  updateHumanize()
 })
 // 既存の watchers 群の近くに追加
 watch(relMode, (mode) => {
@@ -483,6 +537,8 @@ onMounted(() => {
   // 1. tz
   const tz = route.query?.tz
   if (tz === 'UTC' || tz === 'Asia/Tokyo') tzDisp.value = tz
+  const calcTz = route.query?.calcTz
+  if (typeof calcTz === 'string' && calcTz.trim()) tzInput.value = calcTz
   // 2. from
   const fromQ = route.query?.from
   if (typeof fromQ === 'string') {
@@ -516,6 +572,7 @@ onMounted(() => {
     input.value = ''
     count.value = 5
     tzDisp.value = 'Asia/Tokyo'
+    tzInput.value = 'Asia/Tokyo'
     relMode.value = 'now'
     setBaseNow()
     updateHumanize()

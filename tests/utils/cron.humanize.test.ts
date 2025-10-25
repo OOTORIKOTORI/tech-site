@@ -23,4 +23,20 @@ describe('cron humanize & 6-field/alias', () => {
     const next = nextRuns(spec, base, 'UTC', 3).map(d => d.toISOString())
     expect(next).toMatchSnapshot()
   })
+
+  it('humanize with tz option (no behavior change, API accepts tz)', () => {
+    const textUtc = humanizeCron('0 0 * * *', { tz: 'UTC' })
+    const textJst = humanizeCron('0 0 * * *', { tz: 'Asia/Tokyo' })
+    expect(textUtc).toBeTruthy()
+    expect(textJst).toBeTruthy()
+  })
+
+  it('boundary 23:59 -> next day (UTC vs JST)', () => {
+    const spec = parseCron('59 23 * * *')
+    const base = new Date('2025-03-10T23:58:00.000Z')
+    const runsUtc = nextRuns(spec, base, 'UTC', 2).map(d => d.toISOString())
+    const runsJst = nextRuns(spec, base, 'Asia/Tokyo', 2).map(d => d.toISOString())
+    expect(runsUtc[0]).toMatch(/T23:59:00.000Z$/)
+    expect(runsJst[0]).toBeDefined()
+  })
 })
