@@ -17,6 +17,12 @@ export default defineContentConfig({
         tags: z.array(z.string()).optional(),
         draft: z.boolean().optional(),
         canonical: z.string().optional(),
+        // New frontmatter fields (tools-first pivot)
+        type: z.enum(['primer', 'note', 'memo']).optional(),
+        tool: z.string().optional(),
+        audience: z.string().optional(),
+        visibility: z.enum(['featured', 'default', 'hidden', 'archive']).optional(),
+        robots: z.string().optional(),
       }),
     }),
   },

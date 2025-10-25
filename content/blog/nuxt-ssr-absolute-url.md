@@ -1,12 +1,17 @@
 ---
-benefits: ""
-for: ""
-title: 'NuxtでSSR相対URLを禁じる理由（実務目線の最短メモ）'
-description: 'SSRで相対URLが招く典型的な不具合と最短の回避策を、Migaki Explorerの運用規約ベースで解説。'
-tags: [nuxt, ssr, url, infra]
-date: 2025-10-15
+title: NuxtでSSR相対URLを禁じる理由（実務目線の最短メモ）
+description: SSRで相対URLが招く典型的な不具合と最短の回避策を、Migaki Explorerの運用規約ベースで解説。
+tags:
+  - nuxt
+  - ssr
+  - url
+  - infra
+date: 2025-10-15T00:00:00.000Z
 draft: true
-audience: 'フロント/フルスタック開発者（Nuxt SSRの相対URL事故を避けたい人）'
+audience: フロント/フルスタック開発者（Nuxt SSRの相対URL事故を避けたい人）
+type: guide
+visibility: hidden
+robots: noindex
 ---
 > **この記事はこういう人におすすめ**: （for）
 > **この記事で得られること**: （benefits）

@@ -5,6 +5,8 @@
         <span>© {{ display }}</span>
         <span class="text-gray-400">|</span>
         <nav class="flex items-center gap-3" aria-label="Legal">
+          <NuxtLink to="/blog/archive" class="hover:underline focus-ring">Archive</NuxtLink>
+          <span class="text-gray-400">/</span>
           <NuxtLink to="/privacy" class="hover:underline focus-ring">プライバシー</NuxtLink>
           <span class="text-gray-400">/</span>
           <NuxtLink to="/terms" class="hover:underline focus-ring">利用規約</NuxtLink>

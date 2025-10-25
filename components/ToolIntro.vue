@@ -32,7 +32,8 @@
 </template>
 
 <script setup lang="ts">
-defineProps<{
+import { useHead } from '#imports'
+const props = defineProps<{
   title: string
   description?: string
   usage?: string
@@ -41,4 +42,22 @@ defineProps<{
   exampleInput?: string
   exampleOutput?: string
 }>()
+
+// Inject SoftwareApplication JSON-LD for tools pages (SSR capable)
+useHead({
+  script: [
+    {
+      type: 'application/ld+json',
+      // @ts-expect-error: children string for tests
+      children: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'SoftwareApplication',
+        name: props.title,
+        description: props.description,
+        applicationCategory: 'DeveloperApplication',
+        operatingSystem: 'Web',
+      }),
+    },
+  ],
+})
 </script>

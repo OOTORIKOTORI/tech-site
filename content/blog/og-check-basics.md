@@ -1,11 +1,20 @@
 ---
-title: 'OGP 入門：SNS で正しく表示されるための基本'
+title: OGP 入門：SNS で正しく表示されるための基本
 description: '課題: SNS 共有でプレビューが崩れる/反映されない。得られること: 原因の把握・確認手順。'
-date: 2025-10-22
+date: 2025-10-22T00:00:00.000Z
 published: true
-audience: ['初学者', 'Web エンジニア']
-tags: ['tool:og-check', 'seo', 'ogp', 'social']
-
+audience:
+  - 初学者
+  - Web エンジニア
+tags:
+  - 'tool:og-check'
+  - seo
+  - ogp
+  - social
+type: primer
+tool: og-check
+visibility: primer
+robots: index
 ---
 
 「SNS で URL を貼ったのに、サムネやタイトルが変…」——そんな経験はありませんか？

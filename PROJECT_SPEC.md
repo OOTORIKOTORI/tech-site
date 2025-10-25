@@ -438,13 +438,54 @@ pnpm typecheck; pnpm lint; pnpm test -- --run; pnpm build; node .\scripts\gen-me
 
 ---
 
-# Debug クエリ早見表（dev 限定）
+# Tools-First 移行方針
 
-| クエリ      | 効果                     | 備考（dev 限定） |
-| ----------- | ------------------------ | ---------------- |
-| debug=1     | デバッグログ出力         | 開発時のみ有効   |
-| mdfb=1      | Markdown fallback 強制   | テスト・開発用   |
-| forceHtml=1 | HTML 直描画強制          | テスト・開発用   |
-| cr=1        | ContentRenderer 分岐強制 | テスト・開発用   |
+## 背景と目的
 
-# プロジェクト仕様書 - 磨きエクスプローラー（Migaki Explorer）
+従来「ブログが主、ツールが従」の構成だったが、実際のトラフィックとユーザー価値は**ツール＞入門記事 ≫ その他記事**の順位。この実態に合わせ、サイト全体を「Tools-First（ツールを主体とした構成）」に移行する。
+
+## 基本方針
+
+1. **URL は資産 — 301 は避ける**: 既存 URL はそのまま維持。見せ方（visibility）だけを変える。
+2. **3 層の visibility**: 各コンテンツに `visibility` フィールドを付与。
+   - `primer`: ツールの入門記事。Blog 一覧・Sitemap に含める（デフォルト表示）。
+   - `archive`: 過去記事や低パフォーマンス記事。`/blog/archive`（noindex）のみに表示。
+   - `hidden`: 完全非表示（draft 的な扱い）。
+3. **ツール中心のナビゲーション**: メインナビは「Tools → Primers（入門）→ Archive」の順に並べる。
+4. **相互リンク強化**: ツール詳細には関連 Primer へのリンク、Primer には関連ツールへのリンクを明示。
+
+## Frontmatter 拡張
+
+```typescript
+type: 'primer' | 'guide' | 'reference' | 'news' // コンテンツ種別
+tool: string // 関連ツールID（例: 'cron-jst'）
+visibility: 'primer' | 'archive' | 'hidden' // 表示制御
+robots: 'index' | 'noindex' // robots メタタグ
+```
+
+## 実装項目
+
+- Blog Index: `visibility === 'primer'` のみ表示
+- Archive ページ: `visibility === 'archive'` を一覧表示（noindex）
+- Sitemap: `visibility === 'primer'` + tools のみ含める
+- ツールページ: 関連 Primer を `PrimerCardList` で表示
+- JSON-LD: Tools に `SoftwareApplication`、Primer に `Article` + `FAQPage`
+
+## KPI と追跡
+
+- ツール別 UU・滞在時間・遷移率を週次ダッシュボードで監視
+- 低パフォーマンス Primer は継続改善 or archive 化を判断
+- Search Console でカバレッジ・サイトマップ収束を確認
+
+---
+
+# Debug クエリ早見表(dev 限定)
+
+| クエリ      | 効果                     | 備考(dev 限定) |
+| ----------- | ------------------------ | -------------- |
+| debug=1     | デバッグログ出力         | 開発時のみ有効 |
+| mdfb=1      | Markdown fallback 強制   | テスト・開発用 |
+| forceHtml=1 | HTML 直描画強制          | テスト・開発用 |
+| cr=1        | ContentRenderer 分岐強制 | テスト・開発用 |
+
+# プロジェクト仕様書 - 磨きエクスプローラー(Migaki Explorer)

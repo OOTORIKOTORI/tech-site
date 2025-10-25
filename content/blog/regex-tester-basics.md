@@ -1,11 +1,20 @@
 ---
-title: '正規表現入門：パターンで文字列を操る基本'
+title: 正規表現入門：パターンで文字列を操る基本
 description: '課題: パターンが取り過ぎる/読みにくい。得られること: メタ文字・最短一致の基本と実用パターン。'
-date: 2025-10-22
+date: 2025-10-22T00:00:00.000Z
 published: true
-audience: ['初学者', 'Web エンジニア']
-tags: ['tool:regex-tester', 'regex', 'string', 'validation']
-
+audience:
+  - 初学者
+  - Web エンジニア
+tags:
+  - 'tool:regex-tester'
+  - regex
+  - string
+  - validation
+type: primer
+tool: regex-tester
+visibility: primer
+robots: index
 ---
 
 ログ抽出・入力チェック・置換…**正規表現（Regular Expression）**はテキスト処理の万能ナイフです。

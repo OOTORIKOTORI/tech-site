@@ -41,6 +41,7 @@ C:\website\tech-site
 |  |  └── Term.vue
 |  ├── CookieConsent.vue
 |  ├── GlobalNav.vue
+|  ├── PrimerCardList.vue
 |  ├── RelatedList.vue
 |  ├── TagChip.vue
 |  ├── ThemeToggle.vue
@@ -86,6 +87,7 @@ C:\website\tech-site
 |  └── _templates
 |     ├── blog.md
 |     └── post.md
+├── content-classification.csv
 ├── content.config.ts
 ├── content.config.ts.bak
 ├── count-blog-links.ps1
@@ -127,6 +129,7 @@ C:\website\tech-site
 |  ├── about.vue
 |  ├── ads.vue
 |  ├── blog
+|  |  ├── archive.vue
 |  |  ├── index.vue
 |  |  └── [...slug].vue
 |  ├── contact.vue
@@ -187,8 +190,11 @@ C:\website\tech-site
 |  ├── gen-meta.mjs
 |  ├── migrate-blog-template.cjs
 |  ├── ops
+|  |  ├── add-primer-cards.mjs
+|  |  ├── classify-blog-content.mjs
 |  |  ├── rollback.ps1
-|  |  └── smoke-control-seo.cjs
+|  |  ├── smoke-control-seo.cjs
+|  |  └── update-blog-frontmatter.mjs
 |  ├── report-content-quality.mjs
 |  └── smoke-og.mjs
 ├── server
@@ -243,10 +249,14 @@ C:\website\tech-site
 |  |  └── top-analyzer.http.spec.ts
 |  ├── pages
 |  |  ├── ads.render.test.ts
+|  |  ├── blog.archive.robots.test.ts
 |  |  ├── blog.index.date-format.test.ts
+|  |  ├── blog.index.filter.test.ts
+|  |  ├── blog.index.primers-only.test.ts
 |  |  ├── blog.index.render.test.ts
 |  |  ├── blog.slug.render.test.ts
 |  |  ├── blog.slug.resolve.test.ts
+|  |  ├── blog.slug.robots-nonprimer.test.ts
 |  |  ├── blog.slug.seo.test.ts
 |  |  ├── index.render.test.ts
 |  |  ├── privacy.render.test.ts
@@ -254,6 +264,7 @@ C:\website\tech-site
 |  |  ├── tools.cron-jst.copy.test.ts
 |  |  ├── tools.jwt-decode.learnlink.test.ts
 |  |  ├── tools.og-check.copy.test.ts
+|  |  ├── tools.related-primers.test.ts
 |  |  ├── tools.render.test.ts
 |  |  └── tools.site-check.copy.test.ts
 |  ├── scripts
@@ -298,6 +309,7 @@ C:\website\tech-site
 ├── tsconfig.tsbuildinfo
 ├── types
 |  ├── appconfig.d.ts
+|  ├── blog.ts
 |  ├── query-content-global.d.ts
 |  ├── query-content.d.ts
 |  ├── shims-nuxt-content-server.d.ts
@@ -327,5 +339,5 @@ C:\website\tech-site
 └── workers
    └── topParser.worker.ts
 
-directory: 65 file: 257 symboliclink: 39
+directory: 65 file: 269 symboliclink: 39
 

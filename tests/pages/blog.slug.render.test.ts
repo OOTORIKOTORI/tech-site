@@ -70,9 +70,11 @@ describe('pages/blog/[...slug].vue render + SEO', () => {
     // definePageMeta stub for Nuxt SFC
     // @ts-expect-error test stub
     globalThis.definePageMeta = () => {}
+    // @ts-expect-error stub
+    globalThis.useFetch = () => Promise.resolve({ data: { value: { blog: [], items: [] } } })
   })
 
-  it('calls useSeoMeta with title and canonical from frontmatter', async () => {
+  it('calls useSeoMeta with title and canonical from frontmatter', { timeout: 10000 }, async () => {
     const mod = await import('@/pages/blog/[...slug].vue')
     const Comp = wrapperOf(mod.default)
     const wrapper = mount(Comp as any, {

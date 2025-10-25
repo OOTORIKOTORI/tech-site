@@ -20,6 +20,8 @@ describe('og-check page copy smoke', () => {
     globalThis.useHead = () => undefined
     // @ts-expect-error stub
     globalThis.useRuntimeConfig = () => ({ public: { siteOrigin: 'https://example.com' } })
+    // @ts-expect-error stub
+    globalThis.useFetch = () => Promise.resolve({ data: { value: { blog: [], items: [] } } })
   })
 
   it('shows required/recommended tags one-liner', async () => {

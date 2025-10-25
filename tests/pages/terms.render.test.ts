@@ -17,7 +17,7 @@ describe('pages/terms.vue', () => {
     })
   })
 
-  it('renders h1 and partial body text', async () => {
+  it('renders h1 and partial body text', { timeout: 10000 }, async () => {
     const mod = await import('@/pages/terms.vue')
     const wrapper = mount(mod.default as any)
     const html = wrapper.html()

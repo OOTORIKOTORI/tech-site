@@ -1,11 +1,20 @@
 ---
-title: 'Linux top 入門：負荷を読み解くための指標ガイド'
+title: Linux top 入門：負荷を読み解くための指標ガイド
 description: '課題: top の指標の意味が曖昧で原因に辿り着けない。得られること: 指標の読み方・初動の当たりの付け方。'
-date: 2025-10-22
+date: 2025-10-22T00:00:00.000Z
 published: true
-audience: ['初学者', 'Web エンジニア']
-tags: ['tool:top-analyzer', 'linux', 'infra', 'performance']
-
+audience:
+  - 初学者
+  - Web エンジニア
+tags:
+  - 'tool:top-analyzer'
+  - linux
+  - infra
+  - performance
+type: primer
+tool: top-analyzer
+visibility: primer
+robots: index
 ---
 
 サーバが「重い」と感じたとき、まず開くのが `top`。でも数字の意味が曖昧だと、原因に辿り着けません。

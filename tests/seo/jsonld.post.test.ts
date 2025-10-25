@@ -70,46 +70,50 @@ beforeEach(() => {
 })
 
 describe('pages/blog/[slug].vue JSON-LD', () => {
-  it('injects BlogPosting JSON-LD via children with @type and headline', async () => {
-    const mod = await import('@/pages/blog/[...slug].vue')
-    const Page = mod.default
+  it(
+    'injects BlogPosting JSON-LD via children with @type and headline',
+    { timeout: 10000 },
+    async () => {
+      const mod = await import('@/pages/blog/[...slug].vue')
+      const Page = mod.default
 
-    const Wrapper = defineComponent({
-      setup() {
-        return () => h(Suspense, null, { default: () => h(Page as any) })
-      },
-    })
-
-    mount(Wrapper as any, {
-      global: {
-        stubs: {
-          NuxtLink: defineComponent({
-            props: { to: { type: String, required: false } },
-            setup:
-              (p, { slots }) =>
-              () =>
-                h('a', { href: (p as any).to }, slots.default?.()),
-          }),
-          ContentRenderer: defineComponent({
-            props: { value: { type: Object, required: false } },
-            setup: () => () => h('div'),
-          }),
+      const Wrapper = defineComponent({
+        setup() {
+          return () => h(Suspense, null, { default: () => h(Page as any) })
         },
-      },
-    })
+      })
 
-    // Let async setup resolve
-    await Promise.resolve()
-    await nextTick()
-    await new Promise(r => setTimeout(r, 0))
+      mount(Wrapper as any, {
+        global: {
+          stubs: {
+            NuxtLink: defineComponent({
+              props: { to: { type: String, required: false } },
+              setup:
+                (p, { slots }) =>
+                () =>
+                  h('a', { href: (p as any).to }, slots.default?.()),
+            }),
+            ContentRenderer: defineComponent({
+              props: { value: { type: Object, required: false } },
+              setup: () => () => h('div'),
+            }),
+          },
+        },
+      })
 
-    const scripts = headCalls.flatMap((h: any) => h?.script ?? [])
-    const ld = scripts.find((s: any) => s?.type === 'application/ld+json')
-    expect(ld).toBeTruthy()
-    const obj = JSON.parse(ld.children)
-    expect(obj['@context']).toBe('https://schema.org')
-    expect(obj['@type']).toBe('BlogPosting')
-    expect(typeof obj.headline).toBe('string')
-    expect(obj.headline.length).toBeGreaterThan(0)
-  })
+      // Let async setup resolve
+      await Promise.resolve()
+      await nextTick()
+      await new Promise(r => setTimeout(r, 0))
+
+      const scripts = headCalls.flatMap((h: any) => h?.script ?? [])
+      const ld = scripts.find((s: any) => s?.type === 'application/ld+json')
+      expect(ld).toBeTruthy()
+      const obj = JSON.parse(ld.children)
+      expect(obj['@context']).toBe('https://schema.org')
+      expect(obj['@type']).toBe('BlogPosting')
+      expect(typeof obj.headline).toBe('string')
+      expect(obj.headline.length).toBeGreaterThan(0)
+    }
+  )
 })

@@ -1,11 +1,20 @@
 ---
-title: 'JSON 入門：整形と構造を理解する'
+title: JSON 入門：整形と構造を理解する
 description: '課題: JSON の構文エラーで原因が分からない。得られること: 整形/検証の基礎と見分け方。'
-date: 2025-10-22
+date: 2025-10-22T00:00:00.000Z
 published: true
-audience: ['初学者', 'Web エンジニア']
-tags: ['tool:json-formatter', 'json', 'format', 'debug']
-
+audience:
+  - 初学者
+  - Web エンジニア
+tags:
+  - 'tool:json-formatter'
+  - json
+  - format
+  - debug
+type: primer
+tool: json-formatter
+visibility: primer
+robots: index
 ---
 
 API レスポンスや設定ファイルで日常的に使う**JSON**。でも、カンマやクォートのミスで赤エラー…は“あるある”です。

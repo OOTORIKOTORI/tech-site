@@ -117,7 +117,27 @@ export default defineEventHandler(async event => {
     const tags = Array.isArray(tagsRaw) ? (tagsRaw as unknown[]).map(v => String(v)) : []
     const ogRaw = obj['ogImage']
     const ogImage = typeof ogRaw === 'string' && ogRaw ? String(ogRaw) : null
-    return { id, path, title, description, date, updated, tags, ogImage }
+    // tools-first additional fields
+    const type = typeof obj['type'] === 'string' ? String(obj['type']) : undefined
+    const tool = typeof obj['tool'] === 'string' ? String(obj['tool']) : undefined
+    const audience = typeof obj['audience'] === 'string' ? String(obj['audience']) : undefined
+    const visibility = typeof obj['visibility'] === 'string' ? String(obj['visibility']) : undefined
+    const robots = typeof obj['robots'] === 'string' ? String(obj['robots']) : undefined
+    return {
+      id,
+      path,
+      title,
+      description,
+      date,
+      updated,
+      tags,
+      ogImage,
+      type,
+      tool,
+      audience,
+      visibility,
+      robots,
+    }
   }
 
   const blog = (Array.isArray(blogRows) ? blogRows : []).map(normRow)
@@ -132,6 +152,11 @@ export default defineEventHandler(async event => {
       updated: string | null
       tags: string[]
       ogImage: string | null
+      type?: string
+      tool?: string
+      audience?: string
+      visibility?: string
+      robots?: string
     }[]
     docs: {
       id: string

@@ -1,15 +1,15 @@
 ---
-benefits: ""
-for: ""
-title: 'LHCIグリーン維持のコツ'
-description: 'Lighthouse CIで常にグリーンを保つための運用ポイントを簡潔にまとめました。'
+title: LHCIグリーン維持のコツ
+description: Lighthouse CIで常にグリーンを保つための運用ポイントを簡潔にまとめました。
 published: true
 draft: false
 date: '2025-10-15'
 tags:
-  - 'devlog'
-canonical: ''
-audience: 'サイト運用・開発者（まずは最短で直したい人）'
+  - devlog
+audience: サイト運用・開発者（まずは最短で直したい人）
+type: guide
+visibility: archive
+robots: noindex
 ---
 > **この記事はこういう人におすすめ**: （for）
 > **この記事で得られること**: （benefits）

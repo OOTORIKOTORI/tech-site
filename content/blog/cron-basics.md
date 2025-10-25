@@ -1,11 +1,21 @@
 ---
-title: 'CRON 入門：スケジュール表記を人間の言葉で理解する'
+title: CRON 入門：スケジュール表記を人間の言葉で理解する
 description: '課題: cron 構文が読めず JST/UTC の違いで誤動作する。得られること: 構文の要点・次回実行の確認手順。'
-date: 2025-10-20
-tags: ['tool:cron-jst', 'cron', 'linux', 'scheduling', 'automation']
-audience: ['初学者', 'Web エンジニア']
+date: 2025-10-20T00:00:00.000Z
+tags:
+  - 'tool:cron-jst'
+  - cron
+  - linux
+  - scheduling
+  - automation
+audience:
+  - 初学者
+  - Web エンジニア
 published: true
-
+type: primer
+tool: cron-jst
+visibility: primer
+robots: index
 ---
 
 「毎朝 9 時にバッチを動かしたいけど、cron 構文が読めない...」「設定したのに動かない！タイムゾーンが違った！」――サーバー運用やバッチ設定を任されたとき、誰もが一度は悩む CRON の壁。

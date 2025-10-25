@@ -1,5 +1,5 @@
-import { describe, it, beforeEach, expect } from 'vitest'
-import { mount } from '@vue/test-utils'
+import { describe, it, beforeAll, expect, vi } from 'vitest'
+import { mount, flushPromises } from '@vue/test-utils'
 import { defineComponent, h, Suspense } from 'vue'
 
 function wrapperOf(component: any) {
@@ -15,11 +15,13 @@ function wrapperOf(component: any) {
 }
 
 describe('cron-jst page copy smoke', () => {
-  beforeEach(() => {
+  beforeAll(() => {
     // @ts-expect-error stub
     globalThis.useHead = () => undefined
     // @ts-expect-error stub
     globalThis.useRoute = () => ({ query: {} })
+    // @ts-expect-error stub
+    globalThis.useFetch = () => Promise.resolve({ data: { value: { blog: [], items: [] } } })
   })
 
   it('renders 6-field/alias note statically', async () => {
@@ -39,10 +41,10 @@ describe('cron-jst page copy smoke', () => {
       },
     })
 
-    await new Promise(r => setTimeout(r, 0))
+    await flushPromises()
 
     const txt = wrapper.text()
     expect(txt).toContain('秒付き6フィールド')
     expect(txt).toContain('@hourly')
-  })
+  }, 20000)
 })

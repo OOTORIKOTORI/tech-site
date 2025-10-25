@@ -20,9 +20,15 @@
           </NuxtLink>
         </li>
         <li>
-          <NuxtLink to="/blog" :aria-current="isBlog ? 'page' : undefined"
+          <NuxtLink to="/blog" :aria-current="isPrimers ? 'page' : undefined"
             class="text-blue-600 hover:underline focus-ring">
-            Blog
+            Primers
+          </NuxtLink>
+        </li>
+        <li>
+          <NuxtLink to="/blog/archive" :aria-current="isArchive ? 'page' : undefined"
+            class="text-sm text-gray-500 hover:underline focus-ring">
+            Archive
           </NuxtLink>
         </li>
         <li>
@@ -46,5 +52,6 @@ import { computed, useRoute } from '#imports'
 const route = useRoute()
 const isHome = computed(() => route.path === '/')
 const isTools = computed(() => route.path === '/tools' || route.path.startsWith('/tools/'))
-const isBlog = computed(() => route.path === '/blog' || route.path.startsWith('/blog/'))
+const isPrimers = computed(() => route.path === '/blog')
+const isArchive = computed(() => route.path === '/blog/archive')
 </script>

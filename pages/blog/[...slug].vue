@@ -77,10 +77,16 @@ useSeoMeta({
 })
 
 // robots meta from frontmatter (control-only)
-if (exactPath === '/blog/_control') {
-  useHead({
-    meta: [{ name: 'robots', content: 'noindex,follow' }]
-  })
+// Policy: non-primer defaults to noindex unless explicitly overridden via frontmatter
+{
+  const t = ((doc.value as any)?.type || '').toLowerCase()
+  const robots = (doc.value as any)?.robots as string | undefined
+  const explicit = typeof robots === 'string' && robots.trim().length > 0
+  const shouldNoindex = !explicit && t !== 'primer'
+  const content = explicit ? robots : shouldNoindex ? 'noindex,follow' : undefined
+  if (content) {
+    useHead({ meta: [{ name: 'robots', content }] })
+  }
 }
 
 // BlogPosting JSON-LD

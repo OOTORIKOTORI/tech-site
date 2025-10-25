@@ -22,7 +22,22 @@ try {
 }
 const HOST = ORIGIN_URL.host
 console.log('[gen-meta] origin=%s host=%s', ORIGIN_URL.href, HOST)
-const ROUTES = ['/', '/tools/cron-jst', '/tools/jwt-decode']
+// Static base routes
+const ROUTES = ['/']
+
+function readToolRoutes() {
+  // Discover /tools/<id> pages from SFC filenames
+  const dir = 'pages/tools'
+  if (!existsSync(dir)) return []
+  const entries = readdirSync(dir, { withFileTypes: true })
+  const slugs = entries
+    .filter(e => e.isFile() && e.name.endsWith('.vue'))
+    .map(e => basename(e.name, '.vue'))
+    .filter(name => name && name !== 'index')
+  return slugs.map(s => `/tools/${s}`)
+}
+
+const ALWAYS_INCLUDE_BLOG = new Set(['welcome'])
 
 function readBlogRoutes() {
   const dir = 'content/blog'
@@ -32,13 +47,21 @@ function readBlogRoutes() {
     .filter(e => e.isFile() && e.name.endsWith('.md'))
     .map(e => basename(e.name, '.md'))
     .filter(slug => {
-      // Exclude internal-tagged posts from sitemap
+      // Exclude by tools-first policy:
+      // - internal tag
+      // - robots: noindex
+      // - visibility: hidden or archive (only primer is included)
+      // - type !== primer (deprecated, use visibility)
       const filePath = join(dir, `${slug}.md`)
       const raw = readFileSync(filePath, 'utf8')
       const fmMatch = raw.match(/^---[\s\S]*?---/)
       if (!fmMatch) return true
       const tagsStr = extractYamlScalar('tags', fmMatch[0])
-      if (!tagsStr) return true
+      const robotsStr = extractYamlScalar('robots', fmMatch[0]) || ''
+      const visibility = (extractYamlScalar('visibility', fmMatch[0]) || '').toLowerCase()
+      const type = (extractYamlScalar('type', fmMatch[0]) || '').toLowerCase()
+      if (ALWAYS_INCLUDE_BLOG.has(slug)) return true
+      if (!tagsStr) return false
       try {
         // Handle YAML array format: [internal, control]
         let tags = []
@@ -48,9 +71,15 @@ function readBlogRoutes() {
         } else {
           tags = [tagsStr]
         }
-        return !tags.includes('internal')
+        const hasInternal = tags.includes('internal')
+        const isNoindex = robotsStr.toLowerCase().includes('noindex')
+        // Only 'primer' visibility is included in sitemap
+        const isPrimerVis = visibility === 'primer'
+        const isPrimerType = type === 'primer'
+        return !hasInternal && !isNoindex && isPrimerVis && isPrimerType
       } catch {
-        return true
+        // If parsing tags failed, exclude conservatively
+        return false
       }
     })
   return slugs.map(s => `/blog/${s}`)
@@ -108,6 +137,9 @@ function readBlogFrontmatterMeta() {
     const description = extractYamlScalar('description', yaml)
     const dateStr = extractYamlScalar('date', yaml)
     const tagsStr = extractYamlScalar('tags', yaml)
+    const visibility = (extractYamlScalar('visibility', yaml) || '').toLowerCase()
+    const robotsStr = extractYamlScalar('robots', yaml) || ''
+
     // Parse tags array and check for 'internal'
     let tags = []
     if (tagsStr) {
@@ -128,7 +160,11 @@ function readBlogFrontmatterMeta() {
       const dt = new Date(dateStr)
       if (!isNaN(dt.getTime())) pubIso = dt.toISOString()
     }
-    if (title && pubIso && !tags.includes('internal')) {
+    // Only include primer visibility (not archive/hidden) and not internal/noindex
+    const hasInternal = tags.includes('internal')
+    const isNoindex = robotsStr.toLowerCase().includes('noindex')
+    const isPrimerVis = visibility === 'primer'
+    if (title && pubIso && !hasInternal && !isNoindex && isPrimerVis) {
       list.push({ slug, title, description: description || '', pubIso })
     }
   }
@@ -174,9 +210,10 @@ async function writeTextAtomic(dst, text) {
 async function generate() {
   const now = new Date().toISOString()
   const blog = readBlogRoutes()
+  const tools = readToolRoutes()
   const blogDates = readBlogFrontmatterDates()
   const blogMeta = readBlogFrontmatterMeta()
-  const allRoutes = [...ROUTES, ...blog]
+  const allRoutes = [...ROUTES, ...tools, ...blog]
   const urls = allRoutes
     .map(p => {
       const base = ORIGIN_URL.href.replace(/\/$/, '')

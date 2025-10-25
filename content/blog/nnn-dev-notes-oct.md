@@ -1,15 +1,15 @@
 ---
-benefits: ""
-for: ""
-title: '10月の開発メモ'
-description: '2025年10月の開発で得た小さな知見や運用改善のメモをまとめました。'
+title: 10月の開発メモ
+description: 2025年10月の開発で得た小さな知見や運用改善のメモをまとめました。
 published: true
 draft: false
 date: '2025-10-15'
 tags:
-  - 'devlog'
-canonical: ''
-audience: 'サイト運用・開発者（まずは最短で直したい人）'
+  - devlog
+audience: サイト運用・開発者（まずは最短で直したい人）
+type: guide
+visibility: archive
+robots: noindex
 ---
 > **この記事はこういう人におすすめ**: （for）
 > **この記事で得られること**: （benefits）

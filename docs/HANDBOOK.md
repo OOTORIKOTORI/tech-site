@@ -300,6 +300,37 @@ Checks:
 
 ---
 
+## Tools-First 移行方針（規約）
+
+### 概要
+従来「ブログ主体」だった構成を「ツール主体」に転換。URL は維持し、visibility による見せ方変更のみ行う。
+
+### 運用ルール
+1. **新規記事は visibility 必須**: `primer` / `archive` / `hidden` のいずれかを明示
+2. **Primer の条件**:
+   - ツール関連の入門記事
+   - frontmatter に `tool:<tool-id>` タグ必須
+   - テンプレート準拠（価値 → 3手 → 注意 → 入門リンク）
+3. **Archive 化の判断基準**:
+   - 直近 3 ヶ月の UU < 10 かつ 滞在時間 < 30秒
+   - または内容が古く更新予定なし
+4. **相互リンク義務**:
+   - ツール側: 導入直下に「📖 入門記事: [タイトル](/blog/xxx)」
+   - Primer 側: 冒頭 or 末尾に「🔧 関連ツール: [ツール名](/tools/xxx)」
+5. **Sitemap・robots 制御**:
+   - `primer` + tools のみ Sitemap に含める
+   - `archive` は noindex（`/blog/archive` のみ表示）
+   - `hidden` は完全非表示
+
+### リリース手順
+1. feat/tools-first-pivot ブランチで実装
+2. ローカル検証（既知=200 / 未知=404 / Blog 一覧=primer のみ / Archive=noindex / Sitemap=primer+tools）
+3. CI 全グリーン確認
+4. PR 作成（minor バージョンアップ）
+5. マージ後、Search Console でカバレッジ収束を監視
+
+---
+
 ### `/tools/top-analyzer`（topログ可視化ツール）
 - **SRE/運用/開発の初動調査向け**
 - topコマンドのCPU/Mem/Loadを時系列グラフ化し、ピークや異常を素早く把握

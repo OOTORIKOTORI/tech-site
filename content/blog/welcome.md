@@ -1,15 +1,16 @@
 ---
-benefits: ""
-for: ""
 title: Welcome
 description: このサイト（Migaki Explorer）の使い方と、このブログで読める内容のガイド。
-date: 2025-10-08
-audience: '初めての方向け（サイト方針・使い方の案内）'
+date: 2025-10-08T00:00:00.000Z
+audience: 初めての方向け（サイト方針・使い方の案内）
 tags:
   - お知らせ
   - ガイド
 published: true
 draft: false
+type: news
+visibility: hidden
+robots: noindex
 ---
 > **この記事はこういう人におすすめ**: （for）
 > **この記事で得られること**: （benefits）

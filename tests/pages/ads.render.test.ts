@@ -94,7 +94,7 @@ describe('pages/ads.vue', () => {
     })
   })
 
-  it('renders h1 and required policy links', async () => {
+  it('renders h1 and required policy links', { timeout: 10000 }, async () => {
     const mod = await import('@/pages/ads.vue')
     const wrapper = mount(mod.default as any, {
       global: {

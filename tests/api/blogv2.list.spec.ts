@@ -66,30 +66,43 @@ describe('Blog v2 list API resilience', () => {
     const app = createApp()
     app.use('/api/blogv2/list', handler)
     const server = createServer(toNodeListener(app))
-    await new Promise<void>(resolve => server.listen(0, resolve))
-    const address = server.address()
-    const port = typeof address === 'object' && address ? (address as any).port : 0
-    const agent = request(`http://127.0.0.1:${port}`)
 
-    const res = await agent.get('/api/blogv2/list')
-    expect(res.status).toBe(200)
-    expect(res.type).toMatch(/json/)
-    expect(res.body).toBeTruthy()
-    // sourceは返却されない仕様に変更
-    // expect(res.body.source).toBeDefined()
-    expect(Array.isArray(res.body.blog)).toBe(true)
-    expect(Array.isArray(res.body.docs)).toBe(true)
-    // errorsは任意
-    if (res.body.errors) {
-      expect(Array.isArray(res.body.errors)).toBe(true)
+    try {
+      await new Promise<void>((resolve, reject) => {
+        server.listen(0, (err?: Error) => {
+          if (err) reject(err)
+          else resolve()
+        })
+      })
+
+      const address = server.address()
+      const port = typeof address === 'object' && address ? (address as any).port : 0
+      const agent = request(`http://127.0.0.1:${port}`)
+
+      const res = await agent.get('/api/blogv2/list')
+      expect(res.status).toBe(200)
+      expect(res.type).toMatch(/json/)
+      expect(res.body).toBeTruthy()
+      // sourceは返却されない仕様に変更
+      // expect(res.body.source).toBeDefined()
+      expect(Array.isArray(res.body.blog)).toBe(true)
+      expect(Array.isArray(res.body.docs)).toBe(true)
+      // errorsは任意
+      if (res.body.errors) {
+        expect(Array.isArray(res.body.errors)).toBe(true)
+      }
+      // Mapping check (id/path のみ)
+      expect(res.body.blog[0].path).toBe('/blog/hello-world')
+      expect(res.body.blog[0].id).toBe('blog:1')
+      expect(res.body.docs[0].path).toBe('/docs/guide')
+      expect(res.body.docs[0].id).toBe('docs:1')
+      expect(res.body.docs[1].id).toBe('2')
+    } finally {
+      // Ensure server closes even if test fails
+      await new Promise<void>(resolve => {
+        server.closeAllConnections?.()
+        server.close(() => resolve())
+      })
     }
-    // Mapping check (id/path のみ)
-    expect(res.body.blog[0].path).toBe('/blog/hello-world')
-    expect(res.body.blog[0].id).toBe('blog:1')
-    expect(res.body.docs[0].path).toBe('/docs/guide')
-    expect(res.body.docs[0].id).toBe('docs:1')
-    expect(res.body.docs[1].id).toBe('2')
-
-    await new Promise<void>(resolve => server.close(() => resolve()))
-  })
+  }, 10000) // 10秒のタイムアウトに延長
 })

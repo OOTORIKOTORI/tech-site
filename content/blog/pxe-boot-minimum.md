@@ -1,12 +1,16 @@
 ---
-benefits: ""
-for: ""
-title: 'PXEブート最小セット：これだけ押さえる'
-description: 'DHCP/TFTP/NFS の役割と、最小セットアップの道筋だけ。'
-tags: [pxe, boot, infra]
-date: 2025-10-15
+title: PXEブート最小セット：これだけ押さえる
+description: DHCP/TFTP/NFS の役割と、最小セットアップの道筋だけ。
+tags:
+  - pxe
+  - boot
+  - infra
+date: 2025-10-15T00:00:00.000Z
 draft: true
-audience: 'キッティング担当・インフラ初学者（PXEで最小ブートだけしたい人）'
+audience: キッティング担当・インフラ初学者（PXEで最小ブートだけしたい人）
+type: guide
+visibility: hidden
+robots: noindex
 ---
 > **この記事はこういう人におすすめ**: （for）
 > **この記事で得られること**: （benefits）

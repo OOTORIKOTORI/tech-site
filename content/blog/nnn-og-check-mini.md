@@ -1,15 +1,15 @@
 ---
-benefits: ""
-for: ""
-title: 'OGPチェックの小技'
-description: 'OGP画像やタグの即時確認に便利なtipsを紹介。開発中のOGPトラブルを最小限に抑えるための実践メモ。'
+title: OGPチェックの小技
+description: OGP画像やタグの即時確認に便利なtipsを紹介。開発中のOGPトラブルを最小限に抑えるための実践メモ。
 published: true
 draft: false
 date: '2025-10-15'
 tags:
-  - 'devlog'
-canonical: ''
-audience: 'コンテンツ担当・運用者・開発者（OGの確認を最短で済ませたい人）'
+  - devlog
+audience: コンテンツ担当・運用者・開発者（OGの確認を最短で済ませたい人）
+type: guide
+visibility: archive
+robots: noindex
 ---
 > **この記事はこういう人におすすめ**: （for）
 > **この記事で得られること**: （benefits）

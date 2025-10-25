@@ -1,14 +1,20 @@
 ---
-title: 'JWT 入門：デコードと検証の違いを 5 分で理解'
+title: JWT 入門：デコードと検証の違いを 5 分で理解
 description: '課題: デコードと検証の違いが曖昧で誤用が起きる。得られること: 構造の理解・安全な扱い方。'
-date: 2025-10-22
+date: 2025-10-22T00:00:00.000Z
 tags:
   - 'tool:jwt-decoder'
-  - 'jwt'
-  - 'security'
-  - 'authentication'
-audience: ['初学者', 'Web エンジニア']
+  - jwt
+  - security
+  - authentication
+audience:
+  - 初学者
+  - Web エンジニア
 published: true
+type: primer
+tool: jwt-decoder
+visibility: primer
+robots: index
 ---
 
 「API のログインで JWT トークンって出てきたけど、これって何？」「デコードって聞くけど、暗号化されてるの？」――初めて JWT に触れるとき、誰もが感じる疑問です。

@@ -30,6 +30,9 @@
       <p class="text-sm text-gray-600">デフォルトはデコードのみ。入力値は保存しません。JWKS は明示許可時のみ取得します。</p>
     </header>
 
+    <!-- 初回は静的描画のみ。マウント後に Primer カードを表示 -->
+    <PrimerCardList v-if="showPrimers" tool-id="jwt-decode" />
+
     <div class="rounded-md bg-blue-50 text-blue-900 text-xs md:text-sm p-3 leading-relaxed">
       <p class="font-medium mb-1">プライバシーと安全な使い方</p>
       <ul class="list-disc ml-5 space-y-1">
@@ -227,9 +230,9 @@
               <div class="space-y-1">
                 <div v-for="e in sortedErrors" :key="e.code" class="text-xs flex gap-2">
                   <span class="inline-block px-2 py-0.5 rounded bg-red-100 text-red-700 font-semibold">{{ e.code
-                  }}</span>
+                    }}</span>
                   <span class="text-gray-800">{{ e.message }}<span v-if="e.hint" class="text-gray-500"> ({{ e.hint
-                  }})</span></span>
+                      }})</span></span>
                 </div>
               </div>
             </template>
@@ -269,7 +272,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, watch } from 'vue'
+import { defineAsyncComponent } from 'vue'
+// Primerカード（非サスペンド）
+const PrimerCardList = defineAsyncComponent({ loader: () => import('@/components/PrimerCardList.vue'), suspensible: false })
+import { ref, reactive, computed, watch, onMounted } from 'vue'
+const showPrimers = ref(false)
 import { useHead } from '#imports'
 import AudienceNote from '@/components/AudienceNote.vue'
 import { decodeBase64Url, verifyJwt, fetchJwks, findJwksRsaKeyByKid, buildRsaPemFromModExp } from '@/utils/jwt'
@@ -321,6 +328,8 @@ const parts = computed(() => token.value.split('.'))
 const header = computed<JwtHeader | null>(() => parseJsonPart<JwtHeader>(parts.value[0]))
 const payload = computed<JwtPayload | null>(() => parseJsonPart<JwtPayload>(parts.value[1]))
 function pretty(v: unknown) { return v ? JSON.stringify(v, null, 2) : '（有効なJWTを入力すると表示されます）' }
+
+onMounted(() => { showPrimers.value = true })
 
 interface ClaimRow { key: string; label: string; value: string | number | boolean | null }
 const baseClaims = computed<ClaimRow[]>(() => {

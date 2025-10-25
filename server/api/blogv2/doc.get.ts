@@ -87,6 +87,11 @@ export default defineEventHandler(async event => {
   const ogRaw = obj['ogImage']
   const ogImage = typeof ogRaw === 'string' && ogRaw ? String(ogRaw) : null
   const robotsValue = typeof obj['robots'] === 'string' ? (obj['robots'] as string) : undefined
+  // tools-first additional fields
+  const type = typeof obj['type'] === 'string' ? String(obj['type']) : undefined
+  const tool = typeof obj['tool'] === 'string' ? String(obj['tool']) : undefined
+  const audience = typeof obj['audience'] === 'string' ? String(obj['audience']) : undefined
+  const visibility = typeof obj['visibility'] === 'string' ? String(obj['visibility']) : undefined
 
   // Return unified shape along with original body for rendering
   return {
@@ -99,6 +104,10 @@ export default defineEventHandler(async event => {
     tags,
     ogImage,
     robots: robotsValue,
+    type,
+    tool,
+    audience,
+    visibility,
     // keep rest for ContentRenderer compatibility
     body: (obj as Record<string, unknown>)['body'],
   }

@@ -1,11 +1,20 @@
 ---
-title: 'サイトチェッカー入門：meta タグと構造化データの健康診断'
+title: サイトチェッカー入門：meta タグと構造化データの健康診断
 description: '課題: meta/canonical/JSON-LD/robots/sitemap/feed の健全性が分からない。得られること: 点検観点・一括確認手順。'
-date: 2025-10-22
+date: 2025-10-22T00:00:00.000Z
 published: true
-audience: ['初学者', 'Web エンジニア']
-tags: ['tool:site-check', 'seo', 'meta', 'json-ld']
-
+audience:
+  - 初学者
+  - Web エンジニア
+tags:
+  - 'tool:site-check'
+  - seo
+  - meta
+  - json-ld
+type: primer
+tool: site-check
+visibility: primer
+robots: index
 ---
 
 「SEO の健康診断って何を見るの？」という疑問に、まず押さえたい項目をコンパクトにまとめます。

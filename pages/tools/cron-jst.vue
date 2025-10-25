@@ -16,6 +16,8 @@
     <ToolIntroBox audience="サイト運用・開発者（定時バッチの確認）" value="Cron式の次回実行を JST/UTC で確認できます。"
       how="1) 式を入力 → 2) タイムゾーン選択 → 3) 次回N件（5/10/25）を表示"
       safety="<strong>6フィールド（秒）</strong>や <strong>@hourly 等エイリアス</strong>も入力可（自動認識）。" />
+    <!-- 初回は静的コピーのみ描画し、マウント後にPrimerカードを出す -->
+    <PrimerCardList v-if="showPrimers" tool-id="cron-jst" />
     <h1 class="text-2xl font-bold">Cron JST 次回実行予測</h1>
     <AudienceNote who="サイト運用・開発者（定時バッチの確認）" />
     <div class="mt-2 text-sm">
@@ -204,8 +206,9 @@
 
 import { useHead } from '#imports'
 import AudienceNote from '@/components/AudienceNote.vue'
-
-import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
+import { defineAsyncComponent, ref, onMounted, onUnmounted, computed, watch } from 'vue'
+// 非サスペンド：親Suspenseをブロックしない
+const PrimerCardList = defineAsyncComponent({ loader: () => import('@/components/PrimerCardList.vue'), suspensible: false })
 import { useRoute } from '#imports'
 import { parseCron, nextRuns, humanizeCron } from '~/utils/cron'
 
@@ -222,7 +225,11 @@ useHead({
   ]
 })
 
+// ToolIntro 内で SoftwareApplication の JSON-LD を付与
+
 const input = ref('')
+// 初回描画は即時（静的コピーのみ）。マウント後にPrimerを表示
+const showPrimers = ref(false)
 const error = ref('')
 const resultsSel = ref<Date[]>([])
 const resultsUTC = ref<Date[]>([])
@@ -526,6 +533,8 @@ watch(relMode, (mode) => {
 
 const route = useRoute()
 onMounted(() => {
+  // Primerの遅延マウント（親Suspenseをブロックしない）
+  showPrimers.value = true
   // クライアントのみ
   if (typeof window === 'undefined') return
   const rel = route.query?.rel

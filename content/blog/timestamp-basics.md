@@ -1,12 +1,16 @@
 ---
-title: 'タイムスタンプ入門：Epoch 秒/ミリ秒と JST/UTC を 5 分で理解'
+title: タイムスタンプ入門：Epoch 秒/ミリ秒と JST/UTC を 5 分で理解
 description: '課題: 秒/ミリ秒や JST/UTC の取り違えで時刻がズレる。得られること: 相互変換と単位/TZ の見極め。'
 date: '2025-10-23'
 tags:
   - 'tool:timestamp'
-  - '入門'
-  - 'time'
-audience: 'SE/DevOps/フロントエンド'
+  - 入門
+  - time
+audience: SE/DevOps/フロントエンド
+type: primer
+tool: timestamp
+visibility: primer
+robots: index
 ---
 
 ## 1. 導入
