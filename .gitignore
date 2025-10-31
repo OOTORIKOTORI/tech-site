@@ -32,3 +32,4 @@ memo/*.txt
 # Lighthouse CI artifacts
 .lighthouseci/
 memo/review.patch.txt
+tech-site-src.zip
