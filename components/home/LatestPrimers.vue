@@ -10,6 +10,7 @@ type BlogItem = {
   title?: string
   description?: string
   date?: string | null
+  type?: string | null
   visibility?: string
   tool?: string
 }
@@ -35,6 +36,7 @@ onMounted(async () => {
         title: i?.title,
         description: i?.description,
         date: i?.date ?? null,
+        type: i?.type ?? null,
         visibility: i?.visibility,
         tool: i?.tool,
       }))
@@ -46,7 +48,11 @@ onMounted(async () => {
 
 const primers = computed(() =>
   (list.value || [])
-    .filter((i) => (i.visibility || '').toLowerCase() === 'primer')
+    .filter((i) => {
+      const typ = (i.type || '').toLowerCase()
+      const vis = (i.visibility || '').toLowerCase()
+      return typ === 'primer' || vis === 'primer'
+    })
     .sort((a, b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime())
     .slice(0, 3)
 )

@@ -46,8 +46,6 @@ function onPick(e: Event) {
   file.value = t.files?.[0] ?? null
 }
 
-toast('解析が完了しました')
-
 
 // Primerカード（非サスペンド）
 const PrimerCardList = defineAsyncComponent({ loader: () => import('@/components/PrimerCardList.vue'), suspensible: false })
@@ -71,6 +69,7 @@ async function analyze() {
     }
   })
   busy.value = false
+  toast('解析が完了しました')
 }
 
 </script>
