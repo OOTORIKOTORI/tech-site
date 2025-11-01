@@ -60,6 +60,12 @@
 - `/tools/site-check` で robots/sitemap/feed をまとめて取得・ORIGIN 一致の簡易検証に加え、最終 URL を 1 回だけフェッチして meta/canonical/JSON‑LD/基本セキュリティヘッダ（CSP/HSTS 等）の有無を概況表示（JSON‑LD は型/件数/主要プロパティのみを抜粋）
 - `/tools/timestamp` — Epoch 秒/ミリ秒 ⇄ 日時（JST/UTC）の相互変換。入門記事と相互リンク（frontmatter: `tool:timestamp`）。
 - JWT Decoder の入門記事（frontmatter: `tool:jwt-decoder`）との相互リンクが機能中（ツール導入直下と記事側の冒頭/末尾に相互リンクを設置）。
+- 新カテゴリ体系（6 種）: `time` / `auth-security` / `web` / `devops` / `format` / `ai` にツールを整理。ツール一覧 `/tools` はカテゴリ別セクション表示＋ヘッダのカテゴリドロップダウンから遷移可能。
+- 新ツール（2025-11 追加）:
+
+  - `/tools/token-counter` — 入出力トークンの概算とコスト見積（主要モデルの 1M tokens 価格を内蔵）。Primer: 「LLM トークン入門」。
+  - `/tools/pwa-checker` — Web App Manifest の検証とスコアリング（必須/推奨フィールドと icon サイズをチェック）。Primer: 「PWA Manifest 入門」。
+  - `/tools/security-checker` — HTTP セキュリティヘッダ（CSP/HSTS 等 8 種）の有無/推奨値を検査しスコア化。Primer: 「Web セキュリティヘッダ入門」。
 
 - 生成物の表記を統一: `robots.txt` / `sitemap.xml` / `feed.xml`（postbuild で生成）。
 - ORIGIN 基準の一元化: `NUXT_PUBLIC_SITE_ORIGIN` を canonical / og:url / robots / sitemap / RSS の基点に使用。

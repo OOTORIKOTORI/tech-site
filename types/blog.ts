@@ -6,6 +6,33 @@ export type ContentType = 'primer' | 'guide' | 'reference' | 'news'
 export type ContentVisibility = 'primer' | 'archive' | 'hidden'
 export type RobotsDirective = 'index' | 'noindex'
 
+/**
+ * Tool category for organizing tools page
+ */
+export type ToolCategory =
+  | 'time' // 時間・スケジューラ
+  | 'auth-security' // 認証・セキュリティ
+  | 'web' // Web/SEO
+  | 'devops' // DevOps/ログ
+  | 'format' // 形式変換・検証
+  | 'ai' // AI/LLMツール
+
+/**
+ * Tool ID for referencing specific tools
+ */
+export type ToolId =
+  | 'cron-jst'
+  | 'timestamp'
+  | 'jwt-decode'
+  | 'og-check'
+  | 'site-check'
+  | 'top-analyzer'
+  | 'json-formatter'
+  | 'regex-tester'
+  | 'token-counter'
+  | 'pwa-checker'
+  | 'security-checker'
+
 export interface BlogFrontmatter {
   title: string
   description: string
@@ -17,7 +44,8 @@ export interface BlogFrontmatter {
 
   // Tools-First extension
   type?: ContentType
-  tool?: string
+  tool?: ToolId
+  category?: ToolCategory
   visibility?: ContentVisibility
   robots?: RobotsDirective
 

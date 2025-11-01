@@ -19,7 +19,22 @@ export default defineContentConfig({
         canonical: z.string().optional(),
         // New frontmatter fields (tools-first pivot)
         type: z.enum(['primer', 'guide', 'reference', 'news']).optional(),
-        tool: z.string().optional(),
+        tool: z
+          .enum([
+            'cron-jst',
+            'timestamp',
+            'jwt-decode',
+            'og-check',
+            'site-check',
+            'top-analyzer',
+            'json-formatter',
+            'regex-tester',
+            'token-counter',
+            'pwa-checker',
+            'security-checker',
+          ])
+          .optional(),
+        category: z.enum(['time', 'auth-security', 'web', 'devops', 'format', 'ai']).optional(),
         audience: z.string().optional(),
         visibility: z.enum(['primer', 'archive', 'hidden']).optional(),
         robots: z.string().optional(),

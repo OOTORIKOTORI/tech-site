@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0"><channel><title>磨きエクスプローラー Blog</title><link>https://migakiexplorer.jp/blog</link><description>磨きエクスプローラー Blog RSS</description>
+    <item><title>PWA Manifest入門：インストール可能なWebアプリの設定ガイド</title><link>https://migakiexplorer.jp/blog/pwa-checker-basics</link><pubDate>Sat, 01 Nov 2025 00:00:00 GMT</pubDate><description>課題: manifest.json の設定ミスで PWA がインストールできない。得られること: 必須フィールド、推奨設定、検証方法の基本。</description></item>
+    <item><title>Webセキュリティヘッダ入門：攻撃を防ぐHTTPヘッダ設定ガイド</title><link>https://migakiexplorer.jp/blog/security-checker-basics</link><pubDate>Sat, 01 Nov 2025 00:00:00 GMT</pubDate><description>課題: セキュリティヘッダの設定漏れで脆弱性が残る。得られること: 主要ヘッダの役割、推奨値、実装方法の基本。</description></item>
+    <item><title>LLMトークン数とコスト計算入門：プロンプト設計の基礎</title><link>https://migakiexplorer.jp/blog/token-counter-basics</link><pubDate>Sat, 01 Nov 2025 00:00:00 GMT</pubDate><description>課題: トークン数が読めず、予算オーバーやエラーで困る。得られること: トークン概念、モデル別料金、効率的なプロンプト設計の基本。</description></item>
     <item><title>JWT 署名検証入門：デコード ≠ 検証を 5 分で理解</title><link>https://migakiexplorer.jp/blog/jwt-verify-basics</link><pubDate>Fri, 24 Oct 2025 00:00:00 GMT</pubDate><description>課題: デコード＝検証だと誤解して真正性判断を誤る。得られること: 署名検証の手順・期限系の扱い。</description></item>
     <item><title>タイムスタンプ入門：Epoch 秒/ミリ秒と JST/UTC を 5 分で理解</title><link>https://migakiexplorer.jp/blog/timestamp-basics</link><pubDate>Thu, 23 Oct 2025 00:00:00 GMT</pubDate><description>課題: 秒/ミリ秒や JST/UTC の取り違えで時刻がズレる。得られること: 相互変換と単位/TZ の見極め。</description></item>
     <item><title>JSON 入門：整形と構造を理解する</title><link>https://migakiexplorer.jp/blog/json-formatter-basics</link><pubDate>Wed, 22 Oct 2025 00:00:00 GMT</pubDate><description>課題: JSON の構文エラーで原因が分からない。得られること: 整形/検証の基礎と見分け方。</description></item>

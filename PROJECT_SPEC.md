@@ -148,7 +148,7 @@ SFC（`pages/blog/[...slug].vue`）ではグローバル `queryContent` 利用�
 - トップ `/`: ヒーロー＋ CTA（`/tools/cron-jst`, `/blog`）/ 最新 4 件を「最新記事」で表示
 - Top の「最新記事」セクションは **/blog の新着 4 件**を表示し、`audience`必須・`draft !== true`・`published !== false` を満たすもののみを採用する（スケルトン → 空 → 表示の 3 分岐、末尾に /blog への「すべて見る」リンク）。
 - ブログ詳細 `/blog/[slug]`: 本文＋ SEO メタ（title/description/canonical/og:url）
-- ツール: `/tools/cron-jst`, `/tools/jwt-decoder`, `/tools/json-formatter`, `/tools/regex-tester`, `/tools/og-check`, `/tools/site-check`, `/tools/top-analyzer`, `/tools/timestamp`
+- ツール: `/tools/cron-jst`, `/tools/jwt-decoder`, `/tools/json-formatter`, `/tools/regex-tester`, `/tools/og-check`, `/tools/site-check`, `/tools/top-analyzer`, `/tools/timestamp`, `/tools/token-counter`, `/tools/pwa-checker`, `/tools/security-checker`
 
 - `/tools/top-analyzer`: Linux top コマンドのログをブラウザで解析・可視化。CSV エクスポート（英/日ヘッダ切替）、サンプルログ DL 機能あり。
 - **SVG/PNG 保存** — SVG は viewBox に 12px 余白を付与してラベル/目盛りの欠けを防止、PNG は白背景で安定出力。
@@ -262,6 +262,13 @@ SFC（`pages/blog/[...slug].vue`）ではグローバル `queryContent` 利用�
 
 - 入門記事には frontmatter に `tool:<id>` を付与する（関連記事抽出のキー）。
 - ツール側は導入ブロック直下に「入門記事へのリンク」を置く。入門記事側は冒頭または末尾に「関連ツール: /tools/<id>」を明記。
+
+### ツールカテゴリ体系（正準）
+
+- カテゴリは 6 種固定: `time` / `auth-security` / `web` / `devops` / `format` / `ai`
+- 型定義: `types/blog.ts` の `ToolCategory` / `ToolId` を正準とし、`utils/tool-metadata.ts` を単一情報源（SSOT）としてツール名/説明/カテゴリ/ルートを管理。
+- 表示: `/pages/tools/index.vue` はカテゴリ別セクションで一覧表示し、`components/AppHeader.vue` のドロップダウンからカテゴリへ遷移できる。
+- 生成物: サイトマップ/RSS は `scripts/gen-meta.mjs` が `utils/tool-metadata.ts` を参照して自動反映。
 
 ---
 

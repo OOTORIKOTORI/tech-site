@@ -1,109 +1,68 @@
-<template>
-  <section class="mx-auto max-w-6xl px-4 py-8">
-    <div class="flex items-center justify-between mb-6">
-      <h1 class="text-3xl font-semibold text-foreground">Tools</h1>
-    </div>
-
-    <ul class="grid grid-cols-1 sm:grid-cols-2 gap-4" aria-label="Available tools">
-      <li class="surface p-4">
-        <NuxtLink to="/tools/timestamp" class="group block focus-ring">
-          <div class="text-sm text-gray-500">新規</div>
-          <h2 class="text-lg font-medium text-blue-600 group-hover:underline">Epoch Timestamp Converter</h2>
-        </NuxtLink>
-        <p class="text-sm muted mt-1">Epoch ⇄ 日時（<b>JST/UTC</b>）を双方向変換。<b>秒/ミリ秒</b>は自動判定または手動指定。</p>
-        <div class="flex gap-4 text-xs muted mt-2">
-          <span aria-label="対象読者">開発・運用</span>
-          <span aria-label="所要時間">~10秒</span>
-          <span aria-label="入出力例">入力: 1700000000 / 出力: JST/UTC</span>
-        </div>
-      </li>
-      <li class="surface p-4">
-        <NuxtLink to="/tools/cron-jst" class="group block focus-ring">
-          <h2 class="text-lg font-medium text-blue-600 group-hover:underline">Cron JST</h2>
-        </NuxtLink>
-        <p class="text-sm muted mt-1">サーバ運用や定時実行の確認に。crontab の式を <b>JST/UTC</b> で即座に検証、次回実行がひと目でわかる。</p>
-        <div class="flex gap-4 text-xs muted mt-2">
-          <span aria-label="対象読者">—</span>
-          <span aria-label="所要時間">—</span>
-          <span aria-label="入出力例">—</span>
-        </div>
-      </li>
-      <li class="surface p-4">
-        <NuxtLink to="/tools/jwt-decode" class="group block focus-ring">
-          <h2 class="text-lg font-medium text-blue-600 group-hover:underline">JWT Decode</h2>
-        </NuxtLink>
-        <p class="text-sm muted mt-1">認証トークンの中身を<b>ローカルで</b>確認。ペイロードを安全に可視化（秘密鍵は不要）。</p>
-        <div class="flex gap-4 text-xs muted mt-2">
-          <span aria-label="対象読者">—</span>
-          <span aria-label="所要時間">—</span>
-          <span aria-label="入出力例">—</span>
-        </div>
-      </li>
-      <li class="surface p-4">
-        <NuxtLink to="/tools/og-check" class="group block focus-ring">
-          <h2 class="text-lg font-medium text-blue-600 group-hover:underline">OGプレビュー確認</h2>
-        </NuxtLink>
-        <p class="text-sm muted mt-1">共有時の<b>画像/タイトル</b>の状態と、最終URL・HTTPステータスを一発チェック。</p>
-        <div class="flex gap-4 text-xs muted mt-2">
-          <span aria-label="対象読者">—</span>
-          <span aria-label="所要時間">—</span>
-          <span aria-label="入出力例">—</span>
-        </div>
-      </li>
-      <li class="surface p-4">
-        <NuxtLink to="/tools/site-check" class="group block focus-ring">
-          <h2 class="text-lg font-medium text-blue-600 group-hover:underline">サイトマップ / robots チェッカー</h2>
-        </NuxtLink>
-        <p class="text-sm muted mt-1">/sitemap.xml と /robots.txt をまとめて確認。<b>掲載可否と到達性</b>を素早く点検。</p>
-        <div class="flex gap-4 text-xs muted mt-2">
-          <span aria-label="対象読者">—</span>
-          <span aria-label="所要時間">—</span>
-          <span aria-label="入出力例">—</span>
-        </div>
-      </li>
-      <li class="surface p-4">
-        <NuxtLink to="/tools/top-analyzer" class="group block focus-ring">
-          <div class="text-sm text-gray-500">新規</div>
-          <h2 class="text-lg font-medium text-blue-600 group-hover:underline">Top Log Analyzer</h2>
-        </NuxtLink>
-        <p class="text-sm muted mt-1">
-          top ログから CPU / Mem / Load を時系列で把握できる可視化ツール（ブラウザ内のみで解析）
-        </p>
-        <div class="flex gap-4 text-xs muted mt-2">
-          <span aria-label="対象読者">Linux/インフラ運用のSE/DevOps</span>
-          <span aria-label="所要時間">1–3分</span>
-          <span aria-label="入出力例">入力: topログ / 出力: グラフ＋CSV(英/日)</span>
-        </div>
-      </li>
-
-      <li class="surface p-4">
-        <NuxtLink to="/tools/json-formatter" class="group block focus-ring">
-          <h2 class="text-lg font-medium text-blue-600 group-hover:underline">JSON フォーマッタ</h2>
-        </NuxtLink>
-        <p class="text-sm muted mt-1">JSON をブラウザ内で整形／最小化して検証。コピー／ダウンロード対応。</p>
-        <div class="flex gap-4 text-xs muted mt-2">
-          <span aria-label="対象読者">—</span>
-          <span aria-label="所要時間">—</span>
-          <span aria-label="入出力例">入力: JSON 文字列 / 出力: 整形JSON</span>
-        </div>
-      </li>
-
-      <li class="surface p-4">
-        <NuxtLink to="/tools/regex-tester" class="group block focus-ring">
-          <h2 class="text-lg font-medium text-blue-600 group-hover:underline">正規表現テスター</h2>
-        </NuxtLink>
-        <p class="text-sm muted mt-1">パターンとフラグで一致箇所をテスト。簡易ハイライトとコピーに対応。</p>
-        <div class="flex gap-4 text-xs muted mt-2">
-          <span aria-label="対象読者">—</span>
-          <span aria-label="所要時間">—</span>
-          <span aria-label="入出力例">入力: テキスト / 出力: 一致リスト</span>
-        </div>
-      </li>
-    </ul>
-  </section>
-</template>
-
 <script setup lang="ts">
 import { useHead } from '#imports'
-useHead({ title: 'Tools' })
+import type { ToolCategory } from '~/types/blog'
+import { TOOL_CATEGORIES, getToolsByCategory } from '~/utils/tool-metadata'
+
+const toolsByCategory = getToolsByCategory()
+const categoryKeys = Object.keys(TOOL_CATEGORIES) as ToolCategory[]
+
+useHead({
+  title: 'Tools | Migaki Explorer',
+  meta: [
+    {
+      name: 'description',
+      content:
+        'ブラウザだけで使える便利ツール集。時間、認証、Web/SEO、DevOps、形式変換、AI/LLMの各カテゴリから選べます。',
+    },
+  ],
+})
 </script>
+
+<template>
+  <section class="mx-auto max-w-6xl px-4 py-8">
+    <div class="mb-8">
+      <h1 class="text-3xl font-semibold text-foreground mb-2">Tools</h1>
+      <p class="text-muted">
+        ブラウザだけで使える便利ツール集。カテゴリ別に整理されています。
+      </p>
+    </div>
+
+    <!-- Category Sections -->
+    <div v-for="categoryKey in categoryKeys" :key="categoryKey" class="mb-12">
+      <div :id="categoryKey" class="scroll-mt-20">
+        <h2 class="text-2xl font-semibold text-foreground mb-2">
+          {{ TOOL_CATEGORIES[categoryKey].name }}
+        </h2>
+        <p class="text-sm text-muted mb-4">
+          {{ TOOL_CATEGORIES[categoryKey].description }}
+        </p>
+
+        <ul class="grid grid-cols-1 sm:grid-cols-2 gap-4" :aria-label="`${TOOL_CATEGORIES[categoryKey].name}のツール一覧`">
+          <li v-for="tool in toolsByCategory[categoryKey]" :key="tool.id" class="surface p-4">
+            <NuxtLink :to="tool.path" class="group block focus-ring">
+              <div v-if="tool.isNew" class="text-sm text-gray-500 dark:text-gray-400">
+                新規
+              </div>
+              <h3 class="text-lg font-medium text-blue-600 group-hover:underline">
+                {{ tool.title }}
+              </h3>
+            </NuxtLink>
+            <p class="text-sm muted mt-1" v-html="tool.description"></p>
+            <div v-if="tool.audience || tool.timeEstimate || tool.inputOutput" class="flex gap-4 text-xs muted mt-2">
+              <span v-if="tool.audience" :aria-label="`対象読者: ${tool.audience}`">{{
+                tool.audience
+                }}</span>
+              <span v-else aria-label="対象読者">—</span>
+              <span v-if="tool.timeEstimate" :aria-label="`所要時間: ${tool.timeEstimate}`">{{
+                tool.timeEstimate
+                }}</span>
+              <span v-else aria-label="所要時間">—</span>
+              <span v-if="tool.inputOutput" :aria-label="`入出力例: ${tool.inputOutput}`">{{ tool.inputOutput }}</span>
+              <span v-else aria-label="入出力例">—</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</template>
