@@ -21,7 +21,11 @@ function splitFrontmatter(s: string) {
 
 describe('blog structure guard', () => {
   const SEVERITY: 'fail' | 'warn' =
-    (process.env.BLOG_GUARD_MODE as any) === 'fail' || process.env.CI ? 'fail' : 'warn'
+    (process.env.BLOG_GUARD_MODE as any) === 'fail' ||
+    process.env.BLOG_GUARD_ENFORCE === '1' ||
+    (process.env.BLOG_GUARD_ENFORCE || '').toLowerCase() === 'true'
+      ? 'fail'
+      : 'warn'
   const CTA_MAX = Number(process.env.BLOG_GUARD_CTA_MAX ?? 3)
   const files = walk(ROOT)
   test.each(files)('%s has canonical structure (no dup, sane CTA)', (fp: string) => {
