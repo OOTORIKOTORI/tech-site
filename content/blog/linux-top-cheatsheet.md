@@ -1,6 +1,7 @@
 ---
 title: Linux topの読み方：現場チートシート
 description: 'Load, CPU%, Mem/Swap を最短で読むための実務メモ。'
+tags:
   - linux
   - top
   - ops
