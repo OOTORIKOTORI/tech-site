@@ -222,6 +222,7 @@ C:\website\tech-site
 ├── simple-test.mjs
 ├── System.Text.ASCIIEncoding
 ├── tailwind.config.ts
+├── tech-site-src.zip
 ├── tech-site_handover_notes.txt
 ├── test
 |  └── jwt-es256.spec.ts
@@ -247,6 +248,8 @@ C:\website\tech-site
 |  |  ├── blog.detail.spec.ts
 |  |  ├── blog.spec.ts
 |  |  └── top-analyzer.http.spec.ts
+|  ├── guards
+|  |  └── blog-structure.spec.ts
 |  ├── pages
 |  |  ├── ads.render.test.ts
 |  |  ├── blog.archive.robots.test.ts
@@ -339,5 +342,5 @@ C:\website\tech-site
 └── workers
    └── topParser.worker.ts
 
-directory: 65 file: 269 symboliclink: 39
+directory: 66 file: 271 symboliclink: 39
 
