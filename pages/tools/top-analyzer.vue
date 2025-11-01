@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, defineAsyncComponent, onMounted } from 'vue'
 import { downloadCSV, TOP_COLUMNS, type HeaderLang } from '@/utils/top/csv'
 import { definePageMeta, useHead } from '#imports'
 import type { TopSnapshot } from '../../types/top'
@@ -30,11 +30,15 @@ const warnings = ref<string[]>([])
 const busy = ref(false)
 const progress = ref(0)
 const headerLang = ref<HeaderLang>('en')
+// 軽いトースト（SR向け）
+const liveMsg = ref('')
+function toast(msg: string) { liveMsg.value = msg; setTimeout(() => { liveMsg.value = '' }, 2000) }
 
 function onDownload() {
   if (!snapshots.value.length) return
   const ts = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-')
   downloadCSV(snapshots.value, `top_parsed_${ts}.csv`, headerLang.value)
+  toast('CSVのダウンロードを開始しました')
 }
 
 function onPick(e: Event) {
@@ -42,7 +46,13 @@ function onPick(e: Event) {
   file.value = t.files?.[0] ?? null
 }
 
+toast('解析が完了しました')
 
+
+// Primerカード（非サスペンド）
+const PrimerCardList = defineAsyncComponent({ loader: () => import('@/components/PrimerCardList.vue'), suspensible: false })
+const showPrimers = ref(false)
+onMounted(() => { showPrimers.value = true })
 async function analyze() {
   if (!file.value) return
   busy.value = true
@@ -67,6 +77,7 @@ async function analyze() {
 
 <template>
   <main class="mx-auto max-w-5xl p-6 space-y-6">
+    <div aria-live="polite" class="sr-only">{{ liveMsg }}</div>
     <ToolIntro title="Top Analyzer" description="top の CSV を可視化。CPU/Load/Mem を比較し、SVG/PNGで保存可能。"
       usage="1) CSV を貼り付け/選択\n2) グラフ化→保存（SVG/PNG）" time="~30秒" audience="運用・調査" :example-input="exampleInput"
       :example-output="exampleOutput" />
@@ -75,6 +86,8 @@ async function analyze() {
     <ToolIntroBox>
       <p>このツールの使い方や基本概念は <NuxtLink to="/blog/top-analyzer-basics">こちらの記事</NuxtLink> を参照。</p>
     </ToolIntroBox>
+    <!-- 入門記事（自動） -->
+    <PrimerCardList v-if="showPrimers" tool-id="top-analyzer" />
     <h1 class="text-2xl font-bold">Top Log Analyzer</h1>
 
     <AudienceNote who="Linux/インフラ運用のSE/DevOps" />

@@ -17,6 +17,9 @@
         </nav>
         <span v-if="appVersion" class="ml-auto text-gray-400" aria-label="App version">v{{ appVersion }}</span>
       </div>
+      <p class="mt-2 text-xs text-gray-400">
+        本サイトは a11y≥90 / Best Practices≥0.70 の品質基準を維持して運用しています。
+      </p>
     </div>
   </footer>
 </template>

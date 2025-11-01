@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, defineAsyncComponent, onMounted } from 'vue'
 import RelatedList from '@/components/RelatedList.vue'
 
 
@@ -17,6 +17,9 @@ useHead({
 const input = ref('')
 const output = ref('')
 const error = ref('')
+// Primerカード（非サスペンド）
+const PrimerCardList = defineAsyncComponent({ loader: () => import('@/components/PrimerCardList.vue'), suspensible: false })
+const showPrimers = ref(false)
 
 // ToolIntro用サンプル文字列
 const exampleInput = '{ "hello": "world" }'
@@ -61,6 +64,8 @@ function downloadJson() {
   a.click()
   URL.revokeObjectURL(url)
 }
+
+onMounted(() => { showPrimers.value = true })
 </script>
 
 <template>
@@ -73,6 +78,9 @@ function downloadJson() {
     <ToolIntroBox>
       <p>このツールの使い方や基本概念は <NuxtLink to="/blog/json-formatter-basics">こちらの記事</NuxtLink> を参照。</p>
     </ToolIntroBox>
+
+    <!-- 入門記事（自動） -->
+    <PrimerCardList v-if="showPrimers" tool-id="json-formatter" />
 
     <div class="grid gap-4 md:grid-cols-2">
       <div>

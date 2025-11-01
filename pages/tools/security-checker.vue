@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, defineAsyncComponent, onMounted } from 'vue'
 import { useHead, useRequestURL } from '#imports'
 import {
   validateSecurityHeaders,
@@ -62,6 +62,10 @@ const lowIssues = computed(() =>
 
 const exampleInput = 'https://example.com'
 const exampleOutput = 'セキュリティスコア: 75/100 (CSP ✓, HSTS ✓)'
+
+// Primerカード（非サスペンド）
+const PrimerCardList = defineAsyncComponent({ loader: () => import('@/components/PrimerCardList.vue'), suspensible: false })
+const showPrimers = ref(false)
 
 async function checkHeaders() {
   if (!targetUrl.value.trim()) {
@@ -137,6 +141,7 @@ ${securityChecks.value
   a.click()
   URL.revokeObjectURL(url)
 }
+onMounted(() => { showPrimers.value = true })
 </script>
 
 <template>
@@ -174,6 +179,9 @@ ${securityChecks.value
         を参照してください。
       </p>
     </ToolIntroBox>
+
+    <!-- 入門記事（自動） -->
+    <PrimerCardList v-if="showPrimers" tool-id="security-checker" />
 
     <!-- Input Section -->
     <div class="surface p-4 rounded">

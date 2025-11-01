@@ -5,7 +5,7 @@
       <h1 data-testid="home-hero-heading" class="page-title text-3xl md:text-4xl font-bold">
         毎日の実務を、少し速く・確実に。
       </h1>
-      <p class="text-gray-600">
+      <p v-if="!hasLatestPrimers" class="text-gray-600">
         ブラウザだけで使えるミニツールと、1〜3分で読めるチェックリスト。
       </p>
       <div class="flex flex-wrap gap-3 pt-2">
@@ -18,6 +18,8 @@
           最新記事を見る
         </NuxtLink>
       </div>
+      <!-- 最新Primer（0件ならレンダ無し） -->
+      <LatestPrimers v-model:has-items="hasLatestPrimers" />
     </section>
 
     <!-- Featured Tools -->
@@ -74,10 +76,12 @@
 <script setup lang="ts">
 
 import AdSlot from '@/components/AdSlot.vue'
+import LatestPrimers from '@/components/home/LatestPrimers.vue'
 import { definePageMeta, useAsyncData } from '#imports'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { fetchPosts } from '@/composables/usePosts'
 definePageMeta({ title: 'Migaki Explorer' })
+const hasLatestPrimers = ref(false)
 
 const featured = [
   { title: 'Cron JST', href: '/tools/cron-jst', desc: 'crontab式をJST/UTCで検証し、次回実行を即確認' },

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, defineAsyncComponent, onMounted } from 'vue'
 import { useRuntimeConfig } from '#imports'
 import { useHead } from '#imports'
 import AudienceNote from '@/components/AudienceNote.vue'
@@ -16,6 +16,10 @@ const showRaw = ref({ robots: false, sitemap: false, feed: false })
 // ToolIntro 用 例示
 const exampleInput = 'https://example.com'
 const exampleOutput = 'HTTP ステータス / ヘッダー / リダイレクト を表示'
+
+// Primerカード（非サスペンド）
+const PrimerCardList = defineAsyncComponent({ loader: () => import('@/components/PrimerCardList.vue'), suspensible: false })
+const showPrimers = ref(false)
 
 useHead({
   title: 'Site Checker | Migaki Explorer',
@@ -108,6 +112,7 @@ const doCheck = async () => {
   }
   checking.value = false
 }
+onMounted(() => { showPrimers.value = true })
 </script>
 
 <template>
@@ -119,6 +124,8 @@ const doCheck = async () => {
     <ToolIntroBox>
       <p>このツールの使い方や基本概念は <NuxtLink to="/blog/site-check-basics">こちらの記事</NuxtLink> を参照。</p>
     </ToolIntroBox>
+    <!-- 入門記事（自動） -->
+    <PrimerCardList v-if="showPrimers" tool-id="site-check" />
     <h1 class="text-2xl font-bold">robots / sitemap / feed / meta チェッカー</h1>
     <AudienceNote who="サイト運用・SEO担当（到達性・掲載可否の点検）" />
     <div class="mb-2 text-sm text-gray-700">現在のORIGIN: <span class="font-mono">{{ origin }}</span></div>
@@ -137,7 +144,7 @@ const doCheck = async () => {
         <template v-if="metaInfo">
           <div class="text-sm text-gray-600 mb-2">
             最終URL: <span class="font-mono break-all">{{ metaInfo.finalUrl
-            }}</span>
+              }}</span>
           </div>
           <ul class="list-disc pl-5 text-sm space-y-1">
             <li>title: <span class="font-mono">{{ metaInfo.meta.title || '—' }}</span></li>
@@ -180,7 +187,7 @@ const doCheck = async () => {
             </div>
             <div class="text-sm">
               major type: <span class="font-mono">{{ metaInfo.jsonld.types.join(', ') || '—'
-              }}</span>
+                }}</span>
             </div>
             <ul v-if="metaInfo.jsonld.samples.length" class="mt-1 text-xs list-disc pl-5">
               <li v-for="(s, i) in metaInfo.jsonld.samples" :key="i">{{ s.type }} — {{ JSON.stringify(s.props) }}</li>
@@ -312,7 +319,7 @@ const doCheck = async () => {
           <li>URL件数: {{ feed?.count }}</li>
           <li>
             ORIGIN一致: <span :class="feed?.allOk ? 'text-green-700' : 'text-red-600'">{{ feed?.allOk ? 'OK' : 'NG'
-            }}</span>
+              }}</span>
           </li>
           <li>サンプル: <span v-if="feed?.sample?.length">{{ feed.sample.join(', ') }}</span><span v-else>なし</span></li>
         </ul>

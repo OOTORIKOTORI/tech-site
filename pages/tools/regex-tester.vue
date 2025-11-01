@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, nextTick } from 'vue'
+import { ref, computed, nextTick, defineAsyncComponent, onMounted } from 'vue'
 import { useHead } from '#imports'
 import RelatedList from '@/components/RelatedList.vue'
 import AudienceNote from '@/components/AudienceNote.vue'
@@ -69,6 +69,11 @@ function clearAll() {
   error.value = ''
   matches.value = []
 }
+
+// Primerカード（非サスペンド）
+const PrimerCardList = defineAsyncComponent({ loader: () => import('@/components/PrimerCardList.vue'), suspensible: false })
+const showPrimers = ref(false)
+onMounted(() => { showPrimers.value = true })
 </script>
 
 <template>
@@ -79,6 +84,8 @@ function clearAll() {
     <ToolIntroBox>
       <p>このツールの使い方や基本概念は <NuxtLink to="/blog/regex-tester-basics">こちらの記事</NuxtLink> を参照。</p>
     </ToolIntroBox>
+    <!-- 入門記事（自動） -->
+    <PrimerCardList v-if="showPrimers" tool-id="regex-tester" />
     <h1 class="text-2xl font-semibold">
       正規表現テスター
     </h1>

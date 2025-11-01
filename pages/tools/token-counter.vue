@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, defineAsyncComponent, onMounted } from 'vue'
 import { useHead } from '#imports'
 import { getTokenStats } from '~/utils/token'
 import { MODEL_PRICING, calculateCost, type ModelPricing } from '~/utils/token-price'
@@ -70,6 +70,14 @@ ${selectedModel.value.name},${selectedModel.value.provider},${stats.value.estima
   a.click()
   URL.revokeObjectURL(url)
 }
+
+// providerごとのモデル一覧（テンプレートでの暗黙any回避）
+const modelsByProvider = (prov: string) => MODEL_PRICING.filter((m) => m.provider === prov)
+
+// Primerカード（非サスペンド）
+const PrimerCardList = defineAsyncComponent({ loader: () => import('@/components/PrimerCardList.vue'), suspensible: false })
+const showPrimers = ref(false)
+onMounted(() => { showPrimers.value = true })
 </script>
 
 <template>
@@ -112,6 +120,9 @@ ${selectedModel.value.name},${selectedModel.value.provider},${stats.value.estima
       </p>
     </ToolIntroBox>
 
+    <!-- 入門記事（自動） -->
+    <PrimerCardList v-if="showPrimers" tool-id="token-counter" />
+
     <!-- Input Section -->
     <div class="surface p-4 rounded">
       <label for="input-text" class="block text-sm font-medium mb-2">テキスト入力</label>
@@ -130,8 +141,7 @@ ${selectedModel.value.name},${selectedModel.value.provider},${stats.value.estima
       <select id="model-select" v-model="selectedModelId"
         class="w-full rounded border border-zinc-300 dark:border-zinc-700 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500">
         <optgroup v-for="provider in ['OpenAI', 'Anthropic', 'Google']" :key="provider" :label="provider">
-          <option v-for="model in MODEL_PRICING.filter((m) => m.provider === provider)" :key="model.id"
-            :value="model.id">
+          <option v-for="model in modelsByProvider(provider)" :key="model.id" :value="model.id">
             {{ model.name }} (入力: ${{ model.inputPer1M }}/1M, 出力: ${{ model.outputPer1M }}/1M)
           </option>
         </optgroup>

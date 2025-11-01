@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, defineAsyncComponent, onMounted } from 'vue'
 import { useRuntimeConfig } from '#imports'
 import { useHead } from '#imports'
 import AudienceNote from '@/components/AudienceNote.vue'
@@ -60,6 +60,10 @@ useHead({
     { property: 'og:description', content: 'URL の OGP メタ情報を取得してプレビュー表示。' }
   ]
 })
+
+// Primerカード（非サスペンド）
+const PrimerCardList = defineAsyncComponent({ loader: () => import('@/components/PrimerCardList.vue'), suspensible: false })
+const showPrimers = ref(false)
 
 const doCheck = async () => {
   err.value = null
@@ -146,6 +150,7 @@ const doImgCheck = async () => {
     imgResp.value = e
   }
 }
+onMounted(() => { showPrimers.value = true })
 </script>
 
 <template>
@@ -157,6 +162,8 @@ const doImgCheck = async () => {
     <ToolIntroBox>
       <p>このツールの使い方や基本概念は <NuxtLink to="/blog/og-check-basics">こちらの記事</NuxtLink> を参照。</p>
     </ToolIntroBox>
+    <!-- 入門記事（自動） -->
+    <PrimerCardList v-if="showPrimers" tool-id="og-check" />
     <p class="text-sm text-gray-700">
       必須: <code>og:title</code> <code>og:type</code> <code>og:image</code> <code>og:url</code>／推奨:
       <code>og:description</code> <code>og:site_name</code> <code>og:image:alt</code> を評価します。

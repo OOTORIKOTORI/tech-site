@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, defineAsyncComponent, onMounted } from 'vue'
 import { useHead, useRequestURL } from '#imports'
 import {
   validateManifest,
@@ -56,6 +56,10 @@ const score = computed(() => {
 
 const exampleInput = 'https://example.com'
 const exampleOutput = 'Manifest検証結果: name ✓, icons ✓, display ✓'
+
+// Primerカード（非サスペンド）
+const PrimerCardList = defineAsyncComponent({ loader: () => import('@/components/PrimerCardList.vue'), suspensible: false })
+const showPrimers = ref(false)
 
 async function checkManifest() {
   if (!targetUrl.value.trim()) {
@@ -124,6 +128,8 @@ function downloadJSON() {
   a.click()
   URL.revokeObjectURL(url)
 }
+
+onMounted(() => { showPrimers.value = true })
 </script>
 
 <template>
@@ -163,6 +169,9 @@ function downloadJSON() {
         を参照してください。
       </p>
     </ToolIntroBox>
+
+    <!-- 入門記事（自動） -->
+    <PrimerCardList v-if="showPrimers" tool-id="pwa-checker" />
 
     <!-- Input Section -->
     <div class="surface p-4 rounded">

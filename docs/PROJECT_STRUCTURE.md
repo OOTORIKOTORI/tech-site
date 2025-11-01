@@ -41,6 +41,8 @@ C:\website\tech-site
 |  |  └── Term.vue
 |  ├── CookieConsent.vue
 |  ├── GlobalNav.vue
+|  ├── home
+|  |  └── LatestPrimers.vue
 |  ├── PrimerCardList.vue
 |  ├── RelatedList.vue
 |  ├── TagChip.vue
@@ -361,5 +363,5 @@ C:\website\tech-site
 └── workers
    └── topParser.worker.ts
 
-directory: 66 file: 290 symboliclink: 39
+directory: 67 file: 291 symboliclink: 39
 

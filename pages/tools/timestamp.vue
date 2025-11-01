@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, defineAsyncComponent, onMounted } from 'vue'
 import RelatedList from '@/components/RelatedList.vue'
 import { useHead } from '#imports'
 import { detectUnitByLength, epochToDate, dateToEpoch, formatInTZ, parseDateTimeLocal, toDateTimeLocalValue, type Tz, type Unit } from '~/utils/timestamp'
@@ -51,6 +51,11 @@ function setNow() {
 // ToolIntro 用例
 const exampleInput = '1700000000 (秒) / 1700000000000 (ミリ秒)'
 const exampleOutput = 'JST: 2023/11/14 22:13:20, UTC: 2023/11/14 13:13:20 (例)'
+
+// Primerカード（非サスペンド）
+const PrimerCardList = defineAsyncComponent({ loader: () => import('@/components/PrimerCardList.vue'), suspensible: false })
+const showPrimers = ref(false)
+onMounted(() => { showPrimers.value = true })
 </script>
 
 <template>
@@ -64,6 +69,9 @@ const exampleOutput = 'JST: 2023/11/14 22:13:20, UTC: 2023/11/14 13:13:20 (例)'
     <p class="text-sm">
       入門記事: <NuxtLink class="link" to="/blog/timestamp-basics">/blog/timestamp-basics</NuxtLink>
     </p>
+
+    <!-- 入門記事（自動） -->
+    <PrimerCardList v-if="showPrimers" tool-id="timestamp" />
 
     <section aria-labelledby="epoch2date" class="surface p-4 space-y-3">
       <h2 id="epoch2date" class="text-lg font-semibold">Epoch → 日時</h2>
